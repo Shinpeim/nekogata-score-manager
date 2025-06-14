@@ -113,7 +113,7 @@ describe('ChordChartEditor', () => {
       />
     );
 
-    const addChordButton = screen.getByText('➕ コード追加');
+    const addChordButton = screen.getByText('コード追加');
     fireEvent.click(addChordButton);
 
     // Should have 5 chords now (4 original + 1 new)
