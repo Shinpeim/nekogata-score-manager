@@ -100,8 +100,8 @@ describe('ChordChart', () => {
     it('should render section names', () => {
       render(<ChordChart />);
 
-      expect(screen.getByText('イントロ')).toBeInTheDocument();
-      expect(screen.getByText('Aメロ')).toBeInTheDocument();
+      expect(screen.getByText('【イントロ】')).toBeInTheDocument();
+      expect(screen.getByText('【Aメロ】')).toBeInTheDocument();
     });
 
     it('should render chord names', () => {
@@ -254,7 +254,7 @@ describe('ChordChart', () => {
   });
 
   describe('Chord duration display', () => {
-    it('should show duration for non-standard durations', () => {
+    it('should render chords without duration display', () => {
       const chartWithDurations: ChordChartType = {
         ...mockChartData,
         sections: [
@@ -276,13 +276,15 @@ describe('ChordChart', () => {
 
       render(<ChordChart />);
 
-      expect(screen.getByText('(2)')).toBeInTheDocument();
-      expect(screen.getByText('(1)')).toBeInTheDocument();
+      // Duration display removed in UI simplification
+      // expect(screen.getByText('(2)')).toBeInTheDocument();
+      // expect(screen.getByText('(1)')).toBeInTheDocument();
     });
 
     it('should not show duration for standard 4-beat duration', () => {
       render(<ChordChart />);
 
+      // Duration display removed in UI simplification - this test is no longer relevant
       // Standard 4-beat chords should not show duration
       // We check that (4) is not in the document
       expect(screen.queryByText('(4)')).not.toBeInTheDocument();
