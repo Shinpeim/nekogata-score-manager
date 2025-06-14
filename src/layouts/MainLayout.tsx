@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { useChordChartStore } from '../stores/chordChartStore';
 import ChordChartForm from '../components/ChordChartForm';
-import ExportImportDialog from '../components/ExportImportDialog';
+import ImportDialog from '../components/ImportDialog';
 import type { ChordChart } from '../types';
 
 interface MainLayoutProps {
@@ -12,10 +12,11 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [explorerOpen, setExplorerOpen] = useState(false);
-  const [showExportImportDialog, setShowExportImportDialog] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
   const [selectedChartIds, setSelectedChartIds] = useState<string[]>([]);
   const [showActionsDropdown, setShowActionsDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownRef2 = useRef<HTMLDivElement>(null);
   
   const chartsData = useChordChartStore(state => state.charts);
   const currentChartId = useChordChartStore(state => state.currentChartId);
@@ -33,7 +34,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      const isInsideDropdown = (dropdownRef.current?.contains(event.target as Node)) || 
+                               (dropdownRef2.current?.contains(event.target as Node));
+      
+      if (!isInsideDropdown) {
         setShowActionsDropdown(false);
       }
     };
@@ -162,15 +166,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 <div className="px-4">
                   <div className="flex items-center justify-between mb-3">
                     <h2 className="text-sm font-medium text-gray-900">Score Explorer</h2>
-                    <div className="flex gap-1">
-                      <button 
-                        onClick={() => setShowCreateForm(true)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs font-medium"
-                        title="新規作成"
-                      >
-                        +
-                      </button>
-                    </div>
                   </div>
                   {charts.length > 0 && (
                     <div className="mb-3 flex items-center gap-2">
@@ -189,7 +184,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                       <span className="text-xs text-gray-600">一括選択</span>
                       <div className="relative" ref={dropdownRef}>
                         <button
-                          onClick={() => selectedChartIds.length > 0 && setShowActionsDropdown(!showActionsDropdown)}
+                          onClick={() => {
+                            if (selectedChartIds.length > 0) {
+                              setShowActionsDropdown(!showActionsDropdown);
+                            }
+                          }}
                           disabled={selectedChartIds.length === 0}
                           className={`px-2 py-1 rounded text-xs font-medium flex items-center ${
                             selectedChartIds.length > 0
@@ -205,18 +204,22 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                         {showActionsDropdown && selectedChartIds.length > 0 && (
                           <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 min-w-32">
                             <button
-                              onClick={() => {
-                                handleExportSelected();
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
                                 setShowActionsDropdown(false);
+                                setTimeout(() => handleExportSelected(), 0);
                               }}
                               className="block w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-100"
                             >
                               エクスポート
                             </button>
                             <button
-                              onClick={() => {
-                                handleDeleteSelected();
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
                                 setShowActionsDropdown(false);
+                                setTimeout(() => handleDeleteSelected(), 0);
                               }}
                               className="block w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50"
                             >
@@ -269,13 +272,19 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     ))}
                   </div>
                   
-                  {/* Mobile Import/Export Actions */}
-                  <div className="mt-4 pt-4 border-t border-gray-200">
+                  {/* Mobile Actions */}
+                  <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
                     <button 
-                      onClick={() => setShowExportImportDialog(true)}
+                      onClick={() => setShowCreateForm(true)}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm font-medium"
+                    >
+                      新規作成
+                    </button>
+                    <button 
+                      onClick={() => setShowImportDialog(true)}
                       className="w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded text-sm font-medium"
                     >
-                      インポート・エクスポート
+                      インポート
                     </button>
                   </div>
                 </div>
@@ -289,15 +298,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           <div className="p-4">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-medium text-gray-900">Score Explorer</h2>
-              <div className="flex gap-1">
-                <button 
-                  onClick={() => setShowCreateForm(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs font-medium"
-                  title="新規作成"
-                >
-                  +
-                </button>
-              </div>
             </div>
             {charts.length > 0 && (
               <div className="mb-3 flex items-center gap-2">
@@ -314,9 +314,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   title={selectedChartIds.length === charts.length ? '全て解除' : '全て選択'}
                 />
                 <span className="text-xs text-gray-600">一括選択</span>
-                <div className="relative" ref={dropdownRef}>
+                <div className="relative" ref={dropdownRef2}>
                   <button
-                    onClick={() => selectedChartIds.length > 0 && setShowActionsDropdown(!showActionsDropdown)}
+                    onClick={() => {
+                      if (selectedChartIds.length > 0) {
+                        setShowActionsDropdown(!showActionsDropdown);
+                      }
+                    }}
                     disabled={selectedChartIds.length === 0}
                     className={`px-2 py-1 rounded text-xs font-medium flex items-center ${
                       selectedChartIds.length > 0
@@ -332,18 +336,22 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   {showActionsDropdown && selectedChartIds.length > 0 && (
                     <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 min-w-32">
                       <button
-                        onClick={() => {
-                          handleExportSelected();
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
                           setShowActionsDropdown(false);
+                          setTimeout(() => handleExportSelected(), 0);
                         }}
                         className="block w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-100"
                       >
                         エクスポート
                       </button>
                       <button
-                        onClick={() => {
-                          handleDeleteSelected();
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
                           setShowActionsDropdown(false);
+                          setTimeout(() => handleDeleteSelected(), 0);
                         }}
                         className="block w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50"
                       >
@@ -393,13 +401,19 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               ))}
             </div>
             
-            {/* Desktop Import/Export Actions */}
-            <div className="mt-4 pt-4 border-t border-gray-200">
+            {/* Desktop Actions */}
+            <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
               <button 
-                onClick={() => setShowExportImportDialog(true)}
+                onClick={() => setShowCreateForm(true)}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm font-medium"
+              >
+                新規作成
+              </button>
+              <button 
+                onClick={() => setShowImportDialog(true)}
                 className="w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded text-sm font-medium"
               >
-                インポート・エクスポート
+                インポート
               </button>
             </div>
           </div>
@@ -419,12 +433,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         />
       )}
 
-      {/* インポート・エクスポートダイアログ */}
-      {showExportImportDialog && (
-        <ExportImportDialog 
-          isOpen={showExportImportDialog}
-          onClose={() => setShowExportImportDialog(false)}
-          allCharts={charts}
+      {/* インポートダイアログ */}
+      {showImportDialog && (
+        <ImportDialog 
+          isOpen={showImportDialog}
+          onClose={() => setShowImportDialog(false)}
           onImportCharts={handleImportCharts}
         />
       )}

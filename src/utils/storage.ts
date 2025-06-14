@@ -66,6 +66,23 @@ export const storageService = {
     }
   },
 
+  // 複数のコード譜を一度に削除
+  async deleteMultipleCharts(chartIds: string[]): Promise<void> {
+    try {
+      const charts = await this.loadCharts() || {};
+      
+      // 複数のIDを一度に削除
+      chartIds.forEach(id => {
+        delete charts[id];
+      });
+      
+      await this.saveCharts(charts);
+    } catch (error) {
+      console.error('Failed to delete multiple charts:', error);
+      throw new Error('複数コード譜の削除に失敗しました');
+    }
+  },
+
   // ストレージをクリア
   async clearStorage(): Promise<void> {
     try {
