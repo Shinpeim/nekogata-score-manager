@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type { ChordChart, ChordLibrary } from '../types';
-import { sampleCharts } from '../data/sampleCharts';
 import { createNewChordChart } from '../utils/chordUtils';
 import { storageService } from '../utils/storage';
 
@@ -137,19 +136,16 @@ export const useChordChartStore = create<ChordChartState>()(
               isLoading: false
             }, false, 'loadFromStorage');
           } else {
-            // ストレージが空の場合、サンプルデータを使用
+            // ストレージが空の場合、空の状態で開始
             const initialCharts: ChordLibrary = {};
-            sampleCharts.forEach(chart => {
-              initialCharts[chart.id] = chart;
-            });
             
             set({
               charts: initialCharts,
-              currentChartId: sampleCharts[0]?.id || null,
+              currentChartId: null,
               isLoading: false
             }, false, 'loadInitialData');
             
-            // サンプルデータをストレージに保存
+            // 空のデータをストレージに保存
             await storageService.saveCharts(initialCharts);
           }
         } catch (error) {
