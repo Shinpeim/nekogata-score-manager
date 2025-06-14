@@ -569,12 +569,6 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
                 />
                 <div className="flex gap-2">
                   <button
-                    onClick={() => addChordToSection(section.id)}
-                    className="bg-[#85B0B7] hover:bg-[#6B9CA5] text-white px-2 py-1 rounded-md text-xs"
-                  >
-                    ➕ コード追加
-                  </button>
-                  <button
                     onClick={() => selectAllInSection(section.id)}
                     className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded-md text-xs"
                     title="このセクションの全選択"
@@ -670,6 +664,16 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
                         />
                       );
                     })}
+                    {/* コード追加ボタンを最後のコードの次に配置 */}
+                    <div className="flex items-center justify-center p-2 border border-dashed border-slate-300 rounded-md hover:border-[#85B0B7] transition-colors">
+                      <button
+                        onClick={() => addChordToSection(section.id)}
+                        className="w-full h-full flex flex-col items-center justify-center gap-1 text-[#85B0B7] hover:text-[#6B9CA5] transition-colors"
+                      >
+                        <span className="text-2xl">+</span>
+                        <span className="text-xs font-medium">コード追加</span>
+                      </button>
+                    </div>
                   </div>
                 </SortableContext>
               </DndContext>
