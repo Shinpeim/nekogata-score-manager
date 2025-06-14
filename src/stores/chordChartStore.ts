@@ -15,6 +15,7 @@ interface ChordChartState {
   addChart: (chart: ChordChart) => Promise<void>;
   updateChart: (id: string, chart: Partial<ChordChart>) => Promise<void>;
   deleteChart: (id: string) => Promise<void>;
+  deleteMultipleCharts: (ids: string[]) => Promise<void>;
   setCurrentChart: (id: string | null) => void;
   loadInitialData: () => Promise<void>;
   loadFromStorage: () => Promise<void>;
@@ -206,6 +207,40 @@ export const useChordChartStore = create<ChordChartState>()(
           set({ 
             isLoading: false, 
             error: error instanceof Error ? error.message : '新しいコード譜の作成に失敗しました' 
+          });
+          throw error;
+        }
+      },
+
+      deleteMultipleCharts: async (ids) => {
+        try {
+          set({ isLoading: true, error: null });
+          
+          // ローカル状態を更新
+          set((state) => {
+            const remainingCharts = { ...state.charts };
+            ids.forEach(id => {
+              delete remainingCharts[id];
+            });
+            
+            // 現在選択中のチャートが削除対象に含まれている場合、選択を解除
+            const newCurrentChartId = ids.includes(state.currentChartId || '') 
+              ? (Object.keys(remainingCharts)[0] || null)
+              : state.currentChartId;
+            
+            return {
+              charts: remainingCharts,
+              currentChartId: newCurrentChartId,
+              isLoading: false
+            };
+          }, false, 'deleteMultipleCharts');
+          
+          // ストレージから削除
+          await Promise.all(ids.map(id => storageService.deleteChart(id)));
+        } catch (error) {
+          set({ 
+            isLoading: false, 
+            error: error instanceof Error ? error.message : '複数コード譜の削除に失敗しました' 
           });
           throw error;
         }
