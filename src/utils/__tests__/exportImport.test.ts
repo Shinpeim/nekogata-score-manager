@@ -9,7 +9,7 @@ import {
 } from '../exportImport';
 
 // Blob のモック
-global.Blob = vi.fn().mockImplementation((content: BlobPart[], options: BlobPropertyBag) => ({
+globalThis.Blob = vi.fn().mockImplementation((content: BlobPart[], options: BlobPropertyBag) => ({
   content,
   options,
   size: JSON.stringify(content).length,
@@ -17,10 +17,10 @@ global.Blob = vi.fn().mockImplementation((content: BlobPart[], options: BlobProp
 }));
 
 // URL のモック
-global.URL = {
+globalThis.URL = {
   createObjectURL: vi.fn().mockReturnValue('blob:mock-url'),
   revokeObjectURL: vi.fn()
-} as typeof URL;
+} as unknown as typeof URL;
 
 // DOM モック
 const mockElement = {

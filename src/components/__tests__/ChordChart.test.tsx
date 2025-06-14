@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import ChordChart from '../ChordChart';
-import type { ChordChart as ChordChartType } from '../../types';
+import type { ChordChart as ChordChartType, ChordSection } from '../../types';
 
 // Create mock store state
 let mockCharts: Record<string, ChordChartType> = {};
@@ -182,7 +182,7 @@ describe('ChordChart', () => {
     it('should show fallback message when sections are undefined', () => {
       const emptyChart: ChordChartType = {
         ...mockChartData,
-        sections: undefined as ChordSection[] | undefined
+        sections: undefined as unknown as ChordSection[]
       };
 
       mockCharts = { 'test-chart-1': emptyChart };

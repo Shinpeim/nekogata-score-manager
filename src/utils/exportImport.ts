@@ -1,4 +1,4 @@
-import type { ChordChart, ChordLibrary } from '../types';
+import type { ChordChart, ChordLibrary, ChordSection } from '../types';
 
 // エクスポート・インポート用のデータフォーマット
 export interface ExportData {
@@ -181,10 +181,10 @@ export const parseImportData = (jsonString: string): ImportResult => {
  * エクスポートデータの形式チェック
  */
 const isValidExportData = (data: unknown): data is ExportData => {
-  return data && 
+  return Boolean(data && 
          typeof data === 'object' && 
          typeof (data as Record<string, unknown>).version === 'string' && 
-         Array.isArray((data as Record<string, unknown>).charts);
+         Array.isArray((data as Record<string, unknown>).charts));
 };
 
 /**
@@ -297,13 +297,18 @@ const validateSingleChart = (chart: unknown): {
   });
 
   const validatedChart: ChordChart = {
-    ...chartObj,
+    id: chartObj.id as string,
+    title: chartObj.title as string,
+    artist: chartObj.artist as string,
+    key: chartObj.key as string,
+    tempo: chartObj.tempo as number,
+    timeSignature: chartObj.timeSignature as string,
     createdAt,
     updatedAt,
-    sections: validSections,
-    tags: Array.isArray(chartObj.tags) ? chartObj.tags : [],
+    sections: validSections as unknown as ChordSection[],
+    tags: Array.isArray(chartObj.tags) ? chartObj.tags as string[] : [],
     notes: typeof chartObj.notes === 'string' ? chartObj.notes : ''
-  } as ChordChart;
+  };
 
   return { isValid: true, chart: validatedChart, errors: [], warnings };
 };

@@ -47,6 +47,7 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
       id: `section-${Date.now()}`,
       name: '新しいセクション',
       beatsPerBar,
+      barsCount: 4,
       chords: []
     };
     
@@ -66,6 +67,7 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
   const addChordToSection = (sectionId: string) => {
     const newChord: Chord = {
       name: 'C',
+      root: 'C',
       duration: 4
     };
     
