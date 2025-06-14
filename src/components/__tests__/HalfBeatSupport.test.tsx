@@ -149,68 +149,69 @@ describe('Half Beat Support', () => {
   });
 
   describe('ChordChart Display', () => {
-    it('整数の拍数は小数点なしで表示される', () => {
+    it('コード名が正しく表示される', () => {
       render(<ChordChart chartData={mockChart} />);
 
-      // duration=4の場合は表示されない（デフォルト値のため）
-      // duration=2の場合は(2)と表示される
-      expect(screen.getByText('(2)')).toBeInTheDocument();
+      // 各コード名が表示されることを確認（拍数表示は削除済み）
+      expect(screen.getByText('C')).toBeInTheDocument();
+      expect(screen.getByText('Am')).toBeInTheDocument();
+      expect(screen.getByText('F')).toBeInTheDocument();
+      expect(screen.getByText('G')).toBeInTheDocument();
     });
 
-    it('小数の拍数は小数点付きで表示される', () => {
+    it('セクション名が【】で囲まれて表示される', () => {
       render(<ChordChart chartData={mockChart} />);
 
-      // duration=1.5の場合は(1.5)と表示される
-      expect(screen.getByText('(1.5)')).toBeInTheDocument();
-      // duration=0.5の場合は(0.5)と表示される
-      expect(screen.getByText('(0.5)')).toBeInTheDocument();
+      // セクション名が【】で囲まれて表示される
+      expect(screen.getByText('【Aメロ】')).toBeInTheDocument();
     });
 
-    it('小数の拍数が正しい表示フォーマットで表示される', () => {
-      const chartWithVariousDecimals: ChordChartType = {
-        ...mockChart,
-        sections: [
-          {
-            ...mockChart.sections[0],
-            chords: [
-              { name: 'C', root: 'C', duration: 1.5 },
-              { name: 'F', root: 'F', duration: 2.5 },
-              { name: 'G', root: 'G', duration: 0.5 },
-              { name: 'Am', root: 'A', duration: 3.0 } // 整数だが小数点形式
-            ]
-          }
-        ]
-      };
+    // 拍数表示はUI簡素化により削除済み
+    // it('小数の拍数が正しい表示フォーマットで表示される', () => {
+    //   const chartWithVariousDecimals: ChordChartType = {
+    //     ...mockChart,
+    //     sections: [
+    //       {
+    //         ...mockChart.sections[0],
+    //         chords: [
+    //           { name: 'C', root: 'C', duration: 1.5 },
+    //           { name: 'F', root: 'F', duration: 2.5 },
+    //           { name: 'G', root: 'G', duration: 0.5 },
+    //           { name: 'Am', root: 'A', duration: 3.0 } // 整数だが小数点形式
+    //         ]
+    //       }
+    //     ]
+    //   };
 
-      render(<ChordChart chartData={chartWithVariousDecimals} />);
+    //   render(<ChordChart chartData={chartWithVariousDecimals} />);
 
-      // 小数点のある値は小数点付きで表示
-      expect(screen.getByText('(1.5)')).toBeInTheDocument();
-      expect(screen.getByText('(2.5)')).toBeInTheDocument();
-      expect(screen.getByText('(0.5)')).toBeInTheDocument();
+    //   // 小数点のある値は小数点付きで表示
+    //   expect(screen.getByText('(1.5)')).toBeInTheDocument();
+    //   expect(screen.getByText('(2.5)')).toBeInTheDocument();
+    //   expect(screen.getByText('(0.5)')).toBeInTheDocument();
       
-      // 3.0は整数として扱われるので(3)と表示される
-      expect(screen.getByText('(3)')).toBeInTheDocument();
-    });
+    //   // 3.0は整数として扱われるので(3)と表示される
+    //   expect(screen.getByText('(3)')).toBeInTheDocument();
+    // });
 
-    it('デフォルト拍数4は表示されない', () => {
-      const chartWithDefaultDuration: ChordChartType = {
-        ...mockChart,
-        sections: [
-          {
-            ...mockChart.sections[0],
-            chords: [
-              { name: 'C', root: 'C', duration: 4 }
-            ]
-          }
-        ]
-      };
+    // it('デフォルト拍数4は表示されない', () => {
+    //   const chartWithDefaultDuration: ChordChartType = {
+    //     ...mockChart,
+    //     sections: [
+    //       {
+    //         ...mockChart.sections[0],
+    //         chords: [
+    //           { name: 'C', root: 'C', duration: 4 }
+    //         ]
+    //       }
+    //     ]
+    //   };
 
-      render(<ChordChart chartData={chartWithDefaultDuration} />);
+    //   render(<ChordChart chartData={chartWithDefaultDuration} />);
 
-      // duration=4の場合は拍数表示されない
-      expect(screen.queryByText('(4)')).not.toBeInTheDocument();
-    });
+    //   // duration=4の場合は拍数表示されない
+    //   expect(screen.queryByText('(4)')).not.toBeInTheDocument();
+    // });
   });
 
   describe('Beat Calculation', () => {
