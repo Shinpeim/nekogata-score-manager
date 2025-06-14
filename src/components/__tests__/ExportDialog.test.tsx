@@ -7,11 +7,11 @@ import type { ChordChart } from '../../types';
 const mockCreateObjectURL = vi.fn(() => 'mock-blob-url');
 const mockRevokeObjectURL = vi.fn();
 
-Object.defineProperty(global.URL, 'createObjectURL', {
+Object.defineProperty(globalThis.URL, 'createObjectURL', {
   value: mockCreateObjectURL,
 });
 
-Object.defineProperty(global.URL, 'revokeObjectURL', {
+Object.defineProperty(globalThis.URL, 'revokeObjectURL', {
   value: mockRevokeObjectURL,
 });
 
