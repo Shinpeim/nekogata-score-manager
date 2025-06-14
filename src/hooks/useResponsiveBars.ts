@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 // 小節の幅の設定
 const BAR_WIDTH_CONFIG = {
   MIN_WIDTH: 120, // 最小幅（px）
-  MAX_WIDTH: 200, // 最大幅（px）
+  MAX_WIDTH: 340, // 最大幅（px）
   PADDING: 48,    // 左右のパディング合計（px）
 } as const;
 
@@ -17,24 +17,11 @@ export const useResponsiveBars = () => {
     // コンテナの幅を取得（ウィンドウ幅からパディングを引く）
     const containerWidth = window.innerWidth - BAR_WIDTH_CONFIG.PADDING;
     
-    // 最大幅での小節数
-    const maxBarsWithMaxWidth = Math.floor(containerWidth / BAR_WIDTH_CONFIG.MAX_WIDTH);
-    
-    // 最小幅での小節数
+    // 最小幅で入る最大小節数を計算（これを基準にする）
     const maxBarsWithMinWidth = Math.floor(containerWidth / BAR_WIDTH_CONFIG.MIN_WIDTH);
     
-    // 小節数を決定
-    let calculatedBars: number;
-    if (maxBarsWithMaxWidth > 0) {
-      // 最大幅で1小節以上入る場合は、最大幅を基準にする
-      calculatedBars = maxBarsWithMaxWidth;
-    } else {
-      // 最大幅で1小節も入らない場合は、最小幅を基準にする
-      calculatedBars = Math.max(1, maxBarsWithMinWidth);
-    }
-    
     // 実用的な範囲に制限（1〜16小節）
-    const finalBars = Math.min(16, calculatedBars);
+    const finalBars = Math.max(1, Math.min(16, maxBarsWithMinWidth));
     
     setBarsPerRow(finalBars);
   }, []);
