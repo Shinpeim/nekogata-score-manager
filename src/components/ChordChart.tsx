@@ -10,9 +10,11 @@ import { splitChordsIntoRows, isLineBreakMarker } from '../utils/lineBreakHelper
 interface ChordChartProps {
   chartData?: ChordChartType;
   onCreateNew?: () => void;
+  onOpenImport?: () => void;
+  onOpenExplorer?: () => void;
 }
 
-const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
+const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew, onOpenImport, onOpenExplorer }) => {
   const [isEditing, setIsEditing] = useState(false);
   const charts = useChordChartStore(state => state.charts);
   const currentChartId = useChordChartStore(state => state.currentChartId);
@@ -70,13 +72,27 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
       <div className="h-full bg-white flex items-center justify-center">
         <div className="text-center text-slate-500">
           <h3 className="text-lg font-medium mb-2">コード譜がありません</h3>
-          <p className="text-sm mb-4">まずは新しいコード譜を作成してみましょう</p>
-          <button 
-            onClick={onCreateNew}
-            className="bg-[#85B0B7] hover:bg-[#6B9CA5] text-white px-4 py-2 rounded-md text-sm font-medium"
-          >
-            新規作成
-          </button>
+          <p className="text-sm mb-6">まずは新しいコード譜を作成するか、既存のファイルをインポートしてみましょう</p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <button 
+              onClick={onCreateNew}
+              className="bg-[#85B0B7] hover:bg-[#6B9CA5] text-white px-6 py-3 rounded-md text-sm font-medium"
+            >
+              新規作成
+            </button>
+            <button 
+              onClick={onOpenImport}
+              className="bg-[#BDD0CA] hover:bg-[#A4C2B5] text-slate-800 px-6 py-3 rounded-md text-sm font-medium"
+            >
+              インポート
+            </button>
+            <button 
+              onClick={onOpenExplorer}
+              className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-6 py-3 rounded-md text-sm font-medium"
+            >
+              Score Explorerを開く
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -302,7 +318,12 @@ const ChordChartWithForm: React.FC<ChordChartProps> = (props) => {
 
   return (
     <>
-      <ChordChart {...props} onCreateNew={handleCreateNew} />
+      <ChordChart 
+        {...props} 
+        onCreateNew={handleCreateNew}
+        onOpenImport={props.onOpenImport}
+        onOpenExplorer={props.onOpenExplorer}
+      />
       {showCreateForm && (
         <ChordChartForm
           onSave={handleCreateChart}

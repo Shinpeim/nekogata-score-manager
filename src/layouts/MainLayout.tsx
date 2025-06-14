@@ -7,11 +7,17 @@ import type { ChordChart } from '../types';
 
 interface MainLayoutProps {
   children: ReactNode;
+  explorerOpen?: boolean;
+  setExplorerOpen?: (open: boolean) => void;
 }
 
-const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExplorerOpen, setExplorerOpen: propSetExplorerOpen }) => {
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [explorerOpen, setExplorerOpen] = useState(false);
+  const [localExplorerOpen, setLocalExplorerOpen] = useState(false);
+  
+  // Use props if provided, otherwise use local state
+  const explorerOpen = propExplorerOpen !== undefined ? propExplorerOpen : localExplorerOpen;
+  const setExplorerOpen = propSetExplorerOpen || setLocalExplorerOpen;
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [selectedChartIds, setSelectedChartIds] = useState<string[]>([]);
   const [showActionsDropdown, setShowActionsDropdown] = useState(false);
@@ -69,6 +75,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const handleCancelCreate = () => {
     setShowCreateForm(false);
   };
+
 
 
   const handleChartSelect = (chartId: string) => {

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import ChordChart from '../ChordChart';
 import type { ChordChart as ChordChartType, ChordSection } from '../../types';
 
@@ -135,7 +135,10 @@ describe('ChordChart', () => {
       render(<ChordChart />);
 
       expect(screen.getByText('コード譜がありません')).toBeInTheDocument();
-      expect(screen.getByText('まずは新しいコード譜を作成してみましょう')).toBeInTheDocument();
+      expect(screen.getByText('まずは新しいコード譜を作成するか、既存のファイルをインポートしてみましょう')).toBeInTheDocument();
+      expect(screen.getByText('新規作成')).toBeInTheDocument();
+      expect(screen.getByText('インポート')).toBeInTheDocument();
+      expect(screen.getByText('Score Explorerを開く')).toBeInTheDocument();
     });
 
     it('should show empty state when current chart does not exist', () => {
@@ -145,6 +148,45 @@ describe('ChordChart', () => {
       render(<ChordChart />);
 
       expect(screen.getByText('コード譜がありません')).toBeInTheDocument();
+    });
+
+    it('should call onCreateNew when 新規作成 button is clicked', () => {
+      mockCharts = {};
+      mockCurrentChartId = null;
+      const mockOnCreateNew = vi.fn();
+
+      render(<ChordChart onCreateNew={mockOnCreateNew} />);
+
+      const createButton = screen.getByText('新規作成');
+      fireEvent.click(createButton);
+
+      expect(mockOnCreateNew).toHaveBeenCalledOnce();
+    });
+
+    it('should call onOpenImport when インポート button is clicked', () => {
+      mockCharts = {};
+      mockCurrentChartId = null;
+      const mockOnOpenImport = vi.fn();
+
+      render(<ChordChart onOpenImport={mockOnOpenImport} />);
+
+      const importButton = screen.getByText('インポート');
+      fireEvent.click(importButton);
+
+      expect(mockOnOpenImport).toHaveBeenCalledOnce();
+    });
+
+    it('should call onOpenExplorer when Score Explorerを開く button is clicked', () => {
+      mockCharts = {};
+      mockCurrentChartId = null;
+      const mockOnOpenExplorer = vi.fn();
+
+      render(<ChordChart onOpenExplorer={mockOnOpenExplorer} />);
+
+      const explorerButton = screen.getByText('Score Explorerを開く');
+      fireEvent.click(explorerButton);
+
+      expect(mockOnOpenExplorer).toHaveBeenCalledOnce();
     });
   });
 
