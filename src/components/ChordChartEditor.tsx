@@ -128,17 +128,17 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
       <div className="p-6">
         {/* Header */}
         <div className="mb-6 flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-900">コード譜を編集</h2>
+          <h2 className="text-2xl font-bold text-slate-900">コード譜を編集</h2>
           <div className="flex gap-3">
             <button
               onClick={onCancel}
-              className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-medium"
+              className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-md text-sm font-medium"
             >
               キャンセル
             </button>
             <button
               onClick={handleSave}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+              className="bg-[#85B0B7] hover:bg-[#6B9CA5] text-white px-4 py-2 rounded-md text-sm font-medium"
             >
               保存
             </button>
@@ -146,11 +146,11 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
         </div>
 
         {/* Basic Information */}
-        <div className="mb-8 p-4 bg-gray-50 rounded-lg">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">基本情報</h3>
+        <div className="mb-8 p-4 bg-slate-50 rounded-lg">
+          <h3 className="text-lg font-semibold text-slate-800 mb-4">基本情報</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="title-input" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="title-input" className="block text-sm font-medium text-slate-700 mb-1">
                 タイトル
               </label>
               <input
@@ -158,11 +158,11 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
                 type="text"
                 value={editedChart.title}
                 onChange={(e) => handleBasicInfoChange('title', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#85B0B7]"
               />
             </div>
             <div>
-              <label htmlFor="artist-input" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="artist-input" className="block text-sm font-medium text-slate-700 mb-1">
                 アーティスト
               </label>
               <input
@@ -170,18 +170,18 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
                 type="text"
                 value={editedChart.artist}
                 onChange={(e) => handleBasicInfoChange('artist', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#85B0B7]"
               />
             </div>
             <div>
-              <label htmlFor="key-select" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="key-select" className="block text-sm font-medium text-slate-700 mb-1">
                 キー
               </label>
               <select
                 id="key-select"
                 value={editedChart.key}
                 onChange={(e) => handleBasicInfoChange('key', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#85B0B7]"
               >
                 <option value="C">C</option>
                 <option value="C#">C#</option>
@@ -198,7 +198,7 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
               </select>
             </div>
             <div>
-              <label htmlFor="tempo-input" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="tempo-input" className="block text-sm font-medium text-slate-700 mb-1">
                 テンポ (BPM)
               </label>
               <input
@@ -206,18 +206,18 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
                 type="number"
                 value={editedChart.tempo || ''}
                 onChange={(e) => handleBasicInfoChange('tempo', e.target.value ? parseInt(e.target.value) : undefined)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#85B0B7]"
               />
             </div>
             <div className="md:col-span-2">
-              <label htmlFor="time-signature-select" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="time-signature-select" className="block text-sm font-medium text-slate-700 mb-1">
                 拍子
               </label>
               <select
                 id="time-signature-select"
                 value={editedChart.timeSignature}
                 onChange={(e) => handleBasicInfoChange('timeSignature', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#85B0B7]"
               >
                 <option value="4/4">4/4</option>
                 <option value="3/4">3/4</option>
@@ -231,27 +231,27 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
         {/* Sections */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">セクション</h3>
+            <h3 className="text-lg font-semibold text-slate-800">セクション</h3>
             <button
               onClick={addSection}
-              className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md text-sm font-medium"
+              className="bg-[#BDD0CA] hover:bg-[#A4C2B5] text-slate-800 px-3 py-1 rounded-md text-sm font-medium"
             >
               セクション追加
             </button>
           </div>
 
           {editedChart.sections?.map((section) => (
-            <div key={section.id} className="mb-6 p-4 border border-gray-300 rounded-lg">
+            <div key={section.id} className="mb-6 p-4 border border-slate-300 rounded-lg">
               <div className="flex justify-between items-center mb-3">
                 <input
                   type="text"
                   value={section.name}
                   onChange={(e) => handleSectionChange(section.id, 'name', e.target.value)}
-                  className="text-lg font-medium bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
+                  className="text-lg font-medium bg-transparent border-b border-slate-300 focus:outline-none focus:border-[#85B0B7]"
                 />
                 <button
                   onClick={() => deleteSection(section.id)}
-                  className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded-md text-xs"
+                  className="bg-[#EE5840] hover:bg-[#D14A2E] text-white px-2 py-1 rounded-md text-xs"
                 >
                   削除
                 </button>
@@ -260,7 +260,7 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
               <div className="mb-3">
                 <button
                   onClick={() => addChordToSection(section.id)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm font-medium"
+                  className="bg-[#85B0B7] hover:bg-[#6B9CA5] text-white px-3 py-1 rounded-md text-sm font-medium"
                 >
                   コード追加
                 </button>
@@ -268,12 +268,12 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
 
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
                 {section.chords.map((chord, chordIndex) => (
-                  <div key={chordIndex} className="p-2 border border-gray-200 rounded-md">
+                  <div key={chordIndex} className="p-2 border border-slate-200 rounded-md">
                     <div className="flex justify-between items-center mb-1">
-                      <span className="text-xs text-gray-500">#{chordIndex + 1}</span>
+                      <span className="text-xs text-slate-500">#{chordIndex + 1}</span>
                       <button
                         onClick={() => deleteChordFromSection(section.id, chordIndex)}
-                        className="text-red-600 hover:text-red-800 text-xs"
+                        className="text-[#EE5840] hover:text-[#D14A2E] text-xs"
                       >
                         ✕
                       </button>
@@ -282,14 +282,14 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
                       type="text"
                       value={chord.name}
                       onChange={(e) => updateChordInSection(section.id, chordIndex, 'name', e.target.value)}
-                      className="w-full mb-1 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="w-full mb-1 px-2 py-1 text-sm border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-[#85B0B7]"
                       placeholder="コード名"
                     />
                     <input
                       type="number"
                       value={chord.duration || 4}
                       onChange={(e) => updateChordInSection(section.id, chordIndex, 'duration', parseInt(e.target.value))}
-                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="w-full px-2 py-1 text-sm border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-[#85B0B7]"
                       placeholder="拍数"
                       min="1"
                       max="16"
@@ -303,7 +303,7 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
 
         {/* Notes */}
         <div className="mb-8">
-          <label htmlFor="notes-textarea" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="notes-textarea" className="block text-sm font-medium text-slate-700 mb-2">
             メモ
           </label>
           <textarea
@@ -311,7 +311,7 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
             value={editedChart.notes || ''}
             onChange={(e) => handleBasicInfoChange('notes', e.target.value)}
             rows={4}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="コード譜に関するメモを入力してください"
           />
         </div>

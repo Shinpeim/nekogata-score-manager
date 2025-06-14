@@ -65,12 +65,12 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
   if (!displayChart) {
     return (
       <div className="h-full bg-white flex items-center justify-center">
-        <div className="text-center text-gray-500">
+        <div className="text-center text-slate-500">
           <h3 className="text-lg font-medium mb-2">コード譜がありません</h3>
           <p className="text-sm mb-4">まずは新しいコード譜を作成してみましょう</p>
           <button 
             onClick={onCreateNew}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+            className="bg-[#85B0B7] hover:bg-[#6B9CA5] text-white px-4 py-2 rounded-md text-sm font-medium"
           >
             新規作成
           </button>
@@ -138,7 +138,7 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
         {/* コード表示エリア */}
         <div className="relative bg-white">
           {/* 下の罫線 */}
-          <div className="absolute bottom-8 left-0 right-0 h-px bg-gray-400"></div>
+          <div className="absolute bottom-8 left-0 right-0 h-px bg-slate-400"></div>
           
           {/* 小節の内容 */}
           <div className="flex min-h-20 py-2">
@@ -146,7 +146,7 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
               <div key={barIndex} className="flex-1 relative">
                 {/* 小節線（縦線） */}
                 {barIndex > 0 && (
-                  <div className="absolute left-0 top-6 bottom-6 w-px bg-gray-400"></div>
+                  <div className="absolute left-0 top-6 bottom-6 w-px bg-slate-400"></div>
                 )}
                 
                 {/* コード表示 */}
@@ -158,13 +158,13 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
                     return (
                       <div 
                         key={chordIndex} 
-                        className="flex items-center hover:bg-blue-50 cursor-pointer rounded px-1"
+                        className="flex items-center hover:bg-slate-100 cursor-pointer rounded px-1"
                         style={{ width: `${widthPercentage}%` }}
                       >
                         <div className="text-left flex items-center">
                           <span className="text-xs font-semibold">{chord.name}</span>
                           {chord.duration && chord.duration !== 4 && (
-                            <span className="text-xs text-gray-500 ml-1">({chord.duration})</span>
+                            <span className="text-xs text-slate-500 ml-1">({chord.duration})</span>
                           )}
                         </div>
                       </div>
@@ -174,15 +174,15 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
                 
                 {/* 右端の小節線 */}
                 {barIndex === row.length - 1 && (
-                  <div className="absolute right-0 top-6 bottom-6 w-px bg-gray-400"></div>
+                  <div className="absolute right-0 top-6 bottom-6 w-px bg-slate-400"></div>
                 )}
               </div>
             ))}
           </div>
           
           {/* 左右の境界線 */}
-          <div className="absolute left-0 top-8 bottom-8 w-px bg-gray-400"></div>
-          <div className="absolute right-0 top-8 bottom-8 w-px bg-gray-400"></div>
+          <div className="absolute left-0 top-8 bottom-8 w-px bg-slate-400"></div>
+          <div className="absolute right-0 top-8 bottom-8 w-px bg-slate-400"></div>
         </div>
       </div>
     ));
@@ -193,8 +193,8 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
       <div className="p-6">
         {/* Chart Header */}
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">{displayChart.title}</h2>
-          <div className="flex flex-wrap gap-4 text-gray-600">
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">{displayChart.title}</h2>
+          <div className="flex flex-wrap gap-4 text-slate-600">
             <span>{displayChart.artist}</span>
             <span>キー: {displayChart.key}</span>
             {displayChart.tempo && <BpmIndicator bpm={displayChart.tempo} />}
@@ -203,7 +203,7 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
           {displayChart.tags && displayChart.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-2">
               {displayChart.tags.map((tag, index) => (
-                <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                <span key={index} className="px-2 py-1 bg-slate-100 text-slate-800 text-xs rounded-full">
                   {tag}
                 </span>
               ))}
@@ -212,12 +212,12 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
         </div>
 
         {/* Chart Content */}
-        <div className="bg-gray-50 rounded-lg p-3 sm:p-6">
+        <div className="bg-slate-50 rounded-lg p-3 sm:p-6">
           {displayChart.sections && displayChart.sections.length > 0 ? (
             displayChart.sections.map((section) => (
               <div key={section.id} className="mb-8 last:mb-0">
                 {section.name && (
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-300 pb-2">
+                  <h3 className="text-lg font-semibold text-slate-800 mb-4 border-b border-slate-300 pb-2">
                     {section.name}
                   </h3>
                 )}
@@ -225,7 +225,7 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
               </div>
             ))
           ) : (
-            <div className="text-center text-gray-500 py-8">
+            <div className="text-center text-slate-500 py-8">
               <p>セクションがありません</p>
               <p className="text-sm mt-2">コード譜を編集してセクションを追加してください</p>
             </div>
@@ -234,8 +234,8 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
 
         {displayChart.notes && (
           <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-            <h4 className="font-semibold text-gray-800 mb-2">メモ</h4>
-            <p className="text-gray-700">{displayChart.notes}</p>
+            <h4 className="font-semibold text-slate-800 mb-2">メモ</h4>
+            <p className="text-slate-700">{displayChart.notes}</p>
           </div>
         )}
 
@@ -243,19 +243,19 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
         <div className="mt-6 flex flex-wrap gap-3">
           <button 
             onClick={() => setIsEditing(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+            className="bg-[#85B0B7] hover:bg-[#6B9CA5] text-white px-4 py-2 rounded-md text-sm font-medium"
           >
             編集
           </button>
           <button 
             onClick={handleDuplicate}
-            className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-medium"
+            className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-md text-sm font-medium"
           >
             複製
           </button>
           <button 
             onClick={handleDelete}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+            className="bg-[#EE5840] hover:bg-[#D14A2E] text-white px-4 py-2 rounded-md text-sm font-medium"
           >
             削除
           </button>

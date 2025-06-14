@@ -38,10 +38,10 @@ const BpmIndicator: React.FC<BpmIndicatorProps> = ({ bpm, className = '' }) => {
     <div className={`flex items-center space-x-2 ${className}`}>
       <div
         className={`w-3 h-3 rounded-full ${
-          isActive ? 'bg-blue-500' : 'bg-gray-300'
+          isActive ? 'bg-[#85B0B7]' : 'bg-slate-300'
         }`}
       />
-      <span className="text-sm text-gray-600">テンポ: {bpm} BPM</span>
+      <span className="text-sm text-slate-600">テンポ: {bpm} BPM</span>
     </div>
   );
 };
