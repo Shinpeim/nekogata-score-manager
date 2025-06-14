@@ -98,7 +98,8 @@ export const useChordChartStore = create<ChordChartState>()(
           
           // ローカル状態を更新
           set((state) => {
-            const { [id]: removed, ...remainingCharts } = state.charts;
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { [id]: _removed, ...remainingCharts } = state.charts;
             return {
               charts: remainingCharts,
               currentChartId: state.currentChartId === id ? null : state.currentChartId,

@@ -8,8 +8,13 @@ let mockCharts: Record<string, ChordChartType> = {};
 let mockCurrentChartId: string | null = null;
 
 // Mock the store with proper selector behavior
+interface MockState {
+  charts: Record<string, ChordChartType>;
+  currentChartId: string | null;
+}
+
 vi.mock('../../stores/chordChartStore', () => ({
-  useChordChartStore: vi.fn((selector?: (state: any) => any) => {
+  useChordChartStore: vi.fn((selector?: (state: MockState) => unknown) => {
     const state = {
       charts: mockCharts,
       currentChartId: mockCurrentChartId
@@ -177,7 +182,7 @@ describe('ChordChart', () => {
     it('should show fallback message when sections are undefined', () => {
       const emptyChart: ChordChartType = {
         ...mockChartData,
-        sections: undefined as any
+        sections: undefined as ChordSection[] | undefined
       };
 
       mockCharts = { 'test-chart-1': emptyChart };

@@ -13,6 +13,8 @@ vi.mock('localforage', () => ({
 }));
 
 import localforage from 'localforage';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+vi.mocked = vi.mocked || ((fn: any) => fn as any);
 
 describe('chordChartStore integration with storage', () => {
   beforeEach(() => {
@@ -27,8 +29,8 @@ describe('chordChartStore integration with storage', () => {
 
   describe('async operations', () => {
     it('should handle addChart with storage', async () => {
-      (localforage.getItem as any).mockResolvedValue({});
-      (localforage.setItem as any).mockResolvedValue(undefined);
+      vi.mocked(localforage.getItem).mockResolvedValue({});
+      vi.mocked(localforage.setItem).mockResolvedValue(undefined);
       
       const { addChart } = useChordChartStore.getState();
       
@@ -63,7 +65,7 @@ describe('chordChartStore integration with storage', () => {
         error: null
       });
       
-      (localforage.setItem as any).mockResolvedValue(undefined);
+      vi.mocked(localforage.setItem).mockResolvedValue(undefined);
       
       const { updateChart } = useChordChartStore.getState();
       
@@ -89,8 +91,8 @@ describe('chordChartStore integration with storage', () => {
         error: null
       });
       
-      (localforage.getItem as any).mockResolvedValue({ [initialChart.id]: initialChart });
-      (localforage.setItem as any).mockResolvedValue(undefined);
+      vi.mocked(localforage.getItem).mockResolvedValue({ [initialChart.id]: initialChart });
+      vi.mocked(localforage.setItem).mockResolvedValue(undefined);
       
       const { deleteChart } = useChordChartStore.getState();
       
@@ -104,7 +106,7 @@ describe('chordChartStore integration with storage', () => {
     });
 
     it('should handle createNewChart with storage', async () => {
-      (localforage.setItem as any).mockResolvedValue(undefined);
+      vi.mocked(localforage.setItem).mockResolvedValue(undefined);
       
       const { createNewChart } = useChordChartStore.getState();
       
@@ -125,7 +127,7 @@ describe('chordChartStore integration with storage', () => {
     });
 
     it('should handle storage errors gracefully', async () => {
-      (localforage.setItem as any).mockRejectedValue(new Error('Storage error'));
+      vi.mocked(localforage.setItem).mockRejectedValue(new Error('Storage error'));
       
       const { addChart } = useChordChartStore.getState();
       
@@ -147,7 +149,7 @@ describe('chordChartStore integration with storage', () => {
         'chart-2': createNewChordChart({ title: 'Stored Chart 2' })
       };
       
-      (localforage.getItem as any).mockResolvedValue(storedCharts);
+      vi.mocked(localforage.getItem).mockResolvedValue(storedCharts);
       
       const { loadInitialData } = useChordChartStore.getState();
       
@@ -163,8 +165,8 @@ describe('chordChartStore integration with storage', () => {
     });
 
     it('should load empty data when storage is empty and no sample data', async () => {
-      (localforage.getItem as any).mockResolvedValue(null);
-      (localforage.setItem as any).mockResolvedValue(undefined);
+      vi.mocked(localforage.getItem).mockResolvedValue(null);
+      vi.mocked(localforage.setItem).mockResolvedValue(undefined);
       
       const { loadInitialData } = useChordChartStore.getState();
       
@@ -183,7 +185,7 @@ describe('chordChartStore integration with storage', () => {
 
   describe('error handling', () => {
     it('should set error state when operations fail', async () => {
-      (localforage.setItem as any).mockRejectedValue(new Error('Storage full'));
+      vi.mocked(localforage.setItem).mockRejectedValue(new Error('Storage full'));
       
       const { addChart } = useChordChartStore.getState();
       
@@ -194,7 +196,7 @@ describe('chordChartStore integration with storage', () => {
       
       try {
         await addChart(newChart);
-      } catch (error) {
+      } catch {
         // Expected to throw
       }
       
