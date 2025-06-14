@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import type { ChordChart, ChordSection, Chord } from '../types';
 import { createLineBreakMarker, isLineBreakMarker } from '../utils/lineBreakHelpers';
+import { 
+  textToChords, 
+  copyChordProgressionToClipboard, 
+  pasteChordProgressionFromClipboard,
+  isValidChordProgression 
+} from '../utils/chordCopyPaste';
 import {
   DndContext,
   closestCenter,
@@ -35,6 +41,8 @@ interface SortableChordItemProps {
   onUpdateChord: (sectionId: string, chordIndex: number, field: keyof Chord, value: string | number) => void;
   onDeleteChord: (sectionId: string, chordIndex: number) => void;
   onInsertLineBreak: (sectionId: string, chordIndex: number) => void;
+  isSelected?: boolean;
+  onToggleSelection?: (sectionId: string, chordIndex: number) => void;
 }
 
 const SortableChordItem: React.FC<SortableChordItemProps> = ({
@@ -42,9 +50,11 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
   chordIndex,
   sectionId,
   itemId,
+  isSelected = false,
   onUpdateChord,
   onDeleteChord,
   onInsertLineBreak,
+  onToggleSelection,
 }) => {
   const {
     attributes,
@@ -68,8 +78,22 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
       className={`p-2 border rounded-md ${
         isLineBreakMarker(chord) 
           ? 'border-orange-300 bg-orange-50' 
-          : 'border-slate-200'
-      } ${isDragging ? 'shadow-lg' : ''}`}
+          : isSelected 
+            ? 'border-[#85B0B7] bg-[#85B0B7]/10'
+            : 'border-slate-200'
+      } ${isDragging ? 'shadow-lg' : ''} ${
+        !isLineBreakMarker(chord) ? 'cursor-pointer hover:border-[#85B0B7]/50' : ''
+      }`}
+      onClick={(e) => {
+        // 入力フィールドやボタンをクリックした場合は選択を実行しない
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLButtonElement) {
+          return;
+        }
+        
+        if (!isLineBreakMarker(chord) && onToggleSelection) {
+          onToggleSelection(sectionId, chordIndex);
+        }
+      }}
     >
       <div className="flex justify-between items-center mb-1">
         <span className="text-xs text-slate-500">#{chordIndex + 1}</span>
@@ -83,6 +107,11 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
           >
             ⋮⋮
           </button>
+          {isSelected && (
+            <span className="text-[#85B0B7] text-xs">
+              ✓
+            </span>
+          )}
           {!isLineBreakMarker(chord) && (
             <button
               onClick={() => onInsertLineBreak(sectionId, chordIndex)}
@@ -133,6 +162,9 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
 
 const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCancel }) => {
   const [editedChart, setEditedChart] = useState<ChordChart>({ ...chart });
+  const [copiedMessage, setCopiedMessage] = useState<string>('');
+  const [pasteText, setPasteText] = useState<string>('');
+  const [selectedChords, setSelectedChords] = useState<Set<string>>(new Set());
   
   // ドラッグ&ドロップセンサー
   const sensors = useSensors(
@@ -308,6 +340,92 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
     }));
   };
 
+  // コピペ機能
+  const copyChordProgression = async (sectionId: string) => {
+    const section = editedChart.sections?.find(s => s.id === sectionId);
+    if (!section || section.chords.length === 0) return;
+
+    const success = await copyChordProgressionToClipboard(section.chords);
+    if (success) {
+      setCopiedMessage(`「${section.name}」のコード進行をコピーしました`);
+      setTimeout(() => setCopiedMessage(''), 3000);
+    }
+  };
+
+  const pasteChordProgression = async (sectionId: string) => {
+    const chords = await pasteChordProgressionFromClipboard();
+    if (!chords || chords.length === 0) return;
+
+    setEditedChart(prev => ({
+      ...prev,
+      sections: prev.sections?.map(section =>
+        section.id === sectionId
+          ? {
+              ...section,
+              chords: [...section.chords, ...chords]
+            }
+          : section
+      ) || []
+    }));
+  };
+
+  const replaceChordProgression = (sectionId: string) => {
+    if (!pasteText.trim()) return;
+    
+    const chords = textToChords(pasteText);
+    if (chords.length === 0) return;
+
+    setEditedChart(prev => ({
+      ...prev,
+      sections: prev.sections?.map(section =>
+        section.id === sectionId
+          ? {
+              ...section,
+              chords: chords
+            }
+          : section
+      ) || []
+    }));
+
+    setPasteText('');
+  };
+
+  // 選択機能
+  const toggleChordSelection = (sectionId: string, chordIndex: number) => {
+    const chordId = `${sectionId}-${chordIndex}`;
+    const newSelected = new Set(selectedChords);
+    
+    if (newSelected.has(chordId)) {
+      newSelected.delete(chordId);
+    } else {
+      newSelected.add(chordId);
+    }
+    
+    setSelectedChords(newSelected);
+  };
+
+  const selectAllInSection = (sectionId: string) => {
+    const section = editedChart.sections?.find(s => s.id === sectionId);
+    if (!section) return;
+
+    const newSelected = new Set(selectedChords);
+    for (let i = 0; i < section.chords.length; i++) {
+      newSelected.add(`${sectionId}-${i}`);
+    }
+    setSelectedChords(newSelected);
+  };
+
+  const clearAllSelectionInSection = (sectionId: string) => {
+    const section = editedChart.sections?.find(s => s.id === sectionId);
+    if (!section) return;
+
+    const newSelected = new Set(selectedChords);
+    for (let i = 0; i < section.chords.length; i++) {
+      newSelected.delete(`${sectionId}-${i}`);
+    }
+    setSelectedChords(newSelected);
+  };
+
   const handleSave = () => {
     onSave({
       ...editedChart,
@@ -336,6 +454,14 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
             </button>
           </div>
         </div>
+
+
+        {/* コピー完了メッセージ */}
+        {copiedMessage && (
+          <div className="mb-4 p-3 bg-green-100 border border-green-300 text-green-700 rounded-md text-sm">
+            {copiedMessage}
+          </div>
+        )}
 
         {/* Basic Information */}
         <div className="mb-8 p-4 bg-slate-50 rounded-lg">
@@ -441,21 +567,79 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
                   onChange={(e) => handleSectionChange(section.id, 'name', e.target.value)}
                   className="text-lg font-medium bg-transparent border-b border-slate-300 focus:outline-none focus:border-[#85B0B7]"
                 />
-                <button
-                  onClick={() => deleteSection(section.id)}
-                  className="bg-[#EE5840] hover:bg-[#D14A2E] text-white px-2 py-1 rounded-md text-xs"
-                >
-                  削除
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => addChordToSection(section.id)}
+                    className="bg-[#85B0B7] hover:bg-[#6B9CA5] text-white px-2 py-1 rounded-md text-xs"
+                  >
+                    ➕ コード追加
+                  </button>
+                  <button
+                    onClick={() => selectAllInSection(section.id)}
+                    className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded-md text-xs"
+                    title="このセクションの全選択"
+                  >
+                    ✅ 全選択
+                  </button>
+                  <button
+                    onClick={() => clearAllSelectionInSection(section.id)}
+                    className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-2 py-1 rounded-md text-xs"
+                    title="このセクションの選択をすべて解除"
+                  >
+                    ❌ 全解除
+                  </button>
+                  <button
+                    onClick={() => copyChordProgression(section.id)}
+                    className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-1 rounded-md text-xs"
+                    title="コード進行をコピー"
+                  >
+                    📋 コピー
+                  </button>
+                  <button
+                    onClick={() => pasteChordProgression(section.id)}
+                    className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-1 rounded-md text-xs"
+                    title="クリップボードから追加"
+                  >
+                    📥 貼り付け
+                  </button>
+                  <button
+                    onClick={() => deleteSection(section.id)}
+                    className="bg-[#EE5840] hover:bg-[#D14A2E] text-white px-2 py-1 rounded-md text-xs"
+                  >
+                    削除
+                  </button>
+                </div>
               </div>
 
-              <div className="mb-3">
-                <button
-                  onClick={() => addChordToSection(section.id)}
-                  className="bg-[#85B0B7] hover:bg-[#6B9CA5] text-white px-3 py-1 rounded-md text-sm font-medium"
-                >
-                  コード追加
-                </button>
+              <div className="mb-3 space-y-2">
+                
+                {/* テキスト入力での一括設定 */}
+                <details className="text-sm">
+                  <summary className="cursor-pointer text-slate-600 hover:text-slate-800">
+                    テキストから一括入力
+                  </summary>
+                  <div className="mt-2 p-3 bg-slate-50 rounded-md">
+                    <p className="text-xs text-slate-500 mb-2">
+                      例: "C F G Am" または "C(4) F(2) G(2) | Am(4)" 
+                    </p>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={pasteText}
+                        onChange={(e) => setPasteText(e.target.value)}
+                        placeholder="C F G Am"
+                        className="flex-1 px-2 py-1 text-sm border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-[#85B0B7]"
+                      />
+                      <button
+                        onClick={() => replaceChordProgression(section.id)}
+                        disabled={!pasteText.trim() || !isValidChordProgression(pasteText)}
+                        className="bg-[#BDD0CA] hover:bg-[#A4C2B5] disabled:bg-slate-300 disabled:cursor-not-allowed text-slate-800 disabled:text-slate-500 px-3 py-1 rounded-md text-xs font-medium"
+                      >
+                        置換
+                      </button>
+                    </div>
+                  </div>
+                </details>
               </div>
 
               <DndContext
@@ -478,9 +662,11 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
                           chordIndex={chordIndex}
                           sectionId={section.id}
                           itemId={itemId}
+                          isSelected={selectedChords.has(`${section.id}-${chordIndex}`)}
                           onUpdateChord={updateChordInSection}
                           onDeleteChord={deleteChordFromSection}
                           onInsertLineBreak={insertLineBreakAfterChord}
+                          onToggleSelection={toggleChordSelection}
                         />
                       );
                     })}
