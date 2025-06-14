@@ -1,6 +1,25 @@
 import React, { useState } from 'react';
 import type { ChordChart, ChordSection, Chord } from '../types';
 import { createLineBreakMarker, isLineBreakMarker } from '../utils/lineBreakHelpers';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import type { DragEndEvent } from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface ChordChartEditorProps {
   chart: ChordChart;
@@ -8,8 +27,159 @@ interface ChordChartEditorProps {
   onCancel: () => void;
 }
 
+interface SortableChordItemProps {
+  chord: Chord;
+  chordIndex: number;
+  sectionId: string;
+  itemId: string;
+  onUpdateChord: (sectionId: string, chordIndex: number, field: keyof Chord, value: string | number) => void;
+  onDeleteChord: (sectionId: string, chordIndex: number) => void;
+  onInsertLineBreak: (sectionId: string, chordIndex: number) => void;
+}
+
+const SortableChordItem: React.FC<SortableChordItemProps> = ({
+  chord,
+  chordIndex,
+  sectionId,
+  itemId,
+  onUpdateChord,
+  onDeleteChord,
+  onInsertLineBreak,
+}) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: itemId });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`p-2 border rounded-md ${
+        isLineBreakMarker(chord) 
+          ? 'border-orange-300 bg-orange-50' 
+          : 'border-slate-200'
+      } ${isDragging ? 'shadow-lg' : ''}`}
+    >
+      <div className="flex justify-between items-center mb-1">
+        <span className="text-xs text-slate-500">#{chordIndex + 1}</span>
+        <div className="flex gap-1">
+          {/* ドラッグハンドル */}
+          <button
+            {...attributes}
+            {...listeners}
+            className="text-slate-400 hover:text-slate-600 text-xs cursor-grab active:cursor-grabbing"
+            title="ドラッグして移動"
+          >
+            ⋮⋮
+          </button>
+          {!isLineBreakMarker(chord) && (
+            <button
+              onClick={() => onInsertLineBreak(sectionId, chordIndex)}
+              className="text-orange-600 hover:text-orange-800 text-xs"
+              title="この後に改行を挿入"
+            >
+              ↵
+            </button>
+          )}
+          <button
+            onClick={() => onDeleteChord(sectionId, chordIndex)}
+            className="text-[#EE5840] hover:text-[#D14A2E] text-xs"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+      
+      {isLineBreakMarker(chord) ? (
+        <div className="text-center py-2">
+          <span className="text-orange-600 font-medium text-sm">改行</span>
+          <div className="text-xs text-orange-500 mt-1">ここで行が変わります</div>
+        </div>
+      ) : (
+        <>
+          <input
+            type="text"
+            value={chord.name}
+            onChange={(e) => onUpdateChord(sectionId, chordIndex, 'name', e.target.value)}
+            className="w-full mb-1 px-2 py-1 text-sm border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-[#85B0B7]"
+            placeholder="コード名"
+          />
+          <input
+            type="number"
+            value={chord.duration || 4}
+            onChange={(e) => onUpdateChord(sectionId, chordIndex, 'duration', parseInt(e.target.value))}
+            className="w-full px-2 py-1 text-sm border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-[#85B0B7]"
+            placeholder="拍数"
+            min="1"
+            max="16"
+          />
+        </>
+      )}
+    </div>
+  );
+};
+
 const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCancel }) => {
   const [editedChart, setEditedChart] = useState<ChordChart>({ ...chart });
+  
+  // ドラッグ&ドロップセンサー
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // ドラッグエンドハンドラー
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      // activeとoverのIDからsectionIdとchordIndexを抽出
+      const activeId = active.id.toString();
+      const overId = over?.id.toString();
+      
+      if (!overId) return;
+
+      // IDの最後の部分がchordIndex、それより前がsectionId
+      const activeLastDashIndex = activeId.lastIndexOf('-');
+      const activeSectionId = activeId.substring(0, activeLastDashIndex);
+      const activeChordIndexStr = activeId.substring(activeLastDashIndex + 1);
+      
+      const overLastDashIndex = overId.lastIndexOf('-');
+      const overSectionId = overId.substring(0, overLastDashIndex);
+      const overChordIndexStr = overId.substring(overLastDashIndex + 1);
+      
+      const activeChordIndex = parseInt(activeChordIndexStr);
+      const overChordIndex = parseInt(overChordIndexStr);
+
+      // 同じセクション内でのみドラッグ&ドロップを許可
+      if (activeSectionId === overSectionId) {
+        setEditedChart(prev => ({
+          ...prev,
+          sections: prev.sections?.map(section =>
+            section.id === activeSectionId
+              ? {
+                  ...section,
+                  chords: arrayMove(section.chords, activeChordIndex, overChordIndex)
+                }
+              : section
+          ) || []
+        }));
+      }
+    }
+  };
   
   const handleBasicInfoChange = (field: keyof ChordChart, value: string | number | undefined) => {
     setEditedChart(prev => {
@@ -287,62 +457,35 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                {section.chords.map((chord, chordIndex) => (
-                  <div key={chordIndex} className={`p-2 border rounded-md ${
-                    isLineBreakMarker(chord) 
-                      ? 'border-orange-300 bg-orange-50' 
-                      : 'border-slate-200'
-                  }`}>
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-xs text-slate-500">#{chordIndex + 1}</span>
-                      <div className="flex gap-1">
-                        {!isLineBreakMarker(chord) && (
-                          <button
-                            onClick={() => insertLineBreakAfterChord(section.id, chordIndex)}
-                            className="text-orange-600 hover:text-orange-800 text-xs"
-                            title="この後に改行を挿入"
-                          >
-                            ↵
-                          </button>
-                        )}
-                        <button
-                          onClick={() => deleteChordFromSection(section.id, chordIndex)}
-                          className="text-[#EE5840] hover:text-[#D14A2E] text-xs"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    </div>
-                    
-                    {isLineBreakMarker(chord) ? (
-                      <div className="text-center py-2">
-                        <span className="text-orange-600 font-medium text-sm">改行</span>
-                        <div className="text-xs text-orange-500 mt-1">ここで行が変わります</div>
-                      </div>
-                    ) : (
-                      <>
-                        <input
-                          type="text"
-                          value={chord.name}
-                          onChange={(e) => updateChordInSection(section.id, chordIndex, 'name', e.target.value)}
-                          className="w-full mb-1 px-2 py-1 text-sm border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-[#85B0B7]"
-                          placeholder="コード名"
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={section.chords.map((_, index) => `${section.id}-${index}`)}
+                  strategy={rectSortingStrategy}
+                >
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                    {section.chords.map((chord, chordIndex) => {
+                      // 各コードにユニークなIDを生成（コード名+インデックス+セクションIDの組み合わせ）
+                      const itemId = `${section.id}-${chordIndex}`;
+                      return (
+                        <SortableChordItem
+                          key={`${section.id}-${chord.name}-${chordIndex}-${chord.duration || 4}`}
+                          chord={chord}
+                          chordIndex={chordIndex}
+                          sectionId={section.id}
+                          itemId={itemId}
+                          onUpdateChord={updateChordInSection}
+                          onDeleteChord={deleteChordFromSection}
+                          onInsertLineBreak={insertLineBreakAfterChord}
                         />
-                        <input
-                          type="number"
-                          value={chord.duration || 4}
-                          onChange={(e) => updateChordInSection(section.id, chordIndex, 'duration', parseInt(e.target.value))}
-                          className="w-full px-2 py-1 text-sm border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-[#85B0B7]"
-                          placeholder="拍数"
-                          min="1"
-                          max="16"
-                        />
-                      </>
-                    )}
+                      );
+                    })}
                   </div>
-                ))}
-              </div>
+                </SortableContext>
+              </DndContext>
             </div>
           ))}
         </div>
