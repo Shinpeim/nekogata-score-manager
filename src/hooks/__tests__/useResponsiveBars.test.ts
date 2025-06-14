@@ -44,34 +44,33 @@ describe('useResponsiveBars', () => {
 
   it('デフォルトで適切な小節数を計算する', () => {
     // 1200px - 48px(padding) = 1152px
-    // 最大幅200pxで計算: 1152 / 200 = 5.76 → 5小節
+    // 最小幅120pxで計算: 1152 / 120 = 9.6 → 9小節
     const { result } = renderHook(() => useResponsiveBars());
     
-    expect(result.current.barsPerRow).toBe(5);
+    expect(result.current.barsPerRow).toBe(9);
     expect(result.current.config.MIN_WIDTH).toBe(120);
-    expect(result.current.config.MAX_WIDTH).toBe(200);
+    expect(result.current.config.MAX_WIDTH).toBe(340);
     expect(result.current.config.PADDING).toBe(48);
   });
 
-  it('小さい画面幅で最大幅での計算をする', () => {
+  it('小さい画面幅で最小幅での計算をする', () => {
     // 500px - 48px = 452px
-    // 最大幅200pxで計算: 452 / 200 = 2.26 → 2小節
+    // 最小幅120pxで計算: 452 / 120 = 3.77 → 3小節
     (globalThis.window as MockWindow).innerWidth = 500;
     
     const { result } = renderHook(() => useResponsiveBars());
     
-    expect(result.current.barsPerRow).toBe(2);
+    expect(result.current.barsPerRow).toBe(3);
   });
 
-  it('最大幅では入らないが最小幅では入る場合の計算', () => {
+  it('最小幅で計算する', () => {
     // 300px - 48px = 252px
-    // 最大幅200px: 252 / 200 = 1.26 → 1小節
-    // 最小幅120px: 252 / 120 = 2.1 → 2小節だが、最大幅基準で1小節
+    // 最小幅120px: 252 / 120 = 2.1 → 2小節
     (globalThis.window as MockWindow).innerWidth = 300;
     
     const { result } = renderHook(() => useResponsiveBars());
     
-    expect(result.current.barsPerRow).toBe(1);
+    expect(result.current.barsPerRow).toBe(2);
   });
 
   it('最大幅でも入らない場合は最小幅で計算', () => {
@@ -121,7 +120,7 @@ describe('useResponsiveBars', () => {
     const { result } = renderHook(() => useResponsiveBars());
     
     // 初期状態
-    expect(result.current.barsPerRow).toBe(5); // 1200px
+    expect(result.current.barsPerRow).toBe(9); // 1200px
     
     // 画面幅を変更
     (globalThis.window as MockWindow).innerWidth = 800;
@@ -140,8 +139,8 @@ describe('useResponsiveBars', () => {
     }
     
     // 800px - 48px = 752px
-    // 最大幅200pxで計算: 752 / 200 = 3.76 → 3小節
-    expect(result.current.barsPerRow).toBe(3);
+    // 最小幅120pxで計算: 752 / 120 = 6.27 → 6小節
+    expect(result.current.barsPerRow).toBe(6);
   });
 
   it('連続したリサイズイベントがデバウンスされる', () => {
@@ -168,7 +167,7 @@ describe('useResponsiveBars', () => {
       });
       
       // まだ初期値のまま
-      expect(result.current.barsPerRow).toBe(5);
+      expect(result.current.barsPerRow).toBe(9);
       
       act(() => {
         // 100ms経過（デバウンス完了）
@@ -176,7 +175,7 @@ describe('useResponsiveBars', () => {
       });
       
       // 最後の値（800px）で計算される
-      expect(result.current.barsPerRow).toBe(3);
+      expect(result.current.barsPerRow).toBe(6);
     }
   });
 });
