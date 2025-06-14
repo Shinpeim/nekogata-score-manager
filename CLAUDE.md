@@ -19,11 +19,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - ユーザーデータの保存はローカルストレージを使用すること
 - ユーザーインターフェースはシンプルで直感的であること
 
-## Configuration
-
-- `.claude/settings.local.json` contains Claude Code permissions configuration
-- Currently allows `Bash(ls:*)` and `Bash(find:*)` commands
-
 ## gitの扱い方
 
 main ブランチに直接コミットはせず、作業単位ごとにブランチを切り、GitHub上でPullRequestを送ること。
@@ -32,3 +27,7 @@ main ブランチに直接コミットはせず、作業単位ごとにブラン
 
 - todoをTODO.mdに書いて管理してください
 - 作業ログを working_log ディレクトリに残してください 
+
+## testing
+
+このプロジェクトでは必ずテストを書くこと
