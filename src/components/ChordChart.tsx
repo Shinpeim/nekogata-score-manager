@@ -68,17 +68,6 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData }) => {
     
     return rows.map((row, rowIndex) => (
       <div key={rowIndex} className="mb-8">
-        {/* 小節番号の行 */}
-        <div className="flex mb-1">
-          {row.map((_, barIndex) => (
-            <div key={barIndex} className="flex-1 text-center">
-              <span className="text-xs text-gray-400">
-                {rowIndex * barsPerRow + barIndex + 1}
-              </span>
-            </div>
-          ))}
-        </div>
-        
         {/* コード表示エリア */}
         <div className="relative bg-white">
           {/* 下の罫線 */}
