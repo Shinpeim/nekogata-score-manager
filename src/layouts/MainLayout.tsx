@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useChordChartStore } from '../stores/chordChartStore';
 import ChordChartForm from '../components/ChordChartForm';
+import ExportImportDialog from '../components/ExportImportDialog';
 import type { ChordChart } from '../types';
 
 interface MainLayoutProps {
@@ -11,11 +12,19 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [explorerOpen, setExplorerOpen] = useState(false);
+  const [showExportImportDialog, setShowExportImportDialog] = useState(false);
   
   const chartsData = useChordChartStore(state => state.charts);
   const currentChartId = useChordChartStore(state => state.currentChartId);
   const setCurrentChart = useChordChartStore(state => state.setCurrentChart);
   const createNewChart = useChordChartStore(state => state.createNewChart);
+  const addChart = useChordChartStore(state => state.addChart);
+  
+  const handleImportCharts = async (charts: ChordChart[]) => {
+    for (const chart of charts) {
+      await addChart(chart);
+    }
+  };
   
   const charts = useMemo(() => 
     Object.values(chartsData).sort((a, b) => 
@@ -63,14 +72,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               </button>
               <h1 className="text-xl font-semibold text-gray-900">Nekogata Score Manager</h1>
             </div>
-            <div className="flex items-center space-x-4">
-              <button 
-                onClick={() => setShowCreateForm(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-              >
-                新規作成
-              </button>
-            </div>
           </div>
         </div>
       </header>
@@ -95,7 +96,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               </div>
               <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
                 <div className="px-4">
-                  <h2 className="text-sm font-medium text-gray-900 mb-3">Score Explorer</h2>
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-sm font-medium text-gray-900">Score Explorer</h2>
+                    <button 
+                      onClick={() => setShowCreateForm(true)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs font-medium"
+                      title="新規作成"
+                    >
+                      +
+                    </button>
+                  </div>
                   <div className="space-y-2">
                     {charts.map((chart) => (
                       <div 
@@ -124,6 +134,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                       </div>
                     ))}
                   </div>
+                  
+                  {/* Mobile Import/Export Actions */}
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <button 
+                      onClick={() => setShowExportImportDialog(true)}
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded text-sm font-medium"
+                    >
+                      インポート・エクスポート
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -133,7 +153,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         {/* Desktop Score Explorer */}
         <aside className={`${explorerOpen ? 'block' : 'hidden'} w-64 bg-white shadow-sm border-r border-gray-200 overflow-y-auto`}>
           <div className="p-4">
-            <h2 className="text-sm font-medium text-gray-900 mb-3">Score Explorer</h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-medium text-gray-900">Score Explorer</h2>
+              <button 
+                onClick={() => setShowCreateForm(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs font-medium"
+                title="新規作成"
+              >
+                +
+              </button>
+            </div>
             <div className="space-y-2">
               {charts.map((chart) => (
                 <div 
@@ -159,6 +188,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 </div>
               ))}
             </div>
+            
+            {/* Desktop Import/Export Actions */}
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <button 
+                onClick={() => setShowExportImportDialog(true)}
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded text-sm font-medium"
+              >
+                インポート・エクスポート
+              </button>
+            </div>
           </div>
         </aside>
 
@@ -173,6 +212,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         <ChordChartForm
           onSave={handleCreateChart}
           onCancel={handleCancelCreate}
+        />
+      )}
+
+      {/* インポート・エクスポートダイアログ */}
+      {showExportImportDialog && (
+        <ExportImportDialog 
+          isOpen={showExportImportDialog}
+          onClose={() => setShowExportImportDialog(false)}
+          allCharts={charts}
+          onImportCharts={handleImportCharts}
         />
       )}
     </div>
