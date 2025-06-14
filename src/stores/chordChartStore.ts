@@ -235,8 +235,8 @@ export const useChordChartStore = create<ChordChartState>()(
             };
           }, false, 'deleteMultipleCharts');
           
-          // ストレージから削除
-          await Promise.all(ids.map(id => storageService.deleteChart(id)));
+          // ストレージから削除（競合を避けるため一度に削除）
+          await storageService.deleteMultipleCharts(ids);
         } catch (error) {
           set({ 
             isLoading: false, 
