@@ -1,12 +1,22 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { ReactNode } from 'react';
-import { sampleCharts } from '../data/sampleCharts';
+import { useChordChartStore } from '../stores/chordChartStore';
 
 interface MainLayoutProps {
   children: ReactNode;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+  const chartsData = useChordChartStore(state => state.charts);
+  const currentChartId = useChordChartStore(state => state.currentChartId);
+  const setCurrentChart = useChordChartStore(state => state.setCurrentChart);
+  
+  const charts = useMemo(() => 
+    Object.values(chartsData).sort((a, b) => 
+      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    ), [chartsData]
+  );
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -32,8 +42,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           <div className="p-4">
             <h2 className="text-sm font-medium text-gray-900 mb-3">コード譜一覧</h2>
             <div className="space-y-2">
-              {sampleCharts.map((chart) => (
-                <div key={chart.id} className="p-3 bg-gray-50 rounded-md hover:bg-gray-100 cursor-pointer">
+              {charts.map((chart) => (
+                <div 
+                  key={chart.id} 
+                  className={`p-3 rounded-md cursor-pointer transition-colors ${
+                    currentChartId === chart.id 
+                      ? 'bg-blue-50 border-blue-200 border' 
+                      : 'bg-gray-50 hover:bg-gray-100'
+                  }`}
+                  onClick={() => setCurrentChart(chart.id)}
+                >
                   <h3 className="text-sm font-medium text-gray-900">{chart.title}</h3>
                   <p className="text-xs text-gray-500 mt-1">{chart.artist}</p>
                   {chart.tags && chart.tags.length > 0 && (
