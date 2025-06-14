@@ -9,7 +9,7 @@ import {
 
 interface ChordChartFormProps {
   initialData?: Partial<ChordChart>;
-  onSave: (chart: ChordChart) => void;
+  onSave: (chart: ChordChart) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -30,7 +30,7 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
 
   const [errors, setErrors] = useState<string[]>([]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const chartData = {
@@ -45,8 +45,13 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
       return;
     }
 
-    const newChart = createNewChordChart(chartData);
-    onSave(newChart);
+    try {
+      const newChart = createNewChordChart(chartData);
+      await onSave(newChart);
+    } catch (error) {
+      console.error('Failed to save chart:', error);
+      setErrors(['コード譜の保存に失敗しました']);
+    }
   };
 
   const handleChange = (field: string, value: string | number) => {

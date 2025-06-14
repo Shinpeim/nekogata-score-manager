@@ -1,17 +1,63 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { ChordChart as ChordChartType, ChordSection, Chord } from '../types';
 import { useChordChartStore } from '../stores/chordChartStore';
+import ChordChartEditor from './ChordChartEditor';
 
 interface ChordChartProps {
   chartData?: ChordChartType;
 }
 
 const ChordChart: React.FC<ChordChartProps> = ({ chartData }) => {
+  const [isEditing, setIsEditing] = useState(false);
   const charts = useChordChartStore(state => state.charts);
   const currentChartId = useChordChartStore(state => state.currentChartId);
+  const updateChart = useChordChartStore(state => state.updateChart);
+  const deleteChart = useChordChartStore(state => state.deleteChart);
+  const addChart = useChordChartStore(state => state.addChart);
   
   const currentChart = currentChartId ? charts[currentChartId] : null;
   const displayChart = chartData || currentChart;
+
+  const handleSave = async (updatedChart: ChordChartType) => {
+    try {
+      if (currentChartId) {
+        await updateChart(currentChartId, updatedChart);
+      }
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Failed to save chart:', error);
+      // エラーはストアで管理されているため、ここでは何もしない
+    }
+  };
+
+  const handleDelete = async () => {
+    if (currentChartId && confirm('このコード譜を削除しますか？')) {
+      try {
+        await deleteChart(currentChartId);
+      } catch (error) {
+        console.error('Failed to delete chart:', error);
+        // エラーはストアで管理されているため、ここでは何もしない
+      }
+    }
+  };
+
+  const handleDuplicate = async () => {
+    if (displayChart) {
+      try {
+        const duplicatedChart = {
+          ...displayChart,
+          id: `chord-${Date.now()}`,
+          title: `${displayChart.title} (コピー)`,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+        await addChart(duplicatedChart);
+      } catch (error) {
+        console.error('Failed to duplicate chart:', error);
+        // エラーはストアで管理されているため、ここでは何もしない
+      }
+    }
+  };
 
   if (!displayChart) {
     return (
@@ -21,6 +67,16 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData }) => {
           <p className="text-sm">左のサイドバーからコード譜を選択してください</p>
         </div>
       </div>
+    );
+  }
+
+  if (isEditing) {
+    return (
+      <ChordChartEditor
+        chart={displayChart}
+        onSave={handleSave}
+        onCancel={() => setIsEditing(false)}
+      />
     );
   }
   const renderChordGrid = (section: ChordSection) => {
@@ -174,13 +230,22 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData }) => {
 
         {/* Action Buttons */}
         <div className="mt-6 flex flex-wrap gap-3">
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+          <button 
+            onClick={() => setIsEditing(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+          >
             編集
           </button>
-          <button className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-medium">
+          <button 
+            onClick={handleDuplicate}
+            className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-medium"
+          >
             複製
           </button>
-          <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+          <button 
+            onClick={handleDelete}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+          >
             削除
           </button>
         </div>
