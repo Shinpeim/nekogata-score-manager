@@ -23,7 +23,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 main ブランチに直接コミットはせず、作業単位ごとにブランチを切り、GitHub上でPullRequestを送ること。
 
-コミットする前にTODO.mdとworking_logを更新すること
+リポジトリに変更をコミットする前にTODO.mdとworking_logを更新すること
 
 ## 作業ログの残し方
 
