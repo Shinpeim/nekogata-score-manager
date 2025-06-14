@@ -146,16 +146,23 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData }) => {
 
         {/* Chart Content */}
         <div className="bg-gray-50 rounded-lg p-3 sm:p-6">
-          {displayChart.sections.map((section) => (
-            <div key={section.id} className="mb-8 last:mb-0">
-              {section.name && (
-                <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-300 pb-2">
-                  {section.name}
-                </h3>
-              )}
-              {renderChordGrid(section)}
+          {displayChart.sections && displayChart.sections.length > 0 ? (
+            displayChart.sections.map((section) => (
+              <div key={section.id} className="mb-8 last:mb-0">
+                {section.name && (
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-300 pb-2">
+                    {section.name}
+                  </h3>
+                )}
+                {renderChordGrid(section)}
+              </div>
+            ))
+          ) : (
+            <div className="text-center text-gray-500 py-8">
+              <p>セクションがありません</p>
+              <p className="text-sm mt-2">コード譜を編集してセクションを追加してください</p>
             </div>
-          ))}
+          )}
         </div>
 
         {displayChart.notes && (
