@@ -66,9 +66,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     setShowCreateForm(false);
   };
 
-  const handleClearSelection = () => {
-    setSelectedChartIds([]);
-  };
 
   const handleChartSelect = (chartId: string) => {
     setSelectedChartIds(prev => 
