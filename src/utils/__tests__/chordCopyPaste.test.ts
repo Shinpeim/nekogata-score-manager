@@ -19,7 +19,7 @@ describe('chordCopyPaste', () => {
       ];
 
       const result = chordsToText(chords);
-      expect(result).toBe('C(4) F(4) G(4) Am(4)');
+      expect(result).toBe('C[4] F[4] G[4] Am[4]');
     });
 
     it('should convert chords with different durations', () => {
@@ -30,7 +30,7 @@ describe('chordCopyPaste', () => {
       ];
 
       const result = chordsToText(chords);
-      expect(result).toBe('C(2) F(2) G(4)');
+      expect(result).toBe('C[2] F[2] G[4]');
     });
 
     it('should convert chords with decimal durations', () => {
@@ -40,7 +40,7 @@ describe('chordCopyPaste', () => {
       ];
 
       const result = chordsToText(chords);
-      expect(result).toBe('C(1.5) F(2.5)');
+      expect(result).toBe('C[1.5] F[2.5]');
     });
 
     it('should include line breaks as |', () => {
@@ -51,7 +51,7 @@ describe('chordCopyPaste', () => {
       ];
 
       const result = chordsToText(chords);
-      expect(result).toBe('C(4) | F(4)');
+      expect(result).toBe('C[4] | F[4]');
     });
 
     it('should handle default duration', () => {
@@ -61,7 +61,7 @@ describe('chordCopyPaste', () => {
       ];
 
       const result = chordsToText(chords);
-      expect(result).toBe('C(4) F(4)');
+      expect(result).toBe('C[4] F[4]');
     });
   });
 
@@ -76,8 +76,8 @@ describe('chordCopyPaste', () => {
       expect(result[3]).toEqual({ name: 'Am', root: 'A', duration: 4 });
     });
 
-    it('should parse chords with durations', () => {
-      const result = textToChords('C(2) F(2) G(4)');
+    it('should parse chords with bracket durations', () => {
+      const result = textToChords('C[2] F[2] G[4]');
       
       expect(result).toHaveLength(3);
       expect(result[0]).toEqual({ name: 'C', root: 'C', duration: 2 });
@@ -85,13 +85,15 @@ describe('chordCopyPaste', () => {
       expect(result[2]).toEqual({ name: 'G', root: 'G', duration: 4 });
     });
 
-    it('should parse decimal durations', () => {
-      const result = textToChords('C(1.5) F(2.5)');
+
+    it('should parse decimal durations with brackets', () => {
+      const result = textToChords('C[1.5] F[2.5]');
       
       expect(result).toHaveLength(2);
       expect(result[0]).toEqual({ name: 'C', root: 'C', duration: 1.5 });
       expect(result[1]).toEqual({ name: 'F', root: 'F', duration: 2.5 });
     });
+
 
     it('should parse line breaks', () => {
       const result = textToChords('C F | G Am');
@@ -124,6 +126,24 @@ describe('chordCopyPaste', () => {
       expect(result[3]).toEqual({ name: 'Eb', root: 'Eb', duration: 4 });
     });
 
+    it('should handle tension chords with bracket notation', () => {
+      const result = textToChords('E7(#9)[2] C7(b5)[4] Am7(11)[1]');
+      
+      expect(result).toHaveLength(3);
+      expect(result[0]).toEqual({ name: 'E7(#9)', root: 'E', duration: 2 });
+      expect(result[1]).toEqual({ name: 'C7(b5)', root: 'C', duration: 4 });
+      expect(result[2]).toEqual({ name: 'Am7(11)', root: 'A', duration: 1 });
+    });
+
+    it('should handle complex tension chords without confusion with old parenthesis notation', () => {
+      const result = textToChords('E7(#9) C7(b5) Am7(11)');
+      
+      expect(result).toHaveLength(3);
+      expect(result[0]).toEqual({ name: 'E7(#9)', root: 'E', duration: 4 });
+      expect(result[1]).toEqual({ name: 'C7(b5)', root: 'C', duration: 4 });
+      expect(result[2]).toEqual({ name: 'Am7(11)', root: 'A', duration: 4 });
+    });
+
     it('should ignore empty parts', () => {
       const result = textToChords('C   F  G     Am');
       
@@ -142,8 +162,9 @@ describe('chordCopyPaste', () => {
   describe('isValidChordProgression', () => {
     it('should return true for valid chord progressions', () => {
       expect(isValidChordProgression('C F G Am')).toBe(true);
-      expect(isValidChordProgression('C(2) F(2) G(4)')).toBe(true);
+      expect(isValidChordProgression('C[2] F[2] G[4]')).toBe(true);
       expect(isValidChordProgression('C F | G Am')).toBe(true);
+      expect(isValidChordProgression('E7(#9)[2] C7(b5)[4]')).toBe(true);
     });
 
     it('should return false for invalid progressions', () => {
@@ -187,7 +208,7 @@ describe('chordCopyPaste', () => {
         const result = await copyChordProgressionToClipboard(chords);
 
         expect(result).toBe(true);
-        expect(mockWriteText).toHaveBeenCalledWith('C(4) F(4)');
+        expect(mockWriteText).toHaveBeenCalledWith('C[4] F[4]');
       });
 
       it('should return false on error', async () => {

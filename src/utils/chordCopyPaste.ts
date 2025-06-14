@@ -7,8 +7,8 @@ import { isLineBreakMarker } from './lineBreakHelpers';
  * @param chords - コードの配列
  * @returns テキスト形式のコード進行
  * 
- * 例: "C(4) F(2) G(2) | Am(4)"
- * - コード名(拍数)の形式
+ * 例: "C[4] F[2] G[2] | Am[4]"
+ * - コード名[拍数]の形式
  * - 改行は "|" で表現
  */
 export const chordsToText = (chords: Chord[]): string => {
@@ -21,7 +21,7 @@ export const chordsToText = (chords: Chord[]): string => {
       const duration = chord.duration || 4;
       // 整数拍数は拍数のみ、小数拍数は小数点付きで表示
       const durationStr = duration % 1 === 0 ? duration.toString() : duration.toString();
-      parts.push(`${chord.name}(${durationStr})`);
+      parts.push(`${chord.name}[${durationStr}]`);
     }
   }
   
@@ -36,9 +36,10 @@ export const chordsToText = (chords: Chord[]): string => {
  * 
  * サポートする形式:
  * - "C F G Am" (デフォルト4拍)
- * - "C(4) F(2) G(2) Am(4)" (拍数指定)
+ * - "C[4] F[2] G[2] Am[4]" (拍数指定)
  * - "C F | G Am" (改行あり)
- * - "C(1.5) F(2.5)" (小数拍数)
+ * - "C[1.5] F[2.5]" (小数拍数)
+ * - "E7(#9)[2] C7(b5)[4]" (テンションコード)
  */
 export const textToChords = (text: string): Chord[] => {
   const chords: Chord[] = [];
@@ -69,34 +70,50 @@ export const textToChords = (text: string): Chord[] => {
 /**
  * 個別のコードテキストをパースする
  * 
- * @param text - コードテキスト (例: "Am(2)", "C7", "F#m")
+ * @param text - コードテキスト (例: "Am[2]", "C7", "F#m", "E7(#9)[4]")
  * @returns パースされたコード、またはnull
  */
 const parseChordText = (text: string): Chord | null => {
-  // コード名(拍数)の形式をパース
-  const match = text.match(/^([A-G][#b]?(?:maj|min|m|dim|aug|sus[24]|add\d+|\d+)*)\(?(\d*\.?\d*)\)?$/i);
-  
-  if (!match) {
-    return null;
+  // [拍数]記法をチェック
+  const bracketMatch = text.match(/^([A-G][#b]?(?:maj|min|m|dim|aug|sus[24]|add\d+|\d+)*(?:\([#b]?\d+\))*)\[(\d*\.?\d*)\]$/i);
+  if (bracketMatch) {
+    const [, chordName, durationStr] = bracketMatch;
+    const duration = durationStr ? parseFloat(durationStr) : 4;
+    
+    // 無効な拍数をチェック
+    if (isNaN(duration) || duration <= 0 || duration > 16) {
+      return null;
+    }
+    
+    // ルート音を抽出
+    const rootMatch = chordName.match(/^([A-G][#b]?)/);
+    const root = rootMatch ? rootMatch[1] : chordName;
+    
+    return {
+      name: chordName,
+      root,
+      duration
+    };
   }
   
-  const [, chordName, durationStr] = match;
-  const duration = durationStr ? parseFloat(durationStr) : 4;
-  
-  // 無効な拍数をチェック
-  if (isNaN(duration) || duration <= 0 || duration > 16) {
-    return null;
+  // 拍数指定なしのコード名のみ（テンションコード含む）
+  const basicMatch = text.match(/^([A-G][#b]?(?:maj|min|m|dim|aug|sus[24]|add\d+|\d+)*(?:\([#b]?\d+\))*)$/i);
+  if (basicMatch) {
+    const [, chordName] = basicMatch;
+    const duration = 4;
+    
+    // ルート音を抽出
+    const rootMatch = chordName.match(/^([A-G][#b]?)/);
+    const root = rootMatch ? rootMatch[1] : chordName;
+    
+    return {
+      name: chordName,
+      root,
+      duration
+    };
   }
   
-  // ルート音を抽出 (コード名の最初の部分)
-  const rootMatch = chordName.match(/^([A-G][#b]?)/);
-  const root = rootMatch ? rootMatch[1] : chordName;
-  
-  return {
-    name: chordName,
-    root,
-    duration
-  };
+  return null;
 };
 
 /**
