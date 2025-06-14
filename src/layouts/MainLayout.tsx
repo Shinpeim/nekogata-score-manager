@@ -6,9 +6,10 @@ import type { ChordChart } from '../types';
 
 interface MainLayoutProps {
   children: ReactNode;
+  onCreateNewChart?: () => void;
 }
 
-const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+const MainLayout: React.FC<MainLayoutProps> = ({ children, onCreateNewChart }) => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   
   const chartsData = useChordChartStore(state => state.charts);
