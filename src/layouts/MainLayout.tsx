@@ -22,9 +22,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     ), [chartsData]
   );
 
-  const handleCreateChart = (chartData: ChordChart) => {
-    createNewChart(chartData);
-    setShowCreateForm(false);
+  const handleCreateChart = async (chartData: ChordChart) => {
+    try {
+      await createNewChart(chartData);
+      setShowCreateForm(false);
+    } catch (error) {
+      console.error('Failed to create chart:', error);
+      // エラーはストアで管理されているため、ここでは何もしない
+    }
   };
 
   const handleCancelCreate = () => {
