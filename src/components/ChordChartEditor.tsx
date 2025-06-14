@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import type { ChordChart, ChordSection, Chord } from '../types';
-import { useChordChartStore } from '../stores/chordChartStore';
 
 interface ChordChartEditorProps {
   chart: ChordChart;
@@ -11,14 +10,14 @@ interface ChordChartEditorProps {
 const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCancel }) => {
   const [editedChart, setEditedChart] = useState<ChordChart>({ ...chart });
   
-  const handleBasicInfoChange = (field: keyof ChordChart, value: any) => {
+  const handleBasicInfoChange = (field: keyof ChordChart, value: string | number | undefined) => {
     setEditedChart(prev => ({
       ...prev,
       [field]: value
     }));
   };
 
-  const handleSectionChange = (sectionId: string, field: keyof ChordSection, value: any) => {
+  const handleSectionChange = (sectionId: string, field: keyof ChordSection, value: string | number) => {
     setEditedChart(prev => ({
       ...prev,
       sections: prev.sections?.map(section =>
@@ -69,7 +68,7 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
     }));
   };
 
-  const updateChordInSection = (sectionId: string, chordIndex: number, field: keyof Chord, value: any) => {
+  const updateChordInSection = (sectionId: string, chordIndex: number, field: keyof Chord, value: string | number) => {
     setEditedChart(prev => ({
       ...prev,
       sections: prev.sections?.map(section =>

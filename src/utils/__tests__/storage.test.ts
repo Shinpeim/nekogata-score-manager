@@ -13,6 +13,8 @@ vi.mock('localforage', () => ({
 }));
 
 import localforage from 'localforage';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+vi.mocked = vi.mocked || ((fn: any) => fn as any);
 
 const mockChart: ChordChart = {
   id: 'test-chart-1',
@@ -44,7 +46,7 @@ describe('storageService', () => {
   describe('saveCharts', () => {
     it('should save charts to storage', async () => {
       const charts = { [mockChart.id]: mockChart };
-      (localforage.setItem as any).mockResolvedValue(charts);
+      vi.mocked(localforage.setItem).mockResolvedValue(charts);
 
       await storageService.saveCharts(charts);
 
@@ -53,7 +55,7 @@ describe('storageService', () => {
 
     it('should throw error when save fails', async () => {
       const charts = { [mockChart.id]: mockChart };
-      (localforage.setItem as any).mockRejectedValue(new Error('Storage error'));
+      vi.mocked(localforage.setItem).mockRejectedValue(new Error('Storage error'));
 
       await expect(storageService.saveCharts(charts)).rejects.toThrow('コード譜の保存に失敗しました');
     });
@@ -62,7 +64,7 @@ describe('storageService', () => {
   describe('loadCharts', () => {
     it('should load charts from storage', async () => {
       const charts = { [mockChart.id]: mockChart };
-      (localforage.getItem as any).mockResolvedValue(charts);
+      vi.mocked(localforage.getItem).mockResolvedValue(charts);
 
       const result = await storageService.loadCharts();
 
@@ -71,7 +73,7 @@ describe('storageService', () => {
     });
 
     it('should return null when no data exists', async () => {
-      (localforage.getItem as any).mockResolvedValue(null);
+      vi.mocked(localforage.getItem).mockResolvedValue(null);
 
       const result = await storageService.loadCharts();
 
@@ -79,7 +81,7 @@ describe('storageService', () => {
     });
 
     it('should throw error when load fails', async () => {
-      (localforage.getItem as any).mockRejectedValue(new Error('Storage error'));
+      vi.mocked(localforage.getItem).mockRejectedValue(new Error('Storage error'));
 
       await expect(storageService.loadCharts()).rejects.toThrow('コード譜の読み込みに失敗しました');
     });
@@ -88,8 +90,8 @@ describe('storageService', () => {
   describe('saveChart', () => {
     it('should save single chart', async () => {
       const existingCharts = {};
-      (localforage.getItem as any).mockResolvedValue(existingCharts);
-      (localforage.setItem as any).mockResolvedValue(undefined);
+      vi.mocked(localforage.getItem).mockResolvedValue(existingCharts);
+      vi.mocked(localforage.setItem).mockResolvedValue(undefined);
 
       await storageService.saveChart(mockChart);
 
@@ -101,8 +103,8 @@ describe('storageService', () => {
 
     it('should update existing chart', async () => {
       const existingCharts = { 'other-chart': { id: 'other-chart' } };
-      (localforage.getItem as any).mockResolvedValue(existingCharts);
-      (localforage.setItem as any).mockResolvedValue(undefined);
+      vi.mocked(localforage.getItem).mockResolvedValue(existingCharts);
+      vi.mocked(localforage.setItem).mockResolvedValue(undefined);
 
       await storageService.saveChart(mockChart);
 
@@ -119,8 +121,8 @@ describe('storageService', () => {
         [mockChart.id]: mockChart,
         'other-chart': { id: 'other-chart' }
       };
-      (localforage.getItem as any).mockResolvedValue(existingCharts);
-      (localforage.setItem as any).mockResolvedValue(undefined);
+      vi.mocked(localforage.getItem).mockResolvedValue(existingCharts);
+      vi.mocked(localforage.setItem).mockResolvedValue(undefined);
 
       await storageService.deleteChart(mockChart.id);
 
@@ -132,7 +134,7 @@ describe('storageService', () => {
 
   describe('clearStorage', () => {
     it('should clear storage', async () => {
-      (localforage.removeItem as any).mockResolvedValue(undefined);
+      vi.mocked(localforage.removeItem).mockResolvedValue(undefined);
 
       await storageService.clearStorage();
 
@@ -143,7 +145,7 @@ describe('storageService', () => {
   describe('getStorageInfo', () => {
     it('should return storage information', async () => {
       const charts = { [mockChart.id]: mockChart };
-      (localforage.getItem as any).mockResolvedValue(charts);
+      vi.mocked(localforage.getItem).mockResolvedValue(charts);
 
       const info = await storageService.getStorageInfo();
 
@@ -152,7 +154,7 @@ describe('storageService', () => {
     });
 
     it('should return zero values when storage is empty', async () => {
-      (localforage.getItem as any).mockResolvedValue(null);
+      vi.mocked(localforage.getItem).mockResolvedValue(null);
 
       const info = await storageService.getStorageInfo();
 
@@ -164,7 +166,7 @@ describe('storageService', () => {
   describe('validateCharts', () => {
     it('should validate correct charts', async () => {
       const charts = { [mockChart.id]: mockChart };
-      (localforage.getItem as any).mockResolvedValue(charts);
+      vi.mocked(localforage.getItem).mockResolvedValue(charts);
 
       const isValid = await storageService.validateCharts();
 
@@ -174,7 +176,7 @@ describe('storageService', () => {
     it('should return false for invalid charts', async () => {
       const invalidChart = { ...mockChart, title: '' };
       const charts = { [invalidChart.id]: invalidChart };
-      (localforage.getItem as any).mockResolvedValue(charts);
+      vi.mocked(localforage.getItem).mockResolvedValue(charts);
 
       const isValid = await storageService.validateCharts();
 
@@ -182,7 +184,7 @@ describe('storageService', () => {
     });
 
     it('should return true when no charts exist', async () => {
-      (localforage.getItem as any).mockResolvedValue(null);
+      vi.mocked(localforage.getItem).mockResolvedValue(null);
 
       const isValid = await storageService.validateCharts();
 
