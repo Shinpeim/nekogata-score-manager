@@ -4,6 +4,7 @@ import { useChordChartStore } from '../stores/chordChartStore';
 import ChordChartEditor from './ChordChartEditor';
 import ChordChartForm from './ChordChartForm';
 import BpmIndicator from './BpmIndicator';
+import { useResponsiveBars } from '../hooks/useResponsiveBars';
 
 interface ChordChartProps {
   chartData?: ChordChartType;
@@ -17,6 +18,7 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
   const updateChart = useChordChartStore(state => state.updateChart);
   const deleteChart = useChordChartStore(state => state.deleteChart);
   const addChart = useChordChartStore(state => state.addChart);
+  const { barsPerRow } = useResponsiveBars();
   
   const currentChart = currentChartId ? charts[currentChartId] : null;
   const displayChart = chartData || currentChart;
@@ -92,7 +94,6 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
     // 拍子から正しい拍数を取得し、セクションのbeatsPerBarを優先しつつフォールバック
     const timeSignatureBeats = displayChart.timeSignature ? parseInt(displayChart.timeSignature.split('/')[0]) : 4;
     const beatsPerBar = section.beatsPerBar && section.beatsPerBar !== 4 ? section.beatsPerBar : timeSignatureBeats;
-    const barsPerRow = 8;
     
     // コードを小節に分割
     const bars: Chord[][] = [];
@@ -127,7 +128,7 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
       bars.push(currentBar);
     }
     
-    // 8小節ずつの行に分割
+    // 計算された小節数ずつの行に分割
     const rows = [];
     for (let i = 0; i < bars.length; i += barsPerRow) {
       rows.push(bars.slice(i, i + barsPerRow));
