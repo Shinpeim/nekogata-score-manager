@@ -170,7 +170,9 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
                         <div className="text-left flex items-center">
                           <span className="text-xs font-semibold">{chord.name}</span>
                           {chord.duration && chord.duration !== 4 && (
-                            <span className="text-xs text-slate-500 ml-1">({chord.duration})</span>
+                            <span className="text-xs text-slate-500 ml-1">
+                              ({chord.duration % 1 === 0 ? chord.duration : chord.duration.toFixed(1)})
+                            </span>
                           )}
                         </div>
                       </div>

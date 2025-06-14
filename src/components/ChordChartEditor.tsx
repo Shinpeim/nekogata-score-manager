@@ -118,11 +118,12 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
           <input
             type="number"
             value={chord.duration || 4}
-            onChange={(e) => onUpdateChord(sectionId, chordIndex, 'duration', parseInt(e.target.value))}
+            onChange={(e) => onUpdateChord(sectionId, chordIndex, 'duration', parseFloat(e.target.value))}
             className="w-full px-2 py-1 text-sm border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-[#85B0B7]"
             placeholder="拍数"
-            min="1"
+            min="0.5"
             max="16"
+            step="0.5"
           />
         </>
       )}
