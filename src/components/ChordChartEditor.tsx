@@ -643,7 +643,7 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
                   </summary>
                   <div className="mt-2 p-3 bg-slate-50 rounded-md">
                     <p className="text-xs text-slate-500 mb-2">
-                      例: "C F G Am" または "C(4) F(2) G(2) | Am(4)" 
+                      例: "C F G Am" または "C[4] F[2] G[2] | Am[4]" 
                     </p>
                     <div className="flex gap-2">
                       <input
