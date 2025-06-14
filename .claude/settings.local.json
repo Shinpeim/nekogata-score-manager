@@ -11,7 +11,9 @@
       "Bash(npm run build:*)",
       "Bash(git add:*)",
       "Bash(git checkout:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(git push:*)",
+      "Bash(gh pr create:*)"
     ],
     "deny": []
   }
