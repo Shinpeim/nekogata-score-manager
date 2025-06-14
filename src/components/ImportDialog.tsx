@@ -62,12 +62,12 @@ const ImportDialog: React.FC<ImportDialogProps> = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
+        <div className="px-6 py-4 border-b border-slate-200">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold text-gray-900">インポート</h2>
+            <h2 className="text-xl font-semibold text-slate-900">インポート</h2>
             <button
               onClick={handleClose}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-slate-400 hover:text-slate-600"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -78,20 +78,20 @@ const ImportDialog: React.FC<ImportDialogProps> = ({
 
         <div className="p-6 overflow-y-auto">
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">楽譜をインポート</h3>
+            <h3 className="text-lg font-medium text-slate-900 mb-4">楽譜をインポート</h3>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   JSONファイルを選択
                 </label>
                 <input
                   type="file"
                   accept=".json"
                   onChange={(e) => setImportFile(e.target.files?.[0] || null)}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-slate-500 mt-1">
                   エクスポートされたJSONファイルを選択してください
                 </p>
               </div>
@@ -102,15 +102,15 @@ const ImportDialog: React.FC<ImportDialogProps> = ({
                   disabled={!importFile}
                   className={`flex-1 px-4 py-2 rounded-md font-medium ${
                     importFile
-                      ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      ? 'bg-[#BDD0CA] hover:bg-[#A4C2B5] text-slate-800'
+                      : 'bg-slate-300 text-slate-500 cursor-not-allowed'
                   }`}
                 >
                   インポート
                 </button>
                 <button
                   onClick={handleClose}
-                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md font-medium"
+                  className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-md font-medium"
                 >
                   キャンセル
                 </button>

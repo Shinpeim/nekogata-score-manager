@@ -115,15 +115,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="bg-white shadow-sm border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <button
                 onClick={() => setExplorerOpen(!explorerOpen)}
-                className="px-3 py-2 rounded-md bg-gray-100 border border-gray-300 text-gray-600 hover:bg-gray-200 hover:text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mr-3 shadow-sm transition-all duration-150 text-sm font-medium"
+                className="px-3 py-2 rounded-md bg-slate-100 border border-slate-300 text-slate-600 hover:bg-slate-200 hover:text-slate-700 hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mr-3 shadow-sm transition-all duration-150 text-sm font-medium"
                 aria-label={explorerOpen ? "Close Score Explorer" : "Open Score Explorer"}
               >
                 {explorerOpen ? (
@@ -138,7 +138,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   </span>
                 )}
               </button>
-              <h1 className="text-xl font-semibold text-gray-900">Nekogata Score Manager</h1>
+              <h1 className="text-xl font-semibold text-slate-900">Nekogata Score Manager</h1>
             </div>
           </div>
         </div>
@@ -149,7 +149,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         {/* Mobile Score Explorer overlay */}
         {explorerOpen && (
           <div className="fixed inset-0 flex z-40 md:hidden">
-            <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setExplorerOpen(false)}></div>
+            <div className="fixed inset-0 bg-slate-600 bg-opacity-75" onClick={() => setExplorerOpen(false)}></div>
             <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white">
               <div className="absolute top-0 right-0 -mr-12 pt-2">
                 <button
@@ -165,7 +165,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
                 <div className="px-4">
                   <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-sm font-medium text-gray-900">Score Explorer</h2>
+                    <h2 className="text-sm font-medium text-slate-900">Score Explorer</h2>
                   </div>
                   {charts.length > 0 && (
                     <div className="mb-3 flex items-center gap-2">
@@ -178,10 +178,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                           }
                         }}
                         onChange={handleSelectAll}
-                        className="text-orange-600 focus:ring-orange-500"
+                        className="text-[#85B0B7] focus:ring-[#85B0B7]"
                         title={selectedChartIds.length === charts.length ? '全て解除' : '全て選択'}
                       />
-                      <span className="text-xs text-gray-600">一括選択</span>
+                      <span className="text-xs text-slate-600">一括選択</span>
                       <div className="relative" ref={dropdownRef}>
                         <button
                           onClick={() => {
@@ -192,8 +192,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                           disabled={selectedChartIds.length === 0}
                           className={`px-2 py-1 rounded text-xs font-medium flex items-center ${
                             selectedChartIds.length > 0
-                              ? 'bg-orange-600 hover:bg-orange-700 text-white cursor-pointer'
-                              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                              ? 'bg-[#85B0B7] hover:bg-[#6B9CA5] text-white cursor-pointer'
+                              : 'bg-slate-300 text-slate-500 cursor-not-allowed'
                           }`}
                           title="アクション"
                         >
@@ -202,7 +202,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                           </svg>
                         </button>
                         {showActionsDropdown && selectedChartIds.length > 0 && (
-                          <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 min-w-32">
+                          <div className="absolute top-full left-0 mt-1 bg-white border border-slate-200 rounded-md shadow-lg z-10 min-w-32">
                             <button
                               onClick={(e) => {
                                 e.preventDefault();
@@ -210,7 +210,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                                 setShowActionsDropdown(false);
                                 setTimeout(() => handleExportSelected(), 0);
                               }}
-                              className="block w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-100"
+                              className="block w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-100"
                             >
                               エクスポート
                             </button>
@@ -221,14 +221,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                                 setShowActionsDropdown(false);
                                 setTimeout(() => handleDeleteSelected(), 0);
                               }}
-                              className="block w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50"
+                              className="block w-full text-left px-3 py-2 text-xs text-[#EE5840] hover:bg-slate-100"
                             >
                               削除
                             </button>
                           </div>
                         )}
                       </div>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-slate-500">
                         {selectedChartIds.length > 0 ? `${selectedChartIds.length}件選択中` : '未選択'}
                       </span>
                     </div>
@@ -243,25 +243,25 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                           type="checkbox"
                           checked={selectedChartIds.includes(chart.id)}
                           onChange={() => handleChartSelect(chart.id)}
-                          className="mt-3 text-orange-600 focus:ring-orange-500"
+                          className="mt-3 text-[#85B0B7] focus:ring-[#85B0B7]"
                         />
                         <div 
                           className={`flex-1 p-3 rounded-md transition-colors cursor-pointer ${
                             currentChartId === chart.id 
-                              ? 'bg-blue-50 border-blue-200 border' 
-                              : 'bg-gray-50 hover:bg-gray-100'
+                              ? 'bg-slate-100 border-[#85B0B7] border' 
+                              : 'bg-slate-50 hover:bg-slate-100'
                           }`}
                           onClick={() => {
                             setCurrentChart(chart.id);
                             setExplorerOpen(false);
                           }}
                         >
-                          <h3 className="text-sm font-medium text-gray-900">{chart.title}</h3>
-                          <p className="text-xs text-gray-500 mt-1">{chart.artist}</p>
+                          <h3 className="text-sm font-medium text-slate-900">{chart.title}</h3>
+                          <p className="text-xs text-slate-500 mt-1">{chart.artist}</p>
                           {chart.tags && chart.tags.length > 0 && (
                             <div className="flex flex-wrap gap-1 mt-2">
                               {chart.tags.slice(0, 2).map((tag, index) => (
-                                <span key={index} className="px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded">
+                                <span key={index} className="px-1.5 py-0.5 bg-[#BDD0CA] text-slate-800 text-xs rounded">
                                   {tag}
                                 </span>
                               ))}
@@ -273,16 +273,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   </div>
                   
                   {/* Mobile Actions */}
-                  <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
+                  <div className="mt-4 pt-4 border-t border-slate-200 space-y-2">
                     <button 
                       onClick={() => setShowCreateForm(true)}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm font-medium"
+                      className="w-full bg-[#85B0B7] hover:bg-[#6B9CA5] text-white px-3 py-2 rounded text-sm font-medium"
                     >
                       新規作成
                     </button>
                     <button 
                       onClick={() => setShowImportDialog(true)}
-                      className="w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded text-sm font-medium"
+                      className="w-full bg-[#BDD0CA] hover:bg-[#A4C2B5] text-slate-800 text-white px-3 py-2 rounded text-sm font-medium"
                     >
                       インポート
                     </button>
@@ -294,10 +294,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         )}
 
         {/* Desktop Score Explorer */}
-        <aside className={`${explorerOpen ? 'block' : 'hidden'} w-80 bg-white shadow-sm border-r border-gray-200 overflow-y-auto`}>
+        <aside className={`${explorerOpen ? 'block' : 'hidden'} w-80 bg-white shadow-sm border-r border-slate-200 overflow-y-auto`}>
           <div className="p-4">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-medium text-gray-900">Score Explorer</h2>
+              <h2 className="text-sm font-medium text-slate-900">Score Explorer</h2>
             </div>
             {charts.length > 0 && (
               <div className="mb-3 flex items-center gap-2">
@@ -310,10 +310,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     }
                   }}
                   onChange={handleSelectAll}
-                  className="text-orange-600 focus:ring-orange-500"
+                  className="text-[#85B0B7] focus:ring-[#85B0B7]"
                   title={selectedChartIds.length === charts.length ? '全て解除' : '全て選択'}
                 />
-                <span className="text-xs text-gray-600">一括選択</span>
+                <span className="text-xs text-slate-600">一括選択</span>
                 <div className="relative" ref={dropdownRef2}>
                   <button
                     onClick={() => {
@@ -324,8 +324,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     disabled={selectedChartIds.length === 0}
                     className={`px-2 py-1 rounded text-xs font-medium flex items-center ${
                       selectedChartIds.length > 0
-                        ? 'bg-orange-600 hover:bg-orange-700 text-white cursor-pointer'
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        ? 'bg-[#85B0B7] hover:bg-[#6B9CA5] text-white cursor-pointer'
+                        : 'bg-slate-300 text-slate-500 cursor-not-allowed'
                     }`}
                     title="アクション"
                   >
@@ -334,7 +334,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     </svg>
                   </button>
                   {showActionsDropdown && selectedChartIds.length > 0 && (
-                    <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 min-w-32">
+                    <div className="absolute top-full left-0 mt-1 bg-white border border-slate-200 rounded-md shadow-lg z-10 min-w-32">
                       <button
                         onClick={(e) => {
                           e.preventDefault();
@@ -342,7 +342,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                           setShowActionsDropdown(false);
                           setTimeout(() => handleExportSelected(), 0);
                         }}
-                        className="block w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-100"
+                        className="block w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-100"
                       >
                         エクスポート
                       </button>
@@ -353,14 +353,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                           setShowActionsDropdown(false);
                           setTimeout(() => handleDeleteSelected(), 0);
                         }}
-                        className="block w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50"
+                        className="block w-full text-left px-3 py-2 text-xs text-[#EE5840] hover:bg-slate-100"
                       >
                         削除
                       </button>
                     </div>
                   )}
                 </div>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-slate-500">
                   {selectedChartIds.length > 0 ? `${selectedChartIds.length}件選択中` : '未選択'}
                 </span>
               </div>
@@ -375,22 +375,22 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     type="checkbox"
                     checked={selectedChartIds.includes(chart.id)}
                     onChange={() => handleChartSelect(chart.id)}
-                    className="mt-3 text-orange-600 focus:ring-orange-500"
+                    className="mt-3 text-[#85B0B7] focus:ring-[#85B0B7]"
                   />
                   <div 
                     className={`flex-1 p-3 rounded-md transition-colors cursor-pointer ${
                       currentChartId === chart.id 
-                        ? 'bg-blue-50 border-blue-200 border' 
-                        : 'bg-gray-50 hover:bg-gray-100'
+                        ? 'bg-slate-100 border-[#85B0B7] border' 
+                        : 'bg-slate-50 hover:bg-slate-100'
                     }`}
                     onClick={() => setCurrentChart(chart.id)}
                   >
-                    <h3 className="text-sm font-medium text-gray-900">{chart.title}</h3>
-                    <p className="text-xs text-gray-500 mt-1">{chart.artist}</p>
+                    <h3 className="text-sm font-medium text-slate-900">{chart.title}</h3>
+                    <p className="text-xs text-slate-500 mt-1">{chart.artist}</p>
                     {chart.tags && chart.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-2">
                         {chart.tags.slice(0, 2).map((tag, index) => (
-                          <span key={index} className="px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded">
+                          <span key={index} className="px-1.5 py-0.5 bg-[#BDD0CA] text-slate-800 text-xs rounded">
                             {tag}
                           </span>
                         ))}
@@ -402,16 +402,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             </div>
             
             {/* Desktop Actions */}
-            <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
+            <div className="mt-4 pt-4 border-t border-slate-200 space-y-2">
               <button 
                 onClick={() => setShowCreateForm(true)}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm font-medium"
+                className="w-full bg-[#85B0B7] hover:bg-[#6B9CA5] text-white px-3 py-2 rounded text-sm font-medium"
               >
                 新規作成
               </button>
               <button 
                 onClick={() => setShowImportDialog(true)}
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded text-sm font-medium"
+                className="w-full bg-[#BDD0CA] hover:bg-[#A4C2B5] text-slate-800 px-3 py-2 rounded text-sm font-medium"
               >
                 インポート
               </button>

@@ -64,14 +64,14 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">
+        <h2 className="text-2xl font-bold text-slate-900 mb-6">
           {initialData?.id ? 'コード譜を編集' : '新しいコード譜を作成'}
         </h2>
 
         {errors.length > 0 && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-            <h3 className="text-sm font-medium text-red-800 mb-2">エラーがあります:</h3>
-            <ul className="text-sm text-red-700 list-disc list-inside">
+          <div className="mb-4 p-4 bg-slate-100 border border-slate-300 rounded-md">
+            <h3 className="text-sm font-medium text-slate-800 mb-2">エラーがあります:</h3>
+            <ul className="text-sm text-[#EE5840] list-disc list-inside">
               {errors.map((error, index) => (
                 <li key={index}>{error}</li>
               ))}
@@ -83,7 +83,7 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
           {/* 基本情報 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="title" className="block text-sm font-medium text-slate-700 mb-2">
                 タイトル *
               </label>
               <input
@@ -91,13 +91,13 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
                 type="text"
                 value={formData.title}
                 onChange={(e) => handleChange('title', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#85B0B7]"
                 placeholder="楽曲のタイトル"
               />
             </div>
 
             <div>
-              <label htmlFor="artist" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="artist" className="block text-sm font-medium text-slate-700 mb-2">
                 アーティスト
               </label>
               <input
@@ -105,20 +105,20 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
                 type="text"
                 value={formData.artist}
                 onChange={(e) => handleChange('artist', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#85B0B7]"
                 placeholder="アーティスト名"
               />
             </div>
 
             <div>
-              <label htmlFor="key" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="key" className="block text-sm font-medium text-slate-700 mb-2">
                 キー *
               </label>
               <select
                 id="key"
                 value={formData.key}
                 onChange={(e) => handleChange('key', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#85B0B7]"
               >
                 {COMMON_KEYS.map(key => (
                   <option key={key} value={key}>{key}</option>
@@ -127,7 +127,7 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
             </div>
 
             <div>
-              <label htmlFor="tempo" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="tempo" className="block text-sm font-medium text-slate-700 mb-2">
                 テンポ (BPM)
               </label>
               <input
@@ -137,19 +137,19 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
                 onChange={(e) => handleChange('tempo', parseInt(e.target.value) || 120)}
                 min="40"
                 max="200"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#85B0B7]"
               />
             </div>
 
             <div>
-              <label htmlFor="timeSignature" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="timeSignature" className="block text-sm font-medium text-slate-700 mb-2">
                 拍子 *
               </label>
               <select
                 id="timeSignature"
                 value={formData.timeSignature}
                 onChange={(e) => handleChange('timeSignature', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#85B0B7]"
               >
                 {COMMON_TIME_SIGNATURES.map(sig => (
                   <option key={sig} value={sig}>{sig}</option>
@@ -158,7 +158,7 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
             </div>
 
             <div>
-              <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="tags" className="block text-sm font-medium text-slate-700 mb-2">
                 タグ (カンマ区切り)
               </label>
               <input
@@ -166,7 +166,7 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
                 type="text"
                 value={formData.tags}
                 onChange={(e) => handleChange('tags', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#85B0B7]"
                 placeholder="例: ポップス, バラード"
               />
             </div>
@@ -174,7 +174,7 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
 
           {/* メモ */}
           <div>
-            <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="notes" className="block text-sm font-medium text-slate-700 mb-2">
               メモ
             </label>
             <textarea
@@ -182,23 +182,23 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
               value={formData.notes}
               onChange={(e) => handleChange('notes', e.target.value)}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="楽曲に関するメモや注意点"
             />
           </div>
 
           {/* ボタン */}
-          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+          <div className="flex justify-end space-x-3 pt-4 border-t border-slate-200">
             <button
               type="button"
               onClick={onCancel}
-              className="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md transition-colors"
+              className="px-4 py-2 text-slate-700 bg-slate-200 hover:bg-slate-300 rounded-md transition-colors"
             >
               キャンセル
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
+              className="px-4 py-2 text-white bg-[#85B0B7] hover:bg-[#6B9CA5] rounded-md transition-colors"
             >
               {initialData?.id ? '更新' : '作成'}
             </button>
