@@ -4,6 +4,7 @@ import { useChordChartStore } from '../stores/chordChartStore';
 import ChordChartEditor from './ChordChartEditor';
 import ChordChartForm from './ChordChartForm';
 import ExportImportDialog from './ExportImportDialog';
+import BpmIndicator from './BpmIndicator';
 import { exportSingleChart } from '../utils/exportImport';
 
 interface ChordChartProps {
@@ -222,7 +223,7 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
           <div className="flex flex-wrap gap-4 text-gray-600">
             <span>{displayChart.artist}</span>
             <span>キー: {displayChart.key}</span>
-            {displayChart.tempo && <span>テンポ: {displayChart.tempo} BPM</span>}
+            {displayChart.tempo && <BpmIndicator bpm={displayChart.tempo} />}
             <span>拍子: {displayChart.timeSignature}</span>
           </div>
           {displayChart.tags && displayChart.tags.length > 0 && (
