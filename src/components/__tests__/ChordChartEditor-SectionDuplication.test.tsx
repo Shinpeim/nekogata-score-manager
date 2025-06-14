@@ -43,7 +43,6 @@ const mockChart: ChordChart = {
 };
 
 describe('ChordChartEditor - Section Duplication', () => {
-  const mockOnSave = vi.fn();
   const mockOnCancel = vi.fn();
 
   it('duplicates a section with all its chords', () => {
@@ -123,7 +122,7 @@ describe('ChordChartEditor - Section Duplication', () => {
     fireEvent.click(screen.getByText('保存'));
     
     const savedChart = saveMock.mock.calls[0][0];
-    const sectionNames = savedChart.sections.map((s: any) => s.name);
+    const sectionNames = savedChart.sections.map((s: { name: string }) => s.name);
     
     // 順序が Verse, Chorus, Chorus (コピー) になっていることを確認
     expect(sectionNames).toEqual(['Verse', 'Chorus', 'Chorus (コピー)']);
