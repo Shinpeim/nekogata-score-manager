@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { useChordChartStore } from '../stores/chordChartStore';
 import ChordChartForm from '../components/ChordChartForm';
@@ -14,6 +14,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [explorerOpen, setExplorerOpen] = useState(false);
   const [showExportImportDialog, setShowExportImportDialog] = useState(false);
   const [selectedChartIds, setSelectedChartIds] = useState<string[]>([]);
+  const [showActionsDropdown, setShowActionsDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   
   const chartsData = useChordChartStore(state => state.charts);
   const currentChartId = useChordChartStore(state => state.currentChartId);
@@ -27,6 +29,22 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       await addChart(chart);
     }
   };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowActionsDropdown(false);
+      }
+    };
+
+    if (showActionsDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [showActionsDropdown]);
   
   const charts = useMemo(() => 
     Object.values(chartsData).sort((a, b) => 
@@ -48,9 +66,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     setShowCreateForm(false);
   };
 
-  const handleClearSelection = () => {
-    setSelectedChartIds([]);
-  };
 
   const handleChartSelect = (chartId: string) => {
     setSelectedChartIds(prev => 
@@ -148,15 +163,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   <div className="flex items-center justify-between mb-3">
                     <h2 className="text-sm font-medium text-gray-900">Score Explorer</h2>
                     <div className="flex gap-1">
-                      {selectedChartIds.length > 0 && (
-                        <button 
-                          onClick={handleClearSelection}
-                          className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs font-medium"
-                          title="選択解除"
-                        >
-                          選択解除
-                        </button>
-                      )}
                       <button 
                         onClick={() => setShowCreateForm(true)}
                         className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs font-medium"
@@ -168,17 +174,60 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   </div>
                   {charts.length > 0 && (
                     <div className="mb-3 flex items-center gap-2">
-                      <button 
-                        onClick={handleSelectAll}
-                        className="text-xs text-blue-600 hover:text-blue-800"
-                      >
-                        {selectedChartIds.length === charts.length ? '全て解除' : '全て選択'}
-                      </button>
-                      {selectedChartIds.length > 0 && (
-                        <span className="text-xs text-gray-500">
-                          {selectedChartIds.length}件選択中
-                        </span>
-                      )}
+                      <input
+                        type="checkbox"
+                        checked={selectedChartIds.length === charts.length}
+                        ref={(el) => {
+                          if (el) {
+                            el.indeterminate = selectedChartIds.length > 0 && selectedChartIds.length < charts.length;
+                          }
+                        }}
+                        onChange={handleSelectAll}
+                        className="text-orange-600 focus:ring-orange-500"
+                        title={selectedChartIds.length === charts.length ? '全て解除' : '全て選択'}
+                      />
+                      <span className="text-xs text-gray-600">一括選択</span>
+                      <div className="relative" ref={dropdownRef}>
+                        <button
+                          onClick={() => selectedChartIds.length > 0 && setShowActionsDropdown(!showActionsDropdown)}
+                          disabled={selectedChartIds.length === 0}
+                          className={`px-2 py-1 rounded text-xs font-medium flex items-center ${
+                            selectedChartIds.length > 0
+                              ? 'bg-orange-600 hover:bg-orange-700 text-white cursor-pointer'
+                              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          }`}
+                          title="アクション"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+                        {showActionsDropdown && selectedChartIds.length > 0 && (
+                          <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 min-w-32">
+                            <button
+                              onClick={() => {
+                                handleExportSelected();
+                                setShowActionsDropdown(false);
+                              }}
+                              className="block w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-100"
+                            >
+                              エクスポート
+                            </button>
+                            <button
+                              onClick={() => {
+                                handleDeleteSelected();
+                                setShowActionsDropdown(false);
+                              }}
+                              className="block w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50"
+                            >
+                              削除
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      <span className="text-xs text-gray-500">
+                        {selectedChartIds.length > 0 ? `${selectedChartIds.length}件選択中` : '未選択'}
+                      </span>
                     </div>
                   )}
                   <div className="space-y-2">
@@ -221,29 +270,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   </div>
                   
                   {/* Mobile Import/Export Actions */}
-                  <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
-                    <button 
-                      onClick={handleExportSelected}
-                      disabled={selectedChartIds.length === 0}
-                      className={`w-full px-3 py-2 rounded text-sm font-medium ${
-                        selectedChartIds.length > 0
-                          ? 'bg-green-600 hover:bg-green-700 text-white'
-                          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      }`}
-                    >
-                      選択したチャートをエクスポート {selectedChartIds.length > 0 && `(${selectedChartIds.length}件)`}
-                    </button>
-                    <button 
-                      onClick={handleDeleteSelected}
-                      disabled={selectedChartIds.length === 0}
-                      className={`w-full px-3 py-2 rounded text-sm font-medium ${
-                        selectedChartIds.length > 0
-                          ? 'bg-red-600 hover:bg-red-700 text-white'
-                          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      }`}
-                    >
-                      選択したチャートを削除 {selectedChartIds.length > 0 && `(${selectedChartIds.length}件)`}
-                    </button>
+                  <div className="mt-4 pt-4 border-t border-gray-200">
                     <button 
                       onClick={() => setShowExportImportDialog(true)}
                       className="w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded text-sm font-medium"
@@ -258,20 +285,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         )}
 
         {/* Desktop Score Explorer */}
-        <aside className={`${explorerOpen ? 'block' : 'hidden'} w-64 bg-white shadow-sm border-r border-gray-200 overflow-y-auto`}>
+        <aside className={`${explorerOpen ? 'block' : 'hidden'} w-80 bg-white shadow-sm border-r border-gray-200 overflow-y-auto`}>
           <div className="p-4">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-medium text-gray-900">Score Explorer</h2>
               <div className="flex gap-1">
-                {selectedChartIds.length > 0 && (
-                  <button 
-                    onClick={handleClearSelection}
-                    className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs font-medium"
-                    title="選択解除"
-                  >
-                    選択解除
-                  </button>
-                )}
                 <button 
                   onClick={() => setShowCreateForm(true)}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs font-medium"
@@ -283,17 +301,60 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             </div>
             {charts.length > 0 && (
               <div className="mb-3 flex items-center gap-2">
-                <button 
-                  onClick={handleSelectAll}
-                  className="text-xs text-blue-600 hover:text-blue-800"
-                >
-                  {selectedChartIds.length === charts.length ? '全て解除' : '全て選択'}
-                </button>
-                {selectedChartIds.length > 0 && (
-                  <span className="text-xs text-gray-500">
-                    {selectedChartIds.length}件選択中
-                  </span>
-                )}
+                <input
+                  type="checkbox"
+                  checked={selectedChartIds.length === charts.length}
+                  ref={(el) => {
+                    if (el) {
+                      el.indeterminate = selectedChartIds.length > 0 && selectedChartIds.length < charts.length;
+                    }
+                  }}
+                  onChange={handleSelectAll}
+                  className="text-orange-600 focus:ring-orange-500"
+                  title={selectedChartIds.length === charts.length ? '全て解除' : '全て選択'}
+                />
+                <span className="text-xs text-gray-600">一括選択</span>
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => selectedChartIds.length > 0 && setShowActionsDropdown(!showActionsDropdown)}
+                    disabled={selectedChartIds.length === 0}
+                    className={`px-2 py-1 rounded text-xs font-medium flex items-center ${
+                      selectedChartIds.length > 0
+                        ? 'bg-orange-600 hover:bg-orange-700 text-white cursor-pointer'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                    title="アクション"
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {showActionsDropdown && selectedChartIds.length > 0 && (
+                    <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 min-w-32">
+                      <button
+                        onClick={() => {
+                          handleExportSelected();
+                          setShowActionsDropdown(false);
+                        }}
+                        className="block w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-100"
+                      >
+                        エクスポート
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleDeleteSelected();
+                          setShowActionsDropdown(false);
+                        }}
+                        className="block w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50"
+                      >
+                        削除
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <span className="text-xs text-gray-500">
+                  {selectedChartIds.length > 0 ? `${selectedChartIds.length}件選択中` : '未選択'}
+                </span>
               </div>
             )}
             <div className="space-y-2">
@@ -333,29 +394,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             </div>
             
             {/* Desktop Import/Export Actions */}
-            <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
-              <button 
-                onClick={handleExportSelected}
-                disabled={selectedChartIds.length === 0}
-                className={`w-full px-3 py-2 rounded text-sm font-medium ${
-                  selectedChartIds.length > 0
-                    ? 'bg-green-600 hover:bg-green-700 text-white'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-              >
-                選択したチャートをエクスポート {selectedChartIds.length > 0 && `(${selectedChartIds.length}件)`}
-              </button>
-              <button 
-                onClick={handleDeleteSelected}
-                disabled={selectedChartIds.length === 0}
-                className={`w-full px-3 py-2 rounded text-sm font-medium ${
-                  selectedChartIds.length > 0
-                    ? 'bg-red-600 hover:bg-red-700 text-white'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-              >
-                選択したチャートを削除 {selectedChartIds.length > 0 && `(${selectedChartIds.length}件)`}
-              </button>
+            <div className="mt-4 pt-4 border-t border-gray-200">
               <button 
                 onClick={() => setShowExportImportDialog(true)}
                 className="w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded text-sm font-medium"
