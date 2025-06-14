@@ -1,12 +1,28 @@
 import React from 'react';
 import type { ChordChart as ChordChartType, ChordSection, Chord } from '../types';
-import { sampleCharts } from '../data/sampleCharts';
+import { useChordChartStore } from '../stores/chordChartStore';
 
 interface ChordChartProps {
   chartData?: ChordChartType;
 }
 
-const ChordChart: React.FC<ChordChartProps> = ({ chartData = sampleCharts[0] }) => {
+const ChordChart: React.FC<ChordChartProps> = ({ chartData }) => {
+  const charts = useChordChartStore(state => state.charts);
+  const currentChartId = useChordChartStore(state => state.currentChartId);
+  
+  const currentChart = currentChartId ? charts[currentChartId] : null;
+  const displayChart = chartData || currentChart;
+
+  if (!displayChart) {
+    return (
+      <div className="h-full bg-white flex items-center justify-center">
+        <div className="text-center text-gray-500">
+          <h3 className="text-lg font-medium mb-2">コード譜が選択されていません</h3>
+          <p className="text-sm">左のサイドバーからコード譜を選択してください</p>
+        </div>
+      </div>
+    );
+  }
   const renderChordGrid = (section: ChordSection) => {
     const beatsPerBar = section.beatsPerBar || 4;
     const barsPerRow = 8;
@@ -54,7 +70,7 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData = sampleCharts[0] }) 
       <div key={rowIndex} className="mb-8">
         {/* 小節番号の行 */}
         <div className="flex mb-1">
-          {row.map((bar, barIndex) => (
+          {row.map((_, barIndex) => (
             <div key={barIndex} className="flex-1 text-center">
               <span className="text-xs text-gray-400">
                 {rowIndex * barsPerRow + barIndex + 1}
@@ -121,16 +137,16 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData = sampleCharts[0] }) 
       <div className="p-6">
         {/* Chart Header */}
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">{chartData.title}</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{displayChart.title}</h2>
           <div className="flex flex-wrap gap-4 text-gray-600">
-            <span>{chartData.artist}</span>
-            <span>キー: {chartData.key}</span>
-            {chartData.tempo && <span>テンポ: {chartData.tempo} BPM</span>}
-            <span>拍子: {chartData.timeSignature}</span>
+            <span>{displayChart.artist}</span>
+            <span>キー: {displayChart.key}</span>
+            {displayChart.tempo && <span>テンポ: {displayChart.tempo} BPM</span>}
+            <span>拍子: {displayChart.timeSignature}</span>
           </div>
-          {chartData.tags && chartData.tags.length > 0 && (
+          {displayChart.tags && displayChart.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-2">
-              {chartData.tags.map((tag, index) => (
+              {displayChart.tags.map((tag, index) => (
                 <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
                   {tag}
                 </span>
@@ -141,7 +157,7 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData = sampleCharts[0] }) 
 
         {/* Chart Content */}
         <div className="bg-gray-50 rounded-lg p-3 sm:p-6">
-          {chartData.sections.map((section) => (
+          {displayChart.sections.map((section) => (
             <div key={section.id} className="mb-8 last:mb-0">
               {section.name && (
                 <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-300 pb-2">
@@ -153,10 +169,10 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData = sampleCharts[0] }) 
           ))}
         </div>
 
-        {chartData.notes && (
+        {displayChart.notes && (
           <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
             <h4 className="font-semibold text-gray-800 mb-2">メモ</h4>
-            <p className="text-gray-700">{chartData.notes}</p>
+            <p className="text-gray-700">{displayChart.notes}</p>
           </div>
         )}
 
