@@ -10,7 +10,7 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [explorerOpen, setExplorerOpen] = useState(false);
   
   const chartsData = useChordChartStore(state => state.charts);
   const currentChartId = useChordChartStore(state => state.currentChartId);
@@ -45,13 +45,21 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 rounded-md bg-gray-100 border border-gray-300 text-gray-600 hover:bg-gray-200 hover:text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mr-3 shadow-sm transition-all duration-150"
-                aria-label="サイドバーを開く"
+                onClick={() => setExplorerOpen(!explorerOpen)}
+                className="px-3 py-2 rounded-md bg-gray-100 border border-gray-300 text-gray-600 hover:bg-gray-200 hover:text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mr-3 shadow-sm transition-all duration-150 text-sm font-medium"
+                aria-label={explorerOpen ? "Close Score Explorer" : "Open Score Explorer"}
               >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h6v12H4V6zM14 6h6v12h-6V6z" />
-                </svg>
+                {explorerOpen ? (
+                  <span className="flex items-center gap-1">
+                    <span className="text-lg font-bold">&lt;</span>
+                    <span className="text-xs">close score explorer</span>
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1">
+                    <span className="text-lg font-bold">&gt;</span>
+                    <span className="text-xs">open score explorer</span>
+                  </span>
+                )}
               </button>
               <h1 className="text-xl font-semibold text-gray-900">Nekogata Score Manager</h1>
             </div>
@@ -69,17 +77,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
       {/* Main Content */}
       <div className="flex h-[calc(100vh-4rem)]">
-        {/* Mobile sidebar overlay */}
-        {sidebarOpen && (
+        {/* Mobile Score Explorer overlay */}
+        {explorerOpen && (
           <div className="fixed inset-0 flex z-40 md:hidden">
-            <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)}></div>
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setExplorerOpen(false)}></div>
             <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white">
               <div className="absolute top-0 right-0 -mr-12 pt-2">
                 <button
-                  onClick={() => setSidebarOpen(false)}
+                  onClick={() => setExplorerOpen(false)}
                   className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
                 >
-                  <span className="sr-only">サイドバーを閉じる</span>
+                  <span className="sr-only">Score Explorerを閉じる</span>
                   <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -87,7 +95,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               </div>
               <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
                 <div className="px-4">
-                  <h2 className="text-sm font-medium text-gray-900 mb-3">コード譜一覧</h2>
+                  <h2 className="text-sm font-medium text-gray-900 mb-3">Score Explorer</h2>
                   <div className="space-y-2">
                     {charts.map((chart) => (
                       <div 
@@ -99,7 +107,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                         }`}
                         onClick={() => {
                           setCurrentChart(chart.id);
-                          setSidebarOpen(false);
+                          setExplorerOpen(false);
                         }}
                       >
                         <h3 className="text-sm font-medium text-gray-900">{chart.title}</h3>
@@ -122,10 +130,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           </div>
         )}
 
-        {/* Desktop Sidebar */}
-        <aside className={`${sidebarOpen ? 'block' : 'hidden'} w-64 bg-white shadow-sm border-r border-gray-200 overflow-y-auto`}>
+        {/* Desktop Score Explorer */}
+        <aside className={`${explorerOpen ? 'block' : 'hidden'} w-64 bg-white shadow-sm border-r border-gray-200 overflow-y-auto`}>
           <div className="p-4">
-            <h2 className="text-sm font-medium text-gray-900 mb-3">コード譜一覧</h2>
+            <h2 className="text-sm font-medium text-gray-900 mb-3">Score Explorer</h2>
             <div className="space-y-2">
               {charts.map((chart) => (
                 <div 
