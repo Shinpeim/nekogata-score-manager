@@ -67,6 +67,7 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew, onOpenI
     }
   };
 
+
   if (!displayChart) {
     return (
       <div className="h-full bg-white flex items-center justify-center">
