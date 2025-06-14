@@ -21,7 +21,7 @@ const mockElement = {
   href: '',
   download: '',
   click: mockClick,
-};
+} as HTMLAnchorElement;
 
 const originalCreateElement = document.createElement;
 beforeEach(() => {
@@ -29,7 +29,7 @@ beforeEach(() => {
   
   document.createElement = vi.fn((tagName: string) => {
     if (tagName === 'a') {
-      return mockElement as any;
+      return mockElement;
     }
     return originalCreateElement.call(document, tagName);
   });
