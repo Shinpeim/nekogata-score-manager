@@ -19,7 +19,7 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
   const updateChart = useChordChartStore(state => state.updateChart);
   const deleteChart = useChordChartStore(state => state.deleteChart);
   const addChart = useChordChartStore(state => state.addChart);
-  const { barsPerRow } = useResponsiveBars();
+  const { barsPerRow, config } = useResponsiveBars();
   
   const currentChart = currentChartId ? charts[currentChartId] : null;
   const displayChart = chartData || currentChart;
@@ -140,23 +140,29 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
     });
     
     return processedRows.map((rowBars, rowIndex) => (
-      <div key={rowIndex} className="mb-8">
+      <div key={rowIndex}>
         {/* コード表示エリア */}
         <div className="relative bg-white">
-          {/* 下の罫線 */}
-          <div className="absolute bottom-8 left-0 right-0 h-px bg-slate-400"></div>
           
           {/* 小節の内容 */}
-          <div className="flex min-h-20 py-2">
+          <div className="flex min-h-12 py-1">
             {rowBars.map((bar, barIndex) => (
-              <div key={barIndex} className="flex-1 relative">
+              <div 
+                key={barIndex} 
+                className="relative"
+                style={{ 
+                  flexGrow: 1,
+                  flexBasis: 0,
+                  maxWidth: `${config.MAX_WIDTH}px`
+                }}
+              >
                 {/* 小節線（縦線） */}
                 {barIndex > 0 && (
-                  <div className="absolute left-0 top-6 bottom-6 w-px bg-slate-400"></div>
+                  <div className="absolute left-0 top-3 bottom-3 w-0.5 bg-slate-600"></div>
                 )}
                 
                 {/* コード表示 */}
-                <div className="px-1 py-2 h-full flex items-center">
+                <div className="px-1 py-1 h-full flex items-center">
                   {bar.map((chord, chordIndex) => {
                     const chordDuration = chord.duration || 4;
                     const widthPercentage = (chordDuration / beatsPerBar) * 100;
@@ -169,11 +175,6 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
                       >
                         <div className="text-left flex items-center">
                           <span className="text-xs font-semibold">{chord.name}</span>
-                          {chord.duration && chord.duration !== 4 && (
-                            <span className="text-xs text-slate-500 ml-1">
-                              ({chord.duration % 1 === 0 ? chord.duration : chord.duration.toFixed(1)})
-                            </span>
-                          )}
                         </div>
                       </div>
                     );
@@ -182,15 +183,14 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
                 
                 {/* 右端の小節線 */}
                 {barIndex === rowBars.length - 1 && (
-                  <div className="absolute right-0 top-6 bottom-6 w-px bg-slate-400"></div>
+                  <div className="absolute right-0 top-3 bottom-3 w-0.5 bg-slate-600"></div>
                 )}
               </div>
             ))}
           </div>
           
-          {/* 左右の境界線 */}
-          <div className="absolute left-0 top-8 bottom-8 w-px bg-slate-400"></div>
-          <div className="absolute right-0 top-8 bottom-8 w-px bg-slate-400"></div>
+          {/* 左の境界線 */}
+          <div className="absolute left-0 top-4 bottom-4 w-0.5 bg-slate-600"></div>
         </div>
       </div>
     ));
@@ -225,8 +225,8 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
             displayChart.sections.map((section) => (
               <div key={section.id} className="mb-8 last:mb-0">
                 {section.name && (
-                  <h3 className="text-lg font-semibold text-slate-800 mb-4 border-b border-slate-300 pb-2">
-                    {section.name}
+                  <h3 className="text-sm font-medium text-slate-600 mb-1">
+                    【{section.name}】
                   </h3>
                 )}
                 {renderChordGrid(section)}
