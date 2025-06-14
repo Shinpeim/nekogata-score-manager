@@ -74,14 +74,15 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6" role="form">
           {/* 基本情報 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
                 タイトル *
               </label>
               <input
+                id="title"
                 type="text"
                 value={formData.title}
                 onChange={(e) => handleChange('title', e.target.value)}
@@ -91,10 +92,11 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="artist" className="block text-sm font-medium text-gray-700 mb-2">
                 アーティスト
               </label>
               <input
+                id="artist"
                 type="text"
                 value={formData.artist}
                 onChange={(e) => handleChange('artist', e.target.value)}
@@ -104,10 +106,11 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="key" className="block text-sm font-medium text-gray-700 mb-2">
                 キー *
               </label>
               <select
+                id="key"
                 value={formData.key}
                 onChange={(e) => handleChange('key', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -119,10 +122,11 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="tempo" className="block text-sm font-medium text-gray-700 mb-2">
                 テンポ (BPM)
               </label>
               <input
+                id="tempo"
                 type="number"
                 value={formData.tempo}
                 onChange={(e) => handleChange('tempo', parseInt(e.target.value) || 120)}
@@ -133,10 +137,11 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="timeSignature" className="block text-sm font-medium text-gray-700 mb-2">
                 拍子 *
               </label>
               <select
+                id="timeSignature"
                 value={formData.timeSignature}
                 onChange={(e) => handleChange('timeSignature', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -148,10 +153,11 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-2">
                 タグ (カンマ区切り)
               </label>
               <input
+                id="tags"
                 type="text"
                 value={formData.tags}
                 onChange={(e) => handleChange('tags', e.target.value)}
@@ -163,10 +169,11 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
 
           {/* メモ */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
               メモ
             </label>
             <textarea
+              id="notes"
               value={formData.notes}
               onChange={(e) => handleChange('notes', e.target.value)}
               rows={3}
