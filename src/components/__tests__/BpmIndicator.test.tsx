@@ -38,8 +38,8 @@ describe('BpmIndicator', () => {
   it('initially shows active state (blue circle) since pulse starts immediately', () => {
     render(<BpmIndicator bpm={120} />);
     const circle = document.querySelector('.w-3.h-3.rounded-full');
-    expect(circle).toHaveClass('bg-blue-500');
-    expect(circle).not.toHaveClass('bg-gray-300');
+    expect(circle).toHaveClass('bg-[#85B0B7]');
+    expect(circle).not.toHaveClass('bg-slate-300');
   });
 
   it('starts with blue circle and maintains state', () => {
@@ -47,8 +47,8 @@ describe('BpmIndicator', () => {
     const circle = document.querySelector('.w-3.h-3.rounded-full');
     
     // Initially active (blue) since pulse starts immediately
-    expect(circle).toHaveClass('bg-blue-500');
-    expect(circle).not.toHaveClass('bg-gray-300');
+    expect(circle).toHaveClass('bg-[#85B0B7]');
+    expect(circle).not.toHaveClass('bg-slate-300');
   });
 
   it('deactivates circle after flash duration', () => {
@@ -56,14 +56,14 @@ describe('BpmIndicator', () => {
     const circle = document.querySelector('.w-3.h-3.rounded-full');
     
     // Initially active (blue)
-    expect(circle).toHaveClass('bg-blue-500');
+    expect(circle).toHaveClass('bg-[#85B0B7]');
     
     // After flash duration (50ms)
     act(() => {
       vi.advanceTimersByTime(50);
     });
-    expect(circle).toHaveClass('bg-gray-300');
-    expect(circle).not.toHaveClass('bg-blue-500');
+    expect(circle).toHaveClass('bg-slate-300');
+    expect(circle).not.toHaveClass('bg-[#85B0B7]');
   });
 
   it('repeats pulse cycle based on BPM', () => {
@@ -71,24 +71,24 @@ describe('BpmIndicator', () => {
     const circle = document.querySelector('.w-3.h-3.rounded-full');
     
     // Initially active
-    expect(circle).toHaveClass('bg-blue-500');
+    expect(circle).toHaveClass('bg-[#85B0B7]');
     
     // After flash duration
     act(() => {
       vi.advanceTimersByTime(50);
     });
-    expect(circle).toHaveClass('bg-gray-300');
+    expect(circle).toHaveClass('bg-slate-300');
     
     // Wait for next cycle (500ms - 50ms = 450ms)
     act(() => {
       vi.advanceTimersByTime(450);
     });
-    expect(circle).toHaveClass('bg-blue-500');
+    expect(circle).toHaveClass('bg-[#85B0B7]');
     
     act(() => {
       vi.advanceTimersByTime(50);
     });
-    expect(circle).toHaveClass('bg-gray-300');
+    expect(circle).toHaveClass('bg-slate-300');
   });
 
   it('calculates correct interval for 60 BPM', () => {
@@ -97,23 +97,23 @@ describe('BpmIndicator', () => {
     const circle = document.querySelector('.w-3.h-3.rounded-full');
     
     // Initially active
-    expect(circle).toHaveClass('bg-blue-500');
+    expect(circle).toHaveClass('bg-[#85B0B7]');
     
     act(() => {
       vi.advanceTimersByTime(50);
     });
-    expect(circle).toHaveClass('bg-gray-300');
+    expect(circle).toHaveClass('bg-slate-300');
     
     // Next pulse should be at 1000ms - 50ms = 950ms
     act(() => {
       vi.advanceTimersByTime(949);
     });
-    expect(circle).toHaveClass('bg-gray-300');
+    expect(circle).toHaveClass('bg-slate-300');
     
     act(() => {
       vi.advanceTimersByTime(1);
     });
-    expect(circle).toHaveClass('bg-blue-500');
+    expect(circle).toHaveClass('bg-[#85B0B7]');
   });
 
   it('cleans up timers on unmount', () => {
@@ -131,12 +131,12 @@ describe('BpmIndicator', () => {
     const circle = document.querySelector('.w-3.h-3.rounded-full');
     
     // Initially active
-    expect(circle).toHaveClass('bg-blue-500');
+    expect(circle).toHaveClass('bg-[#85B0B7]');
     
     // Change BPM - should restart
     rerender(<BpmIndicator bpm={60} />);
     
     // Should still be active with new BPM
-    expect(circle).toHaveClass('bg-blue-500');
+    expect(circle).toHaveClass('bg-[#85B0B7]');
   });
 });
