@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { useChordChartStore } from '../stores/chordChartStore';
 import ChordChartForm from '../components/ChordChartForm';
 import ImportDialog from '../components/ImportDialog';
+import ExportDialog from '../components/ExportDialog';
 import type { ChordChart } from '../types';
 
 interface MainLayoutProps {
@@ -19,6 +20,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
   const explorerOpen = propExplorerOpen !== undefined ? propExplorerOpen : localExplorerOpen;
   const setExplorerOpen = propSetExplorerOpen || setLocalExplorerOpen;
   const [showImportDialog, setShowImportDialog] = useState(false);
+  const [showExportDialog, setShowExportDialog] = useState(false);
   const [selectedChartIds, setSelectedChartIds] = useState<string[]>([]);
   const [showActionsDropdown, setShowActionsDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -109,16 +111,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
 
   const handleExportSelected = () => {
     if (selectedChartIds.length === 0) return;
-    
-    const selectedCharts = charts.filter(chart => selectedChartIds.includes(chart.id));
-    const dataStr = JSON.stringify(selectedCharts, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `selected-charts-${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
+    setShowExportDialog(true);
   };
 
   return (
@@ -446,6 +439,18 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
           isOpen={showImportDialog}
           onClose={() => setShowImportDialog(false)}
           onImportCharts={handleImportCharts}
+        />
+      )}
+
+      {/* エクスポートダイアログ */}
+      {showExportDialog && (
+        <ExportDialog 
+          isOpen={showExportDialog}
+          onClose={() => {
+            setShowExportDialog(false);
+            setSelectedChartIds([]);
+          }}
+          charts={charts.filter(chart => selectedChartIds.includes(chart.id))}
         />
       )}
     </div>
