@@ -42,7 +42,7 @@ interface SortableChordItemProps {
   onDeleteChord: (sectionId: string, chordIndex: number) => void;
   onInsertLineBreak: (sectionId: string, chordIndex: number) => void;
   isSelected?: boolean;
-  onToggleSelection?: (sectionId: string, chordIndex: number) => void;
+  onToggleSelection?: (sectionId: string, chordIndex: number, event?: React.MouseEvent) => void;
 }
 
 const SortableChordItem: React.FC<SortableChordItemProps> = ({
@@ -91,7 +91,7 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
         }
         
         if (!isLineBreakMarker(chord) && onToggleSelection) {
-          onToggleSelection(sectionId, chordIndex);
+          onToggleSelection(sectionId, chordIndex, e);
         }
       }}
     >
@@ -165,6 +165,7 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
   const [copiedMessage, setCopiedMessage] = useState<string>('');
   const [pasteText, setPasteText] = useState<string>('');
   const [selectedChords, setSelectedChords] = useState<Set<string>>(new Set());
+  const [lastSelectedChord, setLastSelectedChord] = useState<string | null>(null);
   
   // ドラッグ&ドロップセンサー
   const sensors = useSensors(
@@ -391,17 +392,46 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
   };
 
   // 選択機能
-  const toggleChordSelection = (sectionId: string, chordIndex: number) => {
+  const toggleChordSelection = (sectionId: string, chordIndex: number, event?: React.MouseEvent) => {
     const chordId = `${sectionId}-${chordIndex}`;
-    const newSelected = new Set(selectedChords);
     
-    if (newSelected.has(chordId)) {
-      newSelected.delete(chordId);
+    if (event?.shiftKey && lastSelectedChord) {
+      // Shiftキーが押されていて、前回選択したコードがある場合は範囲選択
+      const lastParts = lastSelectedChord.split('-');
+      const lastSectionId = lastParts.slice(0, -1).join('-'); // section-1 のようなIDに対応
+      const lastChordIndex = parseInt(lastParts[lastParts.length - 1]);
+      
+      // 同じセクション内での範囲選択のみサポート
+      if (lastSectionId === sectionId) {
+        const start = Math.min(chordIndex, lastChordIndex);
+        const end = Math.max(chordIndex, lastChordIndex);
+        
+        // 新しい選択セットを作成（既存の選択を保持）
+        const newSelected = new Set(selectedChords);
+        
+        // 範囲内のすべてのコードを選択
+        for (let i = start; i <= end; i++) {
+          const section = editedChart.sections?.find(s => s.id === sectionId);
+          if (section && i < section.chords.length && !isLineBreakMarker(section.chords[i])) {
+            newSelected.add(`${sectionId}-${i}`);
+          }
+        }
+        
+        setSelectedChords(newSelected);
+        // 範囲選択後も最後に選択したコードを更新
+        setLastSelectedChord(chordId);
+      }
     } else {
-      newSelected.add(chordId);
+      // 通常のトグル選択
+      const newSelected = new Set(selectedChords);
+      if (newSelected.has(chordId)) {
+        newSelected.delete(chordId);
+      } else {
+        newSelected.add(chordId);
+      }
+      setSelectedChords(newSelected);
+      setLastSelectedChord(chordId);
     }
-    
-    setSelectedChords(newSelected);
   };
 
   const selectAllInSection = (sectionId: string) => {
@@ -424,6 +454,11 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
       newSelected.delete(`${sectionId}-${i}`);
     }
     setSelectedChords(newSelected);
+    
+    // 選択をクリアした時は最後の選択もリセット
+    if (newSelected.size === 0) {
+      setLastSelectedChord(null);
+    }
   };
 
   const handleSave = () => {
