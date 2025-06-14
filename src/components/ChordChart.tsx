@@ -89,7 +89,9 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
     );
   }
   const renderChordGrid = (section: ChordSection) => {
-    const beatsPerBar = section.beatsPerBar || 4;
+    // 拍子から正しい拍数を取得し、セクションのbeatsPerBarを優先しつつフォールバック
+    const timeSignatureBeats = displayChart.timeSignature ? parseInt(displayChart.timeSignature.split('/')[0]) : 4;
+    const beatsPerBar = section.beatsPerBar && section.beatsPerBar !== 4 ? section.beatsPerBar : timeSignatureBeats;
     const barsPerRow = 8;
     
     // コードを小節に分割

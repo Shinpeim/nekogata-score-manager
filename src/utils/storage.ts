@@ -1,5 +1,6 @@
 import localforage from 'localforage';
 import type { ChordChart, ChordLibrary } from '../types';
+import { migrateChartData } from './chordUtils';
 
 const STORAGE_KEY = 'chord-charts';
 
@@ -26,7 +27,15 @@ export const storageService = {
   async loadCharts(): Promise<ChordLibrary | null> {
     try {
       const charts = await localforage.getItem<ChordLibrary>(STORAGE_KEY);
-      return charts;
+      if (!charts) return null;
+      
+      // データ移行処理：既存データのbeatsPerBarを拍子に応じて修正
+      const migratedCharts: ChordLibrary = {};
+      for (const [id, chart] of Object.entries(charts)) {
+        migratedCharts[id] = migrateChartData(chart);
+      }
+      
+      return migratedCharts;
     } catch (error) {
       console.error('Failed to load charts:', error);
       throw new Error('コード譜の読み込みに失敗しました');

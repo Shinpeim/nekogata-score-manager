@@ -109,7 +109,7 @@ describe('storageService', () => {
       await storageService.saveChart(mockChart);
 
       expect(localforage.setItem).toHaveBeenCalledWith('chord-charts', {
-        'other-chart': { id: 'other-chart' },
+        'other-chart': { id: 'other-chart', sections: [] },
         [mockChart.id]: mockChart
       });
     });
@@ -127,7 +127,7 @@ describe('storageService', () => {
       await storageService.deleteChart(mockChart.id);
 
       expect(localforage.setItem).toHaveBeenCalledWith('chord-charts', {
-        'other-chart': { id: 'other-chart' }
+        'other-chart': { id: 'other-chart', sections: [] }
       });
     });
   });
