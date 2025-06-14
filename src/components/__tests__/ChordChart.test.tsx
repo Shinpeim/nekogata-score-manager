@@ -254,7 +254,7 @@ describe('ChordChart', () => {
   });
 
   describe('Chord duration display', () => {
-    it('should render chords without duration display', () => {
+    it('should render chord names correctly', () => {
       const chartWithDurations: ChordChartType = {
         ...mockChartData,
         sections: [
@@ -276,18 +276,18 @@ describe('ChordChart', () => {
 
       render(<ChordChart />);
 
-      // Duration display removed in UI simplification
-      // expect(screen.getByText('(2)')).toBeInTheDocument();
-      // expect(screen.getByText('(1)')).toBeInTheDocument();
+      // コード名が表示されることを確認
+      expect(screen.getByText('C')).toBeInTheDocument();
+      expect(screen.getByText('G')).toBeInTheDocument();
     });
 
-    it('should not show duration for standard 4-beat duration', () => {
+    it('should render chart without duration display', () => {
       render(<ChordChart />);
 
-      // Duration display removed in UI simplification - this test is no longer relevant
-      // Standard 4-beat chords should not show duration
-      // We check that (4) is not in the document
+      // 拍数表示は削除されているため、拍数の括弧表示がないことを確認
       expect(screen.queryByText('(4)')).not.toBeInTheDocument();
+      expect(screen.queryByText('(2)')).not.toBeInTheDocument();
+      expect(screen.queryByText('(1)')).not.toBeInTheDocument();
     });
   });
 
