@@ -1,5 +1,5 @@
 import React from 'react';
-import type { ChordChart as ChordChartType, ChordSection } from '../types';
+import type { ChordChart as ChordChartType, ChordSection, Chord } from '../types';
 import { sampleCharts } from '../data/sampleCharts';
 
 interface ChordChartProps {
@@ -8,24 +8,110 @@ interface ChordChartProps {
 
 const ChordChart: React.FC<ChordChartProps> = ({ chartData = sampleCharts[0] }) => {
   const renderChordGrid = (section: ChordSection) => {
-    const chordsPerRow = 4;
-    const chordRows = [];
+    const beatsPerBar = section.beatsPerBar || 4;
+    const barsPerRow = 8;
     
-    for (let i = 0; i < section.chords.length; i += chordsPerRow) {
-      const rowChords = section.chords.slice(i, i + chordsPerRow);
-      chordRows.push(rowChords);
+    // コードを小節に分割
+    const bars: Chord[][] = [];
+    let currentBar: Chord[] = [];
+    let currentBeats = 0;
+    
+    for (const chord of section.chords) {
+      const chordDuration = chord.duration || 4;
+      
+      if (currentBeats + chordDuration <= beatsPerBar) {
+        currentBar.push(chord);
+        currentBeats += chordDuration;
+      } else {
+        // 現在の小節を完了し、新しい小節を開始
+        if (currentBar.length > 0) {
+          bars.push([...currentBar]);
+        }
+        currentBar = [chord];
+        currentBeats = chordDuration;
+      }
+      
+      // 小節が完了した場合
+      if (currentBeats === beatsPerBar) {
+        bars.push([...currentBar]);
+        currentBar = [];
+        currentBeats = 0;
+      }
     }
-
-    return chordRows.map((row, rowIndex) => (
-      <div key={rowIndex} className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-4">
-        {row.map((chord, chordIndex) => (
-          <div key={chordIndex} className="text-center p-2 sm:p-4 bg-white rounded border-2 border-gray-200 hover:border-blue-300 cursor-pointer">
-            <span className="text-base sm:text-lg font-semibold">{chord.name}</span>
-            {chord.duration && chord.duration !== 4 && (
-              <div className="text-xs text-gray-500 mt-1">{chord.duration}拍</div>
-            )}
+    
+    // 最後の未完了の小節を追加
+    if (currentBar.length > 0) {
+      bars.push(currentBar);
+    }
+    
+    // 8小節ずつの行に分割
+    const rows = [];
+    for (let i = 0; i < bars.length; i += barsPerRow) {
+      rows.push(bars.slice(i, i + barsPerRow));
+    }
+    
+    return rows.map((row, rowIndex) => (
+      <div key={rowIndex} className="mb-8">
+        {/* 小節番号の行 */}
+        <div className="flex mb-1">
+          {row.map((bar, barIndex) => (
+            <div key={barIndex} className="flex-1 text-center">
+              <span className="text-xs text-gray-400">
+                {rowIndex * barsPerRow + barIndex + 1}
+              </span>
+            </div>
+          ))}
+        </div>
+        
+        {/* コード表示エリア */}
+        <div className="relative bg-white">
+          {/* 下の罫線 */}
+          <div className="absolute bottom-8 left-0 right-0 h-px bg-gray-400"></div>
+          
+          {/* 小節の内容 */}
+          <div className="flex min-h-20 py-2">
+            {row.map((bar, barIndex) => (
+              <div key={barIndex} className="flex-1 relative">
+                {/* 小節線（縦線） */}
+                {barIndex > 0 && (
+                  <div className="absolute left-0 top-6 bottom-6 w-px bg-gray-400"></div>
+                )}
+                
+                {/* コード表示 */}
+                <div className="px-1 py-2 h-full flex items-center">
+                  {bar.map((chord, chordIndex) => {
+                    const chordDuration = chord.duration || 4;
+                    const widthPercentage = (chordDuration / beatsPerBar) * 100;
+                    
+                    return (
+                      <div 
+                        key={chordIndex} 
+                        className="flex items-center hover:bg-blue-50 cursor-pointer rounded px-1"
+                        style={{ width: `${widthPercentage}%` }}
+                      >
+                        <div className="text-left flex items-center">
+                          <span className="text-xs font-semibold">{chord.name}</span>
+                          {chord.duration && chord.duration !== 4 && (
+                            <span className="text-xs text-gray-500 ml-1">({chord.duration})</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                
+                {/* 右端の小節線 */}
+                {barIndex === row.length - 1 && (
+                  <div className="absolute right-0 top-6 bottom-6 w-px bg-gray-400"></div>
+                )}
+              </div>
+            ))}
           </div>
-        ))}
+          
+          {/* 左右の境界線 */}
+          <div className="absolute left-0 top-8 bottom-8 w-px bg-gray-400"></div>
+          <div className="absolute right-0 top-8 bottom-8 w-px bg-gray-400"></div>
+        </div>
       </div>
     ));
   };

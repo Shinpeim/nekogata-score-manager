@@ -37,3 +37,9 @@
 - [x] ChordChartコンポーネントの動的データ対応
 - [x] MainLayoutのサイドバーでのコード譜一覧表示
 - [x] Tailwind CSS PostCSS設定の修正
+- [x] Tailwind CSS v4対応 - @import "tailwindcss"記法への変更
+- [x] 8小節横並び表示レイアウトの実装
+- [x] 楽譜風の罫線と小節線表示
+- [x] 拍数に応じたコード配置レイアウト
+- [x] コードネームサイズの最適化
+- [x] 拍数表示の右付き配置

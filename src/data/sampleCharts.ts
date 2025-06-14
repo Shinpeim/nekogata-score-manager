@@ -19,6 +19,10 @@ export const sampleCharts: ChordChart[] = [
           { name: 'G', root: 'G', duration: 4 },
           { name: 'Am', root: 'A', quality: 'm', duration: 4 },
           { name: 'F', root: 'F', duration: 4 },
+          { name: 'C', root: 'C', duration: 4 },
+          { name: 'G', root: 'G', duration: 4 },
+          { name: 'Am', root: 'A', quality: 'm', duration: 4 },
+          { name: 'F', root: 'F', duration: 4 },
         ]
       },
       {
@@ -32,6 +36,10 @@ export const sampleCharts: ChordChart[] = [
           { name: 'F', root: 'F', duration: 2 },
           { name: 'C', root: 'C', duration: 2 },
           { name: 'G', root: 'G', duration: 4 },
+          { name: 'C', root: 'C', duration: 4 },
+          { name: 'G', root: 'G', duration: 4 },
+          { name: 'Am', root: 'A', quality: 'm', duration: 2 },
+          { name: 'F', root: 'F', duration: 2 },
         ]
       }
     ],
