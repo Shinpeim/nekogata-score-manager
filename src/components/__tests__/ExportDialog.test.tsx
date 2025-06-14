@@ -21,7 +21,7 @@ const mockElement = {
   href: '',
   download: '',
   click: mockClick,
-} as HTMLAnchorElement;
+} as unknown as HTMLAnchorElement;
 
 const originalCreateElement = document.createElement;
 beforeEach(() => {
