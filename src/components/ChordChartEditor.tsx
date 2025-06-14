@@ -269,6 +269,36 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
     }));
   };
 
+  const duplicateSection = (sectionId: string) => {
+    const sectionToDuplicate = editedChart.sections?.find(section => section.id === sectionId);
+    if (!sectionToDuplicate) return;
+
+    const newSection: ChordSection = {
+      ...sectionToDuplicate,
+      id: `section-${Date.now()}`,
+      name: `${sectionToDuplicate.name} (コピー)`,
+      chords: [...sectionToDuplicate.chords] // コードの配列をコピー
+    };
+
+    // 元のセクションの後に新しいセクションを挿入
+    setEditedChart(prev => {
+      const sections = prev.sections || [];
+      const originalIndex = sections.findIndex(section => section.id === sectionId);
+      if (originalIndex === -1) return prev;
+
+      const newSections = [
+        ...sections.slice(0, originalIndex + 1),
+        newSection,
+        ...sections.slice(originalIndex + 1)
+      ];
+
+      return {
+        ...prev,
+        sections: newSections
+      };
+    });
+  };
+
   const addChordToSection = (sectionId: string) => {
     const newChord: Chord = {
       name: 'C',
@@ -624,6 +654,13 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
                     title="クリップボードから追加"
                   >
                     📥 貼り付け
+                  </button>
+                  <button
+                    onClick={() => duplicateSection(section.id)}
+                    className="bg-[#BDD0CA] hover:bg-[#A4C2B5] text-slate-800 px-2 py-1 rounded-md text-xs"
+                    title="このセクションを複製"
+                  >
+                    📄 複製
                   </button>
                   <button
                     onClick={() => deleteSection(section.id)}
