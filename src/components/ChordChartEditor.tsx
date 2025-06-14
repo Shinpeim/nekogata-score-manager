@@ -550,12 +550,6 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold text-slate-800">セクション</h3>
-            <button
-              onClick={addSection}
-              className="bg-[#BDD0CA] hover:bg-[#A4C2B5] text-slate-800 px-3 py-1 rounded-md text-sm font-medium"
-            >
-              セクション追加
-            </button>
           </div>
 
           {editedChart.sections?.map((section) => (
@@ -679,6 +673,17 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
               </DndContext>
             </div>
           ))}
+          
+          {/* セクション追加ボタンをセクションリストの最後に配置 */}
+          <div className="mt-6 flex justify-center">
+            <button
+              onClick={addSection}
+              className="flex items-center gap-2 bg-[#BDD0CA] hover:bg-[#A4C2B5] text-slate-800 px-4 py-2 rounded-md text-sm font-medium transition-colors"
+            >
+              <span className="text-lg">+</span>
+              <span>セクション追加</span>
+            </button>
+          </div>
         </div>
 
         {/* Notes */}
