@@ -13,12 +13,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [explorerOpen, setExplorerOpen] = useState(false);
   const [showExportImportDialog, setShowExportImportDialog] = useState(false);
+  const [selectedChartIds, setSelectedChartIds] = useState<string[]>([]);
   
   const chartsData = useChordChartStore(state => state.charts);
   const currentChartId = useChordChartStore(state => state.currentChartId);
   const setCurrentChart = useChordChartStore(state => state.setCurrentChart);
   const createNewChart = useChordChartStore(state => state.createNewChart);
   const addChart = useChordChartStore(state => state.addChart);
+  const deleteMultipleCharts = useChordChartStore(state => state.deleteMultipleCharts);
   
   const handleImportCharts = async (charts: ChordChart[]) => {
     for (const chart of charts) {
@@ -44,6 +46,53 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   const handleCancelCreate = () => {
     setShowCreateForm(false);
+  };
+
+  const handleClearSelection = () => {
+    setSelectedChartIds([]);
+  };
+
+  const handleChartSelect = (chartId: string) => {
+    setSelectedChartIds(prev => 
+      prev.includes(chartId) 
+        ? prev.filter(id => id !== chartId)
+        : [...prev, chartId]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedChartIds.length === charts.length) {
+      setSelectedChartIds([]);
+    } else {
+      setSelectedChartIds(charts.map(chart => chart.id));
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedChartIds.length === 0) return;
+    
+    if (confirm(`選択した${selectedChartIds.length}件のコード譜を削除しますか？`)) {
+      try {
+        await deleteMultipleCharts(selectedChartIds);
+        setSelectedChartIds([]);
+      } catch (error) {
+        console.error('Failed to delete charts:', error);
+      }
+    }
+  };
+
+  const handleExportSelected = () => {
+    if (selectedChartIds.length === 0) return;
+    
+    const selectedCharts = charts.filter(chart => selectedChartIds.includes(chart.id));
+    const dataStr = JSON.stringify(selectedCharts, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `selected-charts-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -98,45 +147,103 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 <div className="px-4">
                   <div className="flex items-center justify-between mb-3">
                     <h2 className="text-sm font-medium text-gray-900">Score Explorer</h2>
-                    <button 
-                      onClick={() => setShowCreateForm(true)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs font-medium"
-                      title="新規作成"
-                    >
-                      +
-                    </button>
+                    <div className="flex gap-1">
+                      {selectedChartIds.length > 0 && (
+                        <button 
+                          onClick={handleClearSelection}
+                          className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs font-medium"
+                          title="選択解除"
+                        >
+                          選択解除
+                        </button>
+                      )}
+                      <button 
+                        onClick={() => setShowCreateForm(true)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs font-medium"
+                        title="新規作成"
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
+                  {charts.length > 0 && (
+                    <div className="mb-3 flex items-center gap-2">
+                      <button 
+                        onClick={handleSelectAll}
+                        className="text-xs text-blue-600 hover:text-blue-800"
+                      >
+                        {selectedChartIds.length === charts.length ? '全て解除' : '全て選択'}
+                      </button>
+                      {selectedChartIds.length > 0 && (
+                        <span className="text-xs text-gray-500">
+                          {selectedChartIds.length}件選択中
+                        </span>
+                      )}
+                    </div>
+                  )}
                   <div className="space-y-2">
                     {charts.map((chart) => (
                       <div 
                         key={chart.id} 
-                        className={`p-3 rounded-md cursor-pointer transition-colors ${
-                          currentChartId === chart.id 
-                            ? 'bg-blue-50 border-blue-200 border' 
-                            : 'bg-gray-50 hover:bg-gray-100'
-                        }`}
-                        onClick={() => {
-                          setCurrentChart(chart.id);
-                          setExplorerOpen(false);
-                        }}
+                        className="flex items-start gap-2"
                       >
-                        <h3 className="text-sm font-medium text-gray-900">{chart.title}</h3>
-                        <p className="text-xs text-gray-500 mt-1">{chart.artist}</p>
-                        {chart.tags && chart.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {chart.tags.slice(0, 2).map((tag, index) => (
-                              <span key={index} className="px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded">
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
+                        <input
+                          type="checkbox"
+                          checked={selectedChartIds.includes(chart.id)}
+                          onChange={() => handleChartSelect(chart.id)}
+                          className="mt-3 text-orange-600 focus:ring-orange-500"
+                        />
+                        <div 
+                          className={`flex-1 p-3 rounded-md transition-colors cursor-pointer ${
+                            currentChartId === chart.id 
+                              ? 'bg-blue-50 border-blue-200 border' 
+                              : 'bg-gray-50 hover:bg-gray-100'
+                          }`}
+                          onClick={() => {
+                            setCurrentChart(chart.id);
+                            setExplorerOpen(false);
+                          }}
+                        >
+                          <h3 className="text-sm font-medium text-gray-900">{chart.title}</h3>
+                          <p className="text-xs text-gray-500 mt-1">{chart.artist}</p>
+                          {chart.tags && chart.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {chart.tags.slice(0, 2).map((tag, index) => (
+                                <span key={index} className="px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded">
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
                   
                   {/* Mobile Import/Export Actions */}
-                  <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
+                    <button 
+                      onClick={handleExportSelected}
+                      disabled={selectedChartIds.length === 0}
+                      className={`w-full px-3 py-2 rounded text-sm font-medium ${
+                        selectedChartIds.length > 0
+                          ? 'bg-green-600 hover:bg-green-700 text-white'
+                          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      }`}
+                    >
+                      選択したチャートをエクスポート {selectedChartIds.length > 0 && `(${selectedChartIds.length}件)`}
+                    </button>
+                    <button 
+                      onClick={handleDeleteSelected}
+                      disabled={selectedChartIds.length === 0}
+                      className={`w-full px-3 py-2 rounded text-sm font-medium ${
+                        selectedChartIds.length > 0
+                          ? 'bg-red-600 hover:bg-red-700 text-white'
+                          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      }`}
+                    >
+                      選択したチャートを削除 {selectedChartIds.length > 0 && `(${selectedChartIds.length}件)`}
+                    </button>
                     <button 
                       onClick={() => setShowExportImportDialog(true)}
                       className="w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded text-sm font-medium"
@@ -155,42 +262,100 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           <div className="p-4">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-medium text-gray-900">Score Explorer</h2>
-              <button 
-                onClick={() => setShowCreateForm(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs font-medium"
-                title="新規作成"
-              >
-                +
-              </button>
+              <div className="flex gap-1">
+                {selectedChartIds.length > 0 && (
+                  <button 
+                    onClick={handleClearSelection}
+                    className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs font-medium"
+                    title="選択解除"
+                  >
+                    選択解除
+                  </button>
+                )}
+                <button 
+                  onClick={() => setShowCreateForm(true)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs font-medium"
+                  title="新規作成"
+                >
+                  +
+                </button>
+              </div>
             </div>
+            {charts.length > 0 && (
+              <div className="mb-3 flex items-center gap-2">
+                <button 
+                  onClick={handleSelectAll}
+                  className="text-xs text-blue-600 hover:text-blue-800"
+                >
+                  {selectedChartIds.length === charts.length ? '全て解除' : '全て選択'}
+                </button>
+                {selectedChartIds.length > 0 && (
+                  <span className="text-xs text-gray-500">
+                    {selectedChartIds.length}件選択中
+                  </span>
+                )}
+              </div>
+            )}
             <div className="space-y-2">
               {charts.map((chart) => (
                 <div 
                   key={chart.id} 
-                  className={`p-3 rounded-md cursor-pointer transition-colors ${
-                    currentChartId === chart.id 
-                      ? 'bg-blue-50 border-blue-200 border' 
-                      : 'bg-gray-50 hover:bg-gray-100'
-                  }`}
-                  onClick={() => setCurrentChart(chart.id)}
+                  className="flex items-start gap-2"
                 >
-                  <h3 className="text-sm font-medium text-gray-900">{chart.title}</h3>
-                  <p className="text-xs text-gray-500 mt-1">{chart.artist}</p>
-                  {chart.tags && chart.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {chart.tags.slice(0, 2).map((tag, index) => (
-                        <span key={index} className="px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                  <input
+                    type="checkbox"
+                    checked={selectedChartIds.includes(chart.id)}
+                    onChange={() => handleChartSelect(chart.id)}
+                    className="mt-3 text-orange-600 focus:ring-orange-500"
+                  />
+                  <div 
+                    className={`flex-1 p-3 rounded-md transition-colors cursor-pointer ${
+                      currentChartId === chart.id 
+                        ? 'bg-blue-50 border-blue-200 border' 
+                        : 'bg-gray-50 hover:bg-gray-100'
+                    }`}
+                    onClick={() => setCurrentChart(chart.id)}
+                  >
+                    <h3 className="text-sm font-medium text-gray-900">{chart.title}</h3>
+                    <p className="text-xs text-gray-500 mt-1">{chart.artist}</p>
+                    {chart.tags && chart.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {chart.tags.slice(0, 2).map((tag, index) => (
+                          <span key={index} className="px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
             
             {/* Desktop Import/Export Actions */}
-            <div className="mt-4 pt-4 border-t border-gray-200">
+            <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
+              <button 
+                onClick={handleExportSelected}
+                disabled={selectedChartIds.length === 0}
+                className={`w-full px-3 py-2 rounded text-sm font-medium ${
+                  selectedChartIds.length > 0
+                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+              >
+                選択したチャートをエクスポート {selectedChartIds.length > 0 && `(${selectedChartIds.length}件)`}
+              </button>
+              <button 
+                onClick={handleDeleteSelected}
+                disabled={selectedChartIds.length === 0}
+                className={`w-full px-3 py-2 rounded text-sm font-medium ${
+                  selectedChartIds.length > 0
+                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+              >
+                選択したチャートを削除 {selectedChartIds.length > 0 && `(${selectedChartIds.length}件)`}
+              </button>
               <button 
                 onClick={() => setShowExportImportDialog(true)}
                 className="w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded text-sm font-medium"
