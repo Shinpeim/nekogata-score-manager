@@ -10,8 +10,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
-        name: 'Chord Chart App',
-        short_name: 'ChordChart',
+        name: 'Nekogata Score Manager',
+        short_name: 'NekogataScore',
         description: 'コード譜の作成・閲覧・管理ができるアプリケーション',
         theme_color: '#ffffff',
         icons: [
