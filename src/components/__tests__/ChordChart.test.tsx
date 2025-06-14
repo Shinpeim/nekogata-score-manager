@@ -129,8 +129,8 @@ describe('ChordChart', () => {
 
       render(<ChordChart />);
 
-      expect(screen.getByText('コード譜が選択されていません')).toBeInTheDocument();
-      expect(screen.getByText('左のサイドバーからコード譜を選択してください')).toBeInTheDocument();
+      expect(screen.getByText('コード譜がありません')).toBeInTheDocument();
+      expect(screen.getByText('まずは新しいコード譜を作成してみましょう')).toBeInTheDocument();
     });
 
     it('should show empty state when current chart does not exist', () => {
@@ -139,7 +139,7 @@ describe('ChordChart', () => {
 
       render(<ChordChart />);
 
-      expect(screen.getByText('コード譜が選択されていません')).toBeInTheDocument();
+      expect(screen.getByText('コード譜がありません')).toBeInTheDocument();
     });
   });
 
@@ -297,7 +297,7 @@ describe('ChordChart', () => {
       rerender(<ChordChart />);
 
       // Should now show empty state
-      expect(screen.getByText('コード譜が選択されていません')).toBeInTheDocument();
+      expect(screen.getByText('コード譜がありません')).toBeInTheDocument();
     });
   });
 });

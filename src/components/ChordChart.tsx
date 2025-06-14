@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import type { ChordChart as ChordChartType, ChordSection, Chord } from '../types';
 import { useChordChartStore } from '../stores/chordChartStore';
 import ChordChartEditor from './ChordChartEditor';
+import ChordChartForm from './ChordChartForm';
 
 interface ChordChartProps {
   chartData?: ChordChartType;
+  onCreateNew?: () => void;
 }
 
-const ChordChart: React.FC<ChordChartProps> = ({ chartData }) => {
+const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
   const [isEditing, setIsEditing] = useState(false);
   const charts = useChordChartStore(state => state.charts);
   const currentChartId = useChordChartStore(state => state.currentChartId);
@@ -59,12 +61,19 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData }) => {
     }
   };
 
+
   if (!displayChart) {
     return (
       <div className="h-full bg-white flex items-center justify-center">
         <div className="text-center text-gray-500">
-          <h3 className="text-lg font-medium mb-2">コード譜が選択されていません</h3>
-          <p className="text-sm">左のサイドバーからコード譜を選択してください</p>
+          <h3 className="text-lg font-medium mb-2">コード譜がありません</h3>
+          <p className="text-sm mb-4">まずは新しいコード譜を作成してみましょう</p>
+          <button 
+            onClick={onCreateNew}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+          >
+            新規作成
+          </button>
         </div>
       </div>
     );
@@ -254,4 +263,43 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData }) => {
   );
 };
 
-export default ChordChart;
+// 新規作成フォームの追加（ChordChartコンポーネントの外で）
+const ChordChartWithForm: React.FC<ChordChartProps> = (props) => {
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const createNewChart = useChordChartStore(state => state.createNewChart);
+
+  const handleCreateNew = () => {
+    if (props.onCreateNew) {
+      props.onCreateNew();
+    } else {
+      setShowCreateForm(true);
+    }
+  };
+
+  const handleCreateChart = async (chartData: ChordChartType) => {
+    try {
+      await createNewChart(chartData);
+      setShowCreateForm(false);
+    } catch (error) {
+      console.error('Failed to create chart:', error);
+    }
+  };
+
+  const handleCancelCreate = () => {
+    setShowCreateForm(false);
+  };
+
+  return (
+    <>
+      <ChordChart {...props} onCreateNew={handleCreateNew} />
+      {showCreateForm && (
+        <ChordChartForm
+          onSave={handleCreateChart}
+          onCancel={handleCancelCreate}
+        />
+      )}
+    </>
+  );
+};
+
+export default ChordChartWithForm;

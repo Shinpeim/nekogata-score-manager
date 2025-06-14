@@ -162,7 +162,7 @@ describe('chordChartStore integration with storage', () => {
       expect(state.error).toBeNull();
     });
 
-    it('should load sample data when storage is empty', async () => {
+    it('should load empty data when storage is empty and no sample data', async () => {
       (localforage.getItem as any).mockResolvedValue(null);
       (localforage.setItem as any).mockResolvedValue(undefined);
       
@@ -171,12 +171,12 @@ describe('chordChartStore integration with storage', () => {
       await loadInitialData();
       
       const state = useChordChartStore.getState();
-      expect(Object.keys(state.charts).length).toBeGreaterThan(0);
-      expect(state.currentChartId).toBeTruthy();
+      expect(Object.keys(state.charts).length).toBe(0);
+      expect(state.currentChartId).toBeNull();
       expect(state.isLoading).toBe(false);
       expect(state.error).toBeNull();
       
-      // Should save sample data to storage
+      // Should still save (empty) data to storage
       expect(localforage.setItem).toHaveBeenCalled();
     });
   });
