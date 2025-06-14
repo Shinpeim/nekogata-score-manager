@@ -3,6 +3,8 @@ import type { ChordChart as ChordChartType, ChordSection, Chord } from '../types
 import { useChordChartStore } from '../stores/chordChartStore';
 import ChordChartEditor from './ChordChartEditor';
 import ChordChartForm from './ChordChartForm';
+import ExportImportDialog from './ExportImportDialog';
+import { exportSingleChart } from '../utils/exportImport';
 
 interface ChordChartProps {
   chartData?: ChordChartType;
@@ -11,6 +13,7 @@ interface ChordChartProps {
 
 const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [isExportImportOpen, setIsExportImportOpen] = useState(false);
   const charts = useChordChartStore(state => state.charts);
   const currentChartId = useChordChartStore(state => state.currentChartId);
   const updateChart = useChordChartStore(state => state.updateChart);
@@ -61,6 +64,28 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
     }
   };
 
+  const handleImportCharts = async (importedCharts: ChordChartType[]) => {
+    try {
+      for (const chart of importedCharts) {
+        // IDが重複しないように新しいIDを生成
+        const chartWithNewId = {
+          ...chart,
+          id: `imported-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+        await addChart(chartWithNewId);
+      }
+    } catch (error) {
+      console.error('Failed to import charts:', error);
+    }
+  };
+
+  const handleExportCurrent = () => {
+    if (displayChart) {
+      exportSingleChart(displayChart);
+    }
+  };
 
   if (!displayChart) {
     return (
@@ -254,6 +279,18 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
             複製
           </button>
           <button 
+            onClick={handleExportCurrent}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+          >
+            エクスポート
+          </button>
+          <button 
+            onClick={() => setIsExportImportOpen(true)}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+          >
+            インポート・エクスポート
+          </button>
+          <button 
             onClick={handleDelete}
             className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
           >
@@ -261,6 +298,15 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
           </button>
         </div>
       </div>
+
+      {/* エクスポート・インポートダイアログ */}
+      <ExportImportDialog
+        isOpen={isExportImportOpen}
+        onClose={() => setIsExportImportOpen(false)}
+        currentChart={displayChart}
+        allCharts={Object.values(charts)}
+        onImportCharts={handleImportCharts}
+      />
     </div>
   );
 };
