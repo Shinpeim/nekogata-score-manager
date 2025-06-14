@@ -81,3 +81,4 @@
 - [x] 旧フォーマット自動変換機能
 - [x] エクスポート・インポートUI（ダイアログ形式）
 - [x] アプリケーション名をNekogata Score Managerに変更
+- [x] Nekogata Score Manager用カスタムfaviconとPWAアイコンの作成
