@@ -1,4 +1,6 @@
-import React, { ReactNode } from 'react';
+import React from 'react';
+import type { ReactNode } from 'react';
+import { sampleCharts } from '../data/sampleCharts';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -30,15 +32,21 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           <div className="p-4">
             <h2 className="text-sm font-medium text-gray-900 mb-3">コード譜一覧</h2>
             <div className="space-y-2">
-              {/* Sample chord charts list */}
-              <div className="p-3 bg-gray-50 rounded-md hover:bg-gray-100 cursor-pointer">
-                <h3 className="text-sm font-medium text-gray-900">サンプル楽曲 1</h3>
-                <p className="text-xs text-gray-500 mt-1">アーティスト名</p>
-              </div>
-              <div className="p-3 bg-gray-50 rounded-md hover:bg-gray-100 cursor-pointer">
-                <h3 className="text-sm font-medium text-gray-900">サンプル楽曲 2</h3>
-                <p className="text-xs text-gray-500 mt-1">アーティスト名</p>
-              </div>
+              {sampleCharts.map((chart) => (
+                <div key={chart.id} className="p-3 bg-gray-50 rounded-md hover:bg-gray-100 cursor-pointer">
+                  <h3 className="text-sm font-medium text-gray-900">{chart.title}</h3>
+                  <p className="text-xs text-gray-500 mt-1">{chart.artist}</p>
+                  {chart.tags && chart.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {chart.tags.slice(0, 2).map((tag, index) => (
+                        <span key={index} className="px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </aside>

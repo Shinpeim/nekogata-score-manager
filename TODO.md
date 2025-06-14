@@ -30,3 +30,10 @@
 - [x] メインレイアウトのデザイン（ヘッダー、サイドバー、メインコンテンツ）
 - [x] 基本コンポーネントの作成（Header, Sidebar, ChordChart）
 - [x] モバイルレスポンシブ対応
+- [x] データ構造の設計 - コード譜データの形式定義
+- [x] TypeScript型定義ファイルの作成 (src/types/chord.ts)
+- [x] コア機能の実装 - コード譜の表示・編集機能
+- [x] サンプルデータの作成 (sampleCharts.ts)
+- [x] ChordChartコンポーネントの動的データ対応
+- [x] MainLayoutのサイドバーでのコード譜一覧表示
+- [x] Tailwind CSS PostCSS設定の修正
