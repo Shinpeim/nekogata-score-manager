@@ -1,21 +1,35 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useChordChartStore } from '../stores/chordChartStore';
+import ChordChartForm from '../components/ChordChartForm';
+import type { ChordChart } from '../types';
 
 interface MainLayoutProps {
   children: ReactNode;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  
   const chartsData = useChordChartStore(state => state.charts);
   const currentChartId = useChordChartStore(state => state.currentChartId);
   const setCurrentChart = useChordChartStore(state => state.setCurrentChart);
+  const createNewChart = useChordChartStore(state => state.createNewChart);
   
   const charts = useMemo(() => 
     Object.values(chartsData).sort((a, b) => 
       new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
     ), [chartsData]
   );
+
+  const handleCreateChart = (chartData: ChordChart) => {
+    createNewChart(chartData);
+    setShowCreateForm(false);
+  };
+
+  const handleCancelCreate = () => {
+    setShowCreateForm(false);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -27,7 +41,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               <h1 className="text-xl font-semibold text-gray-900">Chord Chart</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+              <button 
+                onClick={() => setShowCreateForm(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+              >
                 新規作成
               </button>
             </div>
@@ -74,6 +91,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           {children}
         </main>
       </div>
+
+      {/* 新規作成フォーム */}
+      {showCreateForm && (
+        <ChordChartForm
+          onSave={handleCreateChart}
+          onCancel={handleCancelCreate}
+        />
+      )}
     </div>
   );
 };

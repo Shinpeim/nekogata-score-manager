@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type { ChordChart, ChordLibrary } from '../types';
 import { sampleCharts } from '../data/sampleCharts';
+import { createNewChordChart } from '../utils/chordUtils';
 
 interface ChordChartState {
   // データ
@@ -14,6 +15,7 @@ interface ChordChartState {
   deleteChart: (id: string) => void;
   setCurrentChart: (id: string | null) => void;
   loadInitialData: () => void;
+  createNewChart: (chartData: Partial<ChordChart>) => ChordChart;
 }
 
 export const useChordChartStore = create<ChordChartState>()(
@@ -77,6 +79,20 @@ export const useChordChartStore = create<ChordChartState>()(
           charts: initialCharts,
           currentChartId: sampleCharts[0]?.id || null
         }, false, 'loadInitialData');
+      },
+
+      createNewChart: (chartData) => {
+        const newChart = createNewChordChart(chartData);
+        
+        set((state) => ({
+          charts: {
+            ...state.charts,
+            [newChart.id]: newChart
+          },
+          currentChartId: newChart.id
+        }), false, 'createNewChart');
+        
+        return newChart;
       }
     }),
     {
