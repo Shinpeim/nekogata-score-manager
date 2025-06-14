@@ -1,24 +1,30 @@
 import type { ChordChart, ChordSection } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 
-export const createEmptyChordChart = (): Omit<ChordChart, 'id' | 'createdAt' | 'updatedAt'> => ({
-  title: '新しいコード譜',
-  artist: '',
-  key: 'C',
-  tempo: 120,
-  timeSignature: '4/4',
-  sections: [createEmptySection('イントロ')],
-  tags: [],
-  notes: ''
-});
+export const createEmptyChordChart = (): Omit<ChordChart, 'id' | 'createdAt' | 'updatedAt'> => {
+  const timeSignature = '4/4';
+  return {
+    title: '新しいコード譜',
+    artist: '',
+    key: 'C',
+    tempo: 120,
+    timeSignature,
+    sections: [createEmptySection('イントロ', timeSignature)],
+    tags: [],
+    notes: ''
+  };
+};
 
-export const createEmptySection = (name: string = 'セクション'): ChordSection => ({
-  id: uuidv4(),
-  name,
-  chords: [],
-  beatsPerBar: 4,
-  barsCount: 4
-});
+export const createEmptySection = (name: string = 'セクション', timeSignature: string = '4/4'): ChordSection => {
+  const beatsPerBar = parseInt(timeSignature.split('/')[0]);
+  return {
+    id: uuidv4(),
+    name,
+    chords: [],
+    beatsPerBar,
+    barsCount: 4
+  };
+};
 
 export const createNewChordChart = (
   data: Partial<ChordChart>
@@ -70,3 +76,17 @@ export const COMMON_TIME_SIGNATURES = ['4/4', '3/4', '2/4', '6/8', '12/8'];
 export const COMMON_SECTION_NAMES = [
   'イントロ', 'Aメロ', 'Bメロ', 'サビ', 'アウトロ', 'ブリッジ', 'ソロ', 'インタールード'
 ];
+
+// 既存データの移行処理：拍子に応じてbeatsPerBarを修正
+export const migrateChartData = (chart: ChordChart): ChordChart => {
+  const beatsPerBar = chart.timeSignature ? parseInt(chart.timeSignature.split('/')[0]) : 4;
+  
+  return {
+    ...chart,
+    sections: chart.sections?.map(section => ({
+      ...section,
+      // beatsPerBarが未定義、または4拍以外の拍子で4拍になっている場合は修正
+      beatsPerBar: (!section.beatsPerBar || (beatsPerBar !== 4 && section.beatsPerBar === 4)) ? beatsPerBar : section.beatsPerBar
+    })) || []
+  };
+};

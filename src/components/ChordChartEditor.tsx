@@ -11,10 +11,23 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
   const [editedChart, setEditedChart] = useState<ChordChart>({ ...chart });
   
   const handleBasicInfoChange = (field: keyof ChordChart, value: string | number | undefined) => {
-    setEditedChart(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setEditedChart(prev => {
+      const updated = {
+        ...prev,
+        [field]: value
+      };
+      
+      // 拍子が変更された場合、全セクションのbeatsPerBarを更新
+      if (field === 'timeSignature' && typeof value === 'string') {
+        const beatsPerBar = parseInt(value.split('/')[0]);
+        updated.sections = prev.sections?.map(section => ({
+          ...section,
+          beatsPerBar
+        })) || [];
+      }
+      
+      return updated;
+    });
   };
 
   const handleSectionChange = (sectionId: string, field: keyof ChordSection, value: string | number) => {
@@ -29,10 +42,11 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
   };
 
   const addSection = () => {
+    const beatsPerBar = editedChart.timeSignature ? parseInt(editedChart.timeSignature.split('/')[0]) : 4;
     const newSection: ChordSection = {
       id: `section-${Date.now()}`,
       name: '新しいセクション',
-      beatsPerBar: editedChart.timeSignature ? parseInt(editedChart.timeSignature.split('/')[0]) : 4,
+      beatsPerBar,
       chords: []
     };
     
