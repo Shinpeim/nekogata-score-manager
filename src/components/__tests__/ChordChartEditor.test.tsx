@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import ChordChartEditor from '../ChordChartEditor';
 import type { ChordChart } from '../../types';
@@ -18,11 +18,12 @@ const mockChart: ChordChart = {
       id: 'section-1',
       name: 'Verse',
       beatsPerBar: 4,
+      barsCount: 4,
       chords: [
-        { name: 'C', duration: 4 },
-        { name: 'Am', duration: 4 },
-        { name: 'F', duration: 4 },
-        { name: 'G', duration: 4 }
+        { name: 'C', root: 'C', duration: 4 },
+        { name: 'Am', root: 'A', duration: 4 },
+        { name: 'F', root: 'F', duration: 4 },
+        { name: 'G', root: 'G', duration: 4 }
       ]
     }
   ],

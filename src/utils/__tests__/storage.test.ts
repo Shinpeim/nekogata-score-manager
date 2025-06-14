@@ -30,9 +30,10 @@ const mockChart: ChordChart = {
       id: 'section-1',
       name: 'Verse',
       beatsPerBar: 4,
+      barsCount: 4,
       chords: [
-        { name: 'C', duration: 4 },
-        { name: 'Am', duration: 4 }
+        { name: 'C', root: 'C', duration: 4 },
+        { name: 'Am', root: 'A', duration: 4 }
       ]
     }
   ]
@@ -46,7 +47,7 @@ describe('storageService', () => {
   describe('saveCharts', () => {
     it('should save charts to storage', async () => {
       const charts = { [mockChart.id]: mockChart };
-      vi.mocked(localforage.setItem).mockResolvedValue(charts);
+      vi.mocked(localforage.setItem).mockResolvedValue(undefined);
 
       await storageService.saveCharts(charts);
 
