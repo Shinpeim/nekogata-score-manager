@@ -4,6 +4,7 @@ export interface Chord {
   quality?: string;
   bass?: string;
   duration?: number;
+  isLineBreak?: boolean; // 改行マーカーフラグ
 }
 
 export interface ChordSection {
