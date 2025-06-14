@@ -473,7 +473,7 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
                       const itemId = `${section.id}-${chordIndex}`;
                       return (
                         <SortableChordItem
-                          key={`${section.id}-${chord.name}-${chordIndex}-${chord.duration || 4}`}
+                          key={`${section.id}-${chordIndex}`}
                           chord={chord}
                           chordIndex={chordIndex}
                           sectionId={section.id}
