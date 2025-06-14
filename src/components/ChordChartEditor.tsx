@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { ChordChart, ChordSection, Chord } from '../types';
+import { createLineBreakMarker, isLineBreakMarker } from '../utils/lineBreakHelpers';
 
 interface ChordChartEditorProps {
   chart: ChordChart;
@@ -110,6 +111,26 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
           ? {
               ...section,
               chords: section.chords.filter((_, index) => index !== chordIndex)
+            }
+          : section
+      ) || []
+    }));
+  };
+
+  const insertLineBreakAfterChord = (sectionId: string, chordIndex: number) => {
+    const lineBreak = createLineBreakMarker();
+    
+    setEditedChart(prev => ({
+      ...prev,
+      sections: prev.sections?.map(section =>
+        section.id === sectionId
+          ? {
+              ...section,
+              chords: [
+                ...section.chords.slice(0, chordIndex + 1),
+                lineBreak,
+                ...section.chords.slice(chordIndex + 1)
+              ]
             }
           : section
       ) || []
@@ -268,32 +289,57 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
 
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
                 {section.chords.map((chord, chordIndex) => (
-                  <div key={chordIndex} className="p-2 border border-slate-200 rounded-md">
+                  <div key={chordIndex} className={`p-2 border rounded-md ${
+                    isLineBreakMarker(chord) 
+                      ? 'border-orange-300 bg-orange-50' 
+                      : 'border-slate-200'
+                  }`}>
                     <div className="flex justify-between items-center mb-1">
                       <span className="text-xs text-slate-500">#{chordIndex + 1}</span>
-                      <button
-                        onClick={() => deleteChordFromSection(section.id, chordIndex)}
-                        className="text-[#EE5840] hover:text-[#D14A2E] text-xs"
-                      >
-                        ✕
-                      </button>
+                      <div className="flex gap-1">
+                        {!isLineBreakMarker(chord) && (
+                          <button
+                            onClick={() => insertLineBreakAfterChord(section.id, chordIndex)}
+                            className="text-orange-600 hover:text-orange-800 text-xs"
+                            title="この後に改行を挿入"
+                          >
+                            ↵
+                          </button>
+                        )}
+                        <button
+                          onClick={() => deleteChordFromSection(section.id, chordIndex)}
+                          className="text-[#EE5840] hover:text-[#D14A2E] text-xs"
+                        >
+                          ✕
+                        </button>
+                      </div>
                     </div>
-                    <input
-                      type="text"
-                      value={chord.name}
-                      onChange={(e) => updateChordInSection(section.id, chordIndex, 'name', e.target.value)}
-                      className="w-full mb-1 px-2 py-1 text-sm border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-[#85B0B7]"
-                      placeholder="コード名"
-                    />
-                    <input
-                      type="number"
-                      value={chord.duration || 4}
-                      onChange={(e) => updateChordInSection(section.id, chordIndex, 'duration', parseInt(e.target.value))}
-                      className="w-full px-2 py-1 text-sm border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-[#85B0B7]"
-                      placeholder="拍数"
-                      min="1"
-                      max="16"
-                    />
+                    
+                    {isLineBreakMarker(chord) ? (
+                      <div className="text-center py-2">
+                        <span className="text-orange-600 font-medium text-sm">改行</span>
+                        <div className="text-xs text-orange-500 mt-1">ここで行が変わります</div>
+                      </div>
+                    ) : (
+                      <>
+                        <input
+                          type="text"
+                          value={chord.name}
+                          onChange={(e) => updateChordInSection(section.id, chordIndex, 'name', e.target.value)}
+                          className="w-full mb-1 px-2 py-1 text-sm border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-[#85B0B7]"
+                          placeholder="コード名"
+                        />
+                        <input
+                          type="number"
+                          value={chord.duration || 4}
+                          onChange={(e) => updateChordInSection(section.id, chordIndex, 'duration', parseInt(e.target.value))}
+                          className="w-full px-2 py-1 text-sm border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-[#85B0B7]"
+                          placeholder="拍数"
+                          min="1"
+                          max="16"
+                        />
+                      </>
+                    )}
                   </div>
                 ))}
               </div>

@@ -5,6 +5,7 @@ import ChordChartEditor from './ChordChartEditor';
 import ChordChartForm from './ChordChartForm';
 import BpmIndicator from './BpmIndicator';
 import { useResponsiveBars } from '../hooks/useResponsiveBars';
+import { splitChordsIntoRows, isLineBreakMarker } from '../utils/lineBreakHelpers';
 
 interface ChordChartProps {
   chartData?: ChordChartType;
@@ -95,46 +96,50 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
     const timeSignatureBeats = displayChart.timeSignature ? parseInt(displayChart.timeSignature.split('/')[0]) : 4;
     const beatsPerBar = section.beatsPerBar && section.beatsPerBar !== 4 ? section.beatsPerBar : timeSignatureBeats;
     
-    // コードを小節に分割
-    const bars: Chord[][] = [];
-    let currentBar: Chord[] = [];
-    let currentBeats = 0;
+    // 改行マーカーを考慮してコードを行に分割
+    const rows = splitChordsIntoRows(section.chords, barsPerRow, beatsPerBar);
     
-    for (const chord of section.chords) {
-      const chordDuration = chord.duration || 4;
+    // 各行をさらに小節に分割
+    const processedRows = rows.map(rowChords => {
+      const bars: Chord[][] = [];
+      let currentBar: Chord[] = [];
+      let currentBeats = 0;
       
-      if (currentBeats + chordDuration <= beatsPerBar) {
-        currentBar.push(chord);
-        currentBeats += chordDuration;
-      } else {
-        // 現在の小節を完了し、新しい小節を開始
-        if (currentBar.length > 0) {
-          bars.push([...currentBar]);
+      for (const chord of rowChords) {
+        // 改行マーカーは既に除外されているはず
+        if (isLineBreakMarker(chord)) continue;
+        
+        const chordDuration = chord.duration || 4;
+        
+        if (currentBeats + chordDuration <= beatsPerBar) {
+          currentBar.push(chord);
+          currentBeats += chordDuration;
+        } else {
+          // 現在の小節を完了し、新しい小節を開始
+          if (currentBar.length > 0) {
+            bars.push([...currentBar]);
+          }
+          currentBar = [chord];
+          currentBeats = chordDuration;
         }
-        currentBar = [chord];
-        currentBeats = chordDuration;
+        
+        // 小節が完了した場合
+        if (currentBeats === beatsPerBar) {
+          bars.push([...currentBar]);
+          currentBar = [];
+          currentBeats = 0;
+        }
       }
       
-      // 小節が完了した場合
-      if (currentBeats === beatsPerBar) {
-        bars.push([...currentBar]);
-        currentBar = [];
-        currentBeats = 0;
+      // 最後の未完了の小節を追加
+      if (currentBar.length > 0) {
+        bars.push(currentBar);
       }
-    }
+      
+      return bars;
+    });
     
-    // 最後の未完了の小節を追加
-    if (currentBar.length > 0) {
-      bars.push(currentBar);
-    }
-    
-    // 計算された小節数ずつの行に分割
-    const rows = [];
-    for (let i = 0; i < bars.length; i += barsPerRow) {
-      rows.push(bars.slice(i, i + barsPerRow));
-    }
-    
-    return rows.map((row, rowIndex) => (
+    return processedRows.map((rowBars, rowIndex) => (
       <div key={rowIndex} className="mb-8">
         {/* コード表示エリア */}
         <div className="relative bg-white">
@@ -143,7 +148,7 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
           
           {/* 小節の内容 */}
           <div className="flex min-h-20 py-2">
-            {row.map((bar, barIndex) => (
+            {rowBars.map((bar, barIndex) => (
               <div key={barIndex} className="flex-1 relative">
                 {/* 小節線（縦線） */}
                 {barIndex > 0 && (
@@ -174,7 +179,7 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew }) => {
                 </div>
                 
                 {/* 右端の小節線 */}
-                {barIndex === row.length - 1 && (
+                {barIndex === rowBars.length - 1 && (
                   <div className="absolute right-0 top-6 bottom-6 w-px bg-slate-400"></div>
                 )}
               </div>
