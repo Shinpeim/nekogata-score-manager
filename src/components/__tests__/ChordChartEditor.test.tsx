@@ -167,7 +167,7 @@ describe('ChordChartEditor', () => {
       />
     );
 
-    const deleteButton = screen.getByText('削除');
+    const deleteButton = screen.getByTitle('このセクションを削除');
     fireEvent.click(deleteButton);
 
     expect(screen.queryByDisplayValue('Verse')).not.toBeInTheDocument();

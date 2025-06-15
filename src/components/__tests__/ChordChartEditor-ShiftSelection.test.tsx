@@ -109,7 +109,7 @@ describe('ChordChartEditor - Shift Selection', () => {
     fireEvent.click(chordElements[2].closest('.border')!, { shiftKey: true });
 
     // 全解除ボタンをクリック
-    const clearAllButton = screen.getByText('❌ 全解除');
+    const clearAllButton = screen.getByTitle('このセクションの選択をすべて解除');
     fireEvent.click(clearAllButton);
 
     // 選択がクリアされていることを確認
