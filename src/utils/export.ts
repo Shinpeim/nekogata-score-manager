@@ -25,31 +25,7 @@ const CHORD_CHARTS_PREFIX = 'chord-charts';
 // ============================================================================
 
 /**
- * 単一のコード譜をJSONファイルとしてエクスポート
- */
-export const exportSingleChart = (chart: ChordChart): void => {
-  const exportData: ExportData = {
-    version: EXPORT_VERSION,
-    exportDate: new Date().toISOString(),
-    charts: [chart]
-  };
-
-  const jsonString = JSON.stringify(exportData, null, 2);
-  const blob = new Blob([jsonString], { type: JSON_MIME_TYPE });
-  const url = URL.createObjectURL(blob);
-  
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `${sanitizeFileName(chart.title)}.json`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  
-  URL.revokeObjectURL(url);
-};
-
-/**
- * 複数のコード譜をJSONファイルとしてエクスポート
+ * コード譜をJSONファイルとしてエクスポート
  */
 export const exportMultipleCharts = (charts: ChordChart[], filename?: string): void => {
   const exportData: ExportData = {
@@ -65,9 +41,7 @@ export const exportMultipleCharts = (charts: ChordChart[], filename?: string): v
   const link = document.createElement('a');
   link.href = url;
   link.download = filename || `${CHORD_CHARTS_PREFIX}-${new Date().toISOString().split('T')[0]}.json`;
-  document.body.appendChild(link);
   link.click();
-  document.body.removeChild(link);
   
   URL.revokeObjectURL(url);
 };

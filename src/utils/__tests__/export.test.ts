@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { ChordChart } from '../../types';
 import { 
-  exportSingleChart, 
   exportMultipleCharts
 } from '../export';
 
@@ -82,29 +81,6 @@ describe('export', () => {
     vi.clearAllMocks();
   });
 
-  describe('exportSingleChart', () => {
-    it('should export a single chart as JSON file', () => {
-      exportSingleChart(mockChart);
-
-      expect(document.createElement).toHaveBeenCalledWith('a');
-      expect(mockElement.download).toBe('テストソング.json');
-      expect(mockElement.click).toHaveBeenCalled();
-      expect(document.body.appendChild).toHaveBeenCalled();
-      expect(document.body.removeChild).toHaveBeenCalled();
-      expect(URL.revokeObjectURL).toHaveBeenCalled();
-    });
-
-    it('should sanitize filename', () => {
-      const chartWithSpecialChars = {
-        ...mockChart,
-        title: 'Test<>:"/\\|?*Song With Spaces'
-      };
-      
-      exportSingleChart(chartWithSpecialChars);
-      
-      expect(mockElement.download).toBe('TestSong_With_Spaces.json');
-    });
-  });
 
   describe('exportMultipleCharts', () => {
     it('should export multiple charts with default filename', () => {

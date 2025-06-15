@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { ChordChart } from '../types';
+import { exportMultipleCharts } from '../utils/export';
 
 interface ExportDialogProps {
   isOpen: boolean;
@@ -42,15 +43,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
     // .jsonを自動で付与（すでにある場合は重複させない）
     const finalFilename = filename.endsWith('.json') ? filename : `${filename}.json`;
 
-    const dataStr = JSON.stringify(charts, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = finalFilename;
-    link.click();
-    URL.revokeObjectURL(url);
-
+    exportMultipleCharts(charts, finalFilename);
     onClose();
   };
 
