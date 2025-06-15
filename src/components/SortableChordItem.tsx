@@ -32,6 +32,8 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
   // 入力表示用の状態
   const [displayValue, setDisplayValue] = useState('');
   const [isEditing, setIsEditing] = useState(false);
+  const [durationDisplayValue, setDurationDisplayValue] = useState('');
+  const [isDurationEditing, setIsDurationEditing] = useState(false);
 
   const {
     attributes,
@@ -55,6 +57,13 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
       setDisplayValue(fullChordName);
     }
   }, [chord.name, chord.base, isEditing]);
+
+  // 拍数が変更された時に表示値を更新
+  useEffect(() => {
+    if (!isDurationEditing) {
+      setDurationDisplayValue(String(chord.duration || 4));
+    }
+  }, [chord.duration, isDurationEditing]);
 
   const handleInputFocus = () => {
     setIsEditing(true);
@@ -81,6 +90,35 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.currentTarget.blur(); // Enterキーでフォーカスアウト
+    }
+  };
+
+  // 拍数入力用のイベントハンドラー
+  const handleDurationFocus = () => {
+    setIsDurationEditing(true);
+    setDurationDisplayValue(String(chord.duration || 4));
+  };
+
+  const handleDurationChange = (value: string) => {
+    setDurationDisplayValue(value);
+    // 入力中はパースしない
+  };
+
+  const handleDurationBlur = () => {
+    setIsDurationEditing(false);
+    // フォーカスアウト時にパースして確定
+    const parsedValue = parseFloat(durationDisplayValue);
+    if (!isNaN(parsedValue) && parsedValue >= 0.5 && parsedValue <= 16) {
+      onUpdateChord(sectionId, chordIndex, 'duration', parsedValue);
+    } else {
+      // 無効な値の場合は元の値に戻す
+      setDurationDisplayValue(String(chord.duration || 4));
+    }
+  };
+
+  const handleDurationKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.currentTarget.blur(); // Enterキーでフォーカスアウト
     }
@@ -162,8 +200,11 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
           />
           <input
             type="number"
-            value={chord.duration || 4}
-            onChange={(e) => onUpdateChord(sectionId, chordIndex, 'duration', parseFloat(e.target.value))}
+            value={durationDisplayValue}
+            onChange={(e) => handleDurationChange(e.target.value)}
+            onFocus={handleDurationFocus}
+            onBlur={handleDurationBlur}
+            onKeyDown={handleDurationKeyDown}
             className="w-full px-2 py-1 text-sm border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-[#85B0B7]"
             placeholder="拍数"
             min="0.5"
