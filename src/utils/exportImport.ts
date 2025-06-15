@@ -1,7 +1,9 @@
 import type { ChordChart, ChordLibrary, ChordSection } from '../types';
 import { migrateData, getDataVersion, previewMigration } from './migration';
 
-// エクスポート・インポート用のデータフォーマット
+// ============================================================================
+// 型定義
+// ============================================================================
 export interface ExportData {
   version: string;
   exportDate: string;
@@ -21,8 +23,36 @@ export interface ImportResult {
   };
 }
 
-// アプリケーションのバージョン情報
+// ============================================================================
+// 定数
+// ============================================================================
 const EXPORT_VERSION = '1.0.0';
+
+// ファイル名・MIME型
+const JSON_MIME_TYPE = 'application/json';
+const ALL_CHARTS_FILENAME = 'all-chord-charts.json';
+const CHORD_CHARTS_PREFIX = 'chord-charts';
+
+// エラーメッセージ
+const ERROR_MESSAGES = {
+  FILE_READ_FAILED: 'ファイルの読み込みに失敗しました',
+  FILE_READ_ERROR: 'ファイルの読み込みでエラーが発生しました',
+  JSON_PARSE_FAILED: 'JSONの解析に失敗しました',
+  UNKNOWN_ERROR: '不明なエラー',
+  INVALID_DATA_FORMAT: '無効なデータフォーマットです',
+  VERSION_DATA_ERROR: 'バージョン情報付きデータの処理でエラーが発生しました'
+} as const;
+
+// 警告メッセージ
+const WARNING_MESSAGES = {
+  OLD_FORMAT_CONVERTED: '旧形式のデータです。新形式に変換しました。',
+  SINGLE_CHART_FILE: '単一のコード譜ファイルです。',
+  DIFFERENT_VERSION: (oldVer: string, newVer: string) => `異なるバージョンのデータです (${oldVer} -> ${newVer})`
+} as const;
+
+// ============================================================================
+// エクスポート機能
+// ============================================================================
 
 /**
  * 単一のコード譜をJSONファイルとしてエクスポート
@@ -35,7 +65,7 @@ export const exportSingleChart = (chart: ChordChart): void => {
   };
 
   const jsonString = JSON.stringify(exportData, null, 2);
-  const blob = new Blob([jsonString], { type: 'application/json' });
+  const blob = new Blob([jsonString], { type: JSON_MIME_TYPE });
   const url = URL.createObjectURL(blob);
   
   const link = document.createElement('a');
@@ -59,12 +89,12 @@ export const exportMultipleCharts = (charts: ChordChart[], filename?: string): v
   };
 
   const jsonString = JSON.stringify(exportData, null, 2);
-  const blob = new Blob([jsonString], { type: 'application/json' });
+  const blob = new Blob([jsonString], { type: JSON_MIME_TYPE });
   const url = URL.createObjectURL(blob);
   
   const link = document.createElement('a');
   link.href = url;
-  link.download = filename || `chord-charts-${new Date().toISOString().split('T')[0]}.json`;
+  link.download = filename || `${CHORD_CHARTS_PREFIX}-${new Date().toISOString().split('T')[0]}.json`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -77,8 +107,12 @@ export const exportMultipleCharts = (charts: ChordChart[], filename?: string): v
  */
 export const exportAllCharts = (library: ChordLibrary): void => {
   const charts = Object.values(library);
-  exportMultipleCharts(charts, 'all-chord-charts.json');
+  exportMultipleCharts(charts, ALL_CHARTS_FILENAME);
 };
+
+// ============================================================================
+// インポート機能
+// ============================================================================
 
 /**
  * JSONファイルからコード譜をインポート
@@ -96,7 +130,7 @@ export const importChartsFromFile = (file: File): Promise<ImportResult> => {
         resolve({
           success: false,
           charts: [],
-          errors: [`ファイルの読み込みに失敗しました: ${error instanceof Error ? error.message : '不明なエラー'}`],
+          errors: [`${ERROR_MESSAGES.FILE_READ_FAILED}: ${error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR}`],
           warnings: []
         });
       }
@@ -227,11 +261,15 @@ export const parseImportData = (jsonString: string): ImportResult => {
     return {
       success: false,
       charts: [],
-      errors: [`JSONの解析に失敗しました: ${error instanceof Error ? error.message : '不明なエラー'}`],
+      errors: [`${ERROR_MESSAGES.JSON_PARSE_FAILED}: ${error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR}`],
       warnings: []
     };
   }
 };
+
+// ============================================================================
+// 内部処理関数
+// ============================================================================
 
 /**
  * 処理済みデータからImportResultを生成
@@ -251,7 +289,7 @@ const processImportData = (
       return {
         success: false,
         charts: [],
-        errors: ['バージョン情報付きデータの処理でエラーが発生しました'],
+        errors: [ERROR_MESSAGES.VERSION_DATA_ERROR],
         warnings,
         migrationInfo
       };
@@ -265,7 +303,7 @@ const processImportData = (
         success: validationResult.charts.length > 0,
         charts: validationResult.charts,
         errors: validationResult.errors,
-        warnings: ['旧形式のデータです。新形式に変換しました。', ...warnings, ...validationResult.warnings],
+        warnings: [WARNING_MESSAGES.OLD_FORMAT_CONVERTED, ...warnings, ...validationResult.warnings],
         migrationInfo
       };
     }
@@ -278,7 +316,7 @@ const processImportData = (
           success: true,
           charts: [validationResult.chart!],
           errors: [],
-          warnings: ['単一のコード譜ファイルです。', ...warnings],
+          warnings: [WARNING_MESSAGES.SINGLE_CHART_FILE, ...warnings],
           migrationInfo
         };
       }
@@ -287,7 +325,7 @@ const processImportData = (
     return {
       success: false,
       charts: [],
-      errors: ['無効なデータフォーマットです'],
+      errors: [ERROR_MESSAGES.INVALID_DATA_FORMAT],
       warnings,
       migrationInfo
     };
@@ -295,7 +333,7 @@ const processImportData = (
 
   // バージョンチェック
   if (data.version && data.version !== EXPORT_VERSION) {
-    warnings.push(`異なるバージョンのデータです (${data.version} -> ${EXPORT_VERSION})`);
+    warnings.push(WARNING_MESSAGES.DIFFERENT_VERSION(data.version, EXPORT_VERSION));
   }
 
   // 各コード譜の検証
@@ -309,6 +347,10 @@ const processImportData = (
     migrationInfo
   };
 };
+
+// ============================================================================
+// データ検証関数
+// ============================================================================
 
 /**
  * エクスポートデータの形式チェック
@@ -488,6 +530,10 @@ const validateSingleChart = (chart: unknown): {
 
   return { isValid: true, chart: validatedChart, errors: [], warnings };
 };
+
+// ============================================================================
+// ユーティリティ関数
+// ============================================================================
 
 /**
  * ファイル名をサニタイズ
