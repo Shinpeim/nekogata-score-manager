@@ -82,7 +82,8 @@ describe('import', () => {
       const exportData: ExportData = {
         version: '1.0.0',
         exportDate: new Date().toISOString(),
-        charts: [invalidChart as any]
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        charts: [invalidChart as any] // 意図的に不正なデータを作成してバリデーションをテストするため型チェックを回避
       };
 
       const result = parseImportData(JSON.stringify(exportData));
@@ -101,7 +102,8 @@ describe('import', () => {
       const exportData: ExportData = {
         version: '1.0.0',
         exportDate: new Date().toISOString(),
-        charts: [chartWithInvalidDates as any]
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        charts: [chartWithInvalidDates as any] // 不正な日付形式のテストのため型チェックを回避
       };
 
       const result = parseImportData(JSON.stringify(exportData));
@@ -129,7 +131,8 @@ describe('import', () => {
       const exportData: ExportData = {
         version: '1.0.0',
         exportDate: new Date().toISOString(),
-        charts: [chartWithIncompleteSection as any]
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        charts: [chartWithIncompleteSection as any] // 不完全なセクションデータのテストのため型チェックを回避
       };
 
       const result = parseImportData(JSON.stringify(exportData));
@@ -171,7 +174,8 @@ describe('import', () => {
       const exportData: ExportData = {
         version: '1.0.0',
         exportDate: new Date().toISOString(),
-        charts: [chart34 as any]
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        charts: [chart34 as any] // 間違ったbeatsPerBarのテストのため型チェックを回避
       };
 
       const result = parseImportData(JSON.stringify(exportData));
