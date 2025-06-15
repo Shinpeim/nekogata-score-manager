@@ -256,3 +256,72 @@ export const isValidFullChordName = (chordName: string): boolean => {
   // 通常のコード名のバリデーション
   return isValidChordName(trimmed);
 };
+
+/**
+ * コード譜全体のバリデーション（現在編集中の入力値を含む）
+ * 
+ * @param chart - チェックするコード譜
+ * @param editingState - 現在編集中の状態（SortableChordItemから取得）
+ * @returns バリデーション結果
+ */
+export const validateChartInputs = (
+  chart: ChordChart,
+  editingState?: {
+    sectionId?: string;
+    chordIndex?: number;
+    displayValue?: string;
+    durationDisplayValue?: string;
+    isEditing?: boolean;
+    isDurationEditing?: boolean;
+  }
+): { isValid: boolean; errors: string[] } => {
+  const errors: string[] = [];
+
+  if (!chart.sections) {
+    return { isValid: true, errors: [] };
+  }
+
+  for (const section of chart.sections) {
+    for (let chordIndex = 0; chordIndex < section.chords.length; chordIndex++) {
+      const chord = section.chords[chordIndex];
+      
+      // 改行マーカーはスキップ
+      if (chord.isLineBreak) {
+        continue;
+      }
+
+      // 現在編集中のコードかチェック
+      const isCurrentlyEditing = editingState?.sectionId === section.id && 
+                                editingState?.chordIndex === chordIndex;
+
+      // コード名のバリデーション
+      let chordNameToCheck = chord.name;
+      if (isCurrentlyEditing && editingState?.isEditing && editingState?.displayValue) {
+        chordNameToCheck = editingState.displayValue;
+      }
+
+      if (!isValidFullChordName(chordNameToCheck)) {
+        errors.push(
+          `セクション「${section.name || 'セクション'}」の${chordIndex + 1}番目のコード名「${chordNameToCheck}」が無効です`
+        );
+      }
+
+      // 拍数のバリデーション
+      let durationToCheck: string | number = chord.duration || 4;
+      if (isCurrentlyEditing && editingState?.isDurationEditing && editingState?.durationDisplayValue) {
+        durationToCheck = editingState.durationDisplayValue;
+      }
+
+      if (!isValidDuration(durationToCheck)) {
+        errors.push(
+          `セクション「${section.name || 'セクション'}」の${chordIndex + 1}番目の拍数「${durationToCheck}」が無効です（0.5-16の範囲で入力してください）`
+        );
+      }
+    }
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+};

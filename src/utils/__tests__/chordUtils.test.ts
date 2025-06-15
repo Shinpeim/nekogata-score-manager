@@ -13,7 +13,8 @@ import {
   parseOnChord,
   isOnChord,
   isValidDuration,
-  isValidFullChordName
+  isValidFullChordName,
+  validateChartInputs
 } from '../chordUtils';
 import type { ChordChart } from '../../types';
 
@@ -493,6 +494,130 @@ describe('chordUtils', () => {
     it('should handle null/undefined input', () => {
       expect(isValidFullChordName(null as unknown as string)).toBe(false);
       expect(isValidFullChordName(undefined as unknown as string)).toBe(false);
+    });
+  });
+
+  describe('validateChartInputs', () => {
+    let validChart: ChordChart;
+
+    beforeEach(() => {
+      validChart = {
+        id: 'test-chart',
+        title: 'Test Chart',
+        artist: 'Test Artist',
+        key: 'C',
+        tempo: 120,
+        timeSignature: '4/4',
+        sections: [
+          {
+            id: 'section1',
+            name: 'テストセクション',
+            chords: [
+              { name: 'C', root: 'C', duration: 4 },
+              { name: 'Am', root: 'A', duration: 2 },
+              { name: 'F', root: 'F', duration: 2 }
+            ],
+            beatsPerBar: 4,
+            barsCount: 4
+          }
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+    });
+
+    it('should validate valid chart', () => {
+      const result = validateChartInputs(validChart);
+      expect(result.isValid).toBe(true);
+      expect(result.errors).toEqual([]);
+    });
+
+    it('should detect invalid chord names', () => {
+      validChart.sections![0].chords[0].name = 'invalid';
+      const result = validateChartInputs(validChart);
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toContain('1番目のコード名「invalid」が無効です');
+    });
+
+    it('should detect invalid durations', () => {
+      validChart.sections![0].chords[1].duration = 0.4;
+      const result = validateChartInputs(validChart);
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toContain('2番目の拍数「0.4」が無効です');
+    });
+
+    it('should detect multiple errors', () => {
+      validChart.sections![0].chords[0].name = 'invalid';
+      validChart.sections![0].chords[1].duration = 17;
+      const result = validateChartInputs(validChart);
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toHaveLength(2);
+    });
+
+    it('should validate with editing state (chord name)', () => {
+      const editingState = {
+        sectionId: 'section1',
+        chordIndex: 0,
+        displayValue: 'invalid',
+        isEditing: true
+      };
+      const result = validateChartInputs(validChart, editingState);
+      expect(result.isValid).toBe(false);
+      expect(result.errors[0]).toContain('1番目のコード名「invalid」が無効です');
+    });
+
+    it('should validate with editing state (duration)', () => {
+      const editingState = {
+        sectionId: 'section1',
+        chordIndex: 1,
+        durationDisplayValue: '20',
+        isDurationEditing: true
+      };
+      const result = validateChartInputs(validChart, editingState);
+      expect(result.isValid).toBe(false);
+      expect(result.errors[0]).toContain('2番目の拍数「20」が無効です');
+    });
+
+    it('should skip line break markers', () => {
+      validChart.sections![0].chords.push({
+        name: '__LINE_BREAK__',
+        root: '',
+        isLineBreak: true
+      });
+      const result = validateChartInputs(validChart);
+      expect(result.isValid).toBe(true);
+      expect(result.errors).toEqual([]);
+    });
+
+    it('should handle chart with no sections', () => {
+      const chartWithNoSections = { ...validChart };
+      delete (chartWithNoSections as any).sections;
+      const result = validateChartInputs(chartWithNoSections as ChordChart);
+      expect(result.isValid).toBe(true);
+      expect(result.errors).toEqual([]);
+    });
+
+    it('should validate on chords', () => {
+      validChart.sections![0].chords[0] = { name: 'C', root: 'C', base: 'E', duration: 4 };
+      const result = validateChartInputs(validChart);
+      expect(result.isValid).toBe(true);
+      expect(result.errors).toEqual([]);
+    });
+
+    it('should detect invalid on chords', () => {
+      validChart.sections![0].chords[0].name = 'C';
+      // 編集中に無効なオンコードを入力
+      const editingState = {
+        sectionId: 'section1',
+        chordIndex: 0,
+        displayValue: 'C/invalid',
+        isEditing: true
+      };
+      const result = validateChartInputs(validChart, editingState);
+      expect(result.isValid).toBe(false);
+      expect(result.errors[0]).toContain('1番目のコード名「C/invalid」が無効です');
     });
   });
 });
