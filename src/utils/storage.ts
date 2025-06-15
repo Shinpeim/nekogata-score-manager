@@ -1,6 +1,6 @@
 import localforage from 'localforage';
 import type { ChordChart, ChordLibrary } from '../types';
-import { migrateData, wrapWithVersion, previewMigration, type VersionedChordLibrary } from './migration';
+import { migrateData, getMigrationStats } from './migration';
 
 const STORAGE_KEY = 'chord-charts';
 
@@ -13,11 +13,10 @@ localforage.config({
 });
 
 export const storageService = {
-  // すべてのコード譜を保存（バージョン情報付き）
+  // すべてのコード譜を保存
   async saveCharts(charts: ChordLibrary): Promise<void> {
     try {
-      const versionedData = wrapWithVersion(charts);
-      await localforage.setItem(STORAGE_KEY, versionedData);
+      await localforage.setItem(STORAGE_KEY, charts);
     } catch (error) {
       console.error('Failed to save charts:', error);
       throw new Error('コード譜の保存に失敗しました');
@@ -27,14 +26,14 @@ export const storageService = {
   // すべてのコード譜を読み込み（自動マイグレーション付き）
   async loadCharts(): Promise<ChordLibrary | null> {
     try {
-      const rawData = await localforage.getItem<VersionedChordLibrary | ChordLibrary>(STORAGE_KEY);
+      const rawData = await localforage.getItem<ChordLibrary>(STORAGE_KEY);
       if (!rawData) return null;
       
       // データ移行処理を実行
       const migratedCharts = migrateData(rawData);
       
       // 移行が実行された場合は、最新形式で保存し直す
-      if (JSON.stringify(rawData) !== JSON.stringify(wrapWithVersion(migratedCharts))) {
+      if (JSON.stringify(rawData) !== JSON.stringify(migratedCharts)) {
         console.log('データ移行が実行されました。最新形式で保存します。');
         await this.saveCharts(migratedCharts);
       }
@@ -151,30 +150,21 @@ export const storageService = {
 
   // マイグレーション関連のユーティリティメソッド
   async getMigrationInfo(): Promise<{
-    needsMigration: boolean;
-    currentVersion: number;
-    targetVersion: number;
-    chartCount: number;
+    totalCharts: number;
+    chartsWithVersion: number;
+    chartsWithoutVersion: number;
   }> {
     try {
-      const rawData = await localforage.getItem<VersionedChordLibrary | ChordLibrary>(STORAGE_KEY);
-      if (!rawData) {
+      const charts = await this.loadCharts();
+      if (!charts) {
         return {
-          needsMigration: false,
-          currentVersion: 2,
-          targetVersion: 2,
-          chartCount: 0
+          totalCharts: 0,
+          chartsWithVersion: 0,
+          chartsWithoutVersion: 0
         };
       }
 
-      const preview = previewMigration(rawData);
-      
-      return {
-        needsMigration: preview.needsMigration,
-        currentVersion: preview.currentVersion,
-        targetVersion: preview.targetVersion,
-        chartCount: preview.chartCount
-      };
+      return getMigrationStats(charts);
     } catch (error) {
       console.error('Failed to get migration info:', error);
       throw new Error('マイグレーション情報の取得に失敗しました');

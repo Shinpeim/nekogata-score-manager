@@ -1,6 +1,7 @@
 import type { ChordChart, ChordSection } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import type { ExportData } from './export';
+import { storageService } from './storage';
 
 // ============================================================================
 // 型定義
@@ -89,7 +90,6 @@ export const importChartsToStorage = async (file: File): Promise<{ success: bool
     }
     
     // Storage経由でインポート（Migration自動実行）
-    const { storageService } = await import('./storage');
     await storageService.importCharts(validationResult.charts);
     
     return {
@@ -132,7 +132,7 @@ export const parseImportData = (jsonString: string): ImportResult => {
 const processImportData = (data: unknown): ImportResult => {
   // ExportData形式の検証
   if (isValidExportData(data)) {
-    const validationResult = validateChartArray(data.charts || []);
+    const validationResult = validateChartArray(data.charts || [], data.version);
     
     return {
       success: validationResult.charts.length > 0,
@@ -168,13 +168,13 @@ const isValidExportData = (data: unknown): data is ExportData => {
 /**
  * ChordChart配列の検証
  */
-const validateChartArray = (charts: unknown[]): { charts: ChordChart[]; errors: string[]; warnings: string[] } => {
+const validateChartArray = (charts: unknown[], exportVersion?: string): { charts: ChordChart[]; errors: string[]; warnings: string[] } => {
   const validCharts: ChordChart[] = [];
   const errors: string[] = [];
   const warnings: string[] = [];
 
   charts.forEach((chart, index) => {
-    const result = validateSingleChart(chart);
+    const result = validateSingleChart(chart, exportVersion);
     if (result.isValid && result.chart) {
       validCharts.push(result.chart);
       if (result.warnings.length > 0) {
@@ -191,7 +191,7 @@ const validateChartArray = (charts: unknown[]): { charts: ChordChart[]; errors: 
 /**
  * 単一のChordChartの検証と修正
  */
-const validateSingleChart = (chart: unknown): { 
+const validateSingleChart = (chart: unknown, exportVersion?: string): { 
   isValid: boolean; 
   chart?: ChordChart; 
   errors: string[]; 
@@ -279,7 +279,8 @@ const validateSingleChart = (chart: unknown): {
     updatedAt: new Date(), // インポート時に更新日時を現在に設定
     sections: validSections as unknown as ChordSection[],
     tags: Array.isArray(chartObj.tags) ? chartObj.tags as string[] : [],
-    notes: typeof chartObj.notes === 'string' ? chartObj.notes : ''
+    notes: typeof chartObj.notes === 'string' ? chartObj.notes : '',
+    version: typeof chartObj.version === 'string' ? chartObj.version : exportVersion
   };
 
   return { isValid: true, chart: validatedChart, errors: [], warnings };
