@@ -1,27 +1,22 @@
 <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background circle -->
-  <circle cx="16" cy="16" r="15" fill="#3B82F6" stroke="#1E3A8A" stroke-width="2"/>
+  <!-- Background circle with Teal color -->
+  <circle cx="16" cy="16" r="15" fill="#85B0B7" stroke="#6B9CA5" stroke-width="2"/>
   
-  <!-- Cat ears -->
-  <path d="M8 12 L12 6 L14 12 Z" fill="#1E3A8A"/>
-  <path d="M18 12 L20 6 L24 12 Z" fill="#1E3A8A"/>
+  <!-- Abstract musical staff representation -->
+  <rect x="6" y="12" width="20" height="1.5" fill="#BDD0CA" rx="0.75"/>
+  <rect x="6" y="15" width="20" height="1.5" fill="#BDD0CA" rx="0.75"/>
+  <rect x="6" y="18" width="20" height="1.5" fill="#BDD0CA" rx="0.75"/>
   
-  <!-- Cat head -->
-  <circle cx="16" cy="16" r="8" fill="#1E3A8A"/>
+  <!-- Chord symbols - abstract geometric shapes -->
+  <circle cx="10" cy="11" r="2" fill="white"/>
+  <rect x="14" y="13" width="4" height="4" fill="white" rx="1"/>
+  <polygon points="20,9 24,9 22,13" fill="white"/>
   
-  <!-- Musical staff lines (simplified) -->
-  <line x1="4" y1="20" x2="28" y2="20" stroke="white" stroke-width="0.8"/>
-  <line x1="4" y1="22" x2="28" y2="22" stroke="white" stroke-width="0.8"/>
-  <line x1="4" y1="24" x2="28" y2="24" stroke="white" stroke-width="0.8"/>
+  <!-- Letter indicators for chord notation -->
+  <text x="10" y="12" font-family="Arial, sans-serif" font-size="3" font-weight="bold" text-anchor="middle" fill="#85B0B7">C</text>
+  <text x="16" y="16.5" font-family="Arial, sans-serif" font-size="2.5" font-weight="bold" text-anchor="middle" fill="#85B0B7">Am</text>
+  <text x="22" y="12" font-family="Arial, sans-serif" font-size="3" font-weight="bold" text-anchor="middle" fill="#85B0B7">F</text>
   
-  <!-- Musical notes -->
-  <circle cx="10" cy="21" r="1.2" fill="white"/>
-  <circle cx="14" cy="23" r="1.2" fill="white"/>
-  <circle cx="18" cy="21" r="1.2" fill="white"/>
-  <circle cx="22" cy="23" r="1.2" fill="white"/>
-  
-  <!-- Cat face features -->
-  <circle cx="13" cy="14" r="1" fill="white"/>
-  <circle cx="19" cy="14" r="1" fill="white"/>
-  <path d="M14 18 Q16 20 18 18" stroke="white" stroke-width="1.5" fill="none"/>
+  <!-- Bottom accent line -->
+  <rect x="8" y="24" width="16" height="2" fill="#BDD0CA" rx="1"/>
 </svg>
