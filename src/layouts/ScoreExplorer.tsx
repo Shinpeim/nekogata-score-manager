@@ -13,6 +13,8 @@ interface ScoreExplorerProps {
   onImport: () => void;
   onExportSelected: () => void;
   onDeleteSelected: () => void;
+  isMobile?: boolean;
+  onClose?: () => void;
 }
 
 const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
@@ -26,10 +28,20 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
   onImport,
   onExportSelected,
   onDeleteSelected,
+  isMobile = false,
+  onClose,
 }) => {
   const [showActionsDropdown, setShowActionsDropdown] = useState(false);
-  return (
-    <div className="p-4">
+  
+  const handleChartClick = (chartId: string) => {
+    onSetCurrentChart(chartId);
+    if (isMobile && onClose) {
+      onClose();
+    }
+  };
+
+  const content = (
+    <div className={isMobile ? "px-4" : "p-4"}>
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-sm font-medium text-slate-900">Score Explorer</h2>
       </div>
@@ -78,7 +90,7 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
                   ? 'bg-slate-100 border-[#85B0B7] border' 
                   : 'bg-slate-50 hover:bg-slate-100'
               }`}
-              onClick={() => onSetCurrentChart(chart.id)}
+              onClick={() => handleChartClick(chart.id)}
             >
               <h3 className="text-sm font-medium text-slate-900">{chart.title}</h3>
               <p className="text-xs text-slate-500 mt-1">{chart.artist}</p>
@@ -113,6 +125,32 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
       </div>
     </div>
   );
+
+  if (isMobile) {
+    return (
+      <div className="fixed inset-0 flex z-40 md:hidden">
+        <div className="fixed inset-0 bg-slate-600 bg-opacity-75" onClick={onClose}></div>
+        <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white">
+          <div className="absolute top-0 right-0 -mr-12 pt-2">
+            <button
+              onClick={onClose}
+              className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+            >
+              <span className="sr-only">Score Explorerを閉じる</span>
+              <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
+            {content}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return content;
 };
 
 export default ScoreExplorer;

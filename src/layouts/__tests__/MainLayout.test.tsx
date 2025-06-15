@@ -48,23 +48,15 @@ vi.mock('../Header', () => ({
 }));
 
 vi.mock('../ScoreExplorer', () => ({
-  default: ({ onCreateNew, onImport }: { onCreateNew: () => void; onImport: () => void }) => (
-    <div data-testid="desktop-score-explorer">
+  default: ({ onCreateNew, onImport, onClose, isMobile }: { onCreateNew: () => void; onImport: () => void; onClose?: () => void; isMobile?: boolean }) => (
+    <div data-testid={isMobile ? "mobile-score-explorer" : "desktop-score-explorer"}>
       <button onClick={onCreateNew}>新規作成</button>
       <button onClick={onImport}>インポート</button>
+      {isMobile && onClose && <button onClick={onClose}>閉じる</button>}
     </div>
   ),
 }));
 
-vi.mock('../MobileScoreExplorer', () => ({
-  default: ({ onCreateNew, onImport, onClose }: { onCreateNew: () => void; onImport: () => void; onClose: () => void }) => (
-    <div data-testid="mobile-score-explorer">
-      <button onClick={onCreateNew}>新規作成</button>
-      <button onClick={onImport}>インポート</button>
-      <button onClick={onClose}>閉じる</button>
-    </div>
-  ),
-}));
 
 // その他のコンポーネントのモック
 vi.mock('../../components/ChordChartForm', () => ({
