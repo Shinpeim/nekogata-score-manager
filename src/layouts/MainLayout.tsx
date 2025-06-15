@@ -29,13 +29,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
   const currentChartId = useChordChartStore(state => state.currentChartId);
   const setCurrentChart = useChordChartStore(state => state.setCurrentChart);
   const createNewChart = useChordChartStore(state => state.createNewChart);
-  const addChart = useChordChartStore(state => state.addChart);
+  const loadFromStorage = useChordChartStore(state => state.loadFromStorage);
   const deleteMultipleCharts = useChordChartStore(state => state.deleteMultipleCharts);
   
-  const handleImportCharts = async (charts: ChordChart[]) => {
-    for (const chart of charts) {
-      await addChart(chart);
-    }
+  const handleImportComplete = async () => {
+    // Storage-first方式: インポート後にStorageから再読み込み
+    await loadFromStorage();
   };
 
   
@@ -157,7 +156,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
         <ImportDialog 
           isOpen={showImportDialog}
           onClose={() => setShowImportDialog(false)}
-          onImportCharts={handleImportCharts}
+          onImportComplete={handleImportComplete}
         />
       )}
 

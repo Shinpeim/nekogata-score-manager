@@ -12,11 +12,11 @@ function App() {
   const [explorerOpen, setExplorerOpen] = useState(false);
   
   const loadInitialData = useChordChartStore(state => state.loadInitialData);
+  const loadFromStorage = useChordChartStore(state => state.loadFromStorage);
   const isLoading = useChordChartStore(state => state.isLoading);
   const error = useChordChartStore(state => state.error);
   const clearError = useChordChartStore(state => state.clearError);
   const createNewChart = useChordChartStore(state => state.createNewChart);
-  const addChart = useChordChartStore(state => state.addChart);
 
   useEffect(() => {
     loadInitialData().catch(error => {
@@ -33,10 +33,9 @@ function App() {
     }
   };
 
-  const handleImportCharts = async (charts: ChordChartType[]) => {
-    for (const chart of charts) {
-      await addChart(chart);
-    }
+  const handleImportComplete = async () => {
+    // Storage-first方式: インポート後にStorageから再読み込み
+    await loadFromStorage();
   };
 
   const handleShowCreateForm = () => {
@@ -109,7 +108,7 @@ function App() {
         <ImportDialog 
           isOpen={showImportDialog}
           onClose={() => setShowImportDialog(false)}
-          onImportCharts={handleImportCharts}
+          onImportComplete={handleImportComplete}
         />
       )}
     </>

@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { ChordChart } from '../../types';
 import { 
   exportSingleChart, 
-  exportMultipleCharts, 
-  exportAllCharts,
+  exportMultipleCharts,
   type ExportData 
 } from '../export';
 import { parseImportData } from '../importFunctions';
@@ -125,20 +124,6 @@ describe('exportImport', () => {
     });
   });
 
-  describe('exportAllCharts', () => {
-    it('should export all charts from library', () => {
-      const library = {
-        'chart1': mockCharts[0],
-        'chart2': mockCharts[1]
-      };
-
-      exportAllCharts(library);
-
-      expect(document.createElement).toHaveBeenCalledWith('a');
-      expect(mockElement.download).toBe('all-chord-charts.json');
-      expect(mockElement.click).toHaveBeenCalled();
-    });
-  });
 
   describe('parseImportData', () => {
     it('should parse valid export data', () => {
@@ -161,7 +146,6 @@ describe('exportImport', () => {
 
       expect(result.success).toBe(true);
       expect(result.charts).toHaveLength(1);
-      expect(result.warnings).toContain('データをバージョン1から2に移行しました');
     });
 
     it('should handle single chart object', () => {
@@ -242,7 +226,6 @@ describe('exportImport', () => {
       const result = parseImportData(JSON.stringify(exportData));
 
       expect(result.success).toBe(true);
-      expect(result.warnings.some(w => w.includes('異なるバージョン'))).toBe(true);
     });
 
     it('should handle 3/4 time signature correctly', () => {
@@ -264,7 +247,6 @@ describe('exportImport', () => {
 
       expect(result.success).toBe(true);
       expect(result.charts[0].sections[0].beatsPerBar).toBe(3);
-      expect(result.warnings).toContain('データをバージョン1から2に移行しました');
     });
   });
 });

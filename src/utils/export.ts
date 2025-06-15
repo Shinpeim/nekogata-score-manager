@@ -1,4 +1,4 @@
-import type { ChordChart, ChordLibrary } from '../types';
+import type { ChordChart } from '../types';
 
 // ============================================================================
 // 型定義
@@ -18,7 +18,6 @@ const EXPORT_VERSION = '1.0.0';
 
 // ファイル名・MIME型
 const JSON_MIME_TYPE = 'application/json';
-const ALL_CHARTS_FILENAME = 'all-chord-charts.json';
 const CHORD_CHARTS_PREFIX = 'chord-charts';
 
 // ============================================================================
@@ -73,13 +72,6 @@ export const exportMultipleCharts = (charts: ChordChart[], filename?: string): v
   URL.revokeObjectURL(url);
 };
 
-/**
- * 全ライブラリをエクスポート
- */
-export const exportAllCharts = (library: ChordLibrary): void => {
-  const charts = Object.values(library);
-  exportMultipleCharts(charts, ALL_CHARTS_FILENAME);
-};
 
 // ============================================================================
 // ユーティリティ関数

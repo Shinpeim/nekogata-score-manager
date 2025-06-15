@@ -1,54 +1,44 @@
 import React, { useState } from 'react';
-import type { ChordChart } from '../types';
-import { v4 as uuidv4 } from 'uuid';
+import { importChartsToStorage } from '../utils/importFunctions';
 
 interface ImportDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onImportCharts: (charts: ChordChart[]) => Promise<void>;
+  onImportComplete: () => Promise<void>;
 }
 
 const ImportDialog: React.FC<ImportDialogProps> = ({
   isOpen,
   onClose,
-  onImportCharts
+  onImportComplete
 }) => {
   const [importFile, setImportFile] = useState<File | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
 
   const handleImport = async () => {
     if (!importFile) return;
 
+    setIsImporting(true);
     try {
-      const text = await importFile.text();
-      const data = JSON.parse(text);
+      // Storage-first方式でインポート
+      const result = await importChartsToStorage(importFile);
       
-      // データが配列かオブジェクトかを判定
-      let charts: ChordChart[] = [];
-      if (Array.isArray(data)) {
-        charts = data;
-      } else if (data && typeof data === 'object') {
-        // オブジェクトの場合は、値が配列なら配列を使用、そうでなければ値のみを配列化
-        charts = Object.values(data);
+      if (result.success) {
+        alert(`${result.importedCount}件のコード譜をインポートしました。`);
+        
+        // Storeに再読み込みを指示
+        await onImportComplete();
+        
+        setImportFile(null);
+        onClose();
+      } else {
+        alert(`インポートに失敗しました: ${result.error}`);
       }
-
-      // インポート時にIDを再生成して衝突を防ぐ
-      charts = charts.map(chart => ({
-        ...chart,
-        id: uuidv4(),
-        updatedAt: new Date()
-      }));
-
-      if (charts.length === 0) {
-        alert('有効なコード譜データが見つかりませんでした。');
-        return;
-      }
-
-      await onImportCharts(charts);
-      setImportFile(null);
-      onClose();
     } catch (error) {
       console.error('Import error:', error);
       alert('インポートに失敗しました。JSONファイルの形式を確認してください。');
+    } finally {
+      setIsImporting(false);
     }
   };
 
@@ -99,14 +89,14 @@ const ImportDialog: React.FC<ImportDialogProps> = ({
               <div className="flex gap-3 pt-4">
                 <button
                   onClick={handleImport}
-                  disabled={!importFile}
+                  disabled={!importFile || isImporting}
                   className={`flex-1 px-4 py-2 rounded-md font-medium ${
-                    importFile
+                    importFile && !isImporting
                       ? 'bg-[#BDD0CA] hover:bg-[#A4C2B5] text-slate-800'
                       : 'bg-slate-300 text-slate-500 cursor-not-allowed'
                   }`}
                 >
-                  インポート
+                  {isImporting ? 'インポート中...' : 'インポート'}
                 </button>
                 <button
                   onClick={handleClose}

@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { ChordChart } from '../../types';
 import { 
   exportSingleChart, 
-  exportMultipleCharts, 
-  exportAllCharts
+  exportMultipleCharts
 } from '../export';
 
 // Blob のモック
@@ -123,18 +122,4 @@ describe('export', () => {
     });
   });
 
-  describe('exportAllCharts', () => {
-    it('should export all charts from library', () => {
-      const library = {
-        'chart1': mockCharts[0],
-        'chart2': mockCharts[1]
-      };
-
-      exportAllCharts(library);
-
-      expect(document.createElement).toHaveBeenCalledWith('a');
-      expect(mockElement.download).toBe('all-chord-charts.json');
-      expect(mockElement.click).toHaveBeenCalled();
-    });
-  });
 });

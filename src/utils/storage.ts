@@ -87,6 +87,23 @@ export const storageService = {
     }
   },
 
+  // 複数のコード譜をインポート（既存データに追加）
+  async importCharts(charts: ChordChart[]): Promise<void> {
+    try {
+      const existingCharts = await this.loadCharts() || {};
+      
+      // 新しいチャートを既存データに追加
+      charts.forEach(chart => {
+        existingCharts[chart.id] = chart;
+      });
+      
+      await this.saveCharts(existingCharts);
+    } catch (error) {
+      console.error('Failed to import charts:', error);
+      throw new Error('コード譜のインポートに失敗しました');
+    }
+  },
+
   // ストレージをクリア
   async clearStorage(): Promise<void> {
     try {
