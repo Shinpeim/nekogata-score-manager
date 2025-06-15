@@ -1,14 +1,10 @@
 import type { ChordChart, ChordLibrary, ChordSection } from '../types';
+import type { ExportData } from './export';
 import { migrateData, getDataVersion, previewMigration } from './migration';
 
 // ============================================================================
 // 型定義
 // ============================================================================
-export interface ExportData {
-  version: string;
-  exportDate: string;
-  charts: ChordChart[];
-}
 
 export interface ImportResult {
   success: boolean;
@@ -28,10 +24,6 @@ export interface ImportResult {
 // ============================================================================
 const EXPORT_VERSION = '1.0.0';
 
-// ファイル名・MIME型
-const JSON_MIME_TYPE = 'application/json';
-const ALL_CHARTS_FILENAME = 'all-chord-charts.json';
-const CHORD_CHARTS_PREFIX = 'chord-charts';
 
 // エラーメッセージ
 const ERROR_MESSAGES = {
@@ -50,65 +42,6 @@ const WARNING_MESSAGES = {
   DIFFERENT_VERSION: (oldVer: string, newVer: string) => `異なるバージョンのデータです (${oldVer} -> ${newVer})`
 } as const;
 
-// ============================================================================
-// エクスポート機能
-// ============================================================================
-
-/**
- * 単一のコード譜をJSONファイルとしてエクスポート
- */
-export const exportSingleChart = (chart: ChordChart): void => {
-  const exportData: ExportData = {
-    version: EXPORT_VERSION,
-    exportDate: new Date().toISOString(),
-    charts: [chart]
-  };
-
-  const jsonString = JSON.stringify(exportData, null, 2);
-  const blob = new Blob([jsonString], { type: JSON_MIME_TYPE });
-  const url = URL.createObjectURL(blob);
-  
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `${sanitizeFileName(chart.title)}.json`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  
-  URL.revokeObjectURL(url);
-};
-
-/**
- * 複数のコード譜をJSONファイルとしてエクスポート
- */
-export const exportMultipleCharts = (charts: ChordChart[], filename?: string): void => {
-  const exportData: ExportData = {
-    version: EXPORT_VERSION,
-    exportDate: new Date().toISOString(),
-    charts
-  };
-
-  const jsonString = JSON.stringify(exportData, null, 2);
-  const blob = new Blob([jsonString], { type: JSON_MIME_TYPE });
-  const url = URL.createObjectURL(blob);
-  
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename || `${CHORD_CHARTS_PREFIX}-${new Date().toISOString().split('T')[0]}.json`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  
-  URL.revokeObjectURL(url);
-};
-
-/**
- * 全ライブラリをエクスポート
- */
-export const exportAllCharts = (library: ChordLibrary): void => {
-  const charts = Object.values(library);
-  exportMultipleCharts(charts, ALL_CHARTS_FILENAME);
-};
 
 // ============================================================================
 // インポート機能
@@ -531,16 +464,3 @@ const validateSingleChart = (chart: unknown): {
   return { isValid: true, chart: validatedChart, errors: [], warnings };
 };
 
-// ============================================================================
-// ユーティリティ関数
-// ============================================================================
-
-/**
- * ファイル名をサニタイズ
- */
-const sanitizeFileName = (fileName: string): string => {
-  return fileName
-    .replace(/[<>:"/\\|?*]/g, '') // 不正な文字を削除
-    .replace(/\s+/g, '_') // スペースをアンダースコアに
-    .substring(0, 100); // 長さ制限
-};

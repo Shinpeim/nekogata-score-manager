@@ -4,9 +4,9 @@ import {
   exportSingleChart, 
   exportMultipleCharts, 
   exportAllCharts,
-  parseImportData,
   type ExportData 
-} from '../exportImport';
+} from '../export';
+import { parseImportData } from '../importFunctions';
 
 // Blob のモック
 globalThis.Blob = vi.fn().mockImplementation((content: BlobPart[], options: BlobPropertyBag) => ({
