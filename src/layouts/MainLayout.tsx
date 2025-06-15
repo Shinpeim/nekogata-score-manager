@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { useChordChartStore } from '../stores/chordChartStore';
+import { useWakeLock } from '../hooks/useWakeLock';
 import ChordChartForm from '../components/ChordChartForm';
 import ImportDialog from '../components/ImportDialog';
 import ExportDialog from '../components/ExportDialog';
@@ -25,6 +26,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
   const [showActionsDropdown, setShowActionsDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dropdownRef2 = useRef<HTMLDivElement>(null);
+  
+  const { isActive: wakeLockActive, isSupported: wakeLockSupported, toggleWakeLock } = useWakeLock();
   
   const chartsData = useChordChartStore(state => state.charts);
   const currentChartId = useChordChartStore(state => state.currentChartId);
@@ -138,6 +141,31 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
               )}
             </button>
             <h1 className="text-xl font-semibold text-slate-900">Nekogata Score Manager</h1>
+            <div className="flex-1"></div>
+            {wakeLockSupported && (
+              <button
+                onClick={toggleWakeLock}
+                className={`px-3 py-2 rounded-md border text-sm font-medium transition-all duration-150 shadow-sm ${
+                  wakeLockActive
+                    ? 'bg-[#85B0B7] hover:bg-[#6B9CA5] text-white border-[#85B0B7]'
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-300'
+                }`}
+                title={wakeLockActive ? 'スリープ防止を無効にする' : 'スリープ防止を有効にする'}
+              >
+                <span className="flex items-center gap-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {wakeLockActive ? (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    ) : (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    )}
+                  </svg>
+                  <span className="hidden sm:inline">
+                    {wakeLockActive ? 'スリープ防止中' : 'スリープ防止'}
+                  </span>
+                </span>
+              </button>
+            )}
           </div>
         </div>
       </header>
