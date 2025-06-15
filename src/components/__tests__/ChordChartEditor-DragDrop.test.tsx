@@ -24,6 +24,7 @@ vi.mock('@dnd-kit/sortable', () => ({
     <div data-testid="sortable-context">{children}</div>,
   sortableKeyboardCoordinates: vi.fn(),
   rectSortingStrategy: vi.fn(),
+  verticalListSortingStrategy: vi.fn(),
   useSortable: vi.fn(() => ({
     attributes: {},
     listeners: {},
@@ -80,7 +81,9 @@ describe('ChordChartEditor - Drag & Drop', () => {
       />
     );
 
-    expect(screen.getByTestId('dnd-context')).toBeInTheDocument();
+    // セクション用のDndContextと、コード用のDndContextが配置されていることを確認
+    const dndContexts = screen.getAllByTestId('dnd-context');
+    expect(dndContexts.length).toBeGreaterThanOrEqual(2); // 最低でもセクション用とコード用で2つ
   });
 
   it('SortableContextが正しく配置されている', () => {
@@ -92,7 +95,9 @@ describe('ChordChartEditor - Drag & Drop', () => {
       />
     );
 
-    expect(screen.getByTestId('sortable-context')).toBeInTheDocument();
+    // セクション用とコード用のSortableContextが配置されていることを確認
+    const sortableContexts = screen.getAllByTestId('sortable-context');
+    expect(sortableContexts.length).toBeGreaterThanOrEqual(2);
   });
 
   it('ドラッグハンドルボタンが表示される', () => {
@@ -197,9 +202,9 @@ describe('ChordChartEditor - Drag & Drop', () => {
       />
     );
 
-    // 各セクションにDndContextがあることを確認
+    // セクション用のDndContext（1つ）と各セクション内のコード用のDndContext（2つ）で合計3つ
     const dndContexts = screen.getAllByTestId('dnd-context');
-    expect(dndContexts).toHaveLength(2);
+    expect(dndContexts).toHaveLength(3);
 
     // 全コード（6個）にドラッグハンドルがあることを確認
     const dragHandles = screen.getAllByTitle('ドラッグして移動');

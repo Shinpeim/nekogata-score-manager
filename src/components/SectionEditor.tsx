@@ -22,8 +22,10 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
   rectSortingStrategy,
+  verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import SortableChordItem from './SortableChordItem';
+import SortableSectionItem from './SortableSectionItem';
 
 interface SectionEditorProps {
   chart: ChordChart;
@@ -52,7 +54,24 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
     })
   );
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleSectionDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id && over) {
+      const oldIndex = chart.sections?.findIndex(section => section.id === active.id) ?? -1;
+      const newIndex = chart.sections?.findIndex(section => section.id === over.id) ?? -1;
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const updatedChart = {
+          ...chart,
+          sections: arrayMove(chart.sections || [], oldIndex, newIndex)
+        };
+        onUpdateChart(updatedChart);
+      }
+    }
+  };
+
+  const handleChordDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (active.id !== over?.id) {
@@ -391,8 +410,18 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
         <h3 className="text-lg font-semibold text-slate-800">セクション</h3>
       </div>
 
-      {chart.sections?.map((section) => (
-        <div key={section.id} className="mb-6 p-4 border border-slate-300 rounded-lg">
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleSectionDragEnd}
+      >
+        <SortableContext
+          items={chart.sections?.map(section => section.id) || []}
+          strategy={verticalListSortingStrategy}
+        >
+          {chart.sections?.map((section) => (
+            <SortableSectionItem key={section.id} id={section.id}>
+              <div className="mb-6 p-4 border border-slate-300 rounded-lg">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-3">
             <input
               type="text"
@@ -485,7 +514,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
+            onDragEnd={handleChordDragEnd}
           >
             <SortableContext
               items={section.chords.map((_, index) => `${section.id}-${index}`)}
@@ -522,8 +551,11 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
               </div>
             </SortableContext>
           </DndContext>
-        </div>
-      ))}
+              </div>
+            </SortableSectionItem>
+          ))}
+        </SortableContext>
+      </DndContext>
       
       <div className="mt-6 flex justify-center">
         <button

@@ -25,6 +25,7 @@ vi.mock('@dnd-kit/sortable', () => ({
     <div data-testid="sortable-context">{children}</div>,
   sortableKeyboardCoordinates: vi.fn(),
   rectSortingStrategy: vi.fn(),
+  verticalListSortingStrategy: vi.fn(),
   useSortable: vi.fn(() => ({
     attributes: {},
     listeners: {},
