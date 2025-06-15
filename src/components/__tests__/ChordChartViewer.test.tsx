@@ -138,7 +138,7 @@ describe('ChordChartViewer', () => {
     });
 
     it('should show fallback message when sections are undefined', () => {
-      const emptyChart = { ...mockChartData, sections: undefined as unknown as any };
+      const emptyChart = { ...mockChartData, sections: undefined as unknown as ChordChartType['sections'] };
       render(<ChordChartViewer chart={emptyChart} currentChartId="test-chart-1" onEdit={mockOnEdit} />);
 
       expect(screen.getByText('セクションがありません')).toBeInTheDocument();

@@ -15,7 +15,7 @@ describe('EmptyChartPlaceholder', () => {
     });
 
     it('should have proper button styling', () => {
-      const { container } = render(<EmptyChartPlaceholder />);
+      render(<EmptyChartPlaceholder />);
 
       const createButton = screen.getByText('新規作成');
       expect(createButton).toHaveClass('bg-[#85B0B7]', 'hover:bg-[#6B9CA5]', 'text-white');

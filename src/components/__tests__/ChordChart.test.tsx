@@ -6,7 +6,7 @@ import type { ChordChart as ChordChartType } from '../../types';
 // Create mock store state
 let mockCharts: Record<string, ChordChartType> = {};
 let mockCurrentChartId: string | null = null;
-let mockUpdateChart = vi.fn();
+const mockUpdateChart = vi.fn();
 
 // Mock the store with proper selector behavior
 interface MockState {
@@ -32,7 +32,7 @@ vi.mock('../../stores/chordChartStore', () => ({
 
 // Mock child components to focus on integration
 vi.mock('../ChordChartViewer', () => ({
-  default: ({ chart, onEdit }: any) => (
+  default: ({ chart, onEdit }: { chart: ChordChartType; onEdit: () => void }) => (
     <div data-testid="chord-chart-viewer">
       <div>{chart.title}</div>
       <button onClick={onEdit}>編集</button>
@@ -41,7 +41,11 @@ vi.mock('../ChordChartViewer', () => ({
 }));
 
 vi.mock('../EmptyChartPlaceholder', () => ({
-  default: ({ onCreateNew, onOpenImport, onOpenExplorer }: any) => (
+  default: ({ onCreateNew, onOpenImport, onOpenExplorer }: { 
+    onCreateNew?: () => void; 
+    onOpenImport?: () => void; 
+    onOpenExplorer?: () => void; 
+  }) => (
     <div data-testid="empty-chart-placeholder">
       <div>コード譜がありません</div>
       <button onClick={onCreateNew}>新規作成</button>
@@ -52,7 +56,11 @@ vi.mock('../EmptyChartPlaceholder', () => ({
 }));
 
 vi.mock('../ChordChartEditor', () => ({
-  default: ({ chart, onSave, onCancel }: any) => (
+  default: ({ chart, onSave, onCancel }: { 
+    chart: ChordChartType; 
+    onSave: (chart: ChordChartType) => void; 
+    onCancel: () => void; 
+  }) => (
     <div data-testid="chord-chart-editor">
       <div>編集中: {chart.title}</div>
       <button onClick={() => onSave(chart)}>保存</button>
