@@ -6,6 +6,7 @@ import ChordChartForm from './ChordChartForm';
 import BpmIndicator from './BpmIndicator';
 import { useResponsiveBars } from '../hooks/useResponsiveBars';
 import { splitChordsIntoRows, isLineBreakMarker } from '../utils/lineBreakHelpers';
+import { KEY_DISPLAY_NAMES } from '../utils/chordUtils';
 
 interface ChordChartProps {
   chartData?: ChordChartType;
@@ -226,7 +227,7 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew, onOpenI
           <h2 className="text-2xl font-bold text-slate-900 mb-2">{displayChart.title}</h2>
           <div className="flex flex-wrap gap-4 text-slate-600">
             <span>{displayChart.artist}</span>
-            <span>キー: {displayChart.key}</span>
+            <span>キー: {KEY_DISPLAY_NAMES[displayChart.key] || displayChart.key}</span>
             {displayChart.tempo && <BpmIndicator bpm={displayChart.tempo} />}
             <span>拍子: {displayChart.timeSignature}</span>
           </div>
