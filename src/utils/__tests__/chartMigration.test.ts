@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { migrateChartData } from '../chartMigration';
-import type { ChordChart } from '../../types';
+import type { ChordChart, ChordSection } from '../../types';
 
 describe('chartMigration', () => {
   const createMockChart = (version?: string): ChordChart => ({
@@ -24,7 +24,7 @@ describe('chartMigration', () => {
     createdAt: new Date('2023-01-01'),
     updatedAt: new Date('2023-01-01'),
     tags: ['test'],
-    notes: undefined as any, // 古いデータではnotesが未定義
+    notes: undefined as unknown as string, // 古いデータではnotesが未定義
     version
   });
 
@@ -115,7 +115,7 @@ describe('chartMigration', () => {
 
     it('notesが未定義の場合、空文字で初期化', () => {
       const chart = createMockChart();
-      chart.notes = undefined as any;
+      chart.notes = undefined as unknown as string;
       
       const result = migrateChartData(chart);
       
@@ -144,7 +144,7 @@ describe('chartMigration', () => {
 
     it('空の配列やundefinedのセクションも正常処理', () => {
       const chart = createMockChart('1.0.0');
-      chart.sections = undefined as any;
+      chart.sections = undefined as unknown as ChordSection[];
       
       const result = migrateChartData(chart);
       
