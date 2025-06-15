@@ -1,5 +1,5 @@
 import React from 'react';
-import { KEY_DISPLAY_NAMES } from '../utils/chordUtils';
+import { KEY_DISPLAY_NAMES } from '../utils/musicConstants';
 
 interface TransposeConfirmDialogProps {
   isOpen: boolean;

@@ -1,12 +1,8 @@
 import React, { useState } from 'react';
 import type { ChordChart } from '../types';
-import { 
-  createNewChordChart, 
-  validateChordChart, 
-  COMMON_KEYS, 
-  COMMON_TIME_SIGNATURES,
-  KEY_DISPLAY_NAMES
-} from '../utils/chordUtils';
+import { createNewChordChart } from '../utils/chordCreation';
+import { validateChordChart } from '../utils/chordValidation';
+import { COMMON_KEYS, COMMON_TIME_SIGNATURES, KEY_DISPLAY_NAMES } from '../utils/musicConstants';
 
 interface ChordChartFormProps {
   initialData?: Partial<ChordChart>;

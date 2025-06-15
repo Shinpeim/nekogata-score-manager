@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type { ChordChart, ChordLibrary } from '../types';
-import { createNewChordChart } from '../utils/chordUtils';
+import { createNewChordChart } from '../utils/chordCreation';
 import { storageService } from '../utils/storage';
 
 interface ChordChartState {

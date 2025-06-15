@@ -1,5 +1,5 @@
 import type { ChordLibrary } from '../types';
-import { migrateChartData } from './chordUtils';
+import { migrateChartData } from './chartMigration';
 
 // データスキーマのバージョン定義
 export const CURRENT_DATA_VERSION = 2;

@@ -2,7 +2,7 @@ import {
   transposeChordName, 
   calculateSemitonesDifference, 
   transposeChart 
-} from '../chordUtils';
+} from '../transpose';
 import type { ChordChart } from '../../types';
 
 describe('移調機能のテスト', () => {

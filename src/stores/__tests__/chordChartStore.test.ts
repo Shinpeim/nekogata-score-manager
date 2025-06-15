@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useChordChartStore } from '../chordChartStore';
-import { createNewChordChart } from '../../utils/chordUtils';
+import { createNewChordChart } from '../../utils/chordCreation';
 
 // Mock localforage
 vi.mock('localforage', () => ({

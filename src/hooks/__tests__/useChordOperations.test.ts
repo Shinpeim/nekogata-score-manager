@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useChordOperations } from '../useChordOperations';
 import type { ChordChart } from '../../types';
-import * as chordUtils from '../../utils/chordUtils';
+import * as chordParsing from '../../utils/chordParsing';
 
-// chordUtilsモジュールをモック
-vi.mock('../../utils/chordUtils', () => ({
+// chordParsingモジュールをモック
+vi.mock('../../utils/chordParsing', () => ({
   extractChordRoot: vi.fn(),
   parseOnChord: vi.fn(),
 }));
@@ -108,8 +108,8 @@ describe('useChordOperations', () => {
   });
 
   it('finalizeChordNameがコード名をパースして更新する', () => {
-    const mockParseOnChord = vi.mocked(chordUtils.parseOnChord);
-    const mockExtractChordRoot = vi.mocked(chordUtils.extractChordRoot);
+    const mockParseOnChord = vi.mocked(chordParsing.parseOnChord);
+    const mockExtractChordRoot = vi.mocked(chordParsing.extractChordRoot);
     
     mockParseOnChord.mockReturnValue({ chord: 'Am', base: 'C' });
     mockExtractChordRoot.mockReturnValue('A');

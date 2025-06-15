@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Chord } from '../types';
 import { isLineBreakMarker } from '../utils/lineBreakHelpers';
-import { isValidFullChordName, isValidDuration } from '../utils/chordUtils';
+import { isValidFullChordName, isValidDuration } from '../utils/chordValidation';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
