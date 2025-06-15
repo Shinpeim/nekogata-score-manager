@@ -1,12 +1,55 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { ChordChart } from '../types';
+import TransposeConfirmDialog from './TransposeConfirmDialog';
+import { transposeChart } from '../utils/chordUtils';
 
 interface BasicInfoEditorProps {
   chart: ChordChart;
   onUpdate: (field: keyof ChordChart, value: string | number | undefined) => void;
+  onTranspose?: (transposedChart: ChordChart) => void;
 }
 
-const BasicInfoEditor: React.FC<BasicInfoEditorProps> = ({ chart, onUpdate }) => {
+const BasicInfoEditor: React.FC<BasicInfoEditorProps> = ({ chart, onUpdate, onTranspose }) => {
+  const [showTransposeDialog, setShowTransposeDialog] = useState(false);
+  const [pendingKey, setPendingKey] = useState<string>('');
+
+  const handleKeyChange = (newKey: string) => {
+    if (newKey === chart.key) return;
+
+    // コードが存在するかチェック
+    const hasChords = chart.sections.some(section => 
+      section.chords.some(chord => !chord.isLineBreak)
+    );
+
+    if (hasChords) {
+      // コードが存在する場合は移調確認ダイアログを表示
+      setPendingKey(newKey);
+      setShowTransposeDialog(true);
+    } else {
+      // コードが存在しない場合は直接キーのみ変更
+      onUpdate('key', newKey);
+    }
+  };
+
+  const handleTransposeConfirm = (transposeChords: boolean) => {
+    if (transposeChords && onTranspose) {
+      // 移調処理を実行
+      const transposedChart = transposeChart(chart, pendingKey);
+      onTranspose(transposedChart);
+    } else {
+      // キーのみ変更
+      onUpdate('key', pendingKey);
+    }
+    
+    setShowTransposeDialog(false);
+    setPendingKey('');
+  };
+
+  const handleTransposeCancel = () => {
+    setShowTransposeDialog(false);
+    setPendingKey('');
+  };
+
   return (
     <div className="mb-8 p-4 bg-slate-50 rounded-lg">
       <h3 className="text-lg font-semibold text-slate-800 mb-4">基本情報</h3>
@@ -42,7 +85,7 @@ const BasicInfoEditor: React.FC<BasicInfoEditorProps> = ({ chart, onUpdate }) =>
           <select
             id="key-select"
             value={chart.key}
-            onChange={(e) => onUpdate('key', e.target.value)}
+            onChange={(e) => handleKeyChange(e.target.value)}
             className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#85B0B7]"
           >
             <option value="C">C / Am</option>
@@ -88,6 +131,14 @@ const BasicInfoEditor: React.FC<BasicInfoEditorProps> = ({ chart, onUpdate }) =>
           </select>
         </div>
       </div>
+
+      <TransposeConfirmDialog
+        isOpen={showTransposeDialog}
+        onClose={handleTransposeCancel}
+        onConfirm={handleTransposeConfirm}
+        fromKey={chart.key}
+        toKey={pendingKey}
+      />
     </div>
   );
 };
