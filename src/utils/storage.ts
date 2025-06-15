@@ -1,6 +1,6 @@
 import localforage from 'localforage';
 import type { ChordChart, ChordLibrary } from '../types';
-import { migrateChartData } from './chordUtils';
+import { migrateData, wrapWithVersion, previewMigration, type VersionedChordLibrary } from './migration';
 
 const STORAGE_KEY = 'chord-charts';
 
@@ -13,26 +13,30 @@ localforage.config({
 });
 
 export const storageService = {
-  // すべてのコード譜を保存
+  // すべてのコード譜を保存（バージョン情報付き）
   async saveCharts(charts: ChordLibrary): Promise<void> {
     try {
-      await localforage.setItem(STORAGE_KEY, charts);
+      const versionedData = wrapWithVersion(charts);
+      await localforage.setItem(STORAGE_KEY, versionedData);
     } catch (error) {
       console.error('Failed to save charts:', error);
       throw new Error('コード譜の保存に失敗しました');
     }
   },
 
-  // すべてのコード譜を読み込み
+  // すべてのコード譜を読み込み（自動マイグレーション付き）
   async loadCharts(): Promise<ChordLibrary | null> {
     try {
-      const charts = await localforage.getItem<ChordLibrary>(STORAGE_KEY);
-      if (!charts) return null;
+      const rawData = await localforage.getItem<VersionedChordLibrary | ChordLibrary>(STORAGE_KEY);
+      if (!rawData) return null;
       
-      // データ移行処理：既存データのbeatsPerBarを拍子に応じて修正
-      const migratedCharts: ChordLibrary = {};
-      for (const [id, chart] of Object.entries(charts)) {
-        migratedCharts[id] = migrateChartData(chart);
+      // データ移行処理を実行
+      const migratedCharts = migrateData(rawData);
+      
+      // 移行が実行された場合は、最新形式で保存し直す
+      if (JSON.stringify(rawData) !== JSON.stringify(wrapWithVersion(migratedCharts))) {
+        console.log('データ移行が実行されました。最新形式で保存します。');
+        await this.saveCharts(migratedCharts);
       }
       
       return migratedCharts;
@@ -116,7 +120,7 @@ export const storageService = {
 
       // 基本的な構造チェック
       for (const [id, chart] of Object.entries(charts)) {
-        if (!chart.id || !chart.title || !chart.artist || !chart.key) {
+        if (!chart.id || !chart.title || !chart.key) {
           console.warn(`Invalid chart found: ${id}`);
           return false;
         }
@@ -125,6 +129,38 @@ export const storageService = {
     } catch (error) {
       console.error('Failed to validate charts:', error);
       return false;
+    }
+  },
+
+  // マイグレーション関連のユーティリティメソッド
+  async getMigrationInfo(): Promise<{
+    needsMigration: boolean;
+    currentVersion: number;
+    targetVersion: number;
+    chartCount: number;
+  }> {
+    try {
+      const rawData = await localforage.getItem<VersionedChordLibrary | ChordLibrary>(STORAGE_KEY);
+      if (!rawData) {
+        return {
+          needsMigration: false,
+          currentVersion: 2,
+          targetVersion: 2,
+          chartCount: 0
+        };
+      }
+
+      const preview = previewMigration(rawData);
+      
+      return {
+        needsMigration: preview.needsMigration,
+        currentVersion: preview.currentVersion,
+        targetVersion: preview.targetVersion,
+        chartCount: preview.chartCount
+      };
+    } catch (error) {
+      console.error('Failed to get migration info:', error);
+      throw new Error('マイグレーション情報の取得に失敗しました');
     }
   }
 };
