@@ -36,7 +36,8 @@ npm run preview      # Preview production build locally
 ```bash
 npx vitest run path/to/test.test.ts              # Run specific test file
 npx vitest run --grep "test name pattern"        # Run tests matching pattern
-npx vitest run src/utils/__tests__/chordUtils.test.ts  # Example: run chord utils tests
+npx vitest run src/utils/__tests__/export.test.ts       # Example: run export tests
+npx vitest run src/utils/__tests__/import.test.ts       # Example: run import tests
 ```
 
 ## Architecture Overview
@@ -61,12 +62,12 @@ Post-refactoring structure (as of recent changes):
 - **Music Theory**: `musicConstants.ts`, `transpose.ts`, `chordParsing.ts`
 - **Data Management**: `storage.ts`, `migration.ts`, `chartMigration.ts`
 - **Validation**: `chordValidation.ts`
-- **Chart Operations**: `chordCreation.ts`, `exportImport.ts`
+- **Chart Operations**: `chordCreation.ts`, `export.ts`, `importFunctions.ts`
 - **UI Helpers**: `lineBreakHelpers.ts`, `chordCopyPaste.ts`
 
 ### Data Models
 ```typescript
-ChordChart: { id, title, artist, key, tempo, timeSignature, sections[], tags[], notes }
+ChordChart: { id, title, artist, key, tempo, timeSignature, sections[], tags[], notes, version? }
 ChordSection: { id, name, chords[], beatsPerBar, barsCount }
 Chord: { name, root, base?, duration?, isLineBreak? }
 ```

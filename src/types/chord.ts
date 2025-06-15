@@ -26,6 +26,7 @@ export interface ChordChart {
   updatedAt: Date;
   tags?: string[];
   notes?: string;
+  version?: string;
 }
 
 export interface ChordLibrary {

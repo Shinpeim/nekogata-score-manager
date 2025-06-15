@@ -28,10 +28,15 @@ const CHORD_CHARTS_PREFIX = 'chord-charts';
  * コード譜をJSONファイルとしてエクスポート
  */
 export const exportMultipleCharts = (charts: ChordChart[], filename?: string): void => {
+  const chartsWithVersion = charts.map(chart => ({
+    ...chart,
+    version: chart.version || EXPORT_VERSION
+  }));
+
   const exportData: ExportData = {
     version: EXPORT_VERSION,
     exportDate: new Date().toISOString(),
-    charts
+    charts: chartsWithVersion
   };
 
   const jsonString = JSON.stringify(exportData, null, 2);

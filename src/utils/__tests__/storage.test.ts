@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { storageService } from '../storage';
 import type { ChordChart } from '../../types';
-import type { VersionedChordLibrary } from '../migration';
 
 // localforageをモック
 vi.mock('localforage', () => ({
@@ -53,12 +52,7 @@ describe('storageService', () => {
 
       await storageService.saveCharts(charts);
 
-      expect(localforage.setItem).toHaveBeenCalledWith('chord-charts', expect.objectContaining({
-        version: 2,
-        data: charts,
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date)
-      }));
+      expect(localforage.setItem).toHaveBeenCalledWith('chord-charts', charts);
     });
 
     it('should throw error when save fails', async () => {
@@ -70,21 +64,21 @@ describe('storageService', () => {
   });
 
   describe('loadCharts', () => {
-    it('should load charts from versioned storage', async () => {
+    it('should load charts from storage', async () => {
       const charts = { [mockChart.id]: mockChart };
-      const versionedData: VersionedChordLibrary = {
-        version: 2,
-        data: charts,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      vi.mocked(localforage.getItem).mockResolvedValue(versionedData);
+      vi.mocked(localforage.getItem).mockResolvedValue(charts);
       vi.mocked(localforage.setItem).mockResolvedValue(undefined);
 
       const result = await storageService.loadCharts();
 
       expect(localforage.getItem).toHaveBeenCalledWith('chord-charts');
-      expect(result).toEqual(charts);
+      // マイグレーション処理でversionプロパティが追加される
+      expect(result).toEqual({
+        [mockChart.id]: {
+          ...mockChart,
+          version: '1.0.0'
+        }
+      });
     });
 
     it('should migrate old data format', async () => {
@@ -133,26 +127,18 @@ describe('storageService', () => {
 
   describe('saveChart', () => {
     it('should save single chart', async () => {
-      // 最新バージョンの形式で既存データをモック
-      const existingData: VersionedChordLibrary = {
-        version: 2,
-        data: {},
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
+      // 既存データをモック（空のChordLibrary）
+      const existingData = {};
       vi.mocked(localforage.getItem).mockResolvedValue(existingData);
       vi.mocked(localforage.setItem).mockResolvedValue(undefined);
 
       await storageService.saveChart(mockChart);
 
       expect(localforage.getItem).toHaveBeenCalledWith('chord-charts');
-      // バージョン情報付きで保存される
-      expect(localforage.setItem).toHaveBeenCalledWith('chord-charts', expect.objectContaining({
-        version: 2,
-        data: {
-          [mockChart.id]: mockChart
-        }
-      }));
+      // ChordLibraryとして直接保存される
+      expect(localforage.setItem).toHaveBeenCalledWith('chord-charts', {
+        [mockChart.id]: mockChart
+      });
     });
 
     it('should update existing chart and migrate old data', async () => {
@@ -165,16 +151,15 @@ describe('storageService', () => {
 
       // マイグレーション処理により複数回呼ばれる
       expect(localforage.setItem).toHaveBeenCalled();
-      expect(localforage.setItem).toHaveBeenCalledWith('chord-charts', expect.objectContaining({
-        version: 2,
-        data: expect.objectContaining({
-          'other-chart': expect.objectContaining({
-            id: 'other-chart',
-            notes: '' // マイグレーションで追加される
-          }),
-          [mockChart.id]: mockChart
-        })
-      }));
+      expect(localforage.setItem).toHaveBeenCalledWith('chord-charts', {
+        'other-chart': {
+          id: 'other-chart',
+          sections: [], // マイグレーションで追加される
+          notes: '', // マイグレーションで追加される
+          version: '1.0.0' // デフォルトversionが追加される
+        },
+        [mockChart.id]: mockChart
+      });
     });
   });
 
@@ -192,15 +177,14 @@ describe('storageService', () => {
 
       // マイグレーション処理により複数回呼ばれる
       expect(localforage.setItem).toHaveBeenCalled();
-      expect(localforage.setItem).toHaveBeenCalledWith('chord-charts', expect.objectContaining({
-        version: 2,
-        data: expect.objectContaining({
-          'other-chart': expect.objectContaining({
-            id: 'other-chart',
-            notes: '' // マイグレーションで追加される
-          })
-        })
-      }));
+      expect(localforage.setItem).toHaveBeenCalledWith('chord-charts', {
+        'other-chart': {
+          id: 'other-chart',
+          sections: [], // マイグレーションで追加される
+          notes: '', // マイグレーションで追加される
+          version: '1.0.0' // デフォルトversionが追加される
+        }
+      });
     });
   });
 
