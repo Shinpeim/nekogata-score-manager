@@ -75,7 +75,7 @@ export const textToChords = (text: string): Chord[] => {
  */
 const parseChordText = (text: string): Chord | null => {
   // [拍数]記法をチェック
-  const bracketMatch = text.match(/^([A-G][#b]?(?:maj|min|m|dim|aug|sus[24]|add\d+|\d+)*(?:\([#b]?\d+\))*)\[(\d*\.?\d*)\]$/i);
+  const bracketMatch = text.match(/^([A-G][#b♭]?(?:maj|min|m|dim|aug|sus[24]|add\d+|\d+)*(?:\([#b♭]?\d+\))*)\[(\d*\.?\d*)\]$/i);
   if (bracketMatch) {
     const [, chordName, durationStr] = bracketMatch;
     const duration = durationStr ? parseFloat(durationStr) : 4;
@@ -86,7 +86,7 @@ const parseChordText = (text: string): Chord | null => {
     }
     
     // ルート音を抽出
-    const rootMatch = chordName.match(/^([A-G][#b]?)/);
+    const rootMatch = chordName.match(/^([A-G][#b♭]?)/);
     const root = rootMatch ? rootMatch[1] : chordName;
     
     return {
@@ -97,13 +97,13 @@ const parseChordText = (text: string): Chord | null => {
   }
   
   // 拍数指定なしのコード名のみ（テンションコード含む）
-  const basicMatch = text.match(/^([A-G][#b]?(?:maj|min|m|dim|aug|sus[24]|add\d+|\d+)*(?:\([#b]?\d+\))*)$/i);
+  const basicMatch = text.match(/^([A-G][#b♭]?(?:maj|min|m|dim|aug|sus[24]|add\d+|\d+)*(?:\([#b♭]?\d+\))*)$/i);
   if (basicMatch) {
     const [, chordName] = basicMatch;
     const duration = 4;
     
     // ルート音を抽出
-    const rootMatch = chordName.match(/^([A-G][#b]?)/);
+    const rootMatch = chordName.match(/^([A-G][#b♭]?)/);
     const root = rootMatch ? rootMatch[1] : chordName;
     
     return {
