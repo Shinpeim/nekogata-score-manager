@@ -27,10 +27,6 @@ const ERROR_MESSAGES = {
   INVALID_DATA_FORMAT: '無効なデータフォーマットです',
 } as const;
 
-// 警告メッセージ
-const WARNING_MESSAGES = {
-  SINGLE_CHART_FILE: '単一のコード譜ファイルです。',
-} as const;
 
 
 // ============================================================================
@@ -131,52 +127,26 @@ export const parseImportData = (jsonString: string): ImportResult => {
 
 /**
  * 処理済みデータからImportResultを生成
+ * ExportData形式のみサポート
  */
 const processImportData = (data: unknown): ImportResult => {
-  const warnings: string[] = [];
-  
-  // エクスポートデータ形式の検証
+  // ExportData形式の検証
   if (isValidExportData(data)) {
-    // 各コード譜の検証
     const validationResult = validateChartArray(data.charts || []);
     
     return {
       success: validationResult.charts.length > 0,
       charts: validationResult.charts,
       errors: validationResult.errors,
-      warnings: [...warnings, ...validationResult.warnings]
+      warnings: validationResult.warnings
     };
-  }
-  
-  // ChordChart配列形式の検証
-  if (Array.isArray(data)) {
-    const validationResult = validateChartArray(data);
-    return {
-      success: validationResult.charts.length > 0,
-      charts: validationResult.charts,
-      errors: validationResult.errors,
-      warnings: [...warnings, ...validationResult.warnings]
-    };
-  }
-  
-  // 単一ChordChart形式の検証
-  if (data && typeof data === 'object' && 'id' in data && 'title' in data) {
-    const validationResult = validateSingleChart(data);
-    if (validationResult.isValid) {
-      return {
-        success: true,
-        charts: [validationResult.chart!],
-        errors: [],
-        warnings: [WARNING_MESSAGES.SINGLE_CHART_FILE, ...warnings]
-      };
-    }
   }
   
   return {
     success: false,
     charts: [],
     errors: [ERROR_MESSAGES.INVALID_DATA_FORMAT],
-    warnings
+    warnings: []
   };
 };
 

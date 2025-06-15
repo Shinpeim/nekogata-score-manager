@@ -46,20 +46,6 @@ describe('import', () => {
       expect(result.errors).toHaveLength(0);
     });
 
-    it('should handle chart array without export wrapper', () => {
-      const result = parseImportData(JSON.stringify([mockChart]));
-
-      expect(result.success).toBe(true);
-      expect(result.charts).toHaveLength(1);
-    });
-
-    it('should handle single chart object', () => {
-      const result = parseImportData(JSON.stringify(mockChart));
-
-      expect(result.success).toBe(true);
-      expect(result.charts).toHaveLength(1);
-      expect(result.warnings).toContain('単一のコード譜ファイルです。');
-    });
 
     it('should handle invalid JSON', () => {
       const result = parseImportData('invalid json');
@@ -67,6 +53,22 @@ describe('import', () => {
       expect(result.success).toBe(false);
       expect(result.charts).toHaveLength(0);
       expect(result.errors[0]).toContain('JSONの解析に失敗しました');
+    });
+
+    it('should reject chart array without export wrapper', () => {
+      const result = parseImportData(JSON.stringify([mockChart]));
+
+      expect(result.success).toBe(false);
+      expect(result.charts).toHaveLength(0);
+      expect(result.errors[0]).toContain('無効なデータフォーマットです');
+    });
+
+    it('should reject single chart object', () => {
+      const result = parseImportData(JSON.stringify(mockChart));
+
+      expect(result.success).toBe(false);
+      expect(result.charts).toHaveLength(0);
+      expect(result.errors[0]).toContain('無効なデータフォーマットです');
     });
 
     it('should handle missing required fields', () => {
@@ -77,7 +79,14 @@ describe('import', () => {
         sections: []
       };
 
-      const result = parseImportData(JSON.stringify([invalidChart]));
+      const exportData: ExportData = {
+        version: '1.0.0',
+        exportDate: new Date().toISOString(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        charts: [invalidChart as any] // 意図的に不正なデータを作成してバリデーションをテストするため型チェックを回避
+      };
+
+      const result = parseImportData(JSON.stringify(exportData));
 
       expect(result.success).toBe(false);
       expect(result.errors[0]).toContain('タイトルが不正です');
@@ -90,7 +99,14 @@ describe('import', () => {
         updatedAt: null
       };
 
-      const result = parseImportData(JSON.stringify([chartWithInvalidDates]));
+      const exportData: ExportData = {
+        version: '1.0.0',
+        exportDate: new Date().toISOString(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        charts: [chartWithInvalidDates as any] // 不正な日付形式のテストのため型チェックを回避
+      };
+
+      const result = parseImportData(JSON.stringify(exportData));
 
       expect(result.success).toBe(true);
       expect(result.charts[0].createdAt).toBeInstanceOf(Date);
@@ -112,7 +128,14 @@ describe('import', () => {
         ]
       };
 
-      const result = parseImportData(JSON.stringify([chartWithIncompleteSection]));
+      const exportData: ExportData = {
+        version: '1.0.0',
+        exportDate: new Date().toISOString(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        charts: [chartWithIncompleteSection as any] // 不完全なセクションデータのテストのため型チェックを回避
+      };
+
+      const result = parseImportData(JSON.stringify(exportData));
 
       expect(result.success).toBe(true);
       expect(result.charts[0].sections[0].id).toBeDefined();
@@ -148,7 +171,14 @@ describe('import', () => {
         ]
       };
 
-      const result = parseImportData(JSON.stringify([chart34]));
+      const exportData: ExportData = {
+        version: '1.0.0',
+        exportDate: new Date().toISOString(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        charts: [chart34 as any] // 間違ったbeatsPerBarのテストのため型チェックを回避
+      };
+
+      const result = parseImportData(JSON.stringify(exportData));
 
       expect(result.success).toBe(true);
       expect(result.charts[0].sections[0].beatsPerBar).toBe(3);
