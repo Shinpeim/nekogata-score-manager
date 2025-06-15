@@ -369,42 +369,42 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
                 className="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-md text-sm w-8 h-8 flex items-center justify-center"
                 title="このセクションの全選択"
               >
-                ✅
+                ☑
               </button>
               <button
                 onClick={() => clearAllSelectionInSection(section.id)}
                 className="bg-slate-100 hover:bg-slate-200 text-slate-600 p-2 rounded-md text-sm w-8 h-8 flex items-center justify-center"
                 title="このセクションの選択をすべて解除"
               >
-                ❌
+                ×
               </button>
               <button
                 onClick={() => copyChordProgression(section.id)}
                 className="bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-md text-sm w-8 h-8 flex items-center justify-center"
                 title="コード進行をコピー"
               >
-                📋
+                ⧉
               </button>
               <button
                 onClick={() => pasteChordProgression(section.id)}
                 className="bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-md text-sm w-8 h-8 flex items-center justify-center"
                 title="クリップボードから追加"
               >
-                📥
+                ⇣
               </button>
               <button
                 onClick={() => duplicateSection(section.id)}
                 className="bg-[#BDD0CA] hover:bg-[#A4C2B5] text-slate-800 p-2 rounded-md text-sm w-8 h-8 flex items-center justify-center"
                 title="このセクションを複製"
               >
-                📄
+                ⧉
               </button>
               <button
                 onClick={() => deleteSection(section.id)}
                 className="bg-[#EE5840] hover:bg-[#D14A2E] text-white p-2 rounded-md text-sm w-8 h-8 flex items-center justify-center"
                 title="このセクションを削除"
               >
-                🗑️
+                ×
               </button>
             </div>
           </div>
