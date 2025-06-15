@@ -1,6 +1,6 @@
-import type { ChordChart, ChordLibrary, ChordSection } from '../types';
+import type { ChordChart, ChordSection } from '../types';
+import { v4 as uuidv4 } from 'uuid';
 import type { ExportData } from './export';
-import { migrateData, getDataVersion, previewMigration } from './migration';
 
 // ============================================================================
 // 型定義
@@ -11,12 +11,6 @@ export interface ImportResult {
   charts: ChordChart[];
   errors: string[];
   warnings: string[];
-  migrationInfo?: {
-    originalVersion: number;
-    currentVersion: number;
-    migrationPerformed: boolean;
-    migrationSteps: string[];
-  };
 }
 
 // ============================================================================
@@ -32,14 +26,11 @@ const ERROR_MESSAGES = {
   JSON_PARSE_FAILED: 'JSONの解析に失敗しました',
   UNKNOWN_ERROR: '不明なエラー',
   INVALID_DATA_FORMAT: '無効なデータフォーマットです',
-  VERSION_DATA_ERROR: 'バージョン情報付きデータの処理でエラーが発生しました'
 } as const;
 
 // 警告メッセージ
 const WARNING_MESSAGES = {
-  OLD_FORMAT_CONVERTED: '旧形式のデータです。新形式に変換しました。',
   SINGLE_CHART_FILE: '単一のコード譜ファイルです。',
-  DIFFERENT_VERSION: (oldVer: string, newVer: string) => `異なるバージョンのデータです (${oldVer} -> ${newVer})`
 } as const;
 
 
@@ -83,113 +74,48 @@ export const importChartsFromFile = (file: File): Promise<ImportResult> => {
 };
 
 /**
- * JSON文字列をパースしてコード譜データを抽出（マイグレーション対応）
+ * Storage-first方式でJSONファイルからコード譜をインポート
+ * 1. ファイルを読み込んでバリデーション
+ * 2. Storageに直接保存（Migration自動実行）
+ * 3. 成功/失敗の結果を返す
  */
-export const parseImportData = (jsonString: string): ImportResult => {
-  const warnings: string[] = [];
-
+export const importChartsToStorage = async (file: File): Promise<{ success: boolean; error?: string; importedCount?: number }> => {
   try {
-    const rawData = JSON.parse(jsonString);
+    // ファイル読み込み
+    const jsonString = await file.text();
     
-    // マイグレーション情報を取得
-    const originalVersion = getDataVersion(rawData);
-    const migrationPreview = previewMigration(rawData);
-    
-    // データの種類を判定してマイグレーションを適用
-    let processedData: unknown;
-    let migrationInfo: ImportResult['migrationInfo'];
-    
-    if (migrationPreview.needsMigration) {
-      // ストレージデータ形式（ChordLibrary）の場合、マイグレーションを適用
-      if (isChordLibraryFormat(rawData)) {
-        const migratedLibrary = migrateData(rawData);
-        processedData = {
-          version: EXPORT_VERSION,
-          exportDate: new Date().toISOString(),
-          charts: Object.values(migratedLibrary)
-        };
-        
-        migrationInfo = {
-          originalVersion,
-          currentVersion: migrationPreview.targetVersion,
-          migrationPerformed: true,
-          migrationSteps: migrationPreview.migrationSteps
-        };
-        
-        warnings.push(`データをバージョン${originalVersion}から${migrationPreview.targetVersion}に移行しました`);
-      } else if (isValidExportData(rawData)) {
-        // エクスポートデータ形式だが古いバージョンの場合
-        const tempLibrary: ChordLibrary = {};
-        rawData.charts.forEach((chart, index) => {
-          tempLibrary[`temp-${index}`] = chart;
-        });
-        
-        const migratedLibrary = migrateData(tempLibrary);
-        processedData = {
-          ...rawData,
-          charts: Object.values(migratedLibrary)
-        };
-        
-        migrationInfo = {
-          originalVersion,
-          currentVersion: migrationPreview.targetVersion,
-          migrationPerformed: true,
-          migrationSteps: migrationPreview.migrationSteps
-        };
-        
-        warnings.push(`エクスポートデータをバージョン${originalVersion}から${migrationPreview.targetVersion}に移行しました`);
-      } else if (Array.isArray(rawData)) {
-        // ChordChart配列形式の場合
-        const tempLibrary: ChordLibrary = {};
-        rawData.forEach((chart, index) => {
-          tempLibrary[`temp-${index}`] = chart;
-        });
-        
-        const migratedLibrary = migrateData(tempLibrary);
-        processedData = Object.values(migratedLibrary);
-        
-        migrationInfo = {
-          originalVersion,
-          currentVersion: migrationPreview.targetVersion,
-          migrationPerformed: true,
-          migrationSteps: migrationPreview.migrationSteps
-        };
-        
-        warnings.push(`データをバージョン${originalVersion}から${migrationPreview.targetVersion}に移行しました`);
-      } else {
-        processedData = rawData;
-      }
-    } else {
-      // マイグレーション不要でも、データ形式の正規化は必要
-      if (isChordLibraryFormat(rawData)) {
-        // バージョン情報付きChordLibraryをエクスポート形式に変換
-        let chartLibrary: ChordLibrary;
-        if (typeof rawData === 'object' && rawData !== null && 'data' in rawData) {
-          chartLibrary = (rawData as { data: ChordLibrary }).data;
-        } else {
-          chartLibrary = rawData as ChordLibrary;
-        }
-        
-        processedData = {
-          version: EXPORT_VERSION,
-          exportDate: new Date().toISOString(),
-          charts: Object.values(chartLibrary)
-        };
-        
-        migrationInfo = {
-          originalVersion,
-          currentVersion: originalVersion,
-          migrationPerformed: false,
-          migrationSteps: []
-        };
-      } else {
-        processedData = rawData;
-      }
+    // バリデーション
+    const validationResult = parseImportData(jsonString);
+    if (!validationResult.success) {
+      return {
+        success: false,
+        error: validationResult.errors.join(', ')
+      };
     }
     
-    // 通常の検証処理
-    return processImportData(processedData, warnings, migrationInfo);
+    // Storage経由でインポート（Migration自動実行）
+    const { storageService } = await import('./storage');
+    await storageService.importCharts(validationResult.charts);
+    
+    return {
+      success: true,
+      importedCount: validationResult.charts.length
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : '不明なエラーが発生しました'
+    };
+  }
+};
 
+/**
+ * JSON文字列をパースしてコード譜データを抽出
+ */
+export const parseImportData = (jsonString: string): ImportResult => {
+  try {
+    const rawData = JSON.parse(jsonString);
+    return processImportData(rawData);
   } catch (error) {
     return {
       success: false,
@@ -207,77 +133,51 @@ export const parseImportData = (jsonString: string): ImportResult => {
 /**
  * 処理済みデータからImportResultを生成
  */
-const processImportData = (
-  data: unknown, 
-  existingWarnings: string[] = [], 
-  migrationInfo?: ImportResult['migrationInfo']
-): ImportResult => {
-  const warnings = [...existingWarnings];
+const processImportData = (data: unknown): ImportResult => {
+  const warnings: string[] = [];
   
-  // データフォーマットの検証
-  if (!isValidExportData(data)) {
-    // バージョン情報付きChordLibraryデータかどうかチェック（既にマイグレーション済み）
-    if (data && typeof data === 'object' && 'version' in data && 'data' in data) {
-      // この時点で既にマイグレーション処理は完了しているので、エラーとして扱う
-      return {
-        success: false,
-        charts: [],
-        errors: [ERROR_MESSAGES.VERSION_DATA_ERROR],
-        warnings,
-        migrationInfo
-      };
-    }
-    
-    // 直接ChordChartの配列かどうかチェック
-    if (Array.isArray(data)) {
-      // ChordChart配列として処理
-      const validationResult = validateChartArray(data);
-      return {
-        success: validationResult.charts.length > 0,
-        charts: validationResult.charts,
-        errors: validationResult.errors,
-        warnings: [WARNING_MESSAGES.OLD_FORMAT_CONVERTED, ...warnings, ...validationResult.warnings],
-        migrationInfo
-      };
-    }
-    
-    // 単一のChordChartオブジェクトかどうかチェック
-    if (data && typeof data === 'object' && 'id' in data && 'title' in data) {
-      const validationResult = validateSingleChart(data);
-      if (validationResult.isValid) {
-        return {
-          success: true,
-          charts: [validationResult.chart!],
-          errors: [],
-          warnings: [WARNING_MESSAGES.SINGLE_CHART_FILE, ...warnings],
-          migrationInfo
-        };
-      }
-    }
+  // エクスポートデータ形式の検証
+  if (isValidExportData(data)) {
+    // 各コード譜の検証
+    const validationResult = validateChartArray(data.charts || []);
     
     return {
-      success: false,
-      charts: [],
-      errors: [ERROR_MESSAGES.INVALID_DATA_FORMAT],
-      warnings,
-      migrationInfo
+      success: validationResult.charts.length > 0,
+      charts: validationResult.charts,
+      errors: validationResult.errors,
+      warnings: [...warnings, ...validationResult.warnings]
     };
   }
-
-  // バージョンチェック
-  if (data.version && data.version !== EXPORT_VERSION) {
-    warnings.push(WARNING_MESSAGES.DIFFERENT_VERSION(data.version, EXPORT_VERSION));
+  
+  // ChordChart配列形式の検証
+  if (Array.isArray(data)) {
+    const validationResult = validateChartArray(data);
+    return {
+      success: validationResult.charts.length > 0,
+      charts: validationResult.charts,
+      errors: validationResult.errors,
+      warnings: [...warnings, ...validationResult.warnings]
+    };
   }
-
-  // 各コード譜の検証
-  const validationResult = validateChartArray(data.charts || []);
+  
+  // 単一ChordChart形式の検証
+  if (data && typeof data === 'object' && 'id' in data && 'title' in data) {
+    const validationResult = validateSingleChart(data);
+    if (validationResult.isValid) {
+      return {
+        success: true,
+        charts: [validationResult.chart!],
+        errors: [],
+        warnings: [WARNING_MESSAGES.SINGLE_CHART_FILE, ...warnings]
+      };
+    }
+  }
   
   return {
-    success: validationResult.charts.length > 0,
-    charts: validationResult.charts,
-    errors: validationResult.errors,
-    warnings: [...warnings, ...validationResult.warnings],
-    migrationInfo
+    success: false,
+    charts: [],
+    errors: [ERROR_MESSAGES.INVALID_DATA_FORMAT],
+    warnings
   };
 };
 
@@ -295,43 +195,6 @@ const isValidExportData = (data: unknown): data is ExportData => {
          Array.isArray((data as Record<string, unknown>).charts));
 };
 
-/**
- * ChordLibrary形式（ストレージデータ）かどうかをチェック
- */
-const isChordLibraryFormat = (data: unknown): boolean => {
-  if (!data || typeof data !== 'object') return false;
-  
-  const obj = data as Record<string, unknown>;
-  
-  // バージョン情報付きChordLibraryの場合
-  if (obj.version && obj.data && typeof obj.data === 'object') {
-    return isChordLibraryObject(obj.data);
-  }
-  
-  // 直接ChordLibraryの場合
-  return isChordLibraryObject(obj);
-};
-
-/**
- * オブジェクトがChordLibrary形式かどうかをチェック
- */
-const isChordLibraryObject = (obj: unknown): boolean => {
-  if (!obj || typeof obj !== 'object') return false;
-  
-  const library = obj as Record<string, unknown>;
-  
-  // 空のオブジェクトは有効
-  if (Object.keys(library).length === 0) return true;
-  
-  // 各値がChordChartらしいオブジェクトかチェック
-  return Object.values(library).every(chart => 
-    chart && 
-    typeof chart === 'object' && 
-    'id' in chart && typeof chart.id === 'string' &&
-    'title' in chart && typeof chart.title === 'string' &&
-    'key' in chart && typeof chart.key === 'string'
-  );
-};
 
 /**
  * ChordChart配列の検証
@@ -419,10 +282,9 @@ const validateSingleChart = (chart: unknown): {
     const sectionWarnings: string[] = [];
     const sectionObj = section as Record<string, unknown>;
     
-    if (!sectionObj.id) {
-      sectionObj.id = `imported-section-${index}-${Date.now()}`;
-      sectionWarnings.push(`セクション${index + 1}にIDを自動生成しました`);
-    }
+    // インポート時に新しいIDを生成
+    sectionObj.id = uuidv4();
+    sectionWarnings.push(`セクション${index + 1}にIDを自動生成しました`);
     
     const timeSignatureBeats = parseInt((chartObj.timeSignature as string).split('/')[0]) || 4;
     if (!sectionObj.beatsPerBar || (timeSignatureBeats !== 4 && sectionObj.beatsPerBar === 4)) {
@@ -448,14 +310,14 @@ const validateSingleChart = (chart: unknown): {
   });
 
   const validatedChart: ChordChart = {
-    id: chartObj.id as string,
+    id: uuidv4(), // インポート時に新しいIDを生成して衝突を防ぐ
     title: chartObj.title as string,
     artist: typeof chartObj.artist === 'string' ? chartObj.artist : undefined,
     key: chartObj.key as string,
     tempo: typeof chartObj.tempo === 'number' ? chartObj.tempo : undefined,
     timeSignature: chartObj.timeSignature as string,
     createdAt,
-    updatedAt,
+    updatedAt: new Date(), // インポート時に更新日時を現在に設定
     sections: validSections as unknown as ChordSection[],
     tags: Array.isArray(chartObj.tags) ? chartObj.tags as string[] : [],
     notes: typeof chartObj.notes === 'string' ? chartObj.notes : ''

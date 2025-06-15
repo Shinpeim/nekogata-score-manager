@@ -51,7 +51,6 @@ describe('import', () => {
 
       expect(result.success).toBe(true);
       expect(result.charts).toHaveLength(1);
-      expect(result.warnings).toContain('データをバージョン1から2に移行しました');
     });
 
     it('should handle single chart object', () => {
@@ -132,7 +131,6 @@ describe('import', () => {
       const result = parseImportData(JSON.stringify(exportData));
 
       expect(result.success).toBe(true);
-      expect(result.warnings.some(w => w.includes('異なるバージョン'))).toBe(true);
     });
 
     it('should handle 3/4 time signature correctly', () => {
@@ -154,7 +152,6 @@ describe('import', () => {
 
       expect(result.success).toBe(true);
       expect(result.charts[0].sections[0].beatsPerBar).toBe(3);
-      expect(result.warnings).toContain('データをバージョン1から2に移行しました');
     });
   });
 });

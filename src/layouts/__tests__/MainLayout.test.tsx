@@ -5,6 +5,7 @@ import MainLayout from '../MainLayout';
 // useChordChartStoreのモック
 const mockCreateNewChart = vi.fn();
 const mockAddChart = vi.fn();
+const mockLoadFromStorage = vi.fn();
 const mockDeleteMultipleCharts = vi.fn();
 const mockSetCurrentChart = vi.fn();
 
@@ -30,6 +31,7 @@ vi.mock('../../stores/chordChartStore', () => ({
       setCurrentChart: mockSetCurrentChart,
       createNewChart: mockCreateNewChart,
       addChart: mockAddChart,
+      loadFromStorage: mockLoadFromStorage,
       deleteMultipleCharts: mockDeleteMultipleCharts,
     };
     return selector(mockStore);
@@ -69,10 +71,10 @@ vi.mock('../../components/ChordChartForm', () => ({
 }));
 
 vi.mock('../../components/ImportDialog', () => ({
-  default: ({ isOpen, onClose, onImportCharts }: { isOpen: boolean; onClose: () => void; onImportCharts: (charts: unknown[]) => void }) => (
+  default: ({ isOpen, onClose, onImportComplete }: { isOpen: boolean; onClose: () => void; onImportComplete: () => Promise<void> }) => (
     isOpen ? (
       <div data-testid="import-dialog">
-        <button onClick={() => onImportCharts([{ id: 'imported-chart' }])}>インポート実行</button>
+        <button onClick={() => onImportComplete()}>インポート実行</button>
         <button onClick={onClose}>閉じる</button>
       </div>
     ) : null
@@ -226,7 +228,7 @@ describe('MainLayout', () => {
     expect(screen.queryByTestId('import-dialog')).not.toBeInTheDocument();
   });
 
-  it('should call addChart when charts are imported', async () => {
+  it('should call loadFromStorage when charts are imported', async () => {
     render(
       <MainLayout explorerOpen={true}>
         <div>Content</div>
@@ -240,7 +242,7 @@ describe('MainLayout', () => {
     fireEvent.click(screen.getByText('インポート実行'));
     
     await waitFor(() => {
-      expect(mockAddChart).toHaveBeenCalledWith({ id: 'imported-chart' });
+      expect(mockLoadFromStorage).toHaveBeenCalled();
     });
   });
 
@@ -359,7 +361,7 @@ describe('MainLayout', () => {
       fireEvent.click(screen.getByText('インポート実行'));
       
       await waitFor(() => {
-        expect(mockAddChart).toHaveBeenCalledWith({ id: 'imported-chart' });
+        expect(mockLoadFromStorage).toHaveBeenCalled();
       });
 
       // アプリケーションが正常に動作することを確認
