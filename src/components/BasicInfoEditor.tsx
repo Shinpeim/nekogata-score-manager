@@ -47,15 +47,20 @@ const BasicInfoEditor: React.FC<BasicInfoEditorProps> = ({ chart, onUpdate }) =>
           >
             <option value="C">C</option>
             <option value="C#">C#</option>
+            <option value="Db">D♭</option>
             <option value="D">D</option>
             <option value="D#">D#</option>
+            <option value="Eb">E♭</option>
             <option value="E">E</option>
             <option value="F">F</option>
             <option value="F#">F#</option>
+            <option value="Gb">G♭</option>
             <option value="G">G</option>
             <option value="G#">G#</option>
+            <option value="Ab">A♭</option>
             <option value="A">A</option>
             <option value="A#">A#</option>
+            <option value="Bb">B♭</option>
             <option value="B">B</option>
           </select>
         </div>
