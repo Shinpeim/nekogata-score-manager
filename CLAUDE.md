@@ -2,46 +2,118 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## what is this software
-このリポジトリでは、コード譜の作成・閲覧・管理ができるソフトウェアを作りたいです。
+## Application Overview
+This is "Nekogata Score Manager", a chord chart management application built as a Progressive Web App (PWA) for creating, editing, and managing musical chord charts entirely in the browser.
 
-このソフトウェアでは、以下の機能を実装したいと考えています。
+**Core Features:**
+- コード譜の作成・編集・閲覧
+- 移調機能（楽曲キーの変更）
+- インポート・エクスポート機能
+- ドラッグ&ドロップによる並び替え
+- オフライン対応（PWA）
+- モバイル対応（レスポンシブデザイン）
 
-- コード譜の作成
-- コード譜の編集
-- コード譜の閲覧
+**Technical Requirements:**
+- Browser-only operation (no backend)
+- Local storage using LocalForage
+- Mobile-first responsive design
+- Offline capability via PWA
 
-このソフトウェアの動作環境としては、以下の要件を満たす必要があります。
-- ブラウザで動作すること
-- モバイルデバイスでの利用を考慮すること
-- バックエンドを必要としないこと
-- オフラインでも利用可能であること
-- ユーザーデータの保存はローカルストレージを使用すること
-- ユーザーインターフェースはシンプルで直感的であること
+## Development Commands
 
-## gitの扱い方
+### Core Commands
+```bash
+npm run dev          # Start development server with HMR
+npm run build        # TypeScript compilation + Vite production build
+npm run lint         # ESLint code quality check
+npm test             # Run all tests with Vitest
+npm run test:ui      # Run tests with UI interface
+npm run test:coverage # Run tests with coverage report
+npm run preview      # Preview production build locally
+```
 
-main ブランチに直接コミットはせず、作業単位ごとにブランチを切り、GitHub上でPullRequestを送ること。
+### Single Test Execution
+```bash
+npx vitest run path/to/test.test.ts              # Run specific test file
+npx vitest run --grep "test name pattern"        # Run tests matching pattern
+npx vitest run src/utils/__tests__/chordUtils.test.ts  # Example: run chord utils tests
+```
 
-リポジトリに変更をコミットする前にTODO.mdを更新すること
+## Architecture Overview
 
-コミットログは日本語で書いて
+### State Management
+- **Zustand store** (`chordChartStore.ts`) as single source of truth
+- Automatic persistence to LocalForage with error handling
+- Store-first pattern: all data operations go through the store
 
-## 作業ログの残し方
+### Component Architecture
+```
+MainLayout (orchestrates layout)
+├── Header (navigation, actions)
+├── ScoreExplorer (chart library sidebar)
+├── ChordChart (display mode)
+├── ChordChartEditor (edit mode)
+└── Various dialogs (Import/Export/Transpose)
+```
 
+### Key Utilities Organization
+Post-refactoring structure (as of recent changes):
+- **Music Theory**: `musicConstants.ts`, `transpose.ts`, `chordParsing.ts`
+- **Data Management**: `storage.ts`, `migration.ts`, `chartMigration.ts`
+- **Validation**: `chordValidation.ts`
+- **Chart Operations**: `chordCreation.ts`, `exportImport.ts`
+- **UI Helpers**: `lineBreakHelpers.ts`, `chordCopyPaste.ts`
+
+### Data Models
+```typescript
+ChordChart: { id, title, artist, key, tempo, timeSignature, sections[], tags[], notes }
+ChordSection: { id, name, chords[], beatsPerBar, barsCount }
+Chord: { name, root, base?, duration?, isLineBreak? }
+```
+
+### Custom Hooks Pattern
+- `useResponsiveBars`: Responsive layout calculations
+- `useChordOperations`: Chord manipulation logic  
+- `useSectionOperations`: Section management
+- `useWakeLock`: Screen wake lock for performance mode
+
+## Development Workflow
+
+### Git Workflow
+- main ブランチに直接コミットはせず、作業単位ごとにブランチを切り、GitHub上でPullRequestを送ること
+- コミットログは日本語で書いて
+- リポジトリに変更をコミットする前にTODO.mdを更新すること
+
+### Quality Requirements
+- **Testing**: このプロジェクトでは必ずテストを書くこと
+- **Linting**: コミットするコードはlintに通っている必要がある  
+- **Building**: コミットするコードは必ずビルドできる必要がある
+- **Pre-commit validation**: `npm test && npm run lint && npm run build` を確認してからコミット
+
+### Task Management
 - todoをTODO.mdに書いて管理してください
+- Claude Code sessions should use TodoWrite/TodoRead tools for task tracking
 
-## testing
+## Code Organization Patterns
 
-このプロジェクトでは必ずテストを書くこと
+### Utility Function Structure
+When adding new utilities, follow the established patterns:
+- **Music-related constants**: Add to `musicConstants.ts`
+- **Chord operations**: Use appropriate specialized files (`chordParsing.ts`, `chordValidation.ts`, etc.)
+- **Data operations**: Use `storage.ts` or create new focused utility files
+- **Component helpers**: Create focused utility files with clear single responsibilities
 
-## lint
+### Component Design Patterns
+- Use custom hooks for complex logic extraction
+- Follow the store-first pattern for state management
+- Implement responsive design using `useResponsiveBars` pattern
+- Use drag-and-drop with @dnd-kit following established patterns
 
-コミットするコードはlintに通っている必要がある
-
-## build
-
-コミットするコードは必ずビルドできる必要がある
+### Testing Patterns  
+- Test files mirror source structure: `src/utils/example.ts` → `src/utils/__tests__/example.test.ts`
+- Use React Testing Library for component tests
+- Mock external dependencies (LocalForage, clipboard APIs)
+- Test both success and error scenarios
 
 ## UI Design Guidelines / デザインガイドライン
 
