@@ -90,3 +90,65 @@ export const migrateChartData = (chart: ChordChart): ChordChart => {
     })) || []
   };
 };
+
+/**
+ * コード名からルート音を抽出する
+ * 
+ * @param chordName - コード名 (例: "Am", "F#7", "B♭maj7", "D♭m7(♭5)")
+ * @returns ルート音 (例: "A", "F#", "B♭", "D♭")
+ */
+export const extractChordRoot = (chordName: string): string => {
+  if (!chordName || typeof chordName !== 'string') {
+    return 'C'; // デフォルト値
+  }
+
+  // ルート音のパターンにマッチ: A-Gで始まり、#、b、♭のいずれかが続く可能性
+  const rootMatch = chordName.match(/^([A-G][#b♭]?)/i);
+  
+  if (rootMatch) {
+    return rootMatch[1];
+  }
+  
+  // マッチしない場合はデフォルト値を返す
+  return 'C';
+};
+
+/**
+ * コード名が有効かどうかをチェックする
+ * 
+ * @param chordName - チェックするコード名
+ * @returns 有効な場合はtrue
+ */
+export const isValidChordName = (chordName: string): boolean => {
+  if (!chordName || typeof chordName !== 'string') {
+    return false;
+  }
+
+  const trimmed = chordName.trim();
+  if (!trimmed) {
+    return false;
+  }
+
+  // ルート音（A-G）で始まることのみチェック、あとはユーザーの入力をそのまま受け入れる
+  const rootPattern = /^[A-G][#b♭]?/i;
+  return rootPattern.test(trimmed);
+};
+
+/**
+ * コード名を正規化する（不要な空白を削除など）
+ * 
+ * @param chordName - 正規化するコード名
+ * @returns 正規化されたコード名
+ */
+export const normalizeChordName = (chordName: string): string => {
+  if (!chordName || typeof chordName !== 'string') {
+    return 'C';
+  }
+  
+  const trimmed = chordName.trim();
+  if (!trimmed) {
+    return 'C';
+  }
+  
+  return trimmed;
+};
