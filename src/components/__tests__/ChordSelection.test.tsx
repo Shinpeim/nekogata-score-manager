@@ -94,8 +94,8 @@ describe('ChordSelection', () => {
       />
     );
 
-    expect(screen.getByText('✅ 全選択')).toBeInTheDocument();
-    expect(screen.getByText('❌ 全解除')).toBeInTheDocument();
+    expect(screen.getByTitle('このセクションの全選択')).toBeInTheDocument();
+    expect(screen.getByTitle('このセクションの選択をすべて解除')).toBeInTheDocument();
   });
 
   it('should allow selecting chords without showing action bar', () => {
@@ -112,7 +112,7 @@ describe('ChordSelection', () => {
     expect(screen.queryByText('🗑️ 選択を削除')).not.toBeInTheDocument();
 
     // Click "全選択" to select all chords
-    const selectAllButton = screen.getByText('✅ 全選択');
+    const selectAllButton = screen.getByTitle('このセクションの全選択');
     fireEvent.click(selectAllButton);
 
     // Action bar should still not appear
@@ -130,8 +130,8 @@ describe('ChordSelection', () => {
     );
 
     // Copy/paste buttons should always be visible
-    expect(screen.getByText('📋 コピー')).toBeInTheDocument();
-    expect(screen.getByText('📥 貼り付け')).toBeInTheDocument();
+    expect(screen.getByTitle('コード進行をコピー')).toBeInTheDocument();
+    expect(screen.getByTitle('クリップボードから追加')).toBeInTheDocument();
   });
 
 
@@ -148,7 +148,7 @@ describe('ChordSelection', () => {
     );
 
     // Select all chords
-    const selectAllButton = screen.getByText('✅ 全選択');
+    const selectAllButton = screen.getByTitle('このセクションの全選択');
     fireEvent.click(selectAllButton);
 
     await waitFor(() => {
@@ -168,7 +168,7 @@ describe('ChordSelection', () => {
     );
 
     // First select all chords
-    const selectAllButton = screen.getByText('✅ 全選択');
+    const selectAllButton = screen.getByTitle('このセクションの全選択');
     fireEvent.click(selectAllButton);
 
     await waitFor(() => {
@@ -178,7 +178,7 @@ describe('ChordSelection', () => {
     });
 
     // Then clear all selections
-    const clearAllButton = screen.getByText('❌ 全解除');
+    const clearAllButton = screen.getByTitle('このセクションの選択をすべて解除');
     fireEvent.click(clearAllButton);
 
     await waitFor(() => {

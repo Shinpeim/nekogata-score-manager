@@ -356,54 +356,55 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
 
       {chart.sections?.map((section) => (
         <div key={section.id} className="mb-6 p-4 border border-slate-300 rounded-lg">
-          <div className="flex justify-between items-center mb-3">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-3">
             <input
               type="text"
               value={section.name}
               onChange={(e) => handleSectionChange(section.id, 'name', e.target.value)}
-              className="text-lg font-medium bg-transparent border-b border-slate-300 focus:outline-none focus:border-[#85B0B7]"
+              className="text-lg font-medium bg-transparent border-b border-slate-300 focus:outline-none focus:border-[#85B0B7] flex-1 min-w-0"
             />
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-shrink-0">
               <button
                 onClick={() => selectAllInSection(section.id)}
-                className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded-md text-xs"
+                className="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-md text-sm w-8 h-8 flex items-center justify-center"
                 title="このセクションの全選択"
               >
-                ✅ 全選択
+                ☑
               </button>
               <button
                 onClick={() => clearAllSelectionInSection(section.id)}
-                className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-2 py-1 rounded-md text-xs"
+                className="bg-slate-100 hover:bg-slate-200 text-slate-600 p-2 rounded-md text-sm w-8 h-8 flex items-center justify-center"
                 title="このセクションの選択をすべて解除"
               >
-                ❌ 全解除
+                ×
               </button>
               <button
                 onClick={() => copyChordProgression(section.id)}
-                className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-1 rounded-md text-xs"
+                className="bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-md text-sm w-8 h-8 flex items-center justify-center"
                 title="コード進行をコピー"
               >
-                📋 コピー
+                ⎘
               </button>
               <button
                 onClick={() => pasteChordProgression(section.id)}
-                className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-1 rounded-md text-xs"
+                className="bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-md text-sm w-8 h-8 flex items-center justify-center"
                 title="クリップボードから追加"
               >
-                📥 貼り付け
+                ⎙
               </button>
               <button
                 onClick={() => duplicateSection(section.id)}
-                className="bg-[#BDD0CA] hover:bg-[#A4C2B5] text-slate-800 px-2 py-1 rounded-md text-xs"
+                className="bg-[#BDD0CA] hover:bg-[#A4C2B5] text-slate-800 p-2 rounded-md text-sm w-8 h-8 flex items-center justify-center"
                 title="このセクションを複製"
               >
-                📄 複製
+                ⧉
               </button>
               <button
                 onClick={() => deleteSection(section.id)}
-                className="bg-[#EE5840] hover:bg-[#D14A2E] text-white px-2 py-1 rounded-md text-xs"
+                className="bg-[#EE5840] hover:bg-[#D14A2E] text-white p-2 rounded-md text-sm w-8 h-8 flex items-center justify-center"
+                title="このセクションを削除"
               >
-                削除
+                ×
               </button>
             </div>
           </div>
