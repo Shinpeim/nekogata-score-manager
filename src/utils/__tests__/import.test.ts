@@ -82,7 +82,7 @@ describe('import', () => {
       const exportData: ExportData = {
         version: '1.0.0',
         exportDate: new Date().toISOString(),
-        charts: [invalidChart]
+        charts: [invalidChart as any]
       };
 
       const result = parseImportData(JSON.stringify(exportData));
@@ -101,7 +101,7 @@ describe('import', () => {
       const exportData: ExportData = {
         version: '1.0.0',
         exportDate: new Date().toISOString(),
-        charts: [chartWithInvalidDates]
+        charts: [chartWithInvalidDates as any]
       };
 
       const result = parseImportData(JSON.stringify(exportData));
@@ -129,7 +129,7 @@ describe('import', () => {
       const exportData: ExportData = {
         version: '1.0.0',
         exportDate: new Date().toISOString(),
-        charts: [chartWithIncompleteSection]
+        charts: [chartWithIncompleteSection as any]
       };
 
       const result = parseImportData(JSON.stringify(exportData));
@@ -171,7 +171,7 @@ describe('import', () => {
       const exportData: ExportData = {
         version: '1.0.0',
         exportDate: new Date().toISOString(),
-        charts: [chart34]
+        charts: [chart34 as any]
       };
 
       const result = parseImportData(JSON.stringify(exportData));
