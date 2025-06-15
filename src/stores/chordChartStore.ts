@@ -37,7 +37,10 @@ export const useChordChartStore = create<ChordChartState>()(
         try {
           set({ isLoading: true, error: null });
           
-          // ローカル状態を更新
+          // ストレージに先に保存
+          await storageService.saveChart(chart);
+          
+          // ストレージ保存が成功した場合のみローカル状態を更新
           set((state) => ({
             charts: {
               ...state.charts,
@@ -45,9 +48,6 @@ export const useChordChartStore = create<ChordChartState>()(
             },
             isLoading: false
           }), false, 'addChart');
-          
-          // ストレージに保存
-          await storageService.saveChart(chart);
         } catch (error) {
           set({ 
             isLoading: false, 

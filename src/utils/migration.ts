@@ -68,12 +68,24 @@ const MIGRATIONS: Record<number, MigrationFunction> = {
 export const getDataVersion = (rawData: unknown): number => {
   if (!rawData) return CURRENT_DATA_VERSION;
   
-  // バージョン情報付きデータの場合
-  if (typeof rawData === 'object' && rawData !== null && 'version' in rawData && 'data' in rawData) {
-    return (rawData as { version: number }).version;
+  if (typeof rawData !== 'object' || rawData === null) {
+    return 1;
   }
   
-  // バージョン情報がない古いデータの場合（バージョン1とみなす）
+  const obj = rawData as Record<string, unknown>;
+  
+  // バージョン情報付きChordLibraryデータの場合
+  if ('version' in obj && 'data' in obj && typeof obj.version === 'number') {
+    return obj.version;
+  }
+  
+  // エクスポートデータ形式の場合（charts配列がある）
+  if ('charts' in obj && Array.isArray(obj.charts)) {
+    // エクスポートデータは常にバージョン1のデータとして扱う
+    return 1;
+  }
+  
+  // ChordLibrary形式（直接コード譜オブジェクト）やその他の古いデータ
   return 1;
 };
 
