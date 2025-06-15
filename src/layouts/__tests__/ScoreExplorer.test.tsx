@@ -40,6 +40,7 @@ describe('ScoreExplorer', () => {
   const mockOnImport = vi.fn();
   const mockOnExportSelected = vi.fn();
   const mockOnDeleteSelected = vi.fn();
+  const mockOnClose = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -504,6 +505,195 @@ describe('ScoreExplorer', () => {
       expect(screen.getByText('tag1')).toBeInTheDocument();
       expect(screen.getByText('tag2')).toBeInTheDocument();
       expect(screen.queryByText('tag3')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Mobile Version', () => {
+    it('should render mobile overlay when isMobile is true', () => {
+      render(
+        <ScoreExplorer
+          charts={mockCharts}
+          currentChartId={null}
+          selectedChartIds={[]}
+          onChartSelect={mockOnChartSelect}
+          onSelectAll={mockOnSelectAll}
+          onSetCurrentChart={mockOnSetCurrentChart}
+          onCreateNew={mockOnCreateNew}
+          onImport={mockOnImport}
+          onExportSelected={mockOnExportSelected}
+          onDeleteSelected={mockOnDeleteSelected}
+          isMobile={true}
+          onClose={mockOnClose}
+        />
+      );
+
+      // モバイル固有のオーバーレイクラスを確認
+      const overlay = document.querySelector('.fixed.inset-0.flex.z-40.md\\:hidden');
+      expect(overlay).toBeInTheDocument();
+      
+      // 閉じるボタンの存在を確認
+      expect(screen.getByRole('button', { name: /score explorerを閉じる/i })).toBeInTheDocument();
+    });
+
+    it('should call onClose when close button is clicked in mobile mode', () => {
+      render(
+        <ScoreExplorer
+          charts={mockCharts}
+          currentChartId={null}
+          selectedChartIds={[]}
+          onChartSelect={mockOnChartSelect}
+          onSelectAll={mockOnSelectAll}
+          onSetCurrentChart={mockOnSetCurrentChart}
+          onCreateNew={mockOnCreateNew}
+          onImport={mockOnImport}
+          onExportSelected={mockOnExportSelected}
+          onDeleteSelected={mockOnDeleteSelected}
+          isMobile={true}
+          onClose={mockOnClose}
+        />
+      );
+
+      const closeButton = screen.getByRole('button', { name: /score explorerを閉じる/i });
+      fireEvent.click(closeButton);
+      expect(mockOnClose).toHaveBeenCalled();
+    });
+
+    it('should call onClose when overlay background is clicked in mobile mode', () => {
+      render(
+        <ScoreExplorer
+          charts={mockCharts}
+          currentChartId={null}
+          selectedChartIds={[]}
+          onChartSelect={mockOnChartSelect}
+          onSelectAll={mockOnSelectAll}
+          onSetCurrentChart={mockOnSetCurrentChart}
+          onCreateNew={mockOnCreateNew}
+          onImport={mockOnImport}
+          onExportSelected={mockOnExportSelected}
+          onDeleteSelected={mockOnDeleteSelected}
+          isMobile={true}
+          onClose={mockOnClose}
+        />
+      );
+
+      const overlay = document.querySelector('.fixed.inset-0.bg-slate-600.bg-opacity-75');
+      if (overlay) {
+        fireEvent.click(overlay);
+        expect(mockOnClose).toHaveBeenCalled();
+      }
+    });
+
+    it('should call onSetCurrentChart and onClose when chart is clicked in mobile mode', () => {
+      render(
+        <ScoreExplorer
+          charts={mockCharts}
+          currentChartId={null}
+          selectedChartIds={[]}
+          onChartSelect={mockOnChartSelect}
+          onSelectAll={mockOnSelectAll}
+          onSetCurrentChart={mockOnSetCurrentChart}
+          onCreateNew={mockOnCreateNew}
+          onImport={mockOnImport}
+          onExportSelected={mockOnExportSelected}
+          onDeleteSelected={mockOnDeleteSelected}
+          isMobile={true}
+          onClose={mockOnClose}
+        />
+      );
+
+      fireEvent.click(screen.getByText('Test Chart 1'));
+      expect(mockOnSetCurrentChart).toHaveBeenCalledWith('chart1');
+      expect(mockOnClose).toHaveBeenCalled();
+    });
+
+    it('should not call onClose when chart is clicked in desktop mode', () => {
+      render(
+        <ScoreExplorer
+          charts={mockCharts}
+          currentChartId={null}
+          selectedChartIds={[]}
+          onChartSelect={mockOnChartSelect}
+          onSelectAll={mockOnSelectAll}
+          onSetCurrentChart={mockOnSetCurrentChart}
+          onCreateNew={mockOnCreateNew}
+          onImport={mockOnImport}
+          onExportSelected={mockOnExportSelected}
+          onDeleteSelected={mockOnDeleteSelected}
+          isMobile={false}
+        />
+      );
+
+      fireEvent.click(screen.getByText('Test Chart 1'));
+      expect(mockOnSetCurrentChart).toHaveBeenCalledWith('chart1');
+      expect(mockOnClose).not.toHaveBeenCalled();
+    });
+
+    it('should render desktop version when isMobile is false', () => {
+      render(
+        <ScoreExplorer
+          charts={mockCharts}
+          currentChartId={null}
+          selectedChartIds={[]}
+          onChartSelect={mockOnChartSelect}
+          onSelectAll={mockOnSelectAll}
+          onSetCurrentChart={mockOnSetCurrentChart}
+          onCreateNew={mockOnCreateNew}
+          onImport={mockOnImport}
+          onExportSelected={mockOnExportSelected}
+          onDeleteSelected={mockOnDeleteSelected}
+          isMobile={false}
+        />
+      );
+
+      // モバイル固有のオーバーレイクラスがないことを確認
+      const overlay = document.querySelector('.fixed.inset-0.flex.z-40.md\\:hidden');
+      expect(overlay).not.toBeInTheDocument();
+      
+      // 閉じるボタンが存在しないことを確認
+      expect(screen.queryByRole('button', { name: /score explorerを閉じる/i })).not.toBeInTheDocument();
+    });
+
+    it('should have different padding for mobile vs desktop', () => {
+      const { rerender } = render(
+        <ScoreExplorer
+          charts={mockCharts}
+          currentChartId={null}
+          selectedChartIds={[]}
+          onChartSelect={mockOnChartSelect}
+          onSelectAll={mockOnSelectAll}
+          onSetCurrentChart={mockOnSetCurrentChart}
+          onCreateNew={mockOnCreateNew}
+          onImport={mockOnImport}
+          onExportSelected={mockOnExportSelected}
+          onDeleteSelected={mockOnDeleteSelected}
+          isMobile={false}
+        />
+      );
+
+      // デスクトップ版のパディングを確認
+      let contentDiv = document.querySelector('.p-4');
+      expect(contentDiv).toBeInTheDocument();
+
+      rerender(
+        <ScoreExplorer
+          charts={mockCharts}
+          currentChartId={null}
+          selectedChartIds={[]}
+          onChartSelect={mockOnChartSelect}
+          onSelectAll={mockOnSelectAll}
+          onSetCurrentChart={mockOnSetCurrentChart}
+          onCreateNew={mockOnCreateNew}
+          onImport={mockOnImport}
+          onExportSelected={mockOnExportSelected}
+          onDeleteSelected={mockOnDeleteSelected}
+          isMobile={true}
+          onClose={mockOnClose}
+        />
+      );
+
+      // モバイル版のパディングを確認
+      contentDiv = document.querySelector('.px-4');
+      expect(contentDiv).toBeInTheDocument();
     });
   });
 });

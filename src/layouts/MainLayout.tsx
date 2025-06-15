@@ -6,7 +6,6 @@ import ImportDialog from '../components/ImportDialog';
 import ExportDialog from '../components/ExportDialog';
 import Header from './Header';
 import ScoreExplorer from './ScoreExplorer';
-import MobileScoreExplorer from './MobileScoreExplorer';
 import type { ChordChart } from '../types';
 
 interface MainLayoutProps {
@@ -106,7 +105,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
       <div className="flex h-[calc(100vh-4rem)]">
         {/* Mobile Score Explorer overlay */}
         {explorerOpen && (
-          <MobileScoreExplorer
+          <ScoreExplorer
             charts={charts}
             currentChartId={currentChartId}
             selectedChartIds={selectedChartIds}
@@ -117,6 +116,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
             onImport={() => setShowImportDialog(true)}
             onExportSelected={handleExportSelected}
             onDeleteSelected={handleDeleteSelected}
+            isMobile={true}
             onClose={() => setExplorerOpen(false)}
           />
         )}
@@ -134,6 +134,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
             onImport={() => setShowImportDialog(true)}
             onExportSelected={handleExportSelected}
             onDeleteSelected={handleDeleteSelected}
+            isMobile={false}
           />
         </aside>
 
