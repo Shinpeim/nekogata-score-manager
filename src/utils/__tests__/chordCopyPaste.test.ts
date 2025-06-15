@@ -126,6 +126,33 @@ describe('chordCopyPaste', () => {
       expect(result[3]).toEqual({ name: 'Eb', root: 'Eb', duration: 4 });
     });
 
+    it('should handle flat symbol (♭) in addition to b', () => {
+      const result = textToChords('B♭ E♭ A♭ D♭');
+      
+      expect(result).toHaveLength(4);
+      expect(result[0]).toEqual({ name: 'B♭', root: 'B♭', duration: 4 });
+      expect(result[1]).toEqual({ name: 'E♭', root: 'E♭', duration: 4 });
+      expect(result[2]).toEqual({ name: 'A♭', root: 'A♭', duration: 4 });
+      expect(result[3]).toEqual({ name: 'D♭', root: 'D♭', duration: 4 });
+    });
+
+    it('should handle flat symbol (♭) with duration brackets', () => {
+      const result = textToChords('B♭[2] E♭m7[4] A♭maj7[1.5]');
+      
+      expect(result).toHaveLength(3);
+      expect(result[0]).toEqual({ name: 'B♭', root: 'B♭', duration: 2 });
+      expect(result[1]).toEqual({ name: 'E♭m7', root: 'E♭', duration: 4 });
+      expect(result[2]).toEqual({ name: 'A♭maj7', root: 'A♭', duration: 1.5 });
+    });
+
+    it('should handle flat symbol (♭) in tension chords', () => {
+      const result = textToChords('E♭7(♭9)[2] B♭7(♭5)[4]');
+      
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({ name: 'E♭7(♭9)', root: 'E♭', duration: 2 });
+      expect(result[1]).toEqual({ name: 'B♭7(♭5)', root: 'B♭', duration: 4 });
+    });
+
     it('should handle tension chords with bracket notation', () => {
       const result = textToChords('E7(#9)[2] C7(b5)[4] Am7(11)[1]');
       
