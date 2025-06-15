@@ -7,7 +7,7 @@ import {
   pasteChordProgressionFromClipboard,
   isValidChordProgression 
 } from '../utils/chordCopyPaste';
-import { extractChordRoot } from '../utils/chordUtils';
+import { extractChordRoot, parseOnChord } from '../utils/chordUtils';
 import {
   DndContext,
   closestCenter,
@@ -182,14 +182,39 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
         section.id === sectionId
           ? {
               ...section,
+              chords: section.chords.map((chord, index) => 
+                index === chordIndex ? { ...chord, [field]: value } : chord
+              )
+            }
+          : section
+      ) || []
+    };
+    onUpdateChart(updatedChart);
+  };
+
+
+  // コード名の確定時にパースを実行する関数
+  const finalizeChordName = (sectionId: string, chordIndex: number, value: string) => {
+    if (!value.trim()) {
+      // 空文字列の場合は元の値に戻すため、何もしない
+      return;
+    }
+    
+    const parsed = parseOnChord(value);
+    const updatedChart = {
+      ...chart,
+      sections: chart.sections?.map(section =>
+        section.id === sectionId
+          ? {
+              ...section,
               chords: section.chords.map((chord, index) => {
                 if (index === chordIndex) {
-                  const updatedChord = { ...chord, [field]: value };
-                  // コード名が更新された場合、rootも自動更新
-                  if (field === 'name' && typeof value === 'string') {
-                    updatedChord.root = extractChordRoot(value);
-                  }
-                  return updatedChord;
+                  return {
+                    ...chord,
+                    name: parsed.chord,
+                    root: extractChordRoot(parsed.chord),
+                    base: parsed.base
+                  };
                 }
                 return chord;
               })
@@ -478,6 +503,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
                       itemId={itemId}
                       isSelected={selectedChords.has(`${section.id}-${chordIndex}`)}
                       onUpdateChord={updateChordInSection}
+                      onFinalizeChordName={finalizeChordName}
                       onDeleteChord={deleteChordFromSection}
                       onInsertLineBreak={insertLineBreakAfterChord}
                       onToggleSelection={toggleChordSelection}

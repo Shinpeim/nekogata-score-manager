@@ -191,7 +191,12 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew, onOpenI
                         style={{ width: `${widthPercentage}%` }}
                       >
                         <div className="text-left flex items-center">
-                          <span className="text-xs font-semibold">{chord.name}</span>
+                          <span className="text-xs font-semibold">
+                            {chord.name}
+                            {chord.base && (
+                              <span className="text-slate-500">/{chord.base}</span>
+                            )}
+                          </span>
                         </div>
                       </div>
                     );

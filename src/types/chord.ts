@@ -1,6 +1,7 @@
 export interface Chord {
   name: string;
   root: string;
+  base?: string; // オンコードのベース音
   duration?: number;
   isLineBreak?: boolean; // 改行マーカーフラグ
 }

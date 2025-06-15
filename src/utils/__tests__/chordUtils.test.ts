@@ -9,7 +9,9 @@ import {
   COMMON_SECTION_NAMES,
   extractChordRoot,
   isValidChordName,
-  normalizeChordName
+  normalizeChordName,
+  parseOnChord,
+  isOnChord
 } from '../chordUtils';
 import type { ChordChart } from '../../types';
 
@@ -321,6 +323,96 @@ describe('chordUtils', () => {
     it('should preserve valid chord names', () => {
       expect(normalizeChordName('F#m7')).toBe('F#m7');
       expect(normalizeChordName('B♭maj7')).toBe('B♭maj7');
+    });
+  });
+
+  describe('parseOnChord', () => {
+    it('should parse basic on chords', () => {
+      expect(parseOnChord('C/E')).toEqual({ chord: 'C', base: 'E' });
+      expect(parseOnChord('Am/G')).toEqual({ chord: 'Am', base: 'G' });
+      expect(parseOnChord('F/C')).toEqual({ chord: 'F', base: 'C' });
+    });
+
+    it('should parse on chords with sharp base', () => {
+      expect(parseOnChord('D/F#')).toEqual({ chord: 'D', base: 'F#' });
+      expect(parseOnChord('G/C#')).toEqual({ chord: 'G', base: 'C#' });
+    });
+
+    it('should parse on chords with flat base and normalize b to ♭', () => {
+      expect(parseOnChord('C/Bb')).toEqual({ chord: 'C', base: 'B♭' });
+      expect(parseOnChord('F/Eb')).toEqual({ chord: 'F', base: 'E♭' });
+      expect(parseOnChord('G/Ab')).toEqual({ chord: 'G', base: 'A♭' });
+    });
+
+    it('should parse on chords with ♭ symbol in base', () => {
+      expect(parseOnChord('C/B♭')).toEqual({ chord: 'C', base: 'B♭' });
+      expect(parseOnChord('F/E♭')).toEqual({ chord: 'F', base: 'E♭' });
+    });
+
+    it('should parse complex on chords', () => {
+      expect(parseOnChord('Am7/G')).toEqual({ chord: 'Am7', base: 'G' });
+      expect(parseOnChord('Dm7(♭5)/A♭')).toEqual({ chord: 'Dm7(♭5)', base: 'A♭' });
+      expect(parseOnChord('F#m7/C#')).toEqual({ chord: 'F#m7', base: 'C#' });
+    });
+
+    it('should return just chord for non-on chords', () => {
+      expect(parseOnChord('C')).toEqual({ chord: 'C' });
+      expect(parseOnChord('Am7')).toEqual({ chord: 'Am7' });
+      expect(parseOnChord('F#m')).toEqual({ chord: 'F#m' });
+    });
+
+    it('should handle invalid input', () => {
+      expect(parseOnChord('')).toEqual({ chord: 'C' });
+      expect(parseOnChord('invalid')).toEqual({ chord: 'invalid' });
+    });
+
+    it('should handle null/undefined input', () => {
+      expect(parseOnChord(null as unknown as string)).toEqual({ chord: 'C' });
+      expect(parseOnChord(undefined as unknown as string)).toEqual({ chord: 'C' });
+    });
+
+    it('should not parse invalid on chord patterns', () => {
+      expect(parseOnChord('C/invalid')).toEqual({ chord: 'C/invalid' });
+      expect(parseOnChord('C/1')).toEqual({ chord: 'C/1' });
+      expect(parseOnChord('C/')).toEqual({ chord: 'C/' });
+    });
+  });
+
+  describe('isOnChord', () => {
+    it('should identify basic on chords', () => {
+      expect(isOnChord('C/E')).toBe(true);
+      expect(isOnChord('Am/G')).toBe(true);
+      expect(isOnChord('F/C')).toBe(true);
+    });
+
+    it('should identify on chords with sharp and flat base', () => {
+      expect(isOnChord('D/F#')).toBe(true);
+      expect(isOnChord('C/Bb')).toBe(true);
+      expect(isOnChord('F/E♭')).toBe(true);
+    });
+
+    it('should identify complex on chords', () => {
+      expect(isOnChord('Am7/G')).toBe(true);
+      expect(isOnChord('Dm7(♭5)/A♭')).toBe(true);
+      expect(isOnChord('F#m7/C#')).toBe(true);
+    });
+
+    it('should not identify non-on chords', () => {
+      expect(isOnChord('C')).toBe(false);
+      expect(isOnChord('Am7')).toBe(false);
+      expect(isOnChord('F#m')).toBe(false);
+    });
+
+    it('should not identify invalid on chord patterns', () => {
+      expect(isOnChord('C/invalid')).toBe(false);
+      expect(isOnChord('C/1')).toBe(false);
+      expect(isOnChord('C/')).toBe(false);
+    });
+
+    it('should handle invalid input', () => {
+      expect(isOnChord('')).toBe(false);
+      expect(isOnChord(null as unknown as string)).toBe(false);
+      expect(isOnChord(undefined as unknown as string)).toBe(false);
     });
   });
 });

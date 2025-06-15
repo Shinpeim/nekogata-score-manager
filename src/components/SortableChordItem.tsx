@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import type { Chord } from '../types';
 import { isLineBreakMarker } from '../utils/lineBreakHelpers';
 import { useSortable } from '@dnd-kit/sortable';
@@ -10,6 +10,7 @@ interface SortableChordItemProps {
   sectionId: string;
   itemId: string;
   onUpdateChord: (sectionId: string, chordIndex: number, field: keyof Chord, value: string | number) => void;
+  onFinalizeChordName: (sectionId: string, chordIndex: number, value: string) => void;
   onDeleteChord: (sectionId: string, chordIndex: number) => void;
   onInsertLineBreak: (sectionId: string, chordIndex: number) => void;
   isSelected?: boolean;
@@ -23,10 +24,15 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
   itemId,
   isSelected = false,
   onUpdateChord,
+  onFinalizeChordName,
   onDeleteChord,
   onInsertLineBreak,
   onToggleSelection,
 }) => {
+  // 入力表示用の状態
+  const [displayValue, setDisplayValue] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+
   const {
     attributes,
     listeners,
@@ -40,6 +46,44 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
+  };
+
+  // chordが変更された時に表示値を更新
+  useEffect(() => {
+    if (!isEditing) {
+      const fullChordName = chord.name + (chord.base ? `/${chord.base}` : '');
+      setDisplayValue(fullChordName);
+    }
+  }, [chord.name, chord.base, isEditing]);
+
+  const handleInputFocus = () => {
+    setIsEditing(true);
+    // フォーカス時に完全な表記（オンコード含む）を表示
+    const fullChordName = chord.name + (chord.base ? `/${chord.base}` : '');
+    setDisplayValue(fullChordName);
+  };
+
+  const handleInputChange = (value: string) => {
+    setDisplayValue(value);
+    // 入力中はパースしない
+  };
+
+  const handleInputBlur = () => {
+    setIsEditing(false);
+    // フォーカスアウト時にパースして確定
+    if (displayValue.trim()) {
+      onFinalizeChordName(sectionId, chordIndex, displayValue.trim());
+    } else {
+      // 空文字列の場合は元の値に戻す
+      const fullChordName = chord.name + (chord.base ? `/${chord.base}` : '');
+      setDisplayValue(fullChordName);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.currentTarget.blur(); // Enterキーでフォーカスアウト
+    }
   };
 
   return (
@@ -108,8 +152,11 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
         <>
           <input
             type="text"
-            value={chord.name}
-            onChange={(e) => onUpdateChord(sectionId, chordIndex, 'name', e.target.value)}
+            value={displayValue}
+            onChange={(e) => handleInputChange(e.target.value)}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
+            onKeyDown={handleKeyDown}
             className="w-full mb-1 px-2 py-1 text-sm border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-[#85B0B7]"
             placeholder="コード名"
           />

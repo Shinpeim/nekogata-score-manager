@@ -154,3 +154,48 @@ export const normalizeChordName = (chordName: string): string => {
   
   return trimmed;
 };
+
+/**
+ * コード名からオンコード情報を解析する
+ * 
+ * @param chordName - コード名 (例: "C/E", "Am7/G", "F#m/C#")
+ * @returns オンコード情報を含むオブジェクト
+ */
+export const parseOnChord = (chordName: string): { chord: string; base?: string } => {
+  if (!chordName || typeof chordName !== 'string') {
+    return { chord: 'C' };
+  }
+
+  const trimmed = chordName.trim();
+  if (!trimmed) {
+    return { chord: 'C' };
+  }
+
+  // オンコードのパターン: /[A-G][#♭b]?で終わる
+  const onChordMatch = trimmed.match(/^(.+)\/([A-G][#♭b]?)$/i);
+  
+  if (onChordMatch) {
+    const chord = onChordMatch[1];
+    const base = onChordMatch[2];
+    // bを♭に正規化
+    const normalizedBase = base.replace(/b/g, '♭');
+    return { chord, base: normalizedBase };
+  }
+  
+  return { chord: trimmed };
+};
+
+/**
+ * オンコードかどうかを判定する
+ * 
+ * @param chordName - コード名
+ * @returns オンコードの場合はtrue
+ */
+export const isOnChord = (chordName: string): boolean => {
+  if (!chordName || typeof chordName !== 'string') {
+    return false;
+  }
+
+  // /[A-G][#♭b]?で終わるパターンをチェック
+  return /\/[A-G][#♭b]?$/i.test(chordName.trim());
+};
