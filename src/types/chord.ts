@@ -1,8 +1,6 @@
 export interface Chord {
   name: string;
   root: string;
-  quality?: string;
-  bass?: string;
   duration?: number;
   isLineBreak?: boolean; // 改行マーカーフラグ
 }
@@ -31,21 +29,4 @@ export interface ChordChart {
 
 export interface ChordLibrary {
   [key: string]: ChordChart;
-}
-
-export type ChordRoot = 'C' | 'C#' | 'Db' | 'D' | 'D#' | 'Eb' | 'E' | 'F' | 'F#' | 'Gb' | 'G' | 'G#' | 'Ab' | 'A' | 'A#' | 'Bb' | 'B';
-
-export type ChordQuality = '△' | 'm' | '7' | '△7' | 'm7' | 'dim' | 'aug' | 'sus2' | 'sus4' | 'add9' | '6' | 'm6' | '9' | '△9' | 'm9' | '11' | '13';
-
-export interface ChordPosition {
-  sectionId: string;
-  barIndex: number;
-  beatIndex: number;
-}
-
-export interface ChordEditAction {
-  type: 'add' | 'edit' | 'delete' | 'move';
-  position: ChordPosition;
-  chord?: Chord;
-  newPosition?: ChordPosition;
 }
