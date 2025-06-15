@@ -1,8 +1,6 @@
 export interface Chord {
   name: string;
   root: string;
-  quality?: string;
-  bass?: string;
   duration?: number;
   isLineBreak?: boolean; // 改行マーカーフラグ
 }

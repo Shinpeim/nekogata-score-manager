@@ -41,7 +41,7 @@ describe('ChordChart', () => {
         name: 'イントロ',
         chords: [
           { name: 'C', root: 'C', duration: 4 },
-          { name: 'Am', root: 'A', quality: 'm', duration: 4 },
+          { name: 'Am', root: 'A', duration: 4 },
           { name: 'F', root: 'F', duration: 4 },
           { name: 'G', root: 'G', duration: 4 }
         ],
@@ -52,8 +52,8 @@ describe('ChordChart', () => {
         id: 'section-2',
         name: 'Aメロ',
         chords: [
-          { name: 'Dm', root: 'D', quality: 'm', duration: 2 },
-          { name: 'G7', root: 'G', quality: '7', duration: 2 },
+          { name: 'Dm', root: 'D', duration: 2 },
+          { name: 'G7', root: 'G', duration: 2 },
           { name: 'C', root: 'C', duration: 4 }
         ],
         beatsPerBar: 4,
