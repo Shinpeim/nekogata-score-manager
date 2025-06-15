@@ -316,30 +316,35 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
     }
   };
 
-  const selectAllInSection = (sectionId: string) => {
+  const toggleSelectAllInSection = (sectionId: string) => {
     const section = chart.sections?.find(s => s.id === sectionId);
     if (!section) return;
 
-    const newSelected = new Set(selectedChords);
+    // セクション内のコード数を取得
+    const sectionChordIds = [];
     for (let i = 0; i < section.chords.length; i++) {
-      newSelected.add(`${sectionId}-${i}`);
+      if (!isLineBreakMarker(section.chords[i])) {
+        sectionChordIds.push(`${sectionId}-${i}`);
+      }
     }
-    setSelectedChords(newSelected);
-  };
 
-  const clearAllSelectionInSection = (sectionId: string) => {
-    const section = chart.sections?.find(s => s.id === sectionId);
-    if (!section) return;
+    // 選択されているセクション内のコード数を計算
+    const selectedInSection = sectionChordIds.filter(id => selectedChords.has(id)).length;
 
     const newSelected = new Set(selectedChords);
-    for (let i = 0; i < section.chords.length; i++) {
-      newSelected.delete(`${sectionId}-${i}`);
+
+    if (selectedInSection === sectionChordIds.length) {
+      // 全て選択されている場合：全解除
+      sectionChordIds.forEach(id => newSelected.delete(id));
+      if (newSelected.size === 0) {
+        setLastSelectedChord(null);
+      }
+    } else {
+      // 一部または何も選択されていない場合：全選択
+      sectionChordIds.forEach(id => newSelected.add(id));
     }
+
     setSelectedChords(newSelected);
-    
-    if (newSelected.size === 0) {
-      setLastSelectedChord(null);
-    }
   };
 
   return (
@@ -365,18 +370,25 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
             />
             <div className="flex gap-2 flex-shrink-0">
               <button
-                onClick={() => selectAllInSection(section.id)}
+                onClick={() => toggleSelectAllInSection(section.id)}
                 className="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-md text-sm w-8 h-8 flex items-center justify-center"
-                title="このセクションの全選択"
+                title={(() => {
+                  const sectionChordIds = [];
+                  for (let i = 0; i < section.chords.length; i++) {
+                    if (!isLineBreakMarker(section.chords[i])) {
+                      sectionChordIds.push(`${section.id}-${i}`);
+                    }
+                  }
+                  const selectedInSection = sectionChordIds.filter(id => selectedChords.has(id)).length;
+                  
+                  if (selectedInSection === sectionChordIds.length && sectionChordIds.length > 0) {
+                    return "このセクションの選択をすべて解除";
+                  } else {
+                    return "このセクションの全選択";
+                  }
+                })()}
               >
                 ☑
-              </button>
-              <button
-                onClick={() => clearAllSelectionInSection(section.id)}
-                className="bg-slate-100 hover:bg-slate-200 text-slate-600 p-2 rounded-md text-sm w-8 h-8 flex items-center justify-center"
-                title="このセクションの選択をすべて解除"
-              >
-                ×
               </button>
               <button
                 onClick={() => copyChordProgression(section.id)}

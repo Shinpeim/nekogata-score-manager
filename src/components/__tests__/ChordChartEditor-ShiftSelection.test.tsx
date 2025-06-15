@@ -103,17 +103,20 @@ describe('ChordChartEditor - Shift Selection', () => {
       />
     );
 
-    // いくつかのコードを選択
-    const chordElements = screen.getAllByText(/#\d+/);
-    fireEvent.click(chordElements[0].closest('.border')!);
-    fireEvent.click(chordElements[2].closest('.border')!, { shiftKey: true });
+    // まず全選択ボタンを押してすべて選択
+    const selectAllButton = screen.getByTitle('このセクションの全選択');
+    fireEvent.click(selectAllButton);
 
-    // 全解除ボタンをクリック
-    const clearAllButton = screen.getByTitle('このセクションの選択をすべて解除');
-    fireEvent.click(clearAllButton);
+    // 全選択されていることを確認
+    let selectedChords = screen.getAllByText('✓');
+    expect(selectedChords.length).toBeGreaterThan(0);
+
+    // もう一度同じボタンを押すと全解除される（トグル動作）
+    const toggleButton = screen.getByTitle('このセクションの選択をすべて解除');
+    fireEvent.click(toggleButton);
 
     // 選択がクリアされていることを確認
-    const selectedChords = screen.queryAllByText('✓');
+    selectedChords = screen.queryAllByText('✓');
     expect(selectedChords).toHaveLength(0);
   });
 });
