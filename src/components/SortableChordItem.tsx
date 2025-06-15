@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Chord } from '../types';
 import { isLineBreakMarker } from '../utils/lineBreakHelpers';
+import { isValidFullChordName, isValidDuration } from '../utils/chordUtils';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -124,6 +125,10 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
     }
   };
 
+  // バリデーション状態
+  const isChordNameValid = isEditing ? isValidFullChordName(displayValue) : true;
+  const isDurationValid = isDurationEditing ? isValidDuration(durationDisplayValue) : true;
+
   return (
     <div
       ref={setNodeRef}
@@ -195,7 +200,11 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
             onFocus={handleInputFocus}
             onBlur={handleInputBlur}
             onKeyDown={handleKeyDown}
-            className="w-full mb-1 px-2 py-1 text-sm border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-[#85B0B7]"
+            className={`w-full mb-1 px-2 py-1 text-sm border rounded focus:outline-none focus:ring-1 ${
+              isChordNameValid
+                ? 'border-slate-300 focus:ring-[#85B0B7] bg-white'
+                : 'border-red-300 focus:ring-red-400 bg-red-50'
+            }`}
             placeholder="コード名"
           />
           <input
@@ -205,7 +214,11 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
             onFocus={handleDurationFocus}
             onBlur={handleDurationBlur}
             onKeyDown={handleDurationKeyDown}
-            className="w-full px-2 py-1 text-sm border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-[#85B0B7]"
+            className={`w-full px-2 py-1 text-sm border rounded focus:outline-none focus:ring-1 ${
+              isDurationValid
+                ? 'border-slate-300 focus:ring-[#85B0B7] bg-white'
+                : 'border-red-300 focus:ring-red-400 bg-red-50'
+            }`}
             placeholder="拍数"
             min="0.5"
             max="16"
