@@ -1,6 +1,6 @@
 import type { Chord } from '../types';
 import { isLineBreakMarker } from './lineBreakHelpers';
-import { extractChordRoot, parseOnChord } from './chordUtils';
+import { extractChordRoot, parseOnChord } from './chordParsing';
 
 /**
  * コード進行を文字列形式に変換する

@@ -1,22 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import {
-  createEmptyChordChart,
-  createEmptySection,
-  createNewChordChart,
-  validateChordChart,
-  COMMON_KEYS,
-  COMMON_TIME_SIGNATURES,
-  COMMON_SECTION_NAMES,
-  KEY_DISPLAY_NAMES,
-  extractChordRoot,
-  isValidChordName,
-  normalizeChordName,
-  parseOnChord,
-  isOnChord,
-  isValidDuration,
-  isValidFullChordName,
-  validateChartInputs
-} from '../chordUtils';
+import { createEmptyChordChart, createEmptySection, createNewChordChart } from '../chordCreation';
+import { validateChordChart, isValidChordName, isValidDuration, isValidFullChordName, validateChartInputs } from '../chordValidation';
+import { COMMON_KEYS, COMMON_TIME_SIGNATURES, COMMON_SECTION_NAMES, KEY_DISPLAY_NAMES } from '../musicConstants';
+import { extractChordRoot, normalizeChordName, parseOnChord, isOnChord } from '../chordParsing';
 import type { ChordChart } from '../../types';
 
 describe('chordUtils', () => {

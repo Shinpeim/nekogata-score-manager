@@ -1,5 +1,5 @@
 import type { ChordChart, Chord } from '../types';
-import { extractChordRoot, parseOnChord } from '../utils/chordUtils';
+import { extractChordRoot, parseOnChord } from '../utils/chordParsing';
 import { createLineBreakMarker, isLineBreakMarker } from '../utils/lineBreakHelpers';
 
 interface UseChordOperationsProps {

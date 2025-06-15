@@ -6,7 +6,7 @@ import ChordChartForm from './ChordChartForm';
 import BpmIndicator from './BpmIndicator';
 import { useResponsiveBars } from '../hooks/useResponsiveBars';
 import { splitChordsIntoRows, isLineBreakMarker } from '../utils/lineBreakHelpers';
-import { KEY_DISPLAY_NAMES } from '../utils/chordUtils';
+import { KEY_DISPLAY_NAMES } from '../utils/musicConstants';
 
 interface ChordChartProps {
   chartData?: ChordChartType;

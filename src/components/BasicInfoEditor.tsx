@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { ChordChart } from '../types';
 import TransposeConfirmDialog from './TransposeConfirmDialog';
-import { transposeChart } from '../utils/chordUtils';
+import { transposeChart } from '../utils/transpose';
 
 interface BasicInfoEditorProps {
   chart: ChordChart;

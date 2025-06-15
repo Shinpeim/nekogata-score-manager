@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type { ChordChart } from '../types';
 import BasicInfoEditor from './BasicInfoEditor';
 import SectionEditor from './SectionEditor';
-import { validateChartInputs } from '../utils/chordUtils';
+import { validateChartInputs } from '../utils/chordValidation';
 
 interface ChordChartEditorProps {
   chart: ChordChart;
