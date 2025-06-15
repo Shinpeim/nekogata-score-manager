@@ -383,7 +383,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
                 className="bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-md text-sm w-8 h-8 flex items-center justify-center"
                 title="コード進行をコピー"
               >
-                ⧉
+                ⎘
               </button>
               <button
                 onClick={() => pasteChordProgression(section.id)}
