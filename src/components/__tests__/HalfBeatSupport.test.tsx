@@ -59,10 +59,10 @@ describe('Half Beat Support', () => {
         beatsPerBar: 4,
         barsCount: 4,
         chords: [
-          { name: 'C', root: 'C', duration: 4 },
-          { name: 'Am', root: 'A', duration: 2 },
-          { name: 'F', root: 'F', duration: 1.5 },
-          { name: 'G', root: 'G', duration: 0.5 }
+          { name: 'C', root: 'C', duration: 4, memo: '' },
+          { name: 'Am', root: 'A', duration: 2, memo: '' },
+          { name: 'F', root: 'F', duration: 1.5, memo: '' },
+          { name: 'G', root: 'G', duration: 0.5, memo: '' }
         ]
       }
     ],
@@ -177,13 +177,13 @@ describe('Half Beat Support', () => {
           {
             ...mockChart.sections[0],
             chords: [
-              { name: 'C', root: 'C', duration: 0.5 },  // 0.5拍
-              { name: 'F', root: 'F', duration: 0.5 },  // 0.5拍
-              { name: 'G', root: 'G', duration: 1 },    // 1拍
-              { name: 'Am', root: 'A', duration: 2 },   // 2拍
+              { name: 'C', root: 'C', duration: 0.5, memo: '' },  // 0.5拍
+              { name: 'F', root: 'F', duration: 0.5, memo: '' },  // 0.5拍
+              { name: 'G', root: 'G', duration: 1, memo: '' },    // 1拍
+              { name: 'Am', root: 'A', duration: 2, memo: '' },   // 2拍
               // 合計4拍で1小節完了
-              { name: 'Dm', root: 'D', duration: 1.5 }, // 次の小節開始
-              { name: 'G7', root: 'G', duration: 2.5 }  // 合計4拍
+              { name: 'Dm', root: 'D', duration: 1.5, memo: '' }, // 次の小節開始
+              { name: 'G7', root: 'G', duration: 2.5, memo: '' }  // 合計4拍
             ]
           }
         ]

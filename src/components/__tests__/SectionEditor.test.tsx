@@ -19,8 +19,8 @@ describe('SectionEditor - セクション入れ替え機能', () => {
         beatsPerBar: 4,
         barsCount: 4,
         chords: [
-          { name: 'C', root: 'C', duration: 4 },
-          { name: 'F', root: 'F', duration: 4 }
+          { name: 'C', root: 'C', duration: 4, memo: '' },
+          { name: 'F', root: 'F', duration: 4, memo: '' }
         ]
       },
       {
@@ -29,8 +29,8 @@ describe('SectionEditor - セクション入れ替え機能', () => {
         beatsPerBar: 4,
         barsCount: 8,
         chords: [
-          { name: 'Am', root: 'A', duration: 4 },
-          { name: 'G', root: 'G', duration: 4 }
+          { name: 'Am', root: 'A', duration: 4, memo: '' },
+          { name: 'G', root: 'G', duration: 4, memo: '' }
         ]
       },
       {
@@ -39,8 +39,8 @@ describe('SectionEditor - セクション入れ替え機能', () => {
         beatsPerBar: 4,
         barsCount: 8,
         chords: [
-          { name: 'C', root: 'C', duration: 2 },
-          { name: 'G', root: 'G', duration: 2 }
+          { name: 'C', root: 'C', duration: 2, memo: '' },
+          { name: 'G', root: 'G', duration: 2, memo: '' }
         ]
       }
     ],

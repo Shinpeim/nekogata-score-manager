@@ -18,10 +18,10 @@ describe('Migration Utils', () => {
         id: 'section-1',
         name: 'Aメロ',
         chords: [
-          { name: 'C', root: 'C', duration: 4 },
-          { name: 'Am', root: 'A', duration: 4 }
+          { name: 'C', root: 'C', duration: 4, memo: '' },
+          { name: 'Am', root: 'A', duration: 4, memo: '' }
         ],
-        beatsPerBar: 4, // ここが問題（3/4拍子なのに4拍）
+        beatsPerBar: 4, // ここが問題（3/4拍子なのに4拍） - v1マイグレーションで修正されない（version 1.0.0以降はスキップ）
         barsCount: 4
       }
     ],
@@ -36,6 +36,11 @@ describe('Migration Utils', () => {
     version: '1.0.0'
   };
 
+  const mockChartV2: ChordChart = {
+    ...mockChartV1,
+    version: '2.0.0'
+  };
+
   const mockLibraryV1: ChordLibrary = {
     'test-1': mockChartV1
   };
@@ -45,6 +50,11 @@ describe('Migration Utils', () => {
     'test-2': { ...mockChartV1, id: 'test-2', version: '1.1.0' }
   };
 
+  const mockLibraryV2: ChordLibrary = {
+    'test-1': mockChartV2,
+    'test-2': { ...mockChartV1, id: 'test-2', version: '2.0.0' }
+  };
+
   describe('migrateData', () => {
     it('ChordLibraryの各Chartを個別に移行', () => {
       const result = migrateData(mockLibraryV1);
@@ -52,7 +62,7 @@ describe('Migration Utils', () => {
       expect(result['test-1']).toBeDefined();
       expect(result['test-1'].sections[0].beatsPerBar).toBe(3); // 3/4拍子に修正
       expect(result['test-1'].notes).toBe(''); // 空文字で初期化
-      expect(result['test-1'].version).toBe('1.0.0'); // デフォルトversion追加
+      expect(result['test-1'].version).toBe('2.0.0'); // 最新version追加
     });
 
     it('旧バージョン情報付きデータを移行', () => {
@@ -66,14 +76,21 @@ describe('Migration Utils', () => {
       expect(result['test-1']).toBeDefined();
       expect(result['test-1'].sections[0].beatsPerBar).toBe(3);
       expect(result['test-1'].notes).toBe('');
-      expect(result['test-1'].version).toBe('1.0.0');
+      expect(result['test-1'].version).toBe('2.0.0');
     });
 
-    it('現在のデータはそのまま返す', () => {
+    it('v1データはv2にマイグレーションされる', () => {
       const result = migrateData(mockLibraryWithVersions);
       
-      expect(result['test-1'].version).toBe('1.0.0');
-      expect(result['test-2'].version).toBe('1.1.0');
+      expect(result['test-1'].version).toBe('2.0.0');
+      expect(result['test-2'].version).toBe('2.0.0');
+    });
+
+    it('v2データはマイグレーション不要', () => {
+      const result = migrateData(mockLibraryV2);
+      
+      expect(result['test-1'].version).toBe('2.0.0');
+      expect(result['test-2'].version).toBe('2.0.0');
     });
 
     it('空データの場合は空オブジェクトを返す', () => {
@@ -141,7 +158,7 @@ describe('Migration Utils', () => {
             id: 'section-1',
             name: 'Verse',
             chords: [],
-            beatsPerBar: 4, // 6/8拍子なのに4拍
+            beatsPerBar: 4, // 6/8拍子なのに4拍 - versionなしなのでv1マイグレーションで修正される
             barsCount: 8
           }]
         }
@@ -152,8 +169,8 @@ describe('Migration Utils', () => {
       expect(Object.keys(result)).toHaveLength(2);
       expect(result.chart1.sections[0].beatsPerBar).toBe(4); // 4/4拍子は4拍のまま
       expect(result.chart2.sections[0].beatsPerBar).toBe(6); // 6/8拍子は6拍に修正
-      expect(result.chart1.version).toBe('1.0.0');
-      expect(result.chart2.version).toBe('1.0.0');
+      expect(result.chart1.version).toBe('2.0.0');
+      expect(result.chart2.version).toBe('2.0.0');
     });
 
     it('エラーのあるデータの処理', () => {

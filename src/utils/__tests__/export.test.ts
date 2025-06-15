@@ -54,8 +54,8 @@ const mockChart: ChordChart = {
       id: 'section-1',
       name: 'イントロ',
       chords: [
-        { name: 'C', root: 'C', duration: 4 },
-        { name: 'G', root: 'G', duration: 4 }
+        { name: 'C', root: 'C', duration: 4, memo: '' },
+        { name: 'G', root: 'G', duration: 4, memo: '' }
       ],
       beatsPerBar: 4,
       barsCount: 4

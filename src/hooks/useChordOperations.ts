@@ -24,7 +24,8 @@ export const useChordOperations = ({
     const newChord: Chord = {
       name: 'C',
       root: 'C',
-      duration: 4
+      duration: 4,
+      memo: ''
     };
     
     const updatedChart = {

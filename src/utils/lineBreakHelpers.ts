@@ -8,7 +8,8 @@ export function createLineBreakMarker(): Chord {
     name: '改行',
     root: '',
     isLineBreak: true,
-    duration: 0 // 改行マーカーは拍数を占めない
+    duration: 0, // 改行マーカーは拍数を占めない
+    memo: ''
   };
 }
 

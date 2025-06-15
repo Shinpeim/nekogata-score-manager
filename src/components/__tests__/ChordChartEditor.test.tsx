@@ -20,10 +20,10 @@ const mockChart: ChordChart = {
       beatsPerBar: 4,
       barsCount: 4,
       chords: [
-        { name: 'C', root: 'C', duration: 4 },
-        { name: 'Am', root: 'A', duration: 4 },
-        { name: 'F', root: 'F', duration: 4 },
-        { name: 'G', root: 'G', duration: 4 }
+        { name: 'C', root: 'C', duration: 4, memo: '' },
+        { name: 'Am', root: 'A', duration: 4, memo: '' },
+        { name: 'F', root: 'F', duration: 4, memo: '' },
+        { name: 'G', root: 'G', duration: 4, memo: '' }
       ]
     }
   ],

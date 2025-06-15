@@ -20,10 +20,10 @@ describe('ChordGridRenderer', () => {
     id: 'section-1',
     name: 'Test Section',
     chords: [
-      { name: 'C', root: 'C', duration: 4 },
-      { name: 'Am', root: 'A', duration: 4 },
-      { name: 'F', root: 'F', duration: 4 },
-      { name: 'G', root: 'G', duration: 4 }
+      { name: 'C', root: 'C', duration: 4, memo: '' },
+      { name: 'Am', root: 'A', duration: 4, memo: '' },
+      { name: 'F', root: 'F', duration: 4, memo: '' },
+      { name: 'G', root: 'G', duration: 4, memo: '' }
     ],
     beatsPerBar: 4,
     barsCount: 4
@@ -43,8 +43,8 @@ describe('ChordGridRenderer', () => {
       const sectionWithBaseChords: ChordSection = {
         ...mockSection,
         chords: [
-          { name: 'C', root: 'C', base: 'E', duration: 4 },
-          { name: 'F', root: 'F', base: 'A', duration: 4 }
+          { name: 'C', root: 'C', base: 'E', duration: 4, memo: '' },
+          { name: 'F', root: 'F', base: 'A', duration: 4, memo: '' }
         ]
       };
 
@@ -60,9 +60,9 @@ describe('ChordGridRenderer', () => {
       const sectionWithDurations: ChordSection = {
         ...mockSection,
         chords: [
-          { name: 'C', root: 'C', duration: 2 },
-          { name: 'G', root: 'G', duration: 1 },
-          { name: 'Am', root: 'A', duration: 1 }
+          { name: 'C', root: 'C', duration: 2, memo: '' },
+          { name: 'G', root: 'G', duration: 1, memo: '' },
+          { name: 'Am', root: 'A', duration: 1, memo: '' }
         ]
       };
 
@@ -77,8 +77,8 @@ describe('ChordGridRenderer', () => {
       const sectionWithoutDurations: ChordSection = {
         ...mockSection,
         chords: [
-          { name: 'C', root: 'C' },
-          { name: 'G', root: 'G' }
+          { name: 'C', root: 'C', memo: '' },
+          { name: 'G', root: 'G', memo: '' }
         ]
       };
 
@@ -86,6 +86,43 @@ describe('ChordGridRenderer', () => {
 
       expect(screen.getByText('C')).toBeInTheDocument();
       expect(screen.getByText('G')).toBeInTheDocument();
+    });
+
+    it('should render chord memos when present', () => {
+      const sectionWithMemos: ChordSection = {
+        ...mockSection,
+        chords: [
+          { name: 'C', root: 'C', duration: 4, memo: '愛を込めて' },
+          { name: 'Am', root: 'A', duration: 4, memo: 'cresc.' },
+          { name: 'F', root: 'F', duration: 4, memo: '' },
+          { name: 'G', root: 'G', duration: 4, memo: 'forte' }
+        ]
+      };
+
+      render(<ChordGridRenderer section={sectionWithMemos} timeSignature="4/4" />);
+
+      expect(screen.getByText('愛を込めて')).toBeInTheDocument();
+      expect(screen.getByText('cresc.')).toBeInTheDocument();
+      expect(screen.getByText('forte')).toBeInTheDocument();
+      
+      // メモがないコードはメモが表示されない
+      expect(screen.queryByText('F')).toBeInTheDocument();
+    });
+
+    it('should not render memo div when memo is empty', () => {
+      const sectionWithoutMemos: ChordSection = {
+        ...mockSection,
+        chords: [
+          { name: 'C', root: 'C', duration: 4, memo: '' },
+          { name: 'Am', root: 'A', duration: 4, memo: '' }
+        ]
+      };
+
+      const { container } = render(<ChordGridRenderer section={sectionWithoutMemos} timeSignature="4/4" />);
+
+      // メモ用のdivが存在しないことを確認
+      const memoElements = container.querySelectorAll('.text-slate-600');
+      expect(memoElements.length).toBe(0);
     });
   });
 

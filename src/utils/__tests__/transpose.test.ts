@@ -73,10 +73,10 @@ describe('移調機能のテスト', () => {
           id: 'section-1',
           name: 'Aメロ',
           chords: [
-            { name: 'C', root: 'C', duration: 2 },
-            { name: 'Am', root: 'A', duration: 2 },
-            { name: 'F/A', root: 'F', base: 'A', duration: 2 },
-            { name: 'G7', root: 'G', duration: 2 }
+            { name: 'C', root: 'C', duration: 2, memo: '' },
+            { name: 'Am', root: 'A', duration: 2, memo: '' },
+            { name: 'F/A', root: 'F', base: 'A', duration: 2, memo: '' },
+            { name: 'G7', root: 'G', duration: 2, memo: '' }
           ],
           beatsPerBar: 4,
           barsCount: 4
@@ -129,7 +129,8 @@ describe('移調機能のテスト', () => {
       chart.sections[0].chords.push({ 
         name: '', 
         root: '', 
-        isLineBreak: true 
+        isLineBreak: true,
+        memo: ''
       });
 
       const transposed = transposeChart(chart, 'D');
