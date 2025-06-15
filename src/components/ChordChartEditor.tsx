@@ -38,6 +38,10 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
     setEditedChart(updated);
   };
 
+  const handleTranspose = (transposedChart: ChordChart) => {
+    setEditedChart(transposedChart);
+  };
+
   // チャートが変更されるたびにバリデーション実行
   useEffect(() => {
     const result = validateChartInputs(editedChart);
@@ -114,6 +118,7 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
         <BasicInfoEditor
           chart={editedChart}
           onUpdate={handleBasicInfoChange}
+          onTranspose={handleTranspose}
         />
 
         <SectionEditor
