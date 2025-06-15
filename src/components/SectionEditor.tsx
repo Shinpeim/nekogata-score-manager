@@ -356,14 +356,14 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
 
       {chart.sections?.map((section) => (
         <div key={section.id} className="mb-6 p-4 border border-slate-300 rounded-lg">
-          <div className="flex justify-between items-center mb-3">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-3">
             <input
               type="text"
               value={section.name}
               onChange={(e) => handleSectionChange(section.id, 'name', e.target.value)}
-              className="text-lg font-medium bg-transparent border-b border-slate-300 focus:outline-none focus:border-[#85B0B7]"
+              className="text-lg font-medium bg-transparent border-b border-slate-300 focus:outline-none focus:border-[#85B0B7] flex-1 min-w-0"
             />
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-shrink-0">
               <button
                 onClick={() => selectAllInSection(section.id)}
                 className="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-md text-sm w-8 h-8 flex items-center justify-center"
