@@ -593,7 +593,7 @@ describe('chordUtils', () => {
 
     it('should handle chart with no sections', () => {
       const chartWithNoSections = { ...validChart };
-      delete (chartWithNoSections as any).sections;
+      delete (chartWithNoSections as Partial<ChordChart>).sections;
       const result = validateChartInputs(chartWithNoSections as ChordChart);
       expect(result.isValid).toBe(true);
       expect(result.errors).toEqual([]);
