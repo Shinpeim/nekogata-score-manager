@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseImportData } from '../exportImport';
+import { parseImportData } from '../importFunctions';
 import type { ChordChart, ChordLibrary } from '../../types';
 
 describe('ExportImport Migration Integration', () => {

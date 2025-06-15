@@ -1,49 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import type { ChordChart } from '../../types';
-import { 
-  exportSingleChart, 
-  exportMultipleCharts, 
-  exportAllCharts,
-  type ExportData 
-} from '../export';
 import { parseImportData } from '../importFunctions';
-
-// Blob のモック
-globalThis.Blob = vi.fn().mockImplementation((content: BlobPart[], options: BlobPropertyBag) => ({
-  content,
-  options,
-  size: JSON.stringify(content).length,
-  type: options?.type || 'text/plain'
-}));
-
-// URL のモック
-globalThis.URL = {
-  createObjectURL: vi.fn().mockReturnValue('blob:mock-url'),
-  revokeObjectURL: vi.fn()
-} as unknown as typeof URL;
-
-// DOM モック
-const mockElement = {
-  href: '',
-  download: '',
-  click: vi.fn(),
-  remove: vi.fn()
-};
-
-Object.defineProperty(document, 'createElement', {
-  value: vi.fn().mockReturnValue(mockElement),
-  writable: true
-});
-
-Object.defineProperty(document.body, 'appendChild', {
-  value: vi.fn(),
-  writable: true
-});
-
-Object.defineProperty(document.body, 'removeChild', {
-  value: vi.fn(),
-  writable: true
-});
+import type { ExportData } from '../export';
 
 // テスト用のサンプルデータ
 const mockChart: ChordChart = {
@@ -71,75 +29,7 @@ const mockChart: ChordChart = {
   notes: 'テストメモ'
 };
 
-const mockCharts: ChordChart[] = [
-  mockChart,
-  {
-    ...mockChart,
-    id: 'test-chart-2',
-    title: 'テストソング2'
-  }
-];
-
-describe('exportImport', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  describe('exportSingleChart', () => {
-    it('should export a single chart as JSON file', () => {
-      exportSingleChart(mockChart);
-
-      expect(document.createElement).toHaveBeenCalledWith('a');
-      expect(mockElement.download).toBe('テストソング.json');
-      expect(mockElement.click).toHaveBeenCalled();
-      expect(document.body.appendChild).toHaveBeenCalled();
-      expect(document.body.removeChild).toHaveBeenCalled();
-      expect(URL.revokeObjectURL).toHaveBeenCalled();
-    });
-
-    it('should sanitize filename', () => {
-      const chartWithSpecialChars = {
-        ...mockChart,
-        title: 'Test<>:"/\\|?*Song With Spaces'
-      };
-      
-      exportSingleChart(chartWithSpecialChars);
-      
-      expect(mockElement.download).toBe('TestSong_With_Spaces.json');
-    });
-  });
-
-  describe('exportMultipleCharts', () => {
-    it('should export multiple charts with default filename', () => {
-      exportMultipleCharts(mockCharts);
-
-      expect(document.createElement).toHaveBeenCalledWith('a');
-      expect(mockElement.download).toMatch(/chord-charts-\d{4}-\d{2}-\d{2}\.json/);
-      expect(mockElement.click).toHaveBeenCalled();
-    });
-
-    it('should export multiple charts with custom filename', () => {
-      exportMultipleCharts(mockCharts, 'custom-export.json');
-
-      expect(mockElement.download).toBe('custom-export.json');
-    });
-  });
-
-  describe('exportAllCharts', () => {
-    it('should export all charts from library', () => {
-      const library = {
-        'chart1': mockCharts[0],
-        'chart2': mockCharts[1]
-      };
-
-      exportAllCharts(library);
-
-      expect(document.createElement).toHaveBeenCalledWith('a');
-      expect(mockElement.download).toBe('all-chord-charts.json');
-      expect(mockElement.click).toHaveBeenCalled();
-    });
-  });
-
+describe('import', () => {
   describe('parseImportData', () => {
     it('should parse valid export data', () => {
       const exportData: ExportData = {

@@ -1,0 +1,96 @@
+import type { ChordChart, ChordLibrary } from '../types';
+
+// ============================================================================
+// 型定義
+// ============================================================================
+
+export interface ExportData {
+  version: string;
+  exportDate: string;
+  charts: ChordChart[];
+}
+
+// ============================================================================
+// 定数
+// ============================================================================
+
+const EXPORT_VERSION = '1.0.0';
+
+// ファイル名・MIME型
+const JSON_MIME_TYPE = 'application/json';
+const ALL_CHARTS_FILENAME = 'all-chord-charts.json';
+const CHORD_CHARTS_PREFIX = 'chord-charts';
+
+// ============================================================================
+// エクスポート機能
+// ============================================================================
+
+/**
+ * 単一のコード譜をJSONファイルとしてエクスポート
+ */
+export const exportSingleChart = (chart: ChordChart): void => {
+  const exportData: ExportData = {
+    version: EXPORT_VERSION,
+    exportDate: new Date().toISOString(),
+    charts: [chart]
+  };
+
+  const jsonString = JSON.stringify(exportData, null, 2);
+  const blob = new Blob([jsonString], { type: JSON_MIME_TYPE });
+  const url = URL.createObjectURL(blob);
+  
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${sanitizeFileName(chart.title)}.json`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  URL.revokeObjectURL(url);
+};
+
+/**
+ * 複数のコード譜をJSONファイルとしてエクスポート
+ */
+export const exportMultipleCharts = (charts: ChordChart[], filename?: string): void => {
+  const exportData: ExportData = {
+    version: EXPORT_VERSION,
+    exportDate: new Date().toISOString(),
+    charts
+  };
+
+  const jsonString = JSON.stringify(exportData, null, 2);
+  const blob = new Blob([jsonString], { type: JSON_MIME_TYPE });
+  const url = URL.createObjectURL(blob);
+  
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename || `${CHORD_CHARTS_PREFIX}-${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  URL.revokeObjectURL(url);
+};
+
+/**
+ * 全ライブラリをエクスポート
+ */
+export const exportAllCharts = (library: ChordLibrary): void => {
+  const charts = Object.values(library);
+  exportMultipleCharts(charts, ALL_CHARTS_FILENAME);
+};
+
+// ============================================================================
+// ユーティリティ関数
+// ============================================================================
+
+/**
+ * ファイル名をサニタイズ
+ */
+const sanitizeFileName = (fileName: string): string => {
+  return fileName
+    .replace(/[<>:"/\\|?*]/g, '')
+    .replace(/\s+/g, '_')
+    .substring(0, 100);
+};
