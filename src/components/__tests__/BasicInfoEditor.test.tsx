@@ -38,7 +38,7 @@ describe('BasicInfoEditor', () => {
     expect(screen.getByLabelText('拍子')).toBeInTheDocument();
   });
 
-  it('should include both sharp and flat key options', () => {
+  it('should include proper 12 keys with parallel minor keys', () => {
     render(
       <BasicInfoEditor 
         chart={sampleChart} 
@@ -46,19 +46,26 @@ describe('BasicInfoEditor', () => {
       />
     );
     
-    // Check for sharp keys
-    expect(screen.getByText('C#')).toBeInTheDocument();
-    expect(screen.getByText('D#')).toBeInTheDocument();
-    expect(screen.getByText('F#')).toBeInTheDocument();
-    expect(screen.getByText('G#')).toBeInTheDocument();
-    expect(screen.getByText('A#')).toBeInTheDocument();
+    // Check for proper keys with parallel keys display
+    expect(screen.getByText('C / Am')).toBeInTheDocument();
+    expect(screen.getByText('D♭ / B♭m')).toBeInTheDocument();
+    expect(screen.getByText('D / Bm')).toBeInTheDocument();
+    expect(screen.getByText('E♭ / Cm')).toBeInTheDocument();
+    expect(screen.getByText('E / C#m')).toBeInTheDocument();
+    expect(screen.getByText('F / Dm')).toBeInTheDocument();
+    expect(screen.getByText('G♭ / E♭m')).toBeInTheDocument();
+    expect(screen.getByText('G / Em')).toBeInTheDocument();
+    expect(screen.getByText('A♭ / Fm')).toBeInTheDocument();
+    expect(screen.getByText('A / F#m')).toBeInTheDocument();
+    expect(screen.getByText('B♭ / Gm')).toBeInTheDocument();
+    expect(screen.getByText('B / G#m')).toBeInTheDocument();
     
-    // Check for flat keys
-    expect(screen.getByText('D♭')).toBeInTheDocument();
-    expect(screen.getByText('E♭')).toBeInTheDocument();
-    expect(screen.getByText('G♭')).toBeInTheDocument();
-    expect(screen.getByText('A♭')).toBeInTheDocument();
-    expect(screen.getByText('B♭')).toBeInTheDocument();
+    // Check that inappropriate sharp keys are not present
+    expect(screen.queryByText('C#')).not.toBeInTheDocument();
+    expect(screen.queryByText('D#')).not.toBeInTheDocument();
+    expect(screen.queryByText('F#')).not.toBeInTheDocument();
+    expect(screen.queryByText('G#')).not.toBeInTheDocument();
+    expect(screen.queryByText('A#')).not.toBeInTheDocument();
   });
 
   it('should call onUpdate when key is changed to flat key', () => {
