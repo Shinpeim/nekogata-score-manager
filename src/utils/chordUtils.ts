@@ -106,7 +106,9 @@ export const extractChordRoot = (chordName: string): string => {
   const rootMatch = chordName.match(/^([A-G][#b♭]?)/i);
   
   if (rootMatch) {
-    return rootMatch[1];
+    const root = rootMatch[1];
+    // bを♭に正規化
+    return root.replace(/b/g, '♭');
   }
   
   // マッチしない場合はデフォルト値を返す

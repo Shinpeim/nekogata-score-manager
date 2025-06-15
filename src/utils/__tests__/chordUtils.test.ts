@@ -232,10 +232,10 @@ describe('chordUtils', () => {
       expect(extractChordRoot('G#7')).toBe('G#');
     });
 
-    it('should extract root from flat chords with b', () => {
-      expect(extractChordRoot('Bb')).toBe('Bb');
-      expect(extractChordRoot('Ebm')).toBe('Eb');
-      expect(extractChordRoot('Ab7')).toBe('Ab');
+    it('should extract root from flat chords with b and normalize to ♭', () => {
+      expect(extractChordRoot('Bb')).toBe('B♭');
+      expect(extractChordRoot('Ebm')).toBe('E♭');
+      expect(extractChordRoot('Ab7')).toBe('A♭');
     });
 
     it('should extract root from flat chords with ♭ symbol', () => {
@@ -248,6 +248,12 @@ describe('chordUtils', () => {
       expect(extractChordRoot('Dm7(♭5)')).toBe('D');
       expect(extractChordRoot('E♭maj7(#11)')).toBe('E♭');
       expect(extractChordRoot('F#m7(♭9)')).toBe('F#');
+    });
+
+    it('should normalize mixed b and ♭ notations in root', () => {
+      expect(extractChordRoot('Dbmaj7')).toBe('D♭');
+      expect(extractChordRoot('Gbm')).toBe('G♭');
+      expect(extractChordRoot('Abm7(b5)')).toBe('A♭');
     });
 
     it('should return C for invalid input', () => {

@@ -1,5 +1,6 @@
 import type { Chord } from '../types';
 import { isLineBreakMarker } from './lineBreakHelpers';
+import { extractChordRoot } from './chordUtils';
 
 /**
  * コード進行を文字列形式に変換する
@@ -85,9 +86,8 @@ const parseChordText = (text: string): Chord | null => {
       return null;
     }
     
-    // ルート音を抽出
-    const rootMatch = chordName.match(/^([A-G][#b♭]?)/);
-    const root = rootMatch ? rootMatch[1] : chordName;
+    // ルート音を抽出（bを♭に正規化）
+    const root = extractChordRoot(chordName);
     
     return {
       name: chordName,
@@ -102,9 +102,8 @@ const parseChordText = (text: string): Chord | null => {
     const [, chordName] = basicMatch;
     const duration = 4;
     
-    // ルート音を抽出
-    const rootMatch = chordName.match(/^([A-G][#b♭]?)/);
-    const root = rootMatch ? rootMatch[1] : chordName;
+    // ルート音を抽出（bを♭に正規化）
+    const root = extractChordRoot(chordName);
     
     return {
       name: chordName,
