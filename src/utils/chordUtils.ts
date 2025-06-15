@@ -68,8 +68,23 @@ export const validateChordChart = (chart: Partial<ChordChart>): string[] => {
 };
 
 export const COMMON_KEYS = [
-  'C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B'
+  'C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'
 ];
+
+export const KEY_DISPLAY_NAMES: Record<string, string> = {
+  'C': 'C / Am',
+  'Db': 'D♭ / B♭m',
+  'D': 'D / Bm',
+  'Eb': 'E♭ / Cm',
+  'E': 'E / C#m',
+  'F': 'F / Dm',
+  'Gb': 'G♭ / E♭m',
+  'G': 'G / Em',
+  'Ab': 'A♭ / Fm',
+  'A': 'A / F#m',
+  'Bb': 'B♭ / Gm',
+  'B': 'B / G#m'
+};
 
 export const COMMON_TIME_SIGNATURES = ['4/4', '3/4', '2/4', '6/8', '12/8'];
 

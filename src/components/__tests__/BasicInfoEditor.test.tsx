@@ -75,7 +75,7 @@ describe('BasicInfoEditor', () => {
     expect(mockOnUpdate).toHaveBeenCalledWith('key', 'Bb');
   });
 
-  it('should call onUpdate when key is changed to sharp key', () => {
+  it('should call onUpdate when key is changed to Gb', () => {
     render(
       <BasicInfoEditor 
         chart={sampleChart} 
@@ -84,9 +84,9 @@ describe('BasicInfoEditor', () => {
     );
 
     const keySelect = screen.getByLabelText('キー');
-    fireEvent.change(keySelect, { target: { value: 'F#' } });
+    fireEvent.change(keySelect, { target: { value: 'Gb' } });
 
-    expect(mockOnUpdate).toHaveBeenCalledWith('key', 'F#');
+    expect(mockOnUpdate).toHaveBeenCalledWith('key', 'Gb');
   });
 
   it('should handle natural keys correctly', () => {

@@ -7,6 +7,7 @@ import {
   COMMON_KEYS,
   COMMON_TIME_SIGNATURES,
   COMMON_SECTION_NAMES,
+  KEY_DISPLAY_NAMES,
   extractChordRoot,
   isValidChordName,
   normalizeChordName,
@@ -200,12 +201,38 @@ describe('chordUtils', () => {
   });
 
   describe('Constants', () => {
-    it('should export COMMON_KEYS array', () => {
+    it('should export COMMON_KEYS array with 12 proper keys', () => {
       expect(Array.isArray(COMMON_KEYS)).toBe(true);
       expect(COMMON_KEYS).toContain('C');
       expect(COMMON_KEYS).toContain('G');
-      expect(COMMON_KEYS).toContain('F#');
-      expect(COMMON_KEYS.length).toBeGreaterThan(10);
+      expect(COMMON_KEYS).toContain('Gb');
+      expect(COMMON_KEYS).not.toContain('F#');
+      expect(COMMON_KEYS).not.toContain('C#');
+      expect(COMMON_KEYS).not.toContain('D#');
+      expect(COMMON_KEYS).not.toContain('G#');
+      expect(COMMON_KEYS).not.toContain('A#');
+      expect(COMMON_KEYS.length).toBe(12);
+    });
+
+    it('should export KEY_DISPLAY_NAMES with proper parallel keys', () => {
+      expect(KEY_DISPLAY_NAMES).toBeDefined();
+      expect(KEY_DISPLAY_NAMES['C']).toBe('C / Am');
+      expect(KEY_DISPLAY_NAMES['Db']).toBe('D♭ / B♭m');
+      expect(KEY_DISPLAY_NAMES['D']).toBe('D / Bm');
+      expect(KEY_DISPLAY_NAMES['Eb']).toBe('E♭ / Cm');
+      expect(KEY_DISPLAY_NAMES['E']).toBe('E / C#m');
+      expect(KEY_DISPLAY_NAMES['F']).toBe('F / Dm');
+      expect(KEY_DISPLAY_NAMES['Gb']).toBe('G♭ / E♭m');
+      expect(KEY_DISPLAY_NAMES['G']).toBe('G / Em');
+      expect(KEY_DISPLAY_NAMES['Ab']).toBe('A♭ / Fm');
+      expect(KEY_DISPLAY_NAMES['A']).toBe('A / F#m');
+      expect(KEY_DISPLAY_NAMES['Bb']).toBe('B♭ / Gm');
+      expect(KEY_DISPLAY_NAMES['B']).toBe('B / G#m');
+      
+      // すべてのCOMMON_KEYSにdisplay nameがあることを確認
+      COMMON_KEYS.forEach(key => {
+        expect(KEY_DISPLAY_NAMES[key]).toBeDefined();
+      });
     });
 
     it('should export COMMON_TIME_SIGNATURES array', () => {

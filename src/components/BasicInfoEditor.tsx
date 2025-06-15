@@ -45,23 +45,18 @@ const BasicInfoEditor: React.FC<BasicInfoEditorProps> = ({ chart, onUpdate }) =>
             onChange={(e) => onUpdate('key', e.target.value)}
             className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#85B0B7]"
           >
-            <option value="C">C</option>
-            <option value="C#">C#</option>
-            <option value="Db">D♭</option>
-            <option value="D">D</option>
-            <option value="D#">D#</option>
-            <option value="Eb">E♭</option>
-            <option value="E">E</option>
-            <option value="F">F</option>
-            <option value="F#">F#</option>
-            <option value="Gb">G♭</option>
-            <option value="G">G</option>
-            <option value="G#">G#</option>
-            <option value="Ab">A♭</option>
-            <option value="A">A</option>
-            <option value="A#">A#</option>
-            <option value="Bb">B♭</option>
-            <option value="B">B</option>
+            <option value="C">C / Am</option>
+            <option value="Db">D♭ / B♭m</option>
+            <option value="D">D / Bm</option>
+            <option value="Eb">E♭ / Cm</option>
+            <option value="E">E / C#m</option>
+            <option value="F">F / Dm</option>
+            <option value="Gb">G♭ / E♭m</option>
+            <option value="G">G / Em</option>
+            <option value="Ab">A♭ / Fm</option>
+            <option value="A">A / F#m</option>
+            <option value="Bb">B♭ / Gm</option>
+            <option value="B">B / G#m</option>
           </select>
         </div>
         <div>

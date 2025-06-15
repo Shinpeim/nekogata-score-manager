@@ -4,7 +4,8 @@ import {
   createNewChordChart, 
   validateChordChart, 
   COMMON_KEYS, 
-  COMMON_TIME_SIGNATURES
+  COMMON_TIME_SIGNATURES,
+  KEY_DISPLAY_NAMES
 } from '../utils/chordUtils';
 
 interface ChordChartFormProps {
@@ -121,7 +122,7 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
                 className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#85B0B7]"
               >
                 {COMMON_KEYS.map(key => (
-                  <option key={key} value={key}>{key}</option>
+                  <option key={key} value={key}>{KEY_DISPLAY_NAMES[key]}</option>
                 ))}
               </select>
             </div>
