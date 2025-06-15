@@ -46,17 +46,3 @@ export const exportMultipleCharts = (charts: ChordChart[], filename?: string): v
   URL.revokeObjectURL(url);
 };
 
-
-// ============================================================================
-// ユーティリティ関数
-// ============================================================================
-
-/**
- * ファイル名をサニタイズ
- */
-const sanitizeFileName = (fileName: string): string => {
-  return fileName
-    .replace(/[<>:"/\\|?*]/g, '')
-    .replace(/\s+/g, '_')
-    .substring(0, 100);
-};
