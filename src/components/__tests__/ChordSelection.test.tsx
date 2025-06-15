@@ -85,7 +85,7 @@ describe('ChordSelection', () => {
     mockReadText.mockClear();
   });
 
-  it('should show 全選択 and 全解除 buttons in sections', () => {
+  it('should show toggle select all button in sections', () => {
     render(
       <ChordChartEditor 
         chart={sampleChart} 
@@ -95,7 +95,6 @@ describe('ChordSelection', () => {
     );
 
     expect(screen.getByTitle('このセクションの全選択')).toBeInTheDocument();
-    expect(screen.getByTitle('このセクションの選択をすべて解除')).toBeInTheDocument();
   });
 
   it('should allow selecting chords without showing action bar', () => {
@@ -158,7 +157,7 @@ describe('ChordSelection', () => {
     });
   });
 
-  it('should clear all selections when clicking 全解除', async () => {
+  it('should toggle selection when clicking 全選択 button twice', async () => {
     render(
       <ChordChartEditor 
         chart={sampleChart} 
@@ -167,7 +166,7 @@ describe('ChordSelection', () => {
       />
     );
 
-    // First select all chords
+    // First click to select all chords
     const selectAllButton = screen.getByTitle('このセクションの全選択');
     fireEvent.click(selectAllButton);
 
@@ -177,9 +176,9 @@ describe('ChordSelection', () => {
       expect(checkmarks.length).toBeGreaterThan(0);
     });
 
-    // Then clear all selections
-    const clearAllButton = screen.getByTitle('このセクションの選択をすべて解除');
-    fireEvent.click(clearAllButton);
+    // Second click should toggle to clear all selections (since all are selected, it should clear them)
+    const toggleButton = screen.getByTitle('このセクションの選択をすべて解除');
+    fireEvent.click(toggleButton);
 
     await waitFor(() => {
       // Should not show any checkmarks
