@@ -32,8 +32,8 @@ const mockChart: ChordChart = {
       beatsPerBar: 4,
       barsCount: 4,
       chords: [
-        { name: 'C', root: 'C', duration: 4 },
-        { name: 'Am', root: 'A', duration: 4 }
+        { name: 'C', root: 'C', duration: 4, memo: '' },
+        { name: 'Am', root: 'A', duration: 4, memo: '' }
       ]
     }
   ],
@@ -76,7 +76,7 @@ describe('storageService', () => {
       expect(result).toEqual({
         [mockChart.id]: {
           ...mockChart,
-          version: '1.0.0'
+          version: '2.0.0'
         }
       });
     });
@@ -156,7 +156,7 @@ describe('storageService', () => {
           id: 'other-chart',
           sections: [], // マイグレーションで追加される
           notes: '', // マイグレーションで追加される
-          version: '1.0.0' // デフォルトversionが追加される
+          version: '2.0.0' // 最新versionが追加される
         },
         [mockChart.id]: mockChart
       });
@@ -182,7 +182,7 @@ describe('storageService', () => {
           id: 'other-chart',
           sections: [], // マイグレーションで追加される
           notes: '', // マイグレーションで追加される
-          version: '1.0.0' // デフォルトversionが追加される
+          version: '2.0.0' // 最新versionが追加される
         }
       });
     });

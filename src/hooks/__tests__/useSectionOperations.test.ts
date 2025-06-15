@@ -32,8 +32,8 @@ describe('useSectionOperations', () => {
           beatsPerBar: 4,
           barsCount: 4,
           chords: [
-            { name: 'C', root: 'C', duration: 4 },
-            { name: 'F', root: 'F', duration: 4 }
+            { name: 'C', root: 'C', duration: 4, memo: '' },
+            { name: 'F', root: 'F', duration: 4, memo: '' }
           ]
         },
         {
@@ -42,8 +42,8 @@ describe('useSectionOperations', () => {
           beatsPerBar: 4,
           barsCount: 8,
           chords: [
-            { name: 'Am', root: 'A', duration: 4 },
-            { name: 'G', root: 'G', duration: 4 }
+            { name: 'Am', root: 'A', duration: 4, memo: '' },
+            { name: 'G', root: 'G', duration: 4, memo: '' }
           ]
         }
       ],
@@ -158,7 +158,7 @@ describe('useSectionOperations', () => {
 
   it('pasteChordProgressionがクリップボードからコードを追加する', async () => {
     const mockPaste = vi.mocked(chordCopyPaste.pasteChordProgressionFromClipboard);
-    const pastedChords = [{ name: 'D', root: 'D', duration: 4 }];
+    const pastedChords = [{ name: 'D', root: 'D', duration: 4, memo: '' }];
     mockPaste.mockResolvedValue(pastedChords);
 
     const { result } = renderUseSectionOperations();
@@ -182,8 +182,8 @@ describe('useSectionOperations', () => {
   it('replaceChordProgressionがテキストからコード進行を置換する', () => {
     const mockTextToChords = vi.mocked(chordCopyPaste.textToChords);
     const newChords = [
-      { name: 'C', root: 'C', duration: 4 },
-      { name: 'G', root: 'G', duration: 4 }
+      { name: 'C', root: 'C', duration: 4, memo: '' },
+      { name: 'G', root: 'G', duration: 4, memo: '' }
     ];
     mockTextToChords.mockReturnValue(newChords);
 

@@ -1,9 +1,10 @@
 import type { ChordChart } from '../types';
 
-const DEFAULT_VERSION = '1.0.0';
 
-// 既存データの移行処理：拍子に応じてbeatsPerBarを修正 + version情報追加
-export const migrateChartData = (chart: ChordChart): ChordChart => {
+/**
+ * v1.0.0のマイグレーション: beatsPerBar修正 + notes/version初期化
+ */
+const migrateChartDataV1 = (chart: ChordChart): ChordChart => {
   const beatsPerBar = chart.timeSignature ? parseInt(chart.timeSignature.split('/')[0]) : 4;
   
   return {
@@ -15,7 +16,81 @@ export const migrateChartData = (chart: ChordChart): ChordChart => {
     })) || [],
     // notesが未設定の場合は空文字で初期化
     notes: chart.notes ?? '',
-    // version情報が未設定の場合はデフォルト値を設定
-    version: chart.version || DEFAULT_VERSION
+    // version情報を1.0.0に設定
+    version: '1.0.0'
   };
+};
+
+/**
+ * v2.0.0のマイグレーション: memoフィールド追加
+ */
+const migrateChartDataV2 = (chart: ChordChart): ChordChart => {
+  return {
+    ...chart,
+    sections: chart.sections?.map(section => ({
+      ...section,
+      // 各コードにmemoフィールドを追加（既存コードには空文字列を設定）
+      chords: section.chords?.map(chord => ({
+        ...chord,
+        memo: chord.memo ?? ''
+      })) || []
+    })) || [],
+    // version情報を2.0.0に設定
+    version: '2.0.0'
+  };
+};
+
+/**
+ * セマンティックバージョンを解析
+ */
+const parseVersion = (version: string): { major: number; minor: number; patch: number } => {
+  const [major, minor, patch] = version.split('.').map(Number);
+  return { major: major || 0, minor: minor || 0, patch: patch || 0 };
+};
+
+/**
+ * マイグレーション関数の型定義
+ */
+type MigrationFunction = (chart: ChordChart) => ChordChart;
+
+/**
+ * マイグレーション定義の型
+ */
+interface Migration {
+  version: string;
+  migrate: MigrationFunction;
+}
+
+/**
+ * マイグレーション定義配列
+ * 新しいバージョンのマイグレーションはここに追加するだけ
+ * 
+ * 使用例:
+ * 新しいv3.0.0マイグレーションを追加する場合:
+ * { version: '3.0.0', migrate: migrateChartDataV3 },
+ */
+const migrations: Migration[] = [
+  { version: '1.0.0', migrate: migrateChartDataV1 },
+  { version: '2.0.0', migrate: migrateChartDataV2 },
+];
+
+/**
+ * チャートデータを段階的に最新バージョンにマイグレーション
+ * 現在のバージョンより新しいマイグレーションを順次実行
+ */
+export const migrateChartData = (chart: ChordChart): ChordChart => {
+  const currentVersion = chart.version || '0.0.0'; // versionなしは0.0.0として扱う
+  const currentMajor = parseVersion(currentVersion).major;
+  
+  let migratedChart = { ...chart };
+  
+  // 現在のバージョンより新しいマイグレーションを順次実行
+  for (const migration of migrations) {
+    const targetMajor = parseVersion(migration.version).major;
+    if (currentMajor < targetMajor) {
+      migratedChart = migration.migrate(migratedChart);
+    }
+  }
+  
+  return migratedChart;
 };

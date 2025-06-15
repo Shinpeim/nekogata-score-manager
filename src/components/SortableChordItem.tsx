@@ -35,6 +35,8 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [durationDisplayValue, setDurationDisplayValue] = useState('');
   const [isDurationEditing, setIsDurationEditing] = useState(false);
+  const [memoDisplayValue, setMemoDisplayValue] = useState('');
+  const [isMemoEditing, setIsMemoEditing] = useState(false);
 
   const {
     attributes,
@@ -65,6 +67,13 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
       setDurationDisplayValue(String(chord.duration || 4));
     }
   }, [chord.duration, isDurationEditing]);
+
+  // メモが変更された時に表示値を更新
+  useEffect(() => {
+    if (!isMemoEditing) {
+      setMemoDisplayValue(chord.memo);
+    }
+  }, [chord.memo, isMemoEditing]);
 
   const handleInputFocus = () => {
     setIsEditing(true);
@@ -120,6 +129,33 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
   };
 
   const handleDurationKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.currentTarget.blur(); // Enterキーでフォーカスアウト
+    }
+  };
+
+  // メモ入力用のイベントハンドラー
+  const handleMemoFocus = () => {
+    setIsMemoEditing(true);
+    setMemoDisplayValue(chord.memo);
+  };
+
+  const handleMemoChange = (value: string) => {
+    setMemoDisplayValue(value);
+  };
+
+  const handleMemoBlur = () => {
+    setIsMemoEditing(false);
+    // フォーカスアウト時に更新
+    const trimmedMemo = memoDisplayValue.trim();
+    if (trimmedMemo) {
+      onUpdateChord(sectionId, chordIndex, 'memo', trimmedMemo);
+    } else {
+      onUpdateChord(sectionId, chordIndex, 'memo', '');
+    }
+  };
+
+  const handleMemoKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.currentTarget.blur(); // Enterキーでフォーカスアウト
     }
@@ -193,6 +229,16 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
         </div>
       ) : (
         <>
+          <input
+            type="text"
+            value={memoDisplayValue}
+            onChange={(e) => handleMemoChange(e.target.value)}
+            onFocus={handleMemoFocus}
+            onBlur={handleMemoBlur}
+            onKeyDown={handleMemoKeyDown}
+            className="w-full mb-1 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 border-slate-300 focus:ring-[#85B0B7] bg-slate-50"
+            placeholder="メモ（歌詞・演奏記号等）"
+          />
           <input
             type="text"
             value={displayValue}

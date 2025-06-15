@@ -56,7 +56,8 @@ export const textToChords = (text: string): Chord[] => {
       chords.push({
         name: '__LINE_BREAK__',
         root: '',
-        isLineBreak: true
+        isLineBreak: true,
+        memo: ''
       });
     } else if (part.trim()) {
       // コード解析
@@ -96,7 +97,8 @@ const parseChordText = (text: string): Chord | null => {
       name: parsed.chord,
       root,
       base: parsed.base,
-      duration
+      duration,
+      memo: ''
     };
   }
   
@@ -114,7 +116,8 @@ const parseChordText = (text: string): Chord | null => {
       name: parsed.chord,
       root,
       base: parsed.base,
-      duration
+      duration,
+      memo: ''
     };
   }
   

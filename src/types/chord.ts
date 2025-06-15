@@ -4,6 +4,7 @@ export interface Chord {
   base?: string; // オンコードのベース音
   duration?: number;
   isLineBreak?: boolean; // 改行マーカーフラグ
+  memo: string; // コードに付加するメモ（歌詞、演奏記号等）
 }
 
 export interface ChordSection {

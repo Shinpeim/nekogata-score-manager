@@ -79,7 +79,7 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({ section, timeSign
                       return (
                         <div 
                           key={chordIndex} 
-                          className="flex items-center hover:bg-slate-100 cursor-pointer rounded px-1"
+                          className="flex flex-col justify-center hover:bg-slate-100 cursor-pointer rounded px-1"
                           style={{ width: `${widthPercentage}%` }}
                         >
                           <div className="text-left flex items-center">
@@ -90,6 +90,11 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({ section, timeSign
                               )}
                             </span>
                           </div>
+                          {chord.memo && (
+                            <div className="text-left text-xs text-slate-600 leading-tight mt-0.5">
+                              {chord.memo}
+                            </div>
+                          )}
                         </div>
                       );
                     })}
