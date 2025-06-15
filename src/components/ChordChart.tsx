@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import type { ChordChart as ChordChartType, ChordSection, Chord } from '../types';
+import type { ChordChart as ChordChartType } from '../types';
 import { useChordChartStore } from '../stores/chordChartStore';
 import ChordChartEditor from './ChordChartEditor';
 import ChordChartForm from './ChordChartForm';
-import BpmIndicator from './BpmIndicator';
-import { useResponsiveBars } from '../hooks/useResponsiveBars';
-import { splitChordsIntoRows, isLineBreakMarker } from '../utils/lineBreakHelpers';
-import { KEY_DISPLAY_NAMES } from '../utils/musicConstants';
+import ChordChartViewer from './ChordChartViewer';
+import EmptyChartPlaceholder from './EmptyChartPlaceholder';
 
 interface ChordChartProps {
   chartData?: ChordChartType;
@@ -20,9 +18,6 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew, onOpenI
   const charts = useChordChartStore(state => state.charts);
   const currentChartId = useChordChartStore(state => state.currentChartId);
   const updateChart = useChordChartStore(state => state.updateChart);
-  const deleteChart = useChordChartStore(state => state.deleteChart);
-  const addChart = useChordChartStore(state => state.addChart);
-  const { barsPerRow, config } = useResponsiveBars();
   
   const currentChart = currentChartId ? charts[currentChartId] : null;
   const displayChart = chartData || currentChart;
@@ -35,68 +30,16 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew, onOpenI
       setIsEditing(false);
     } catch (error) {
       console.error('Failed to save chart:', error);
-      // エラーはストアで管理されているため、ここでは何もしない
     }
   };
-
-  const handleDelete = async () => {
-    if (currentChartId && confirm('このコード譜を削除しますか？')) {
-      try {
-        await deleteChart(currentChartId);
-      } catch (error) {
-        console.error('Failed to delete chart:', error);
-        // エラーはストアで管理されているため、ここでは何もしない
-      }
-    }
-  };
-
-  const handleDuplicate = async () => {
-    if (displayChart) {
-      try {
-        const duplicatedChart = {
-          ...displayChart,
-          id: `chord-${Date.now()}`,
-          title: `${displayChart.title} (コピー)`,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        };
-        await addChart(duplicatedChart);
-      } catch (error) {
-        console.error('Failed to duplicate chart:', error);
-        // エラーはストアで管理されているため、ここでは何もしない
-      }
-    }
-  };
-
 
   if (!displayChart) {
     return (
-      <div className="h-full bg-white flex items-center justify-center">
-        <div className="text-center text-slate-500">
-          <h3 className="text-lg font-medium mb-2">コード譜がありません</h3>
-          <p className="text-sm mb-6">まずは新しいコード譜を作成するか、既存のファイルをインポートしてみましょう</p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <button 
-              onClick={onCreateNew}
-              className="bg-[#85B0B7] hover:bg-[#6B9CA5] text-white px-6 py-3 rounded-md text-sm font-medium"
-            >
-              新規作成
-            </button>
-            <button 
-              onClick={onOpenImport}
-              className="bg-[#BDD0CA] hover:bg-[#A4C2B5] text-slate-800 px-6 py-3 rounded-md text-sm font-medium"
-            >
-              インポート
-            </button>
-            <button 
-              onClick={onOpenExplorer}
-              className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-6 py-3 rounded-md text-sm font-medium"
-            >
-              Score Explorerを開く
-            </button>
-          </div>
-        </div>
-      </div>
+      <EmptyChartPlaceholder 
+        onCreateNew={onCreateNew}
+        onOpenImport={onOpenImport}
+        onOpenExplorer={onOpenExplorer}
+      />
     );
   }
 
@@ -109,191 +52,12 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew, onOpenI
       />
     );
   }
-  const renderChordGrid = (section: ChordSection) => {
-    // 拍子から正しい拍数を取得し、セクションのbeatsPerBarを優先しつつフォールバック
-    const timeSignatureBeats = displayChart.timeSignature ? parseInt(displayChart.timeSignature.split('/')[0]) : 4;
-    const beatsPerBar = section.beatsPerBar && section.beatsPerBar !== 4 ? section.beatsPerBar : timeSignatureBeats;
-    
-    // 改行マーカーを考慮してコードを行に分割
-    const rows = splitChordsIntoRows(section.chords, barsPerRow, beatsPerBar);
-    
-    // 各行をさらに小節に分割
-    const processedRows = rows.map(rowChords => {
-      const bars: Chord[][] = [];
-      let currentBar: Chord[] = [];
-      let currentBeats = 0;
-      
-      for (const chord of rowChords) {
-        // 改行マーカーは既に除外されているはず
-        if (isLineBreakMarker(chord)) continue;
-        
-        const chordDuration = chord.duration || 4;
-        
-        if (currentBeats + chordDuration <= beatsPerBar) {
-          currentBar.push(chord);
-          currentBeats += chordDuration;
-        } else {
-          // 現在の小節を完了し、新しい小節を開始
-          if (currentBar.length > 0) {
-            bars.push([...currentBar]);
-          }
-          currentBar = [chord];
-          currentBeats = chordDuration;
-        }
-        
-        // 小節が完了した場合
-        if (currentBeats === beatsPerBar) {
-          bars.push([...currentBar]);
-          currentBar = [];
-          currentBeats = 0;
-        }
-      }
-      
-      // 最後の未完了の小節を追加
-      if (currentBar.length > 0) {
-        bars.push(currentBar);
-      }
-      
-      return bars;
-    });
-    
-    return processedRows.map((rowBars, rowIndex) => (
-      <div key={rowIndex}>
-        {/* コード表示エリア */}
-        <div className="relative bg-white">
-          
-          {/* 小節の内容 */}
-          <div className="flex min-h-12 py-1">
-            {rowBars.map((bar, barIndex) => (
-              <div 
-                key={barIndex} 
-                className="relative"
-                style={{ 
-                  flexGrow: 1,
-                  flexBasis: 0,
-                  maxWidth: `${config.MAX_WIDTH}px`
-                }}
-              >
-                {/* 小節線（縦線） */}
-                {barIndex > 0 && (
-                  <div className="absolute left-0 top-3 bottom-3 w-0.5 bg-slate-600"></div>
-                )}
-                
-                {/* コード表示 */}
-                <div className="px-1 py-1 h-full flex items-center">
-                  {bar.map((chord, chordIndex) => {
-                    const chordDuration = chord.duration || 4;
-                    const widthPercentage = (chordDuration / beatsPerBar) * 100;
-                    
-                    return (
-                      <div 
-                        key={chordIndex} 
-                        className="flex items-center hover:bg-slate-100 cursor-pointer rounded px-1"
-                        style={{ width: `${widthPercentage}%` }}
-                      >
-                        <div className="text-left flex items-center">
-                          <span className="text-xs font-semibold">
-                            {chord.name}
-                            {chord.base && (
-                              <span className="text-slate-500">/{chord.base}</span>
-                            )}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-                
-                {/* 右端の小節線 */}
-                {barIndex === rowBars.length - 1 && (
-                  <div className="absolute right-0 top-3 bottom-3 w-0.5 bg-slate-600"></div>
-                )}
-              </div>
-            ))}
-          </div>
-          
-          {/* 左の境界線 */}
-          <div className="absolute left-0 top-4 bottom-4 w-0.5 bg-slate-600"></div>
-        </div>
-      </div>
-    ));
-  };
-
   return (
-    <div className="h-full bg-white overflow-y-auto">
-      <div className="p-6">
-        {/* Chart Header */}
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">{displayChart.title}</h2>
-          <div className="flex flex-wrap gap-4 text-slate-600">
-            <span>{displayChart.artist}</span>
-            <span>キー: {KEY_DISPLAY_NAMES[displayChart.key] || displayChart.key}</span>
-            {displayChart.tempo && <BpmIndicator bpm={displayChart.tempo} />}
-            <span>拍子: {displayChart.timeSignature}</span>
-          </div>
-          {displayChart.tags && displayChart.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-2">
-              {displayChart.tags.map((tag, index) => (
-                <span key={index} className="px-2 py-1 bg-slate-100 text-slate-800 text-xs rounded-full">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Chart Content */}
-        <div className="bg-slate-50 rounded-lg p-3 sm:p-6">
-          {displayChart.sections && displayChart.sections.length > 0 ? (
-            displayChart.sections.map((section) => (
-              <div key={section.id} className="mb-8 last:mb-0">
-                {section.name && (
-                  <h3 className="text-sm font-medium text-slate-600 mb-1">
-                    【{section.name}】
-                  </h3>
-                )}
-                {renderChordGrid(section)}
-              </div>
-            ))
-          ) : (
-            <div className="text-center text-slate-500 py-8">
-              <p>セクションがありません</p>
-              <p className="text-sm mt-2">コード譜を編集してセクションを追加してください</p>
-            </div>
-          )}
-        </div>
-
-        {displayChart.notes && (
-          <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-            <h4 className="font-semibold text-slate-800 mb-2">メモ</h4>
-            <p className="text-slate-700">{displayChart.notes}</p>
-          </div>
-        )}
-
-        {/* Action Buttons */}
-        <div className="mt-6 flex flex-wrap gap-3">
-          <button 
-            onClick={() => setIsEditing(true)}
-            className="bg-[#85B0B7] hover:bg-[#6B9CA5] text-white px-4 py-2 rounded-md text-sm font-medium"
-          >
-            編集
-          </button>
-          <button 
-            onClick={handleDuplicate}
-            className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-md text-sm font-medium"
-          >
-            複製
-          </button>
-          <button 
-            onClick={handleDelete}
-            className="bg-[#EE5840] hover:bg-[#D14A2E] text-white px-4 py-2 rounded-md text-sm font-medium"
-          >
-            削除
-          </button>
-        </div>
-      </div>
-
-    </div>
+    <ChordChartViewer 
+      chart={displayChart} 
+      currentChartId={currentChartId} 
+      onEdit={() => setIsEditing(true)} 
+    />
   );
 };
 
