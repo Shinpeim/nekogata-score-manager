@@ -75,8 +75,30 @@ describe('ExportImport Migration Integration', () => {
       expect(result.charts[0].notes).toBe('');
     });
 
-    // 注意: 現在の実装では、バリデーション問題により最新バージョンも失敗する場合があります
-    // この問題は別途修正が必要です
+    it('最新バージョンのChordLibraryデータはマイグレーション不要', () => {
+      const validCurrentChart = {
+        ...mockChartV1,
+        notes: '',
+        sections: [{
+          ...mockChartV1.sections[0],
+          beatsPerBar: 3,
+          chords: mockChartV1.sections[0].chords
+        }]
+      };
+      
+      const currentVersionData = {
+        version: 2,
+        data: { 'test-1': validCurrentChart },
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      const jsonString = JSON.stringify(currentVersionData);
+      const result = parseImportData(jsonString);
+      
+      expect(result.success).toBe(true);
+      expect(result.migrationInfo?.migrationPerformed).toBe(false);
+    });
   });
 
   describe('エクスポートデータ形式のインポート', () => {

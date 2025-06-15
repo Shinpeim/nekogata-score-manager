@@ -193,7 +193,31 @@ export const parseImportData = (jsonString: string): ImportResult => {
         processedData = rawData;
       }
     } else {
-      processedData = rawData;
+      // マイグレーション不要でも、データ形式の正規化は必要
+      if (isChordLibraryFormat(rawData)) {
+        // バージョン情報付きChordLibraryをエクスポート形式に変換
+        let chartLibrary: ChordLibrary;
+        if (typeof rawData === 'object' && rawData !== null && 'data' in rawData) {
+          chartLibrary = (rawData as { data: ChordLibrary }).data;
+        } else {
+          chartLibrary = rawData as ChordLibrary;
+        }
+        
+        processedData = {
+          version: EXPORT_VERSION,
+          exportDate: new Date().toISOString(),
+          charts: Object.values(chartLibrary)
+        };
+        
+        migrationInfo = {
+          originalVersion,
+          currentVersion: originalVersion,
+          migrationPerformed: false,
+          migrationSteps: []
+        };
+      } else {
+        processedData = rawData;
+      }
     }
     
     // 通常の検証処理
@@ -221,6 +245,18 @@ const processImportData = (
   
   // データフォーマットの検証
   if (!isValidExportData(data)) {
+    // バージョン情報付きChordLibraryデータかどうかチェック（既にマイグレーション済み）
+    if (data && typeof data === 'object' && 'version' in data && 'data' in data) {
+      // この時点で既にマイグレーション処理は完了しているので、エラーとして扱う
+      return {
+        success: false,
+        charts: [],
+        errors: ['バージョン情報付きデータの処理でエラーが発生しました'],
+        warnings,
+        migrationInfo
+      };
+    }
+    
     // 直接ChordChartの配列かどうかチェック
     if (Array.isArray(data)) {
       // ChordChart配列として処理
@@ -364,12 +400,17 @@ const validateSingleChart = (chart: unknown): {
 
   const chartObj = chart as Record<string, unknown>;
 
-  // 必須フィールドのチェック
-  if (!chartObj.id) errors.push('IDが不正です');
-  if (!chartObj.title) errors.push('タイトルが不正です');
-  if (!chartObj.key) errors.push('キーが不正です');
-  if (!chartObj.timeSignature) errors.push('拍子が不正です');
+  // 必須フィールドのチェック（型定義に合わせて修正）
+  if (!chartObj.id || typeof chartObj.id !== 'string') errors.push('IDが不正です');
+  if (!chartObj.title || typeof chartObj.title !== 'string') errors.push('タイトルが不正です');
+  if (!chartObj.key || typeof chartObj.key !== 'string') errors.push('キーが不正です');
+  if (!chartObj.timeSignature || typeof chartObj.timeSignature !== 'string') errors.push('拍子が不正です');
   if (!Array.isArray(chartObj.sections)) errors.push('セクションが不正です');
+  
+  // artistは型定義上オプショナルなので、存在する場合のみチェック
+  if (chartObj.artist !== undefined && typeof chartObj.artist !== 'string') {
+    errors.push('アーティスト名が不正です');
+  }
 
   if (errors.length > 0) {
     return { isValid: false, errors, warnings };
@@ -434,9 +475,9 @@ const validateSingleChart = (chart: unknown): {
   const validatedChart: ChordChart = {
     id: chartObj.id as string,
     title: chartObj.title as string,
-    artist: chartObj.artist as string,
+    artist: typeof chartObj.artist === 'string' ? chartObj.artist : undefined,
     key: chartObj.key as string,
-    tempo: chartObj.tempo as number,
+    tempo: typeof chartObj.tempo === 'number' ? chartObj.tempo : undefined,
     timeSignature: chartObj.timeSignature as string,
     createdAt,
     updatedAt,
