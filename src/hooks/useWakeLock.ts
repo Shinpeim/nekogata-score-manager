@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export const useWakeLock = () => {
   const [isActive, setIsActive] = useState(false);
@@ -10,7 +10,7 @@ export const useWakeLock = () => {
     setIsSupported('wakeLock' in navigator && navigator.wakeLock !== undefined);
   }, []);
 
-  const requestWakeLock = async () => {
+  const requestWakeLock = useCallback(async () => {
     if (!isSupported || !navigator.wakeLock) return;
 
     try {
@@ -25,7 +25,7 @@ export const useWakeLock = () => {
       console.error('Failed to request wake lock:', error);
       setIsActive(false);
     }
-  };
+  }, [isSupported]);
 
   const releaseWakeLock = async () => {
     if (wakeLockRef.current) {
@@ -59,7 +59,7 @@ export const useWakeLock = () => {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [isActive, isSupported]);
+  }, [isActive, isSupported, requestWakeLock]);
 
   // Cleanup on unmount
   useEffect(() => {
