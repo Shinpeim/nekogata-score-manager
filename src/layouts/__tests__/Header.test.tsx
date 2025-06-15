@@ -1,0 +1,105 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import Header from '../Header';
+
+// useWakeLockフックのモック
+const mockToggleWakeLock = vi.fn();
+vi.mock('../../hooks/useWakeLock', () => ({
+  useWakeLock: () => ({
+    isActive: false,
+    isSupported: true,
+    toggleWakeLock: mockToggleWakeLock,
+  }),
+}));
+
+describe('Header', () => {
+  const mockSetExplorerOpen = vi.fn();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should render the header with title', () => {
+    render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+    
+    expect(screen.getByText('Nekogata Score Manager')).toBeInTheDocument();
+  });
+
+  it('should render open explorer button when explorer is closed', () => {
+    render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+    
+    const button = screen.getByRole('button', { name: /open score explorer/i });
+    expect(button).toBeInTheDocument();
+    expect(screen.getByText('open score explorer')).toBeInTheDocument();
+  });
+
+  it('should render close explorer button when explorer is open', () => {
+    render(<Header explorerOpen={true} setExplorerOpen={mockSetExplorerOpen} />);
+    
+    const button = screen.getByRole('button', { name: /close score explorer/i });
+    expect(button).toBeInTheDocument();
+    expect(screen.getByText('close score explorer')).toBeInTheDocument();
+  });
+
+  it('should call setExplorerOpen when explorer toggle button is clicked', () => {
+    render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+    
+    const button = screen.getByRole('button', { name: /open score explorer/i });
+    fireEvent.click(button);
+    
+    expect(mockSetExplorerOpen).toHaveBeenCalledWith(true);
+  });
+
+  it('should render wake lock button when supported', () => {
+    render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+    
+    const wakeLockButton = screen.getByTitle('スリープ防止を有効にする');
+    expect(wakeLockButton).toBeInTheDocument();
+    expect(screen.getByText('スリープ防止')).toBeInTheDocument();
+  });
+
+  it('should call toggleWakeLock when wake lock button is clicked', () => {
+    render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+    
+    const wakeLockButton = screen.getByTitle('スリープ防止を有効にする');
+    fireEvent.click(wakeLockButton);
+    
+    expect(mockToggleWakeLock).toHaveBeenCalled();
+  });
+
+  describe('Wake Lock States', () => {
+    it('should show correct styles for non-active wake lock', () => {
+      render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+      
+      // 非アクティブ状態のスタイル確認（デフォルトのモック状態）
+      const wakeLockButton = screen.getByTitle('スリープ防止を有効にする');
+      expect(wakeLockButton).toHaveClass('bg-slate-100', 'text-slate-600');
+      expect(screen.getByText('スリープ防止')).toBeInTheDocument();
+    });
+
+    it('should handle wake lock button interactions', () => {
+      render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+      
+      const wakeLockButton = screen.getByTitle('スリープ防止を有効にする');
+      
+      // 複数回クリックしても正常に動作することを確認
+      fireEvent.click(wakeLockButton);
+      fireEvent.click(wakeLockButton);
+      fireEvent.click(wakeLockButton);
+      
+      expect(mockToggleWakeLock).toHaveBeenCalledTimes(3);
+    });
+
+    it('should show wake lock button when supported', () => {
+      render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+      
+      // デフォルトのモックではサポートされている
+      expect(screen.getByTitle('スリープ防止を有効にする')).toBeInTheDocument();
+      expect(screen.getByText('スリープ防止')).toBeInTheDocument();
+    });
+  });
+});
