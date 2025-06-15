@@ -16,7 +16,6 @@ export interface ImportResult {
 // ============================================================================
 // 定数
 // ============================================================================
-const EXPORT_VERSION = '1.0.0';
 
 
 // エラーメッセージ
@@ -257,7 +256,6 @@ const validateSingleChart = (chart: unknown): {
   // 日付フィールドの修正
   const now = new Date();
   let createdAt = now;
-  let updatedAt = now;
 
   if (chartObj.createdAt) {
     const parsed = new Date(chartObj.createdAt as string);
@@ -265,15 +263,6 @@ const validateSingleChart = (chart: unknown): {
       createdAt = parsed;
     } else {
       warnings.push('作成日時が不正なため現在時刻に設定しました');
-    }
-  }
-
-  if (chartObj.updatedAt) {
-    const parsed = new Date(chartObj.updatedAt as string);
-    if (!isNaN(parsed.getTime())) {
-      updatedAt = parsed;
-    } else {
-      warnings.push('更新日時が不正なため現在時刻に設定しました');
     }
   }
 
