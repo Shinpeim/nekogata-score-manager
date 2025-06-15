@@ -6,7 +6,10 @@ import {
   validateChordChart,
   COMMON_KEYS,
   COMMON_TIME_SIGNATURES,
-  COMMON_SECTION_NAMES
+  COMMON_SECTION_NAMES,
+  extractChordRoot,
+  isValidChordName,
+  normalizeChordName
 } from '../chordUtils';
 import type { ChordChart } from '../../types';
 
@@ -212,6 +215,112 @@ describe('chordUtils', () => {
       expect(COMMON_SECTION_NAMES).toContain('イントロ');
       expect(COMMON_SECTION_NAMES).toContain('Aメロ');
       expect(COMMON_SECTION_NAMES).toContain('サビ');
+    });
+  });
+
+  describe('extractChordRoot', () => {
+    it('should extract root from basic chord names', () => {
+      expect(extractChordRoot('C')).toBe('C');
+      expect(extractChordRoot('Am')).toBe('A');
+      expect(extractChordRoot('F7')).toBe('F');
+      expect(extractChordRoot('Gmaj7')).toBe('G');
+    });
+
+    it('should extract root from sharp chords', () => {
+      expect(extractChordRoot('C#')).toBe('C#');
+      expect(extractChordRoot('F#m')).toBe('F#');
+      expect(extractChordRoot('G#7')).toBe('G#');
+    });
+
+    it('should extract root from flat chords with b and normalize to ♭', () => {
+      expect(extractChordRoot('Bb')).toBe('B♭');
+      expect(extractChordRoot('Ebm')).toBe('E♭');
+      expect(extractChordRoot('Ab7')).toBe('A♭');
+    });
+
+    it('should extract root from flat chords with ♭ symbol', () => {
+      expect(extractChordRoot('B♭')).toBe('B♭');
+      expect(extractChordRoot('E♭m')).toBe('E♭');
+      expect(extractChordRoot('A♭7')).toBe('A♭');
+    });
+
+    it('should extract root from complex chord names', () => {
+      expect(extractChordRoot('Dm7(♭5)')).toBe('D');
+      expect(extractChordRoot('E♭maj7(#11)')).toBe('E♭');
+      expect(extractChordRoot('F#m7(♭9)')).toBe('F#');
+    });
+
+    it('should normalize mixed b and ♭ notations in root', () => {
+      expect(extractChordRoot('Dbmaj7')).toBe('D♭');
+      expect(extractChordRoot('Gbm')).toBe('G♭');
+      expect(extractChordRoot('Abm7(b5)')).toBe('A♭');
+    });
+
+    it('should return C for invalid input', () => {
+      expect(extractChordRoot('')).toBe('C');
+      expect(extractChordRoot('invalid')).toBe('C');
+      expect(extractChordRoot('123')).toBe('C');
+    });
+
+    it('should handle null/undefined input', () => {
+      expect(extractChordRoot(null as unknown as string)).toBe('C');
+      expect(extractChordRoot(undefined as unknown as string)).toBe('C');
+    });
+  });
+
+  describe('isValidChordName', () => {
+    it('should validate basic chord names', () => {
+      expect(isValidChordName('C')).toBe(true);
+      expect(isValidChordName('Am')).toBe(true);
+      expect(isValidChordName('F7')).toBe(true);
+      expect(isValidChordName('Gmaj7')).toBe(true);
+    });
+
+    it('should validate sharp and flat chords', () => {
+      expect(isValidChordName('C#')).toBe(true);
+      expect(isValidChordName('Bb')).toBe(true);
+      expect(isValidChordName('F♭')).toBe(true);
+      expect(isValidChordName('G♭m7')).toBe(true);
+    });
+
+    it('should validate complex chord names', () => {
+      expect(isValidChordName('Dm7(♭5)')).toBe(true);
+      expect(isValidChordName('E7(#9)')).toBe(true);
+      expect(isValidChordName('Amaj7(add9)')).toBe(true);
+    });
+
+    it('should reject invalid chord names', () => {
+      expect(isValidChordName('')).toBe(false);
+      expect(isValidChordName('invalid')).toBe(false);
+      expect(isValidChordName('123')).toBe(false);
+      expect(isValidChordName('H')).toBe(false); // H is not valid in English notation
+    });
+
+    it('should handle null/undefined input', () => {
+      expect(isValidChordName(null as unknown as string)).toBe(false);
+      expect(isValidChordName(undefined as unknown as string)).toBe(false);
+    });
+  });
+
+  describe('normalizeChordName', () => {
+    it('should trim whitespace', () => {
+      expect(normalizeChordName('  C  ')).toBe('C');
+      expect(normalizeChordName(' Am7 ')).toBe('Am7');
+    });
+
+    it('should return C for invalid input', () => {
+      expect(normalizeChordName('')).toBe('C');
+      expect(normalizeChordName('   ')).toBe('C');
+    });
+
+    it('should handle null/undefined input', () => {
+      expect(normalizeChordName(null as unknown as string)).toBe('C');
+      expect(normalizeChordName(undefined as unknown as string)).toBe('C');
+    });
+
+    it('should preserve valid chord names', () => {
+      expect(normalizeChordName('F#m7')).toBe('F#m7');
+      expect(normalizeChordName('B♭maj7')).toBe('B♭maj7');
     });
   });
 });

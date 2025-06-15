@@ -76,12 +76,12 @@ describe('chordCopyPaste', () => {
       expect(result[3]).toEqual({ name: 'Am', root: 'A', duration: 4 });
     });
 
-    it('should parse chords with bracket durations', () => {
-      const result = textToChords('C[2] F[2] G[4]');
+    it('should parse chords with bracket durations and normalize roots', () => {
+      const result = textToChords('C[2] Bb[2] G[4]');
       
       expect(result).toHaveLength(3);
       expect(result[0]).toEqual({ name: 'C', root: 'C', duration: 2 });
-      expect(result[1]).toEqual({ name: 'F', root: 'F', duration: 2 });
+      expect(result[1]).toEqual({ name: 'Bb', root: 'B♭', duration: 2 });
       expect(result[2]).toEqual({ name: 'G', root: 'G', duration: 4 });
     });
 
@@ -116,14 +116,14 @@ describe('chordCopyPaste', () => {
       expect(result[3]).toEqual({ name: 'Cmaj7', root: 'C', duration: 4 });
     });
 
-    it('should handle sharp and flat chords', () => {
+    it('should handle sharp and flat chords with root normalization', () => {
       const result = textToChords('C# F# Bb Eb');
       
       expect(result).toHaveLength(4);
       expect(result[0]).toEqual({ name: 'C#', root: 'C#', duration: 4 });
       expect(result[1]).toEqual({ name: 'F#', root: 'F#', duration: 4 });
-      expect(result[2]).toEqual({ name: 'Bb', root: 'Bb', duration: 4 });
-      expect(result[3]).toEqual({ name: 'Eb', root: 'Eb', duration: 4 });
+      expect(result[2]).toEqual({ name: 'Bb', root: 'B♭', duration: 4 });
+      expect(result[3]).toEqual({ name: 'Eb', root: 'E♭', duration: 4 });
     });
 
     it('should handle flat symbol (♭) in addition to b', () => {
@@ -136,13 +136,13 @@ describe('chordCopyPaste', () => {
       expect(result[3]).toEqual({ name: 'D♭', root: 'D♭', duration: 4 });
     });
 
-    it('should handle flat symbol (♭) with duration brackets', () => {
-      const result = textToChords('B♭[2] E♭m7[4] A♭maj7[1.5]');
+    it('should handle mixed b and ♭ symbols with duration brackets', () => {
+      const result = textToChords('Bb[2] E♭m7[4] Ab[1.5]');
       
       expect(result).toHaveLength(3);
-      expect(result[0]).toEqual({ name: 'B♭', root: 'B♭', duration: 2 });
+      expect(result[0]).toEqual({ name: 'Bb', root: 'B♭', duration: 2 });
       expect(result[1]).toEqual({ name: 'E♭m7', root: 'E♭', duration: 4 });
-      expect(result[2]).toEqual({ name: 'A♭maj7', root: 'A♭', duration: 1.5 });
+      expect(result[2]).toEqual({ name: 'Ab', root: 'A♭', duration: 1.5 });
     });
 
     it('should handle flat symbol (♭) in tension chords', () => {
@@ -153,21 +153,21 @@ describe('chordCopyPaste', () => {
       expect(result[1]).toEqual({ name: 'B♭7(♭5)', root: 'B♭', duration: 4 });
     });
 
-    it('should handle tension chords with bracket notation', () => {
-      const result = textToChords('E7(#9)[2] C7(b5)[4] Am7(11)[1]');
+    it('should handle tension chords with bracket notation and normalize roots', () => {
+      const result = textToChords('E7(#9)[2] Bb7(b5)[4] Am7(11)[1]');
       
       expect(result).toHaveLength(3);
       expect(result[0]).toEqual({ name: 'E7(#9)', root: 'E', duration: 2 });
-      expect(result[1]).toEqual({ name: 'C7(b5)', root: 'C', duration: 4 });
+      expect(result[1]).toEqual({ name: 'Bb7(b5)', root: 'B♭', duration: 4 });
       expect(result[2]).toEqual({ name: 'Am7(11)', root: 'A', duration: 1 });
     });
 
-    it('should handle complex tension chords without confusion with old parenthesis notation', () => {
-      const result = textToChords('E7(#9) C7(b5) Am7(11)');
+    it('should handle complex tension chords with root normalization', () => {
+      const result = textToChords('Eb7(#9) Bb7(b5) Am7(11)');
       
       expect(result).toHaveLength(3);
-      expect(result[0]).toEqual({ name: 'E7(#9)', root: 'E', duration: 4 });
-      expect(result[1]).toEqual({ name: 'C7(b5)', root: 'C', duration: 4 });
+      expect(result[0]).toEqual({ name: 'Eb7(#9)', root: 'E♭', duration: 4 });
+      expect(result[1]).toEqual({ name: 'Bb7(b5)', root: 'B♭', duration: 4 });
       expect(result[2]).toEqual({ name: 'Am7(11)', root: 'A', duration: 4 });
     });
 
@@ -177,12 +177,12 @@ describe('chordCopyPaste', () => {
       expect(result).toHaveLength(4);
     });
 
-    it('should filter out invalid chords', () => {
-      const result = textToChords('C invalid F');
+    it('should filter out invalid chords and normalize valid roots', () => {
+      const result = textToChords('Bb invalid Eb');
       
       expect(result).toHaveLength(2);
-      expect(result[0]).toEqual({ name: 'C', root: 'C', duration: 4 });
-      expect(result[1]).toEqual({ name: 'F', root: 'F', duration: 4 });
+      expect(result[0]).toEqual({ name: 'Bb', root: 'B♭', duration: 4 });
+      expect(result[1]).toEqual({ name: 'Eb', root: 'E♭', duration: 4 });
     });
   });
 

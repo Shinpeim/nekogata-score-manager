@@ -7,6 +7,7 @@ import {
   pasteChordProgressionFromClipboard,
   isValidChordProgression 
 } from '../utils/chordCopyPaste';
+import { extractChordRoot } from '../utils/chordUtils';
 import {
   DndContext,
   closestCenter,
@@ -181,11 +182,17 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
         section.id === sectionId
           ? {
               ...section,
-              chords: section.chords.map((chord, index) =>
-                index === chordIndex
-                  ? { ...chord, [field]: value }
-                  : chord
-              )
+              chords: section.chords.map((chord, index) => {
+                if (index === chordIndex) {
+                  const updatedChord = { ...chord, [field]: value };
+                  // コード名が更新された場合、rootも自動更新
+                  if (field === 'name' && typeof value === 'string') {
+                    updatedChord.root = extractChordRoot(value);
+                  }
+                  return updatedChord;
+                }
+                return chord;
+              })
             }
           : section
       ) || []
