@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { storageService } from '../storage';
 import type { ChordChart } from '../../types';
+import type { VersionedChordLibrary } from '../migration';
 
 // localforageをモック
 vi.mock('localforage', () => ({
@@ -36,7 +37,8 @@ const mockChart: ChordChart = {
         { name: 'Am', root: 'A', duration: 4 }
       ]
     }
-  ]
+  ],
+  notes: '' // マイグレーション後の形式
 };
 
 describe('storageService', () => {
@@ -45,13 +47,18 @@ describe('storageService', () => {
   });
 
   describe('saveCharts', () => {
-    it('should save charts to storage', async () => {
+    it('should save charts to storage with version info', async () => {
       const charts = { [mockChart.id]: mockChart };
       vi.mocked(localforage.setItem).mockResolvedValue(undefined);
 
       await storageService.saveCharts(charts);
 
-      expect(localforage.setItem).toHaveBeenCalledWith('chord-charts', charts);
+      expect(localforage.setItem).toHaveBeenCalledWith('chord-charts', expect.objectContaining({
+        version: 2,
+        data: charts,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date)
+      }));
     });
 
     it('should throw error when save fails', async () => {
@@ -63,9 +70,16 @@ describe('storageService', () => {
   });
 
   describe('loadCharts', () => {
-    it('should load charts from storage', async () => {
+    it('should load charts from versioned storage', async () => {
       const charts = { [mockChart.id]: mockChart };
-      vi.mocked(localforage.getItem).mockResolvedValue(charts);
+      const versionedData: VersionedChordLibrary = {
+        version: 2,
+        data: charts,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      vi.mocked(localforage.getItem).mockResolvedValue(versionedData);
+      vi.mocked(localforage.setItem).mockResolvedValue(undefined);
 
       const result = await storageService.loadCharts();
 
@@ -73,8 +87,37 @@ describe('storageService', () => {
       expect(result).toEqual(charts);
     });
 
+    it('should migrate old data format', async () => {
+      // 古い形式のデータ（notesなし、beatsPerBarが間違っている）
+      const oldChart = {
+        ...mockChart,
+        notes: undefined,
+        sections: [{
+          ...mockChart.sections[0],
+          beatsPerBar: 4 // 4/4拍子なので正しいが、マイグレーション処理は通る
+        }]
+      };
+      const oldCharts = { [oldChart.id]: oldChart };
+      
+      vi.mocked(localforage.getItem).mockResolvedValue(oldCharts);
+      vi.mocked(localforage.setItem).mockResolvedValue(undefined);
+
+      const result = await storageService.loadCharts();
+
+      expect(localforage.getItem).toHaveBeenCalledWith('chord-charts');
+      expect(result).toEqual(expect.objectContaining({
+        [mockChart.id]: expect.objectContaining({
+          notes: '' // マイグレーション後は空文字になる
+        })
+      }));
+      
+      // マイグレーション後の自動保存が実行される
+      expect(localforage.setItem).toHaveBeenCalled();
+    });
+
     it('should return null when no data exists', async () => {
       vi.mocked(localforage.getItem).mockResolvedValue(null);
+      vi.mocked(localforage.setItem).mockResolvedValue(undefined);
 
       const result = await storageService.loadCharts();
 
@@ -90,34 +133,54 @@ describe('storageService', () => {
 
   describe('saveChart', () => {
     it('should save single chart', async () => {
-      const existingCharts = {};
-      vi.mocked(localforage.getItem).mockResolvedValue(existingCharts);
+      // 最新バージョンの形式で既存データをモック
+      const existingData: VersionedChordLibrary = {
+        version: 2,
+        data: {},
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      vi.mocked(localforage.getItem).mockResolvedValue(existingData);
       vi.mocked(localforage.setItem).mockResolvedValue(undefined);
 
       await storageService.saveChart(mockChart);
 
       expect(localforage.getItem).toHaveBeenCalledWith('chord-charts');
-      expect(localforage.setItem).toHaveBeenCalledWith('chord-charts', {
-        [mockChart.id]: mockChart
-      });
+      // バージョン情報付きで保存される
+      expect(localforage.setItem).toHaveBeenCalledWith('chord-charts', expect.objectContaining({
+        version: 2,
+        data: {
+          [mockChart.id]: mockChart
+        }
+      }));
     });
 
-    it('should update existing chart', async () => {
+    it('should update existing chart and migrate old data', async () => {
+      // 古い形式のデータをモック
       const existingCharts = { 'other-chart': { id: 'other-chart' } };
       vi.mocked(localforage.getItem).mockResolvedValue(existingCharts);
       vi.mocked(localforage.setItem).mockResolvedValue(undefined);
 
       await storageService.saveChart(mockChart);
 
-      expect(localforage.setItem).toHaveBeenCalledWith('chord-charts', {
-        'other-chart': { id: 'other-chart', sections: [] },
-        [mockChart.id]: mockChart
-      });
+      // マイグレーション処理により複数回呼ばれる
+      expect(localforage.setItem).toHaveBeenCalled();
+      expect(localforage.setItem).toHaveBeenCalledWith('chord-charts', expect.objectContaining({
+        version: 2,
+        data: expect.objectContaining({
+          'other-chart': expect.objectContaining({
+            id: 'other-chart',
+            notes: '' // マイグレーションで追加される
+          }),
+          [mockChart.id]: mockChart
+        })
+      }));
     });
   });
 
   describe('deleteChart', () => {
-    it('should delete chart from storage', async () => {
+    it('should delete chart from storage and migrate old data', async () => {
+      // 古い形式のデータをモック
       const existingCharts = {
         [mockChart.id]: mockChart,
         'other-chart': { id: 'other-chart' }
@@ -127,9 +190,17 @@ describe('storageService', () => {
 
       await storageService.deleteChart(mockChart.id);
 
-      expect(localforage.setItem).toHaveBeenCalledWith('chord-charts', {
-        'other-chart': { id: 'other-chart', sections: [] }
-      });
+      // マイグレーション処理により複数回呼ばれる
+      expect(localforage.setItem).toHaveBeenCalled();
+      expect(localforage.setItem).toHaveBeenCalledWith('chord-charts', expect.objectContaining({
+        version: 2,
+        data: expect.objectContaining({
+          'other-chart': expect.objectContaining({
+            id: 'other-chart',
+            notes: '' // マイグレーションで追加される
+          })
+        })
+      }));
     });
   });
 
@@ -147,6 +218,7 @@ describe('storageService', () => {
     it('should return storage information', async () => {
       const charts = { [mockChart.id]: mockChart };
       vi.mocked(localforage.getItem).mockResolvedValue(charts);
+      vi.mocked(localforage.setItem).mockResolvedValue(undefined);
 
       const info = await storageService.getStorageInfo();
 
@@ -168,6 +240,7 @@ describe('storageService', () => {
     it('should validate correct charts', async () => {
       const charts = { [mockChart.id]: mockChart };
       vi.mocked(localforage.getItem).mockResolvedValue(charts);
+      vi.mocked(localforage.setItem).mockResolvedValue(undefined);
 
       const isValid = await storageService.validateCharts();
 
@@ -178,6 +251,7 @@ describe('storageService', () => {
       const invalidChart = { ...mockChart, title: '' };
       const charts = { [invalidChart.id]: invalidChart };
       vi.mocked(localforage.getItem).mockResolvedValue(charts);
+      vi.mocked(localforage.setItem).mockResolvedValue(undefined);
 
       const isValid = await storageService.validateCharts();
 
@@ -186,6 +260,7 @@ describe('storageService', () => {
 
     it('should return true when no charts exist', async () => {
       vi.mocked(localforage.getItem).mockResolvedValue(null);
+      vi.mocked(localforage.setItem).mockResolvedValue(undefined);
 
       const isValid = await storageService.validateCharts();
 

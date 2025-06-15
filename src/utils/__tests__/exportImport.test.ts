@@ -161,7 +161,7 @@ describe('exportImport', () => {
 
       expect(result.success).toBe(true);
       expect(result.charts).toHaveLength(1);
-      expect(result.warnings).toContain('旧形式のデータです。新形式に変換しました。');
+      expect(result.warnings).toContain('データをバージョン1から2に移行しました');
     });
 
     it('should handle single chart object', () => {
@@ -264,7 +264,7 @@ describe('exportImport', () => {
 
       expect(result.success).toBe(true);
       expect(result.charts[0].sections[0].beatsPerBar).toBe(3);
-      expect(result.warnings.some(w => w.includes('拍数を拍子から設定'))).toBe(true);
+      expect(result.warnings).toContain('データをバージョン1から2に移行しました');
     });
   });
 });

@@ -150,6 +150,7 @@ describe('chordChartStore integration with storage', () => {
       };
       
       vi.mocked(localforage.getItem).mockResolvedValue(storedCharts);
+      vi.mocked(localforage.setItem).mockResolvedValue(undefined);
       
       const { loadInitialData } = useChordChartStore.getState();
       
