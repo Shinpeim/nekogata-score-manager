@@ -199,3 +199,60 @@ export const isOnChord = (chordName: string): boolean => {
   // /[A-G][#♭b]?で終わるパターンをチェック
   return /\/[A-G][#♭b]?$/i.test(chordName.trim());
 };
+
+/**
+ * 拍数が有効かどうかをチェックする
+ * 
+ * @param duration - チェックする拍数（文字列または数値）
+ * @returns 有効な場合はtrue
+ */
+export const isValidDuration = (duration: string | number): boolean => {
+  if (typeof duration === 'number') {
+    return !isNaN(duration) && duration >= 0.5 && duration <= 16;
+  }
+  
+  if (typeof duration === 'string') {
+    const trimmed = duration.trim();
+    if (!trimmed) {
+      return false;
+    }
+    
+    const parsed = parseFloat(trimmed);
+    return !isNaN(parsed) && parsed >= 0.5 && parsed <= 16;
+  }
+  
+  return false;
+};
+
+/**
+ * コード名の完全バリデーション（オンコード含む）
+ * 
+ * @param chordName - チェックするコード名
+ * @returns 有効な場合はtrue
+ */
+export const isValidFullChordName = (chordName: string): boolean => {
+  if (!chordName || typeof chordName !== 'string') {
+    return false;
+  }
+
+  const trimmed = chordName.trim();
+  if (!trimmed) {
+    return false;
+  }
+
+  // スラッシュが含まれる場合はオンコードの可能性
+  if (trimmed.includes('/')) {
+    // 有効なオンコードパターンかチェック
+    if (isOnChord(trimmed)) {
+      const parsed = parseOnChord(trimmed);
+      // コード部分とベース音の両方が有効であることを確認
+      return isValidChordName(parsed.chord) && parsed.base !== undefined && /^[A-G][#b♭]?$/i.test(parsed.base);
+    } else {
+      // スラッシュがあるが有効なオンコードパターンでない場合は無効
+      return false;
+    }
+  }
+  
+  // 通常のコード名のバリデーション
+  return isValidChordName(trimmed);
+};

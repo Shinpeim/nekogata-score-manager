@@ -11,7 +11,9 @@ import {
   isValidChordName,
   normalizeChordName,
   parseOnChord,
-  isOnChord
+  isOnChord,
+  isValidDuration,
+  isValidFullChordName
 } from '../chordUtils';
 import type { ChordChart } from '../../types';
 
@@ -413,6 +415,84 @@ describe('chordUtils', () => {
       expect(isOnChord('')).toBe(false);
       expect(isOnChord(null as unknown as string)).toBe(false);
       expect(isOnChord(undefined as unknown as string)).toBe(false);
+    });
+  });
+
+  describe('isValidDuration', () => {
+    it('should validate numeric durations', () => {
+      expect(isValidDuration(1)).toBe(true);
+      expect(isValidDuration(0.5)).toBe(true);
+      expect(isValidDuration(16)).toBe(true);
+      expect(isValidDuration(8.5)).toBe(true);
+    });
+
+    it('should validate string durations', () => {
+      expect(isValidDuration('1')).toBe(true);
+      expect(isValidDuration('0.5')).toBe(true);
+      expect(isValidDuration('16')).toBe(true);
+      expect(isValidDuration('8.5')).toBe(true);
+      expect(isValidDuration(' 2 ')).toBe(true); // trimmed
+    });
+
+    it('should reject invalid durations', () => {
+      expect(isValidDuration(0)).toBe(false);
+      expect(isValidDuration(0.4)).toBe(false);
+      expect(isValidDuration(17)).toBe(false);
+      expect(isValidDuration('0')).toBe(false);
+      expect(isValidDuration('0.4')).toBe(false);
+      expect(isValidDuration('17')).toBe(false);
+      expect(isValidDuration('abc')).toBe(false);
+      expect(isValidDuration('')).toBe(false);
+      expect(isValidDuration('   ')).toBe(false);
+    });
+
+    it('should handle invalid input types', () => {
+      expect(isValidDuration(null as unknown as string)).toBe(false);
+      expect(isValidDuration(undefined as unknown as string)).toBe(false);
+      expect(isValidDuration(NaN)).toBe(false);
+    });
+  });
+
+  describe('isValidFullChordName', () => {
+    it('should validate basic chord names', () => {
+      expect(isValidFullChordName('C')).toBe(true);
+      expect(isValidFullChordName('Am')).toBe(true);
+      expect(isValidFullChordName('F7')).toBe(true);
+      expect(isValidFullChordName('Gmaj7')).toBe(true);
+    });
+
+    it('should validate chord names with sharps and flats', () => {
+      expect(isValidFullChordName('C#')).toBe(true);
+      expect(isValidFullChordName('Bb')).toBe(true);
+      expect(isValidFullChordName('F♭')).toBe(true);
+      expect(isValidFullChordName('G♭m7')).toBe(true);
+    });
+
+    it('should validate on chords', () => {
+      expect(isValidFullChordName('C/E')).toBe(true);
+      expect(isValidFullChordName('Am/G')).toBe(true);
+      expect(isValidFullChordName('F#m7/C#')).toBe(true);
+      expect(isValidFullChordName('Dm7(♭5)/A♭')).toBe(true);
+    });
+
+    it('should reject invalid chord names', () => {
+      expect(isValidFullChordName('')).toBe(false);
+      expect(isValidFullChordName('   ')).toBe(false);
+      expect(isValidFullChordName('invalid')).toBe(false);
+      expect(isValidFullChordName('123')).toBe(false);
+      expect(isValidFullChordName('H')).toBe(false); // H is not valid
+    });
+
+    it('should reject invalid on chords', () => {
+      expect(isValidFullChordName('C/invalid')).toBe(false);
+      expect(isValidFullChordName('C/1')).toBe(false);
+      expect(isValidFullChordName('C/')).toBe(false);
+      expect(isValidFullChordName('invalid/E')).toBe(false);
+    });
+
+    it('should handle null/undefined input', () => {
+      expect(isValidFullChordName(null as unknown as string)).toBe(false);
+      expect(isValidFullChordName(undefined as unknown as string)).toBe(false);
     });
   });
 });
