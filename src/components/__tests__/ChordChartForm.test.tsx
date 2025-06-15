@@ -47,7 +47,9 @@ describe('ChordChartForm', () => {
 
       expect(screen.getByDisplayValue('新しいコード譜')).toBeInTheDocument();
       expect(screen.getByDisplayValue('120')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('C')).toBeInTheDocument();
+      // キーのselectはvalueがCだが、display textは'C / Am'
+      const keySelect = screen.getByLabelText('キー *') as HTMLSelectElement;
+      expect(keySelect.value).toBe('C');
       expect(screen.getByDisplayValue('4/4')).toBeInTheDocument();
     });
 
@@ -68,7 +70,9 @@ describe('ChordChartForm', () => {
       expect(screen.getByText('コード譜を編集')).toBeInTheDocument();
       expect(screen.getByDisplayValue('Existing Chart')).toBeInTheDocument();
       expect(screen.getByDisplayValue('Existing Artist')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('G')).toBeInTheDocument();
+      // キーのselectはvalueがGだが、display textは'G / Em'
+      const keySelect = screen.getByLabelText('キー *') as HTMLSelectElement;
+      expect(keySelect.value).toBe('G');
       expect(screen.getByDisplayValue('140')).toBeInTheDocument();
       expect(screen.getByDisplayValue('3/4')).toBeInTheDocument();
       expect(screen.getByDisplayValue('rock, classic')).toBeInTheDocument();
@@ -92,10 +96,10 @@ describe('ChordChartForm', () => {
       const user = userEvent.setup();
       renderForm();
 
-      const keySelect = screen.getByLabelText('キー *');
+      const keySelect = screen.getByLabelText('キー *') as HTMLSelectElement;
       await user.selectOptions(keySelect, 'G');
 
-      expect(screen.getByDisplayValue('G')).toBeInTheDocument();
+      expect(keySelect.value).toBe('G');
     });
 
     it('should handle number input changes', async () => {

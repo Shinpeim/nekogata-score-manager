@@ -78,7 +78,7 @@ describe('ChordChart', () => {
 
       expect(screen.getByText('Test Song')).toBeInTheDocument();
       expect(screen.getByText('Test Artist')).toBeInTheDocument();
-      expect(screen.getByText('キー: C')).toBeInTheDocument();
+      expect(screen.getByText('キー: C / Am')).toBeInTheDocument();
       expect(screen.getByText('テンポ: 120 BPM')).toBeInTheDocument();
       expect(screen.getByText('拍子: 4/4')).toBeInTheDocument();
     });
@@ -255,7 +255,7 @@ describe('ChordChart', () => {
       render(<ChordChart />);
 
       expect(screen.getByText('Minimal Chart')).toBeInTheDocument();
-      expect(screen.getByText('キー: C')).toBeInTheDocument();
+      expect(screen.getByText('キー: C / Am')).toBeInTheDocument();
       expect(screen.getByText('拍子: 4/4')).toBeInTheDocument();
       
       // Optional fields should not be rendered
