@@ -3,7 +3,7 @@ import MainLayout from './layouts/MainLayout';
 import ChordChart from './components/ChordChart';
 import ChordChartForm from './components/ChordChartForm';
 import ImportDialog from './components/ImportDialog';
-import { useChordChartStore } from './stores/chordChartStore';
+import { useChordChartStore } from './hooks/useChartManagement';
 import type { ChordChart as ChordChartType } from './types';
 
 function App() {
@@ -11,12 +11,14 @@ function App() {
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [explorerOpen, setExplorerOpen] = useState(false);
   
-  const loadInitialData = useChordChartStore(state => state.loadInitialData);
-  const loadFromStorage = useChordChartStore(state => state.loadFromStorage);
-  const isLoading = useChordChartStore(state => state.isLoading);
-  const error = useChordChartStore(state => state.error);
-  const clearError = useChordChartStore(state => state.clearError);
-  const createNewChart = useChordChartStore(state => state.createNewChart);
+  const {
+    loadInitialData,
+    loadFromStorage,
+    isLoading,
+    error,
+    clearError,
+    createNewChart
+  } = useChordChartStore();
 
   useEffect(() => {
     loadInitialData().catch(error => {

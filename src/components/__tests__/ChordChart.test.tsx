@@ -15,7 +15,7 @@ interface MockState {
   updateChart: typeof mockUpdateChart;
 }
 
-vi.mock('../../stores/chordChartStore', () => ({
+vi.mock('../../hooks/useChartManagement', () => ({
   useChordChartStore: vi.fn((selector?: (state: MockState) => unknown) => {
     const state = {
       charts: mockCharts,

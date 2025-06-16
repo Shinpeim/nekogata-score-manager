@@ -9,9 +9,8 @@ const mockLoadFromStorage = vi.fn();
 const mockDeleteMultipleCharts = vi.fn();
 const mockSetCurrentChart = vi.fn();
 
-vi.mock('../../stores/chordChartStore', () => ({
-  useChordChartStore: (selector: (state: unknown) => unknown) => {
-    const mockStore = {
+vi.mock('../../hooks/useChartManagement', () => ({
+  useChordChartStore: () => ({
       charts: {
         'chart1': {
           id: 'chart1',
@@ -33,9 +32,7 @@ vi.mock('../../stores/chordChartStore', () => ({
       addChart: mockAddChart,
       loadFromStorage: mockLoadFromStorage,
       deleteMultipleCharts: mockDeleteMultipleCharts,
-    };
-    return selector(mockStore);
-  },
+  }),
 }));
 
 // HeaderとScoreExplorerコンポーネントのモック

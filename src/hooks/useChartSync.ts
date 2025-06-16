@@ -1,5 +1,5 @@
 import { useEffect, useCallback } from 'react';
-import { useChordChartStore } from '../stores/chordChartStore';
+import { useChordChartStore } from './useChartManagement';
 import { useSyncStore } from '../stores/syncStore';
 import type { SyncConflict } from '../types/sync';
 

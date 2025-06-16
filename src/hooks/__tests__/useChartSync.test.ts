@@ -1,13 +1,14 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useChartSync } from '../useChartSync';
-import { useChordChartStore } from '../../stores/chordChartStore';
+import { useChordChartStore } from '../useChartManagement';
 import { useSyncStore } from '../../stores/syncStore';
 import { createNewChordChart } from '../../utils/chordCreation';
 import type { SyncResult } from '../../types/sync';
+import type { ChordChart } from '../../types';
 
 // Mock stores
-vi.mock('../../stores/chordChartStore');
+vi.mock('../useChartManagement');
 vi.mock('../../stores/syncStore');
 
 // Mock localforage
@@ -20,15 +21,6 @@ vi.mock('localforage', () => ({
   }
 }));
 
-interface MockChordChartStore {
-  charts: Record<string, unknown>;
-  currentChartId: string | null;
-  isLoading: boolean;
-  error: string | null;
-  syncCallbacks: Set<unknown>;
-  subscribeSyncNotification: ReturnType<typeof vi.fn>;
-  applySyncedCharts: ReturnType<typeof vi.fn>;
-}
 
 interface MockSyncStore {
   isSyncing: boolean;
@@ -48,14 +40,30 @@ interface MockSyncStore {
   isAuthenticated: ReturnType<typeof vi.fn>;
 }
 
-const mockChordChartStore: MockChordChartStore = {
+const mockChordChartStore = {
   charts: {},
   currentChartId: null,
   isLoading: false,
   error: null,
-  syncCallbacks: new Set(),
+  syncCallbacks: new Set<(charts: ChordChart[]) => void>(),
   subscribeSyncNotification: vi.fn(),
-  applySyncedCharts: vi.fn()
+  applySyncedCharts: vi.fn(),
+  // 追加で必要なプロパティ
+  setCurrentChart: vi.fn(),
+  getCurrentChart: vi.fn(),
+  getChartById: vi.fn(),
+  getChartsArray: vi.fn(),
+  hasCharts: vi.fn(),
+  getChartsCount: vi.fn(),
+  addChart: vi.fn(),
+  updateChart: vi.fn(),
+  deleteChart: vi.fn(),
+  deleteMultipleCharts: vi.fn(),
+  createNewChart: vi.fn(),
+  loadInitialData: vi.fn(),
+  loadFromStorage: vi.fn(),
+  clearError: vi.fn(),
+  notifySyncCallbacks: vi.fn()
 };
 
 const mockSyncStore: MockSyncStore = {
@@ -97,7 +105,7 @@ describe('useChartSync', () => {
       currentChartId: null,
       isLoading: false,
       error: null,
-      syncCallbacks: new Set(),
+      syncCallbacks: new Set<(charts: ChordChart[]) => void>(),
       subscribeSyncNotification: vi.fn().mockReturnValue(() => {}),
       applySyncedCharts: vi.fn()
     });
@@ -126,7 +134,7 @@ describe('useChartSync', () => {
       isAuthenticated: vi.fn().mockReturnValue(false)
     });
     
-    vi.mocked(useChordChartStore).mockReturnValue(mockChordChartStore as ReturnType<typeof useChordChartStore>);
+    vi.mocked(useChordChartStore).mockReturnValue(mockChordChartStore);
     vi.mocked(useSyncStore).mockReturnValue(mockSyncStore as ReturnType<typeof useSyncStore>);
   });
 
@@ -491,6 +499,7 @@ describe('useChartSync', () => {
 
   describe('combined error state', () => {
     it('should prioritize chart store error', () => {
+      // @ts-expect-error: Temporarily overriding readonly property for testing
       mockChordChartStore.error = 'Chart error';
       mockSyncStore.syncError = 'Sync error';
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { ChordChart as ChordChartType } from '../types';
-import { useChordChartStore } from '../stores/chordChartStore';
+import { useChordChartStore } from '../hooks/useChartManagement';
 import ChordChartEditor from './ChordChartEditor';
 import ChordChartForm from './ChordChartForm';
 import ChordChartViewer from './ChordChartViewer';
@@ -15,9 +15,7 @@ interface ChordChartProps {
 
 const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew, onOpenImport, onOpenExplorer }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const charts = useChordChartStore(state => state.charts);
-  const currentChartId = useChordChartStore(state => state.currentChartId);
-  const updateChart = useChordChartStore(state => state.updateChart);
+  const { charts, currentChartId, updateChart } = useChordChartStore();
   
   const currentChart = currentChartId ? charts[currentChartId] : null;
   const displayChart = chartData || currentChart;
@@ -64,7 +62,7 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew, onOpenI
 // 新規作成フォームの追加（ChordChartコンポーネントの外で）
 const ChordChartWithForm: React.FC<ChordChartProps> = (props) => {
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const createNewChart = useChordChartStore(state => state.createNewChart);
+  const { createNewChart } = useChordChartStore();
 
   const handleCreateNew = () => {
     if (props.onCreateNew) {
