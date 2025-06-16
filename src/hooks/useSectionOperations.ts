@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import type { ChordChart, ChordSection } from '../types';
 import { copyChordProgressionToClipboard, pasteChordProgressionFromClipboard, textToChords } from '../utils/chordCopyPaste';
-import { isLineBreakMarker } from '../utils/lineBreakHelpers';
 
 interface UseSectionOperationsProps {
   chart: ChordChart;
@@ -140,7 +139,7 @@ export const useSectionOperations = ({
 
     const sectionChordIds = [];
     for (let i = 0; i < section.chords.length; i++) {
-      if (!isLineBreakMarker(section.chords[i])) {
+      if (section.chords[i].isLineBreak !== true) {
         sectionChordIds.push(`${sectionId}-${i}`);
       }
     }

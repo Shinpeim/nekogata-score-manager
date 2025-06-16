@@ -1,5 +1,4 @@
 import type { Chord } from '../types';
-import { isLineBreakMarker } from './lineBreakHelpers';
 import { extractChordRoot, parseOnChord } from './chordParsing';
 
 /**
@@ -16,7 +15,7 @@ export const chordsToText = (chords: Chord[]): string => {
   const parts: string[] = [];
   
   for (const chord of chords) {
-    if (isLineBreakMarker(chord)) {
+    if (chord.isLineBreak === true) {
       parts.push('|');
     } else {
       const duration = chord.duration || 4;

@@ -1,6 +1,6 @@
 import type { ChordChart, Chord } from '../types';
 import { extractChordRoot, parseOnChord } from '../utils/chordParsing';
-import { createLineBreakMarker, isLineBreakMarker } from '../utils/lineBreakHelpers';
+import { createLineBreakMarker } from '../utils/lineBreakHelpers';
 
 interface UseChordOperationsProps {
   chart: ChordChart;
@@ -141,7 +141,7 @@ export const useChordOperations = ({
         
         for (let i = start; i <= end; i++) {
           const section = chart.sections?.find(s => s.id === sectionId);
-          if (section && i < section.chords.length && !isLineBreakMarker(section.chords[i])) {
+          if (section && i < section.chords.length && section.chords[i].isLineBreak !== true) {
             newSelected.add(`${sectionId}-${i}`);
           }
         }
