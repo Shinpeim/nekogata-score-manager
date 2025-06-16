@@ -11,27 +11,37 @@ vi.mock('../deviceId', () => ({
 
 describe('SyncManager', () => {
   let syncManager: SyncManager;
-  let mockAdapter: jest.Mocked<GoogleDriveSyncAdapter>;
+  let mockAdapter: GoogleDriveSyncAdapter;
 
   beforeEach(() => {
     localStorage.clear();
     vi.clearAllMocks();
     
     syncManager = SyncManager.getInstance();
-    mockAdapter = vi.mocked(new GoogleDriveSyncAdapter());
+    mockAdapter = {
+      isAuthenticated: vi.fn(),
+      authenticate: vi.fn(),
+      signOut: vi.fn(),
+      pull: vi.fn(),
+      push: vi.fn(),
+      getRemoteMetadata: vi.fn(),
+      updateMetadata: vi.fn(),
+      getStorageInfo: vi.fn(),
+      initialize: vi.fn()
+    } as unknown as GoogleDriveSyncAdapter;
     (syncManager as unknown as { adapter: GoogleDriveSyncAdapter }).adapter = mockAdapter;
   });
 
   describe('authentication', () => {
     it('should check authentication status', () => {
-      mockAdapter.isAuthenticated.mockReturnValue(true);
+      (mockAdapter.isAuthenticated as ReturnType<typeof vi.fn>).mockReturnValue(true);
       
       expect(syncManager.isAuthenticated()).toBe(true);
       expect(mockAdapter.isAuthenticated).toHaveBeenCalled();
     });
 
     it('should authenticate user', async () => {
-      mockAdapter.authenticate.mockResolvedValue();
+      (mockAdapter.authenticate as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
       
       await syncManager.authenticate();
       
@@ -39,7 +49,7 @@ describe('SyncManager', () => {
     });
 
     it('should sign out user', async () => {
-      mockAdapter.signOut.mockResolvedValue();
+      (mockAdapter.signOut as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
       
       await syncManager.signOut();
       
@@ -57,6 +67,8 @@ describe('SyncManager', () => {
         tempo: 120,
         timeSignature: '4/4',
         sections: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
         version: '2.0.0'
       }
     ];
@@ -65,11 +77,11 @@ describe('SyncManager', () => {
     const mockRemoteMetadata: Record<string, SyncMetadata> = {};
 
     beforeEach(() => {
-      mockAdapter.pull.mockResolvedValue({
+      (mockAdapter.pull as ReturnType<typeof vi.fn>).mockResolvedValue({
         charts: mockRemoteCharts,
         metadata: mockRemoteMetadata
       });
-      mockAdapter.push.mockResolvedValue();
+      (mockAdapter.push as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
     });
 
     it('should sync successfully without conflicts', async () => {
@@ -89,7 +101,7 @@ describe('SyncManager', () => {
       localStorage.setItem('nekogata-last-sync', lastSync);
       
       const remoteChart = { ...mockLocalCharts[0], title: 'Remote Title' };
-      mockAdapter.pull.mockResolvedValue({
+      (mockAdapter.pull as ReturnType<typeof vi.fn>).mockResolvedValue({
         charts: [remoteChart],
         metadata: {
           'chart-1': {
@@ -114,7 +126,7 @@ describe('SyncManager', () => {
 
     it('should handle sync cancellation on conflict', async () => {
       const remoteChart = { ...mockLocalCharts[0], title: 'Remote Title' };
-      mockAdapter.pull.mockResolvedValue({
+      (mockAdapter.pull as ReturnType<typeof vi.fn>).mockResolvedValue({
         charts: [remoteChart],
         metadata: {
           'chart-1': {
@@ -133,7 +145,7 @@ describe('SyncManager', () => {
     });
 
     it('should handle sync errors', async () => {
-      mockAdapter.pull.mockRejectedValue(new Error('Failed to fetch'));
+      (mockAdapter.pull as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Failed to fetch'));
       
       const result = await syncManager.sync(mockLocalCharts);
       
