@@ -184,8 +184,17 @@ describe('SyncSettingsDialog', () => {
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
     await waitFor(() => {
-      // タイムゾーンに依存しない部分的マッチングを使用
-      expect(screen.getByText(/2024\/01\/01/)).toBeInTheDocument();
+      // 実行環境のタイムゾーンで期待値を計算
+      const mockDate = new Date('2024-01-01T00:00:00Z');
+      const expectedFormat = new Intl.DateTimeFormat('ja-JP', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      }).format(mockDate);
+      
+      expect(screen.getByText(expectedFormat)).toBeInTheDocument();
     });
   });
 
