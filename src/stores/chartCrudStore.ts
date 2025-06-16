@@ -1,17 +1,14 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type { ChordChart } from '../types';
-import { createNewChordChart } from '../utils/chordCreation';
-import { storageService } from '../utils/storage';
+import { chartCrudService } from '../services/chartCrudService';
+import { syncNotificationService } from '../services/syncNotificationService';
 import { useChartDataStore } from './chartDataStore';
 
 interface ChartCrudState {
   // 状態
   isLoading: boolean;
   error: string | null;
-  
-  // 同期関連
-  syncCallbacks: Set<(charts: ChordChart[]) => void>;
   
   // CRUD操作
   addChart: (chart: ChordChart) => Promise<void>;
@@ -25,7 +22,7 @@ interface ChartCrudState {
   loadFromStorage: () => Promise<void>;
   applySyncedCharts: (mergedCharts: ChordChart[]) => Promise<void>;
   
-  // 同期メソッド
+  // 同期メソッド（簡素化）
   subscribeSyncNotification: (callback: (charts: ChordChart[]) => void) => () => void;
   notifySyncCallbacks: () => void;
   
@@ -33,22 +30,20 @@ interface ChartCrudState {
   clearError: () => void;
 }
 
-
 export const useChartCrudStore = create<ChartCrudState>()(
   devtools(
     (set, get) => ({
       // 初期状態
       isLoading: false,
       error: null,
-      syncCallbacks: new Set(),
       
       // CRUD操作
       addChart: async (chart: ChordChart) => {
         try {
           set({ isLoading: true, error: null });
           
-          // ストレージに先に保存
-          await storageService.saveChart(chart);
+          // CRUDサービスでストレージに保存
+          await chartCrudService.createChart(chart);
           
           // データストアを更新
           useChartDataStore.getState().addChartToData(chart);
@@ -77,17 +72,11 @@ export const useChartCrudStore = create<ChartCrudState>()(
             throw new Error('更新対象のコード譜が見つかりません');
           }
           
-          const updatedChart = {
-            ...existingChart,
-            ...chartUpdate,
-            updatedAt: new Date()
-          };
+          // CRUDサービスで更新
+          const updatedChart = await chartCrudService.updateChart(existingChart, chartUpdate);
           
           // データストアを更新
           dataStore.updateChartInData(id, updatedChart);
-          
-          // ストレージに保存
-          await storageService.saveChart(updatedChart);
           
           // 同期通知
           get().notifySyncCallbacks();
@@ -106,11 +95,11 @@ export const useChartCrudStore = create<ChartCrudState>()(
         try {
           set({ isLoading: true, error: null });
           
+          // CRUDサービスで削除
+          await chartCrudService.deleteChart(id);
+          
           // データストアから削除
           useChartDataStore.getState().removeChartFromData(id);
-          
-          // ストレージから削除
-          await storageService.deleteChart(id);
           
           // 同期通知
           get().notifySyncCallbacks();
@@ -129,11 +118,11 @@ export const useChartCrudStore = create<ChartCrudState>()(
         try {
           set({ isLoading: true, error: null });
           
+          // CRUDサービスで削除
+          await chartCrudService.deleteMultipleCharts(ids);
+          
           // データストアから削除
           useChartDataStore.getState().removeMultipleChartsFromData(ids);
-          
-          // ストレージから削除
-          await storageService.deleteMultipleCharts(ids);
           
           // 同期通知
           get().notifySyncCallbacks();
@@ -152,15 +141,13 @@ export const useChartCrudStore = create<ChartCrudState>()(
         try {
           set({ isLoading: true, error: null });
           
-          const newChart = createNewChordChart(chartData);
+          // CRUDサービスで新規作成
+          const newChart = await chartCrudService.createChart(chartData);
           const dataStore = useChartDataStore.getState();
           
           // データストアを更新
           dataStore.addChartToData(newChart);
           dataStore.setCurrentChart(newChart.id);
-          
-          // ストレージに保存
-          await storageService.saveChart(newChart);
           
           // 同期通知
           get().notifySyncCallbacks();
@@ -183,22 +170,11 @@ export const useChartCrudStore = create<ChartCrudState>()(
           
           const dataStore = useChartDataStore.getState();
           
-          // ストレージから読み込みを試行
-          const storedCharts = await storageService.loadCharts();
+          // CRUDサービスで初期データ読み込み
+          const initialCharts = await chartCrudService.loadInitialData();
           
-          if (storedCharts && Object.keys(storedCharts).length > 0) {
-            // ストレージにデータがある場合
-            dataStore.setCharts(storedCharts);
-            dataStore.setCurrentChart(Object.keys(storedCharts)[0] || null);
-          } else {
-            // ストレージが空の場合、空の状態で開始
-            const initialCharts = {};
-            dataStore.setCharts(initialCharts);
-            dataStore.setCurrentChart(null);
-            
-            // 空のデータをストレージに保存
-            await storageService.saveCharts(initialCharts);
-          }
+          dataStore.setCharts(initialCharts);
+          dataStore.setCurrentChart(Object.keys(initialCharts)[0] || null);
           
           set({ isLoading: false });
         } catch (error) {
@@ -215,12 +191,12 @@ export const useChartCrudStore = create<ChartCrudState>()(
           set({ isLoading: true, error: null });
           
           const dataStore = useChartDataStore.getState();
-          const storedCharts = await storageService.loadCharts();
           
-          if (storedCharts) {
-            dataStore.setCharts(storedCharts);
-            dataStore.setCurrentChart(Object.keys(storedCharts)[0] || null);
-          }
+          // CRUDサービスで再読み込み
+          const storedCharts = await chartCrudService.reloadFromStorage();
+          
+          dataStore.setCharts(storedCharts);
+          dataStore.setCurrentChart(Object.keys(storedCharts)[0] || null);
           
           set({ isLoading: false });
         } catch (error) {
@@ -238,11 +214,8 @@ export const useChartCrudStore = create<ChartCrudState>()(
           
           const dataStore = useChartDataStore.getState();
           
-          // チャート配列をライブラリ形式に変換
-          const chartsLibrary: Record<string, ChordChart> = {};
-          mergedCharts.forEach(chart => {
-            chartsLibrary[chart.id] = chart;
-          });
+          // CRUDサービスで同期データ適用
+          const chartsLibrary = await chartCrudService.applySyncedCharts(mergedCharts);
           
           // 現在選択中のチャートが削除されていないかチェック
           const { currentChartId } = dataStore;
@@ -254,9 +227,6 @@ export const useChartCrudStore = create<ChartCrudState>()(
           dataStore.setCharts(chartsLibrary);
           dataStore.setCurrentChart(newCurrentChartId);
           
-          // ストレージに保存
-          await storageService.saveCharts(chartsLibrary);
-          
           set({ isLoading: false });
         } catch (error) {
           set({ 
@@ -267,29 +237,15 @@ export const useChartCrudStore = create<ChartCrudState>()(
         }
       },
       
-      // 同期メソッド
+      // 同期メソッド（サービスに委譲）
       subscribeSyncNotification: (callback) => {
-        const { syncCallbacks } = get();
-        syncCallbacks.add(callback);
-        
-        // アンサブスクライブ関数を返す
-        return () => {
-          syncCallbacks.delete(callback);
-        };
+        return syncNotificationService.subscribe(callback);
       },
       
       notifySyncCallbacks: () => {
-        const { syncCallbacks } = get();
         const dataStore = useChartDataStore.getState();
         const chartArray = dataStore.getChartsArray();
-        
-        syncCallbacks.forEach(callback => {
-          try {
-            callback(chartArray);
-          } catch (error) {
-            console.error('同期コールバック実行エラー:', error);
-          }
-        });
+        syncNotificationService.notify(chartArray);
       },
       
       // ユーティリティ

@@ -39,7 +39,7 @@ export const useChartManagement = () => {
     applySyncedCharts: crudStore.applySyncedCharts,
     subscribeSyncNotification: crudStore.subscribeSyncNotification,
     notifySyncCallbacks: crudStore.notifySyncCallbacks,
-    syncCallbacks: crudStore.syncCallbacks
+    // syncCallbacks は内部実装のため削除
   };
 };
 
@@ -52,8 +52,7 @@ export interface ChordChartState {
   isLoading: boolean;
   error: string | null;
   
-  // 同期関連
-  syncCallbacks: Set<(charts: ChordChart[]) => void>;
+  // 同期関連（内部実装のため削除）
     
   // アクション
   addChart: (chart: ChordChart) => Promise<void>;
