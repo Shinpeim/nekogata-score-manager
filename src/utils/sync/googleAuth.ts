@@ -31,6 +31,7 @@ export class GoogleAuthProvider {
   private static instance: GoogleAuthProvider;
   private tokenClient: TokenClient | null = null;
   private accessToken: string | null = null;
+  private isInitialized = false;
   
   private readonly CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
   private readonly SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email';
@@ -45,6 +46,10 @@ export class GoogleAuthProvider {
   }
   
   async initialize(): Promise<void> {
+    if (this.isInitialized) {
+      return;
+    }
+    
     if (!this.CLIENT_ID) {
       throw new Error('Google Client ID not configured');
     }
@@ -70,6 +75,8 @@ export class GoogleAuthProvider {
     if (savedToken) {
       this.accessToken = savedToken;
     }
+    
+    this.isInitialized = true;
   }
   
   private async loadGoogleScript(): Promise<void> {
@@ -187,14 +194,14 @@ export class GoogleAuthProvider {
   }
   
   private saveTokenToStorage(token: string): void {
-    sessionStorage.setItem('nekogata-google-token', token);
+    localStorage.setItem('nekogata-google-token', token);
   }
   
   private getTokenFromStorage(): string | null {
-    return sessionStorage.getItem('nekogata-google-token');
+    return localStorage.getItem('nekogata-google-token');
   }
   
   private removeTokenFromStorage(): void {
-    sessionStorage.removeItem('nekogata-google-token');
+    localStorage.removeItem('nekogata-google-token');
   }
 }

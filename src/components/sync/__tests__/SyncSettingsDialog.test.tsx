@@ -38,6 +38,7 @@ describe('SyncSettingsDialog', () => {
     mockAuthProvider.isAuthenticated.mockReturnValue(false);
     mockAuthProvider.getUserEmail.mockResolvedValue('test@example.com');
     mockAuthProvider.validateToken.mockResolvedValue(true);
+    mockAuthProvider.initialize.mockResolvedValue(undefined);
     mockSyncManager.getLastSyncTimeAsDate.mockReturnValue(new Date('2024-01-01T00:00:00Z'));
   });
 
@@ -228,7 +229,7 @@ describe('SyncSettingsDialog', () => {
   });
 
   it('認証エラーが発生した場合にエラーメッセージが表示される', async () => {
-    mockAuthProvider.initialize.mockRejectedValue(new Error('認証エラー'));
+    mockAuthProvider.authenticate.mockRejectedValue(new Error('認証エラー'));
     
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     

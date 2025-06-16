@@ -28,6 +28,16 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
       const currentConfig = syncManager.getConfig();
       setConfig(currentConfig);
       
+      // 初回読み込み時は必ず初期化を実行
+      try {
+        await authProvider.initialize();
+      } catch (initError) {
+        console.error('Auth provider initialization error:', initError);
+        setIsAuthenticated(false);
+        setUserEmail(null);
+        return;
+      }
+      
       const authStatus = authProvider.isAuthenticated();
       
       if (authStatus) {
@@ -68,7 +78,6 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
   const handleSignIn = async () => {
     try {
       setAuthError(null);
-      await authProvider.initialize();
       await authProvider.authenticate();
       
       const email = await authProvider.getUserEmail();
