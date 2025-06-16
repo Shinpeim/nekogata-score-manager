@@ -9,7 +9,7 @@ const mockLoadFromStorage = vi.fn();
 const mockDeleteMultipleCharts = vi.fn();
 const mockSetCurrentChart = vi.fn();
 
-vi.mock('../../stores/chordChartStore', () => ({
+vi.mock('../../hooks/useChartManagement', () => ({
   useChordChartStore: (selector: (state: unknown) => unknown) => {
     const mockStore = {
       charts: {

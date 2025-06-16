@@ -3,7 +3,7 @@ import MainLayout from './layouts/MainLayout';
 import ChordChart from './components/ChordChart';
 import ChordChartForm from './components/ChordChartForm';
 import ImportDialog from './components/ImportDialog';
-import { useChordChartStore } from './stores/chordChartStore';
+import { useChordChartStore } from './hooks/useChartManagement';
 import type { ChordChart as ChordChartType } from './types';
 
 function App() {

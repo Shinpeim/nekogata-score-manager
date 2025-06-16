@@ -7,7 +7,7 @@ import type { ChordChart as ChordChartType } from '../../types';
 const mockDeleteChart = vi.fn();
 const mockAddChart = vi.fn();
 
-vi.mock('../../stores/chordChartStore', () => ({
+vi.mock('../../hooks/useChartManagement', () => ({
   useChordChartStore: vi.fn((selector) => {
     const state = {
       deleteChart: mockDeleteChart,

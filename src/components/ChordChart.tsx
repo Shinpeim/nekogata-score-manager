@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { ChordChart as ChordChartType } from '../types';
-import { useChordChartStore } from '../stores/chordChartStore';
+import { useChordChartStore } from '../hooks/useChartManagement';
 import ChordChartEditor from './ChordChartEditor';
 import ChordChartForm from './ChordChartForm';
 import ChordChartViewer from './ChordChartViewer';

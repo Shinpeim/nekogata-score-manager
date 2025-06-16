@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { useChordChartStore } from '../stores/chordChartStore';
+import { useChordChartStore } from '../hooks/useChartManagement';
 import ChordChartForm from '../components/ChordChartForm';
 import ImportDialog from '../components/ImportDialog';
 import ExportDialog from '../components/ExportDialog';

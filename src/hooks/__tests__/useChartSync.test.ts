@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useChartSync } from '../useChartSync';
-import { useChordChartStore } from '../../stores/chordChartStore';
+import { useChordChartStore } from '../useChartManagement';
 import { useSyncStore } from '../../stores/syncStore';
 import { createNewChordChart } from '../../utils/chordCreation';
 import type { SyncResult } from '../../types/sync';
 
 // Mock stores
-vi.mock('../../stores/chordChartStore');
+vi.mock('../useChartManagement');
 vi.mock('../../stores/syncStore');
 
 // Mock localforage
