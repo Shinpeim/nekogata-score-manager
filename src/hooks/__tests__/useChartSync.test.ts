@@ -499,7 +499,8 @@ describe('useChartSync', () => {
 
   describe('combined error state', () => {
     it('should prioritize chart store error', () => {
-      (mockChordChartStore as any).error = 'Chart error';
+      // @ts-expect-error: Temporarily overriding readonly property for testing
+      mockChordChartStore.error = 'Chart error';
       mockSyncStore.syncError = 'Sync error';
 
       const { result } = renderHook(() => useChartSync());
