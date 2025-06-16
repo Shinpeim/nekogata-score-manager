@@ -1,6 +1,6 @@
 import React from 'react';
 import type { ChordChart as ChordChartType } from '../types';
-import { useChordChartStore } from '../hooks/useChartManagement';
+import { useChartManagement } from '../hooks/useChartManagement';
 
 interface ChordChartActionsProps {
   chart: ChordChartType;
@@ -9,7 +9,7 @@ interface ChordChartActionsProps {
 }
 
 const ChordChartActions: React.FC<ChordChartActionsProps> = ({ chart, currentChartId, onEdit }) => {
-  const { deleteChart, addChart } = useChordChartStore();
+  const { deleteChart, addChart } = useChartManagement();
 
   const handleDelete = async () => {
     if (currentChartId && confirm('このコード譜を削除しますか？')) {

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useChartSync } from '../useChartSync';
-import { useChordChartStore } from '../useChartManagement';
+import { useChartManagement } from '../useChartManagement';
 import { useSyncStore } from '../../stores/syncStore';
 import { createNewChordChart } from '../../utils/chordCreation';
 import type { SyncResult } from '../../types/sync';
@@ -134,7 +134,7 @@ describe('useChartSync', () => {
       isAuthenticated: vi.fn().mockReturnValue(false)
     });
     
-    vi.mocked(useChordChartStore).mockReturnValue(mockChordChartStore);
+    vi.mocked(useChartManagement).mockReturnValue(mockChordChartStore);
     vi.mocked(useSyncStore).mockReturnValue(mockSyncStore as ReturnType<typeof useSyncStore>);
   });
 
