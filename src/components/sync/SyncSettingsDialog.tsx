@@ -51,6 +51,7 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
   const handleSignIn = async () => {
     try {
       setAuthError(null);
+      await authProvider.initialize();
       await authProvider.authenticate();
       setUserEmail('user@example.com');
       setIsAuthenticated(true);

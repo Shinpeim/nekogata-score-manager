@@ -18,6 +18,7 @@ const mockAuthProvider = {
   isAuthenticated: vi.fn(),
   authenticate: vi.fn(),
   signOut: vi.fn(),
+  initialize: vi.fn(),
 };
 
 describe('SyncSettingsDialog', () => {
@@ -212,7 +213,7 @@ describe('SyncSettingsDialog', () => {
   });
 
   it('認証エラーが発生した場合にエラーメッセージが表示される', async () => {
-    mockAuthProvider.authenticate.mockRejectedValue(new Error('認証エラー'));
+    mockAuthProvider.initialize.mockRejectedValue(new Error('認証エラー'));
     
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
