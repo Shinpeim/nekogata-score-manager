@@ -199,8 +199,8 @@ describe('Header', () => {
       
       expect(buttons).toBeDefined();
       if (buttons) {
-        const syncIndex = Array.from(buttons).indexOf(syncButton);
-        const wakeLockIndex = Array.from(buttons).indexOf(wakeLockButton);
+        const syncIndex = Array.from(buttons).indexOf(syncButton as HTMLButtonElement);
+        const wakeLockIndex = Array.from(buttons).indexOf(wakeLockButton as HTMLButtonElement);
         expect(syncIndex).toBeLessThan(wakeLockIndex);
       }
     });
