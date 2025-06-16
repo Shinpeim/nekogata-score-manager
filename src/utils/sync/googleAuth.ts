@@ -125,6 +125,30 @@ export class GoogleAuthProvider {
   getAccessToken(): string | null {
     return this.accessToken;
   }
+
+  async getUserEmail(): Promise<string | null> {
+    if (!this.accessToken) {
+      return null;
+    }
+
+    try {
+      const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch user info');
+      }
+
+      const userInfo = await response.json();
+      return userInfo.email || null;
+    } catch (error) {
+      console.error('Error fetching user email:', error);
+      return null;
+    }
+  }
   
   private saveTokenToStorage(token: string): void {
     sessionStorage.setItem('nekogata-google-token', token);
