@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import type { ChordSection, Chord } from '../types';
-import { isLineBreakMarker } from '../utils/lineBreakHelpers';
 import { isValidChordProgression } from '../utils/chordCopyPaste';
 import {
   DndContext,
@@ -74,7 +73,7 @@ const SectionCard: React.FC<SectionCardProps> = ({
   const getSectionChordIds = () => {
     const sectionChordIds = [];
     for (let i = 0; i < section.chords.length; i++) {
-      if (!isLineBreakMarker(section.chords[i])) {
+      if (section.chords[i].isLineBreak !== true) {
         sectionChordIds.push(`${section.id}-${i}`);
       }
     }

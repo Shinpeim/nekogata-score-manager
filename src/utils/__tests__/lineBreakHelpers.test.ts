@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { 
   createLineBreakMarker, 
-  isLineBreakMarker, 
   filterNormalChords, 
   splitChordsIntoRows 
 } from '../lineBreakHelpers';
@@ -24,14 +23,14 @@ describe('lineBreakHelpers', () => {
       const lineBreak = createLineBreakMarker();
       const normalChord: Chord = { name: 'C', root: 'C', duration: 4, memo: '' };
       
-      expect(isLineBreakMarker(lineBreak)).toBe(true);
-      expect(isLineBreakMarker(normalChord)).toBe(false);
+      expect(lineBreak.isLineBreak === true).toBe(true);
+      expect(normalChord.isLineBreak === true).toBe(false);
     });
 
     it('isLineBreakが未定義のコードを通常コードとして判定する', () => {
       const chord: Chord = { name: 'Am', root: 'A', duration: 2, memo: '' };
       
-      expect(isLineBreakMarker(chord)).toBe(false);
+      expect(chord.isLineBreak === true).toBe(false);
     });
   });
 

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import type { Chord } from '../types';
-import { isLineBreakMarker } from '../utils/lineBreakHelpers';
 import { isValidFullChordName, isValidDuration } from '../utils/chordValidation';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -170,20 +169,20 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
       ref={setNodeRef}
       style={style}
       className={`p-2 border rounded-md ${
-        isLineBreakMarker(chord) 
+        chord.isLineBreak === true 
           ? 'border-orange-300 bg-orange-50' 
           : isSelected 
             ? 'border-[#85B0B7] bg-[#85B0B7]/10'
             : 'border-slate-200'
       } ${isDragging ? 'shadow-lg' : ''} ${
-        !isLineBreakMarker(chord) ? 'cursor-pointer hover:border-[#85B0B7]/50' : ''
+        chord.isLineBreak !== true ? 'cursor-pointer hover:border-[#85B0B7]/50' : ''
       }`}
       onClick={(e) => {
         if (e.target instanceof HTMLInputElement || e.target instanceof HTMLButtonElement) {
           return;
         }
         
-        if (!isLineBreakMarker(chord) && onToggleSelection) {
+        if (chord.isLineBreak !== true && onToggleSelection) {
           onToggleSelection(sectionId, chordIndex, e);
         }
       }}
@@ -204,7 +203,7 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
               ✓
             </span>
           )}
-          {!isLineBreakMarker(chord) && (
+          {chord.isLineBreak !== true && (
             <button
               onClick={() => onInsertLineBreak(sectionId, chordIndex)}
               className="text-orange-600 hover:text-orange-800 text-xs"
@@ -222,7 +221,7 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
         </div>
       </div>
       
-      {isLineBreakMarker(chord) ? (
+      {chord.isLineBreak === true ? (
         <div className="text-center py-2">
           <span className="text-orange-600 font-medium text-sm">改行</span>
           <div className="text-xs text-orange-500 mt-1">ここで行が変わります</div>

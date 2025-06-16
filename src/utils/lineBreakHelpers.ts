@@ -13,18 +13,12 @@ export function createLineBreakMarker(): Chord {
   };
 }
 
-/**
- * コードが改行マーカーかどうかを判定する
- */
-export function isLineBreakMarker(chord: Chord): boolean {
-  return chord.isLineBreak === true;
-}
 
 /**
  * 改行マーカーではない通常のコードのみを抽出する
  */
 export function filterNormalChords(chords: Chord[]): Chord[] {
-  return chords.filter(chord => !isLineBreakMarker(chord));
+  return chords.filter(chord => chord.isLineBreak !== true);
 }
 
 /**
@@ -37,7 +31,7 @@ export function splitChordsIntoRows(chords: Chord[], barsPerRow: number, beatsPe
   let currentRowBars = 0;
 
   for (const chord of chords) {
-    if (isLineBreakMarker(chord)) {
+    if (chord.isLineBreak === true) {
       // 改行マーカーに出会ったら現在の行を終了
       if (currentRow.length > 0) {
         rows.push([...currentRow]);

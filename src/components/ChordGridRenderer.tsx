@@ -1,7 +1,7 @@
 import React from 'react';
 import type { ChordSection, Chord } from '../types';
 import { useResponsiveBars } from '../hooks/useResponsiveBars';
-import { splitChordsIntoRows, isLineBreakMarker } from '../utils/lineBreakHelpers';
+import { splitChordsIntoRows } from '../utils/lineBreakHelpers';
 
 interface ChordGridRendererProps {
   section: ChordSection;
@@ -22,7 +22,7 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({ section, timeSign
     let currentBeats = 0;
     
     for (const chord of rowChords) {
-      if (isLineBreakMarker(chord)) continue;
+      if (chord.isLineBreak === true) continue;
       
       const chordDuration = chord.duration || 4;
       
