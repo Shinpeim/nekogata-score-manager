@@ -64,6 +64,7 @@
 
 ### 🎯 現在の状況（2024-12-16時点）
 - ✅ **PR#88**: chordChartStore分離完了（ストア責務分離）
-- ✅ **ストア間連携**: syncStore-chordChartStore連携実装完了
+- ✅ **PR#89**: syncStore-chordChartStore連携実装完了
+- ✅ **chordChartStoreリファクタリング**: 338行ストアを3ストアに分離（chartDataStore、chartCrudStore、useChartManagement統合フック）
 - 🔄 **次期作業**: UI統合（Header/MainLayout）・初期化処理・認証フロー
-- 📋 **進捗**: 同期機能の基盤・ロジック・ストア連携完了。残りUI統合のみ
+- 📋 **進捗**: 同期機能の基盤・ロジック・ストア連携・肥大化ストア分離完了。残りUI統合のみ
