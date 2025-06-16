@@ -12,11 +12,31 @@ vi.mock('../../hooks/useWakeLock', () => ({
   }),
 }));
 
+// useHiddenFeaturesフックのモック
+const mockHiddenFeatures = {
+  syncSettings: false,
+};
+vi.mock('../../hooks/useHiddenFeatures', () => ({
+  useHiddenFeatures: () => mockHiddenFeatures,
+}));
+
+// SyncSettingsDialogコンポーネントのモック
+vi.mock('../../components/sync/SyncSettingsDialog', () => ({
+  SyncSettingsDialog: ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => (
+    isOpen ? (
+      <div data-testid="sync-settings-dialog">
+        <button onClick={onClose}>Close Dialog</button>
+      </div>
+    ) : null
+  ),
+}));
+
 describe('Header', () => {
   const mockSetExplorerOpen = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockHiddenFeatures.syncSettings = false;
   });
 
   afterEach(() => {
@@ -100,6 +120,89 @@ describe('Header', () => {
       // デフォルトのモックではサポートされている
       expect(screen.getByTitle('スリープ防止を有効にする')).toBeInTheDocument();
       expect(screen.getByText('スリープ防止')).toBeInTheDocument();
+    });
+  });
+
+  describe('Sync Settings Feature', () => {
+    it('同期設定機能が無効の場合は同期設定ボタンが表示されない', () => {
+      mockHiddenFeatures.syncSettings = false;
+      
+      render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+      
+      expect(screen.queryByTitle('Google Drive同期設定')).not.toBeInTheDocument();
+    });
+
+    it('同期設定機能が有効の場合は同期設定ボタンが表示される', () => {
+      mockHiddenFeatures.syncSettings = true;
+      
+      render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+      
+      expect(screen.getByTitle('Google Drive同期設定')).toBeInTheDocument();
+      expect(screen.getByText('同期設定')).toBeInTheDocument();
+    });
+
+    it('同期設定ボタンをクリックするとダイアログが開く', () => {
+      mockHiddenFeatures.syncSettings = true;
+      
+      render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+      
+      const syncButton = screen.getByTitle('Google Drive同期設定');
+      fireEvent.click(syncButton);
+      
+      expect(screen.getByTestId('sync-settings-dialog')).toBeInTheDocument();
+    });
+
+    it('ダイアログの閉じるボタンをクリックするとダイアログが閉じる', () => {
+      mockHiddenFeatures.syncSettings = true;
+      
+      render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+      
+      // ダイアログを開く
+      const syncButton = screen.getByTitle('Google Drive同期設定');
+      fireEvent.click(syncButton);
+      
+      expect(screen.getByTestId('sync-settings-dialog')).toBeInTheDocument();
+      
+      // ダイアログを閉じる
+      const closeButton = screen.getByText('Close Dialog');
+      fireEvent.click(closeButton);
+      
+      expect(screen.queryByTestId('sync-settings-dialog')).not.toBeInTheDocument();
+    });
+
+    it('同期設定ボタンのアイコンとテキストが正しく表示される', () => {
+      mockHiddenFeatures.syncSettings = true;
+      
+      render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+      
+      const syncButton = screen.getByTitle('Google Drive同期設定');
+      
+      // ボタン内にSVGアイコンが存在することを確認
+      const svgIcon = syncButton.querySelector('svg');
+      expect(svgIcon).toBeInTheDocument();
+      
+      // テキストが正しく表示されることを確認
+      expect(screen.getByText('同期設定')).toBeInTheDocument();
+    });
+
+    it('同期設定ボタンが正しい位置に配置される', () => {
+      mockHiddenFeatures.syncSettings = true;
+      
+      render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+      
+      const syncButton = screen.getByTitle('Google Drive同期設定');
+      const wakeLockButton = screen.getByTitle('スリープ防止を有効にする');
+      
+      // 同期設定ボタンがウェイクロックボタンの前にある（DOM順序的に）
+      const header = syncButton.closest('header');
+      const buttons = header?.querySelectorAll('button');
+      
+      expect(buttons).toBeDefined();
+      if (buttons) {
+        const syncIndex = Array.from(buttons).indexOf(syncButton as HTMLButtonElement);
+        const wakeLockIndex = Array.from(buttons).indexOf(wakeLockButton as HTMLButtonElement);
+        expect(syncIndex).toBeLessThan(wakeLockIndex);
+      }
     });
   });
 });
