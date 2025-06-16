@@ -4,6 +4,7 @@ import ChordChart from './components/ChordChart';
 import ChordChartForm from './components/ChordChartForm';
 import ImportDialog from './components/ImportDialog';
 import { useChartManagement } from './hooks/useChartManagement';
+import { useChartSync } from './hooks/useChartSync';
 import type { ChordChart as ChordChartType } from './types';
 
 function App() {
@@ -19,6 +20,9 @@ function App() {
     clearError,
     createNewChart
   } = useChartManagement();
+
+  // 同期機能を有効化（自動的に初期化される）
+  useChartSync();
 
   useEffect(() => {
     loadInitialData().catch(error => {
