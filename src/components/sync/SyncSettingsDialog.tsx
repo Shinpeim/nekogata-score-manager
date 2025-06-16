@@ -29,17 +29,33 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
       setConfig(currentConfig);
       
       const authStatus = authProvider.isAuthenticated();
-      setIsAuthenticated(authStatus);
       
       if (authStatus) {
-        const email = await authProvider.getUserEmail();
-        setUserEmail(email || 'ユーザー情報取得失敗');
+        const isValidToken = await authProvider.validateToken();
+        if (isValidToken) {
+          try {
+            const email = await authProvider.getUserEmail();
+            setUserEmail(email || 'メールアドレス未取得');
+            setIsAuthenticated(true);
+          } catch (error) {
+            setUserEmail('ユーザー情報取得失敗');
+            setIsAuthenticated(false);
+            setAuthError(error instanceof Error ? error.message : 'ユーザー情報の取得に失敗しました');
+          }
+        } else {
+          setIsAuthenticated(false);
+          setUserEmail(null);
+        }
+      } else {
+        setIsAuthenticated(false);
+        setUserEmail(null);
       }
       
       const lastSync = syncManager.getLastSyncTimeAsDate();
       setLastSyncTime(lastSync);
     } catch (error) {
       console.error('設定読み込みエラー:', error);
+      setAuthError(error instanceof Error ? error.message : '設定の読み込みに失敗しました');
     }
   }, [syncManager, authProvider]);
 

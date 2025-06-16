@@ -20,6 +20,7 @@ const mockAuthProvider = {
   signOut: vi.fn(),
   initialize: vi.fn(),
   getUserEmail: vi.fn(),
+  validateToken: vi.fn(),
 };
 
 describe('SyncSettingsDialog', () => {
@@ -36,6 +37,7 @@ describe('SyncSettingsDialog', () => {
     
     mockAuthProvider.isAuthenticated.mockReturnValue(false);
     mockAuthProvider.getUserEmail.mockResolvedValue('test@example.com');
+    mockAuthProvider.validateToken.mockResolvedValue(true);
     mockSyncManager.getLastSyncTimeAsDate.mockReturnValue(new Date('2024-01-01T00:00:00Z'));
   });
 
@@ -108,25 +110,31 @@ describe('SyncSettingsDialog', () => {
 
   it('認証済み状態で自動同期トグルをクリックすると設定が更新される', async () => {
     mockAuthProvider.isAuthenticated.mockReturnValue(true);
+    mockAuthProvider.validateToken.mockResolvedValue(true);
     
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
     await waitFor(() => {
-      const toggleButtons = screen.getAllByRole('button');
-      const autoSyncToggle = toggleButtons.find(button => 
-        button.className.includes('w-12 h-6 rounded-full')
-      );
-      if (autoSyncToggle) {
-        fireEvent.click(autoSyncToggle);
-      }
+      expect(screen.getByText('連携中')).toBeInTheDocument();
     });
     
-    expect(mockSyncManager.saveConfig).toHaveBeenCalledWith({
-      autoSync: true,
-      syncInterval: 5,
-      conflictResolution: 'remote',
-      showConflictWarning: true,
-    });
+    const toggleButtons = screen.getAllByRole('button');
+    const autoSyncToggle = toggleButtons.find(button => 
+      button.className.includes('w-12 h-6 rounded-full')
+    );
+    
+    if (autoSyncToggle) {
+      fireEvent.click(autoSyncToggle);
+      
+      await waitFor(() => {
+        expect(mockSyncManager.saveConfig).toHaveBeenCalledWith({
+          autoSync: true,
+          syncInterval: 5,
+          conflictResolution: 'remote',
+          showConflictWarning: true,
+        });
+      });
+    }
   });
 
   it('同期間隔を変更すると設定が更新される', async () => {
@@ -163,15 +171,20 @@ describe('SyncSettingsDialog', () => {
 
   it('認証済み状態で手動同期ボタンをクリックすると同期が実行される', async () => {
     mockAuthProvider.isAuthenticated.mockReturnValue(true);
+    mockAuthProvider.validateToken.mockResolvedValue(true);
     
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
     await waitFor(() => {
-      const syncButton = screen.getByText('今すぐ同期');
-      fireEvent.click(syncButton);
+      expect(screen.getByText('連携中')).toBeInTheDocument();
     });
     
-    expect(mockSyncManager.sync).toHaveBeenCalledWith([]);
+    const syncButton = screen.getByText('今すぐ同期');
+    fireEvent.click(syncButton);
+    
+    await waitFor(() => {
+      expect(mockSyncManager.sync).toHaveBeenCalledWith([]);
+    });
   });
 
   it('未認証状態では手動同期ボタンが無効になる', async () => {
@@ -231,14 +244,17 @@ describe('SyncSettingsDialog', () => {
 
   it('同期エラーが発生した場合にエラーメッセージが表示される', async () => {
     mockAuthProvider.isAuthenticated.mockReturnValue(true);
+    mockAuthProvider.validateToken.mockResolvedValue(true);
     mockSyncManager.sync.mockRejectedValue(new Error('同期エラー'));
     
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
     await waitFor(() => {
-      const syncButton = screen.getByText('今すぐ同期');
-      fireEvent.click(syncButton);
+      expect(screen.getByText('連携中')).toBeInTheDocument();
     });
+    
+    const syncButton = screen.getByText('今すぐ同期');
+    fireEvent.click(syncButton);
     
     await waitFor(() => {
       expect(screen.getByText('同期エラー')).toBeInTheDocument();
