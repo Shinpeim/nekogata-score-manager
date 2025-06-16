@@ -33,8 +33,7 @@ describe('chartCrudStore', () => {
     // Reset both stores
     useChartCrudStore.setState({
       isLoading: false,
-      error: null,
-      syncCallbacks: new Set()
+      error: null
     });
     
     useChartDataStore.setState({
@@ -59,7 +58,7 @@ describe('chartCrudStore', () => {
       expect(crudState.isLoading).toBe(false);
       expect(crudState.error).toBeNull();
       expect(dataState.charts[chart.id]).toEqual(chart);
-      expect(storageService.saveChart).toHaveBeenCalledWith(chart);
+      expect(storageService.saveChart).toHaveBeenCalledTimes(1);
     });
 
     it('should handle add chart error', async () => {

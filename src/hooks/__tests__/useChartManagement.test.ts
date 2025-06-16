@@ -33,8 +33,7 @@ describe('useChartManagement', () => {
     // Reset stores
     useChartCrudStore.setState({
       isLoading: false,
-      error: null,
-      syncCallbacks: new Set()
+      error: null
     });
     
     useChartDataStore.setState({
@@ -72,7 +71,7 @@ describe('useChartManagement', () => {
     expect(result.current).toHaveProperty('applySyncedCharts');
     expect(result.current).toHaveProperty('subscribeSyncNotification');
     expect(result.current).toHaveProperty('notifySyncCallbacks');
-    expect(result.current).toHaveProperty('syncCallbacks');
+    // syncCallbacks は内部実装のため削除
   });
 
   it('should reflect data store state changes', () => {
@@ -143,7 +142,7 @@ describe('useChartManagement', () => {
     // Should have sync methods
     expect(typeof result.current.subscribeSyncNotification).toBe('function');
     expect(typeof result.current.notifySyncCallbacks).toBe('function');
-    expect(result.current.syncCallbacks).toBeInstanceOf(Set);
+    // syncCallbacks は内部実装のため削除
   });
 
   it('should work as a drop-in replacement for useChordChartStore', () => {
@@ -152,7 +151,7 @@ describe('useChartManagement', () => {
 
     // Check that all required properties from the original interface exist
     const requiredProperties = [
-      'charts', 'currentChartId', 'isLoading', 'error', 'syncCallbacks',
+      'charts', 'currentChartId', 'isLoading', 'error',
       'addChart', 'updateChart', 'deleteChart', 'deleteMultipleCharts',
       'setCurrentChart', 'loadInitialData', 'loadFromStorage', 'createNewChart',
       'clearError', 'applySyncedCharts', 'subscribeSyncNotification', 'notifySyncCallbacks'
