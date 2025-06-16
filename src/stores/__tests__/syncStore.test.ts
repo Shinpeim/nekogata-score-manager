@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { useSyncStore } from '../syncStore';
 import { SyncManager } from '../../utils/sync/syncManager';
-import type { SyncResult, SyncConflict } from '../../types/sync';
+import type { ChordChart } from '../../types';
+import type { SyncResult } from '../../types/sync';
 
 // SyncManagerのモック
 vi.mock('../../utils/sync/syncManager', () => ({
@@ -236,9 +237,31 @@ describe('syncStore', () => {
   });
 
   describe('sync', () => {
-    const mockCharts = [
-      { id: 'chart1', title: 'Test Chart 1', artist: 'Artist 1' },
-      { id: 'chart2', title: 'Test Chart 2', artist: 'Artist 2' }
+    const mockCharts: ChordChart[] = [
+      {
+        id: 'chart1',
+        title: 'Test Chart 1',
+        artist: 'Artist 1',
+        key: 'C',
+        timeSignature: '4/4',
+        sections: [],
+        tags: [],
+        notes: '',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 'chart2',
+        title: 'Test Chart 2',
+        artist: 'Artist 2',
+        key: 'G',
+        timeSignature: '4/4',
+        sections: [],
+        tags: [],
+        notes: '',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
     ];
 
     beforeEach(async () => {
