@@ -22,8 +22,8 @@ const mockAuthProvider = {
 
 describe('SyncSettingsDialog', () => {
   beforeEach(() => {
-    vi.mocked(SyncManager.getInstance).mockReturnValue(mockSyncManager as any);
-    vi.mocked(GoogleAuthProvider.getInstance).mockReturnValue(mockAuthProvider as any);
+    vi.mocked(SyncManager.getInstance).mockReturnValue(mockSyncManager as unknown as SyncManager);
+    vi.mocked(GoogleAuthProvider.getInstance).mockReturnValue(mockAuthProvider as unknown as GoogleAuthProvider);
     
     mockSyncManager.getConfig.mockReturnValue({
       autoSync: false,
