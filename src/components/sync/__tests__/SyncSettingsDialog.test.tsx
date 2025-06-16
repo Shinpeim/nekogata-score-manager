@@ -19,6 +19,7 @@ const mockAuthProvider = {
   authenticate: vi.fn(),
   signOut: vi.fn(),
   initialize: vi.fn(),
+  getUserEmail: vi.fn(),
 };
 
 describe('SyncSettingsDialog', () => {
@@ -34,6 +35,7 @@ describe('SyncSettingsDialog', () => {
     });
     
     mockAuthProvider.isAuthenticated.mockReturnValue(false);
+    mockAuthProvider.getUserEmail.mockResolvedValue('test@example.com');
     mockSyncManager.getLastSyncTimeAsDate.mockReturnValue(new Date('2024-01-01T00:00:00Z'));
   });
 
@@ -75,7 +77,7 @@ describe('SyncSettingsDialog', () => {
     
     await waitFor(() => {
       expect(screen.getByText('連携中')).toBeInTheDocument();
-      expect(screen.getByText('user@example.com')).toBeInTheDocument();
+      expect(screen.getByText('test@example.com')).toBeInTheDocument();
       expect(screen.getByText('サインアウト')).toBeInTheDocument();
     });
   });

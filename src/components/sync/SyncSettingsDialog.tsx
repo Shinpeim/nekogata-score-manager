@@ -32,7 +32,8 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
       setIsAuthenticated(authStatus);
       
       if (authStatus) {
-        setUserEmail('user@example.com');
+        const email = await authProvider.getUserEmail();
+        setUserEmail(email || 'ユーザー情報取得失敗');
       }
       
       const lastSync = syncManager.getLastSyncTimeAsDate();
@@ -53,7 +54,9 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
       setAuthError(null);
       await authProvider.initialize();
       await authProvider.authenticate();
-      setUserEmail('user@example.com');
+      
+      const email = await authProvider.getUserEmail();
+      setUserEmail(email || 'ユーザー情報取得失敗');
       setIsAuthenticated(true);
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : '認証に失敗しました');
