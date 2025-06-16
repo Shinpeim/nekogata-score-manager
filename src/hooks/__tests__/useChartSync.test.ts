@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { useChartSync } from '../useChartSync';
 import { useChordChartStore } from '../../stores/chordChartStore';
 import { useSyncStore } from '../../stores/syncStore';
 import { createNewChordChart } from '../../utils/chordCreation';
-import type { SyncResult, SyncConflict } from '../../types/sync';
+import type { SyncResult } from '../../types/sync';
 
 // Mock stores
 vi.mock('../../stores/chordChartStore');
@@ -20,7 +20,35 @@ vi.mock('localforage', () => ({
   }
 }));
 
-const mockChordChartStore = {
+interface MockChordChartStore {
+  charts: Record<string, unknown>;
+  currentChartId: string | null;
+  isLoading: boolean;
+  error: string | null;
+  syncCallbacks: Set<unknown>;
+  subscribeSyncNotification: ReturnType<typeof vi.fn>;
+  applySyncedCharts: ReturnType<typeof vi.fn>;
+}
+
+interface MockSyncStore {
+  isSyncing: boolean;
+  lastSyncTime: Date | null;
+  syncError: string | null;
+  syncConfig: {
+    autoSync: boolean;
+    syncInterval: number;
+    conflictResolution: string;
+    showConflictWarning: boolean;
+  };
+  sync: ReturnType<typeof vi.fn>;
+  authenticate: ReturnType<typeof vi.fn>;
+  signOut: ReturnType<typeof vi.fn>;
+  updateSyncConfig: ReturnType<typeof vi.fn>;
+  clearSyncError: ReturnType<typeof vi.fn>;
+  isAuthenticated: ReturnType<typeof vi.fn>;
+}
+
+const mockChordChartStore: MockChordChartStore = {
   charts: {},
   currentChartId: null,
   isLoading: false,
@@ -30,7 +58,7 @@ const mockChordChartStore = {
   applySyncedCharts: vi.fn()
 };
 
-const mockSyncStore = {
+const mockSyncStore: MockSyncStore = {
   isSyncing: false,
   lastSyncTime: null,
   syncError: null,
@@ -98,8 +126,8 @@ describe('useChartSync', () => {
       isAuthenticated: vi.fn().mockReturnValue(false)
     });
     
-    vi.mocked(useChordChartStore).mockReturnValue(mockChordChartStore as any);
-    vi.mocked(useSyncStore).mockReturnValue(mockSyncStore as any);
+    vi.mocked(useChordChartStore).mockReturnValue(mockChordChartStore as ReturnType<typeof useChordChartStore>);
+    vi.mocked(useSyncStore).mockReturnValue(mockSyncStore as ReturnType<typeof useSyncStore>);
   });
 
   afterEach(() => {
@@ -282,7 +310,7 @@ describe('useChartSync', () => {
 
     it('should trigger sync when charts change', async () => {
       const chart1 = createNewChordChart({ title: 'Chart 1' });
-      let changeCallback: (charts: any[]) => void = () => {};
+      let changeCallback: (charts: unknown[]) => void = () => {};
 
       mockChordChartStore.subscribeSyncNotification.mockImplementation((callback) => {
         changeCallback = callback;
@@ -305,7 +333,7 @@ describe('useChartSync', () => {
 
     it('should not trigger sync when already syncing', async () => {
       const chart1 = createNewChordChart({ title: 'Chart 1' });
-      let changeCallback: (charts: any[]) => void = () => {};
+      let changeCallback: (charts: unknown[]) => void = () => {};
 
       mockChordChartStore.subscribeSyncNotification.mockImplementation((callback) => {
         changeCallback = callback;
@@ -327,7 +355,7 @@ describe('useChartSync', () => {
 
     it('should handle auto sync errors silently', async () => {
       const chart1 = createNewChordChart({ title: 'Chart 1' });
-      let changeCallback: (charts: any[]) => void = () => {};
+      let changeCallback: (charts: unknown[]) => void = () => {};
 
       mockChordChartStore.subscribeSyncNotification.mockImplementation((callback) => {
         changeCallback = callback;

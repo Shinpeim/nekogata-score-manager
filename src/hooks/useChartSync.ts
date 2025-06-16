@@ -32,7 +32,10 @@ export const useChartSync = () => {
 
   // 自動同期の設定
   useEffect(() => {
-    if (!syncStore.syncConfig.autoSync || !syncStore.isAuthenticated()) {
+    const isAutoSyncEnabled = syncStore.syncConfig.autoSync;
+    const isAuthenticated = syncStore.isAuthenticated();
+    
+    if (!isAutoSyncEnabled || !isAuthenticated) {
       return;
     }
 
@@ -52,7 +55,6 @@ export const useChartSync = () => {
     return unsubscribe;
   }, [
     syncStore.syncConfig.autoSync, 
-    syncStore.isAuthenticated(), 
     syncStore.isSyncing,
     chordChartStore,
     syncStore
@@ -60,7 +62,10 @@ export const useChartSync = () => {
 
   // 定期同期タイマー
   useEffect(() => {
-    if (!syncStore.syncConfig.autoSync || !syncStore.isAuthenticated()) {
+    const isAutoSyncEnabled = syncStore.syncConfig.autoSync;
+    const isAuthenticated = syncStore.isAuthenticated();
+    
+    if (!isAutoSyncEnabled || !isAuthenticated) {
       return;
     }
 
@@ -84,7 +89,6 @@ export const useChartSync = () => {
   }, [
     syncStore.syncConfig.autoSync,
     syncStore.syncConfig.syncInterval,
-    syncStore.isAuthenticated(),
     syncStore.isSyncing,
     chordChartStore,
     syncStore
