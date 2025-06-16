@@ -18,6 +18,7 @@ export interface SyncResult {
   success: boolean;
   conflicts: SyncConflict[];
   syncedCharts: string[];
+  mergedCharts?: ChordChart[];
   errors: SyncError[];
 }
 

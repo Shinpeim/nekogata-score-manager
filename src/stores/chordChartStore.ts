@@ -10,6 +10,9 @@ interface ChordChartState {
   currentChartId: string | null;
   isLoading: boolean;
   error: string | null;
+  
+  // 同期関連
+  syncCallbacks: Set<(charts: ChordChart[]) => void>;
     
   // アクション
   addChart: (chart: ChordChart) => Promise<void>;
@@ -21,6 +24,11 @@ interface ChordChartState {
   loadFromStorage: () => Promise<void>;
   createNewChart: (chartData: Partial<ChordChart>) => Promise<ChordChart>;
   clearError: () => void;
+  
+  // 同期メソッド
+  applySyncedCharts: (mergedCharts: ChordChart[]) => Promise<void>;
+  subscribeSyncNotification: (callback: (charts: ChordChart[]) => void) => () => void;
+  notifySyncCallbacks: () => void;
 }
 
 export const useChordChartStore = create<ChordChartState>()(
@@ -31,6 +39,7 @@ export const useChordChartStore = create<ChordChartState>()(
       currentChartId: null,
       isLoading: false,
       error: null,
+      syncCallbacks: new Set(),
       
       // アクション
       addChart: async (chart) => {
@@ -48,6 +57,9 @@ export const useChordChartStore = create<ChordChartState>()(
             },
             isLoading: false
           }), false, 'addChart');
+          
+          // 同期コールバックを通知
+          get().notifySyncCallbacks();
         } catch (error) {
           set({ 
             isLoading: false, 
@@ -84,6 +96,9 @@ export const useChordChartStore = create<ChordChartState>()(
           
           // ストレージに保存
           await storageService.saveChart(updatedChart);
+          
+          // 同期コールバックを通知
+          get().notifySyncCallbacks();
         } catch (error) {
           set({ 
             isLoading: false, 
@@ -110,6 +125,9 @@ export const useChordChartStore = create<ChordChartState>()(
           
           // ストレージから削除
           await storageService.deleteChart(id);
+          
+          // 同期コールバックを通知
+          get().notifySyncCallbacks();
         } catch (error) {
           set({ 
             isLoading: false, 
@@ -202,6 +220,9 @@ export const useChordChartStore = create<ChordChartState>()(
           // ストレージに保存
           await storageService.saveChart(newChart);
           
+          // 同期コールバックを通知
+          get().notifySyncCallbacks();
+          
           return newChart;
         } catch (error) {
           set({ 
@@ -237,6 +258,9 @@ export const useChordChartStore = create<ChordChartState>()(
           
           // ストレージから削除（競合を避けるため一度に削除）
           await storageService.deleteMultipleCharts(ids);
+          
+          // 同期コールバックを通知
+          get().notifySyncCallbacks();
         } catch (error) {
           set({ 
             isLoading: false, 
@@ -248,6 +272,63 @@ export const useChordChartStore = create<ChordChartState>()(
 
       clearError: () => {
         set({ error: null }, false, 'clearError');
+      },
+
+      // 同期メソッド
+      applySyncedCharts: async (mergedCharts) => {
+        try {
+          set({ isLoading: true, error: null });
+          
+          // チャート配列をライブラリ形式に変換
+          const chartsLibrary: ChordLibrary = {};
+          mergedCharts.forEach(chart => {
+            chartsLibrary[chart.id] = chart;
+          });
+          
+          // 現在選択中のチャートが削除されていないかチェック
+          const { currentChartId } = get();
+          const newCurrentChartId = currentChartId && chartsLibrary[currentChartId] 
+            ? currentChartId 
+            : (Object.keys(chartsLibrary)[0] || null);
+          
+          // ローカル状態を更新
+          set({
+            charts: chartsLibrary,
+            currentChartId: newCurrentChartId,
+            isLoading: false
+          }, false, 'applySyncedCharts');
+          
+          // ストレージに保存
+          await storageService.saveCharts(chartsLibrary);
+        } catch (error) {
+          set({ 
+            isLoading: false, 
+            error: error instanceof Error ? error.message : '同期データの適用に失敗しました' 
+          });
+          throw error;
+        }
+      },
+
+      subscribeSyncNotification: (callback) => {
+        const { syncCallbacks } = get();
+        syncCallbacks.add(callback);
+        
+        // アンサブスクライブ関数を返す
+        return () => {
+          syncCallbacks.delete(callback);
+        };
+      },
+
+      notifySyncCallbacks: () => {
+        const { charts, syncCallbacks } = get();
+        const chartArray = Object.values(charts);
+        syncCallbacks.forEach(callback => {
+          try {
+            callback(chartArray);
+          } catch (error) {
+            console.error('同期コールバック実行エラー:', error);
+          }
+        });
       }
     }),
     {

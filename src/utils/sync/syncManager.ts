@@ -84,6 +84,7 @@ export class SyncManager {
       
       result.success = true;
       result.syncedCharts = mergedCharts.map(c => c.id);
+      result.mergedCharts = mergedCharts;
       
       // 最終同期時刻を更新
       this.updateLastSyncTime();
