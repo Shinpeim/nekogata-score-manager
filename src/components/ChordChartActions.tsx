@@ -9,8 +9,7 @@ interface ChordChartActionsProps {
 }
 
 const ChordChartActions: React.FC<ChordChartActionsProps> = ({ chart, currentChartId, onEdit }) => {
-  const deleteChart = useChordChartStore(state => state.deleteChart);
-  const addChart = useChordChartStore(state => state.addChart);
+  const { deleteChart, addChart } = useChordChartStore();
 
   const handleDelete = async () => {
     if (currentChartId && confirm('このコード譜を削除しますか？')) {

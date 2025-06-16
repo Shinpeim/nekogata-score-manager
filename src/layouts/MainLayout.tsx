@@ -25,12 +25,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [selectedChartIds, setSelectedChartIds] = useState<string[]>([]);
   
-  const chartsData = useChordChartStore(state => state.charts);
-  const currentChartId = useChordChartStore(state => state.currentChartId);
-  const setCurrentChart = useChordChartStore(state => state.setCurrentChart);
-  const createNewChart = useChordChartStore(state => state.createNewChart);
-  const loadFromStorage = useChordChartStore(state => state.loadFromStorage);
-  const deleteMultipleCharts = useChordChartStore(state => state.deleteMultipleCharts);
+  const {
+    charts: chartsData,
+    currentChartId,
+    setCurrentChart,
+    createNewChart,
+    loadFromStorage,
+    deleteMultipleCharts
+  } = useChordChartStore();
   
   const handleImportComplete = async () => {
     // Storage-first方式: インポート後にStorageから再読み込み
