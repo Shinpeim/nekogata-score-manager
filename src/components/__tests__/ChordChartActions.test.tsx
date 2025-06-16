@@ -8,7 +8,7 @@ const mockDeleteChart = vi.fn();
 const mockAddChart = vi.fn();
 
 vi.mock('../../hooks/useChartManagement', () => ({
-  useChordChartStore: () => ({
+  useChartManagement: () => ({
     deleteChart: mockDeleteChart,
     addChart: mockAddChart
   })

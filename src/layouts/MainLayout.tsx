@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { useChordChartStore } from '../hooks/useChartManagement';
+import { useChartManagement } from '../hooks/useChartManagement';
 import ChordChartForm from '../components/ChordChartForm';
 import ImportDialog from '../components/ImportDialog';
 import ExportDialog from '../components/ExportDialog';
@@ -32,7 +32,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
     createNewChart,
     loadFromStorage,
     deleteMultipleCharts
-  } = useChordChartStore();
+  } = useChartManagement();
   
   const handleImportComplete = async () => {
     // Storage-first方式: インポート後にStorageから再読み込み

@@ -1,10 +1,10 @@
 import { useEffect, useCallback } from 'react';
-import { useChordChartStore } from './useChartManagement';
+import { useChartManagement } from './useChartManagement';
 import { useSyncStore } from '../stores/syncStore';
 import type { SyncConflict } from '../types/sync';
 
 export const useChartSync = () => {
-  const chordChartStore = useChordChartStore();
+  const chordChartStore = useChartManagement();
   const syncStore = useSyncStore();
 
   // 手動同期実行

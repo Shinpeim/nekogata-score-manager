@@ -43,13 +43,6 @@ export const useChartManagement = () => {
   };
 };
 
-/**
- * 既存コンポーネント向けの互換レイヤー
- * 
- * 既存のuseChordChartStoreを使用しているコンポーネントが
- * 変更なしで動作するための互換インターフェース
- */
-export const useChordChartStore = useChartManagement;
 
 // 型定義も互換性のために提供
 export interface ChordChartState {

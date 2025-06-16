@@ -10,7 +10,7 @@ const mockDeleteMultipleCharts = vi.fn();
 const mockSetCurrentChart = vi.fn();
 
 vi.mock('../../hooks/useChartManagement', () => ({
-  useChordChartStore: () => ({
+  useChartManagement: () => ({
       charts: {
         'chart1': {
           id: 'chart1',

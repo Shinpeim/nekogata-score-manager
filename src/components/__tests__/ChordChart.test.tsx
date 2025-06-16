@@ -16,7 +16,7 @@ interface MockState {
 }
 
 vi.mock('../../hooks/useChartManagement', () => ({
-  useChordChartStore: vi.fn((selector?: (state: MockState) => unknown) => {
+  useChartManagement: vi.fn((selector?: (state: MockState) => unknown) => {
     const state = {
       charts: mockCharts,
       currentChartId: mockCurrentChartId,
