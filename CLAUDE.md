@@ -97,6 +97,8 @@ Chord: { name, root, base?, duration?, isLineBreak? }
 
 ## Code Organization Patterns
 
+`Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any` が出てしまなわいように、anyの利用は避ける
+
 ### Utility Function Structure
 When adding new utilities, follow the established patterns:
 - **Music-related constants**: Add to `musicConstants.ts`
