@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useWakeLock } from '../hooks/useWakeLock';
 import { useHiddenFeatures } from '../hooks/useHiddenFeatures';
 import { SyncSettingsDialog } from '../components/sync/SyncSettingsDialog';
+import { SyncStatusIndicator } from '../components/sync/SyncStatusIndicator';
 
 interface HeaderProps {
   explorerOpen: boolean;
@@ -36,6 +37,9 @@ const Header: React.FC<HeaderProps> = ({ explorerOpen, setExplorerOpen }) => {
           </button>
           <h1 className="text-xl font-semibold text-slate-900">Nekogata Score Manager</h1>
           <div className="flex-1"></div>
+          {syncSettings && (
+            <SyncStatusIndicator className="mr-4" />
+          )}
           {syncSettings && (
             <button
               onClick={() => setSyncSettingsOpen(true)}
