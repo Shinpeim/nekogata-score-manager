@@ -33,7 +33,7 @@ export class GoogleAuthProvider {
   private accessToken: string | null = null;
   
   private readonly CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
-  private readonly SCOPES = 'https://www.googleapis.com/auth/drive.file';
+  private readonly SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email';
   
   private constructor() {}
   
@@ -113,6 +113,34 @@ export class GoogleAuthProvider {
   isAuthenticated(): boolean {
     return !!this.accessToken;
   }
+
+  async validateToken(): Promise<boolean> {
+    if (!this.accessToken) {
+      return false;
+    }
+
+    try {
+      const response = await fetch('https://www.googleapis.com/oauth2/v1/tokeninfo', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        this.accessToken = null;
+        this.removeTokenFromStorage();
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Token validation failed:', error);
+      this.accessToken = null;
+      this.removeTokenFromStorage();
+      return false;
+    }
+  }
   
   signOut(): void {
     if (this.accessToken) {
@@ -139,14 +167,22 @@ export class GoogleAuthProvider {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch user info');
+        if (response.status === 401) {
+          this.accessToken = null;
+          this.removeTokenFromStorage();
+          throw new Error('認証が無効です。再度サインインしてください。');
+        }
+        throw new Error(`ユーザー情報の取得に失敗しました (${response.status})`);
       }
 
       const userInfo = await response.json();
       return userInfo.email || null;
     } catch (error) {
       console.error('Error fetching user email:', error);
-      return null;
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('ユーザー情報の取得中にエラーが発生しました');
     }
   }
   
