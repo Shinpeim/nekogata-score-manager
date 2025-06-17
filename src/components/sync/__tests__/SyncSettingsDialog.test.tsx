@@ -26,8 +26,8 @@ const mockAuthProvider = {
 
 const mockUseSyncStore = {
   isSyncing: false,
-  lastSyncTime: null,
-  syncError: null,
+  lastSyncTime: null as Date | null,
+  syncError: null as string | null,
   isAuthenticated: vi.fn(),
   authenticate: vi.fn(),
   signOut: vi.fn(),
