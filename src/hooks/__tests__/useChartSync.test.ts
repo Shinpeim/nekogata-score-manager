@@ -268,7 +268,7 @@ describe('useChartSync', () => {
         await expect(result.current.syncCharts()).rejects.toThrow('Network error');
       });
 
-      expect(consoleSpy).toHaveBeenCalledWith('チャート同期エラー:', syncError);
+      expect(consoleSpy).toHaveBeenCalledWith('[SYNC] useChartSync.syncCharts caught error:', syncError);
       expect(mockChordChartStore.applySyncedCharts).not.toHaveBeenCalled();
 
       consoleSpy.mockRestore();
