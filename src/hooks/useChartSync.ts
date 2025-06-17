@@ -44,7 +44,12 @@ export const useChartSync = () => {
       try {
         // 同期中でない場合のみ自動同期を実行
         if (!syncStore.isSyncing) {
-          await syncStore.sync(updatedCharts);
+          const result = await syncStore.sync(updatedCharts);
+          
+          // 成功時にマージ済みデータを適用
+          if (result.success && result.mergedCharts) {
+            await chordChartStore.applySyncedCharts(result.mergedCharts);
+          }
         }
       } catch (error) {
         console.error('自動同期エラー:', error);
