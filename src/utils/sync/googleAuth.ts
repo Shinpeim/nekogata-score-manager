@@ -34,7 +34,7 @@ export class GoogleAuthProvider {
   private isInitialized = false;
   
   private readonly CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
-  private readonly SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email';
+  private readonly SCOPES = 'https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/userinfo.email';
   
   private constructor() {}
   
