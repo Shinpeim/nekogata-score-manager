@@ -43,9 +43,12 @@ npx vitest run src/utils/__tests__/import.test.ts       # Example: run import te
 ## Architecture Overview
 
 ### State Management
-- **Zustand store** (`chordChartStore.ts`) as single source of truth
-- Automatic persistence to LocalForage with error handling
-- Store-first pattern: all data operations go through the store
+分離されたZustandストアによる責務別アーキテクチャ：
+- **chartDataStore**: データのみ管理（charts, currentChartId）
+- **chartCrudStore**: CRUD操作とLocalForage永続化 
+- **syncStore**: Google Drive同期機能専用
+- **統合フック**: `useChartManagement`で既存コンポーネントとの互換性維持
+- **サービス層**: 依存性注入によるビジネスロジック分離（chartCrudService）
 
 ### Component Architecture
 ```
@@ -58,12 +61,12 @@ MainLayout (orchestrates layout)
 ```
 
 ### Key Utilities Organization
-Post-refactoring structure (as of recent changes):
 - **Music Theory**: `musicConstants.ts`, `transpose.ts`, `chordParsing.ts`
 - **Data Management**: `storage.ts`, `migration.ts`, `chartMigration.ts`
 - **Validation**: `chordValidation.ts`
 - **Chart Operations**: `chordCreation.ts`, `export.ts`, `importFunctions.ts`
 - **UI Helpers**: `lineBreakHelpers.ts`, `chordCopyPaste.ts`
+- **Sync System**: `utils/sync/` (Google Drive同期、認証、デバイス管理)
 
 ### Data Models
 ```typescript
@@ -73,10 +76,9 @@ Chord: { name, root, base?, duration?, isLineBreak? }
 ```
 
 ### Custom Hooks Pattern
-- `useResponsiveBars`: Responsive layout calculations
-- `useChordOperations`: Chord manipulation logic  
-- `useSectionOperations`: Section management
-- `useWakeLock`: Screen wake lock for performance mode
+- **State Integration**: `useChartManagement` (統合フック), `useChartSync` (同期統合)
+- **UI Logic**: `useResponsiveBars` (レスポンシブ計算), `useWakeLock` (スクリーンロック)
+- **Chart Operations**: `useChordOperations` (コード操作), `useSectionOperations` (セクション管理)
 
 ## Development Workflow
 
