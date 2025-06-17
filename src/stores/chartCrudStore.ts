@@ -212,10 +212,14 @@ export const useChartCrudStore = create<ChartCrudState>()(
         try {
           set({ isLoading: true, error: null });
           
+          console.log(`[SYNC] Applying ${mergedCharts.length} synced charts to local storage`);
+          
           const dataStore = useChartDataStore.getState();
           
           // CRUDサービスで同期データ適用
           const chartsLibrary = await chartCrudService.applySyncedCharts(mergedCharts);
+          
+          console.log(`[SYNC] Successfully applied synced charts, total charts: ${Object.keys(chartsLibrary).length}`);
           
           // 現在選択中のチャートが削除されていないかチェック
           const { currentChartId } = dataStore;
@@ -227,8 +231,11 @@ export const useChartCrudStore = create<ChartCrudState>()(
           dataStore.setCharts(chartsLibrary);
           dataStore.setCurrentChart(newCurrentChartId);
           
+          console.log(`[SYNC] Local state updated, current chart: ${newCurrentChartId}`);
+          
           set({ isLoading: false });
         } catch (error) {
+          console.error(`[SYNC] Failed to apply synced charts:`, error);
           set({ 
             isLoading: false, 
             error: error instanceof Error ? error.message : '同期データの適用に失敗しました' 
