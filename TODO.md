@@ -31,7 +31,7 @@
       - [x] chordChartStoreにapplySyncedCharts()とイベント機能追加
       - [x] SyncManagerでmergedCharts返却対応
       - [x] useChartSyncカスタムフック作成（手動+自動同期）
-    - [ ] **残り実装タスク** (次期対応予定)
+    - [ ] **残り実装タスク** 
       - [ ] Header/MainLayoutへの同期UI追加  
       - [ ] App.tsxでの同期初期化処理
       - [ ] 初回認証フロー実装
