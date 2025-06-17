@@ -28,7 +28,7 @@ const mockUseSyncStore = {
   isSyncing: false,
   lastSyncTime: null as Date | null,
   syncError: null as string | null,
-  syncManager: null,
+  syncManager: null as SyncManager | null,
   syncConfig: {
     autoSync: false,
     syncInterval: 5,
