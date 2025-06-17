@@ -22,6 +22,11 @@ export class GoogleDriveSyncAdapter implements ISyncAdapter {
   
   async authenticate(): Promise<void> {
     await this.auth.authenticate();
+    // 認証直後のトークン検証
+    const isValid = await this.auth.validateToken();
+    if (!isValid) {
+      throw new Error('認証に失敗しました。再度お試しください。');
+    }
     await this.ensureAppFolder();
   }
   
@@ -123,7 +128,20 @@ export class GoogleDriveSyncAdapter implements ISyncAdapter {
       }
     });
     
-    if (!response.ok) throw new Error('Failed to search for app folder');
+    if (!response.ok) {
+      // 401エラーの場合はトークンが無効
+      if (response.status === 401) {
+        throw new Error('認証が無効です。再度サインインしてください。');
+      }
+      // 403エラーの場合はスコープ不足
+      if (response.status === 403) {
+        throw new Error('Google Driveへのアクセス権限がありません。');
+      }
+      // その他のエラー
+      const errorText = await response.text();
+      console.error('Google Drive API error:', response.status, errorText);
+      throw new Error(`Failed to search for app folder (${response.status})`);
+    }
     
     const data = await response.json();
     return data.files && data.files.length > 0 ? data.files[0].id : null;
@@ -147,7 +165,11 @@ export class GoogleDriveSyncAdapter implements ISyncAdapter {
       body: JSON.stringify(metadata)
     });
     
-    if (!response.ok) throw new Error('Failed to create app folder');
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Failed to create app folder:', response.status, errorText);
+      throw new Error(`Failed to create app folder (${response.status})`);
+    }
     
     const data = await response.json();
     return data.id;
