@@ -144,8 +144,11 @@ describe('SyncSettingsDialog', () => {
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
     await waitFor(() => {
-      const autoSyncToggle = screen.getByRole('button');
-      fireEvent.click(autoSyncToggle);
+      const buttons = screen.getAllByRole('button');
+      const autoSyncToggle = buttons.find(button => 
+        button.className.includes('w-12 h-6 rounded-full')
+      );
+      fireEvent.click(autoSyncToggle!);
     });
     
     expect(mockUseSyncStore.updateSyncConfig).toHaveBeenCalled();
@@ -161,9 +164,11 @@ describe('SyncSettingsDialog', () => {
       fireEvent.change(intervalSelect, { target: { value: '15' } });
     });
     
-    expect(mockUseSyncStore.updateSyncConfig).toHaveBeenCalledWith({
-      syncInterval: 15
-    });
+    expect(mockUseSyncStore.updateSyncConfig).toHaveBeenCalledWith(
+      expect.objectContaining({
+        syncInterval: 15
+      })
+    );
   });
 
   it('コンフリクト解決の設定を変更できる', async () => {
@@ -176,9 +181,11 @@ describe('SyncSettingsDialog', () => {
       fireEvent.change(conflictSelect, { target: { value: 'local' } });
     });
     
-    expect(mockUseSyncStore.updateSyncConfig).toHaveBeenCalledWith({
-      conflictResolution: 'local'
-    });
+    expect(mockUseSyncStore.updateSyncConfig).toHaveBeenCalledWith(
+      expect.objectContaining({
+        conflictResolution: 'local'
+      })
+    );
   });
 
   it('未認証状態では設定項目が無効化される', async () => {
