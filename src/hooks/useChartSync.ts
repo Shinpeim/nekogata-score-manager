@@ -11,24 +11,32 @@ export const useChartSync = () => {
   const syncCharts = useCallback(async (
     onConflict?: (conflicts: SyncConflict[]) => Promise<'overwrite' | 'cancel'>
   ) => {
+    console.log(`[SYNC] useChartSync.syncCharts called`);
     try {
       // 現在のチャートデータを取得
       const charts = Object.values(chordChartStore.charts);
+      console.log(`[SYNC] useChartSync got ${charts.length} local charts for sync`);
       
       // 同期実行
+      console.log(`[SYNC] useChartSync calling syncStore.sync...`);
       const result = await syncStore.sync(charts, onConflict);
+      console.log(`[SYNC] useChartSync received result from syncStore.sync`);
       
       // 成功時にマージ済みデータを適用
       console.log(`[SYNC] Manual sync result:`, { success: result.success, hasCharts: !!result.mergedCharts, chartCount: result.mergedCharts?.length });
       if (result.success && result.mergedCharts) {
+        console.log(`[SYNC] useChartSync calling applySyncedCharts with ${result.mergedCharts.length} charts`);
         await chordChartStore.applySyncedCharts(result.mergedCharts);
+        console.log(`[SYNC] useChartSync applySyncedCharts completed`);
       } else {
         console.log(`[SYNC] Manual sync - not applying charts:`, { success: result.success, mergedCharts: result.mergedCharts });
       }
       
+      console.log(`[SYNC] useChartSync.syncCharts returning result`);
       return result;
     } catch (error) {
-      console.error('チャート同期エラー:', error);
+      console.error('[SYNC] useChartSync.syncCharts caught error:', error);
+      console.error('[SYNC] Error stack:', error instanceof Error ? error.stack : 'No stack');
       throw error;
     }
   }, [chordChartStore, syncStore]);
@@ -47,11 +55,16 @@ export const useChartSync = () => {
       try {
         // 同期中でない場合のみ自動同期を実行
         if (!syncStore.isSyncing) {
+          console.log(`[SYNC] Auto sync triggered with ${updatedCharts.length} charts`);
           const result = await syncStore.sync(updatedCharts);
           
           // 成功時にマージ済みデータを適用
           if (result.success && result.mergedCharts) {
+            console.log(`[SYNC] Auto sync applying ${result.mergedCharts.length} charts`);
             await chordChartStore.applySyncedCharts(result.mergedCharts);
+            console.log(`[SYNC] Auto sync applySyncedCharts completed`);
+          } else {
+            console.log(`[SYNC] Auto sync - not applying charts:`, { success: result.success, mergedCharts: result.mergedCharts });
           }
         }
       } catch (error) {
@@ -82,10 +95,15 @@ export const useChartSync = () => {
       try {
         if (!syncStore.isSyncing) {
           const charts = Object.values(chordChartStore.charts);
+          console.log(`[SYNC] Periodic sync triggered with ${charts.length} charts`);
           const result = await syncStore.sync(charts);
           
           if (result.success && result.mergedCharts) {
+            console.log(`[SYNC] Periodic sync applying ${result.mergedCharts.length} charts`);
             await chordChartStore.applySyncedCharts(result.mergedCharts);
+            console.log(`[SYNC] Periodic sync applySyncedCharts completed`);
+          } else {
+            console.log(`[SYNC] Periodic sync - not applying charts:`, { success: result.success, mergedCharts: result.mergedCharts });
           }
         }
       } catch (error) {

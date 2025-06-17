@@ -209,15 +209,20 @@ export const useChartCrudStore = create<ChartCrudState>()(
       },
       
       applySyncedCharts: async (mergedCharts: ChordChart[]) => {
+        console.log(`[SYNC] chartCrudStore.applySyncedCharts called with ${mergedCharts.length} charts`);
         try {
           set({ isLoading: true, error: null });
+          console.log(`[SYNC] chartCrudStore set isLoading=true`);
           
           console.log(`[SYNC] Applying ${mergedCharts.length} synced charts to local storage`);
           
           const dataStore = useChartDataStore.getState();
+          console.log(`[SYNC] Got dataStore, current charts count: ${Object.keys(dataStore.charts).length}`);
           
           // CRUDサービスで同期データ適用
+          console.log(`[SYNC] Calling chartCrudService.applySyncedCharts...`);
           const chartsLibrary = await chartCrudService.applySyncedCharts(mergedCharts);
+          console.log(`[SYNC] chartCrudService.applySyncedCharts returned ${Object.keys(chartsLibrary).length} charts`);
           
           console.log(`[SYNC] Successfully applied synced charts, total charts: ${Object.keys(chartsLibrary).length}`);
           
@@ -227,15 +232,23 @@ export const useChartCrudStore = create<ChartCrudState>()(
             ? currentChartId 
             : (Object.keys(chartsLibrary)[0] || null);
           
+          console.log(`[SYNC] Chart ID selection: current=${currentChartId}, new=${newCurrentChartId}`);
+          
           // データストアを更新
+          console.log(`[SYNC] Updating dataStore with new charts...`);
           dataStore.setCharts(chartsLibrary);
+          console.log(`[SYNC] Updated dataStore charts`);
+          
           dataStore.setCurrentChart(newCurrentChartId);
+          console.log(`[SYNC] Updated dataStore current chart to: ${newCurrentChartId}`);
           
           console.log(`[SYNC] Local state updated, current chart: ${newCurrentChartId}`);
           
           set({ isLoading: false });
+          console.log(`[SYNC] chartCrudStore set isLoading=false, applySyncedCharts completed`);
         } catch (error) {
-          console.error(`[SYNC] Failed to apply synced charts:`, error);
+          console.error(`[SYNC] chartCrudStore.applySyncedCharts failed:`, error);
+          console.error(`[SYNC] Error stack:`, error instanceof Error ? error.stack : 'No stack');
           set({ 
             isLoading: false, 
             error: error instanceof Error ? error.message : '同期データの適用に失敗しました' 
