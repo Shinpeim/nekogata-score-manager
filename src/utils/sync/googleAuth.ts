@@ -123,6 +123,7 @@ export class GoogleAuthProvider {
 
   async validateToken(): Promise<boolean> {
     if (!this.accessToken) {
+      this.removeTokenFromStorage(); // 不整合状態をクリーンアップ
       return false;
     }
 
@@ -140,6 +141,9 @@ export class GoogleAuthProvider {
         return false;
       }
 
+      const tokenInfo = await response.json();
+      console.log('Current token scopes:', tokenInfo.scope);
+      
       return true;
     } catch (error) {
       console.error('Token validation failed:', error);
