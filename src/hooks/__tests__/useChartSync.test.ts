@@ -23,6 +23,7 @@ vi.mock('localforage', () => ({
 
 
 interface MockSyncStore {
+  syncManager: unknown;
   isSyncing: boolean;
   lastSyncTime: Date | null;
   syncError: string | null;
@@ -38,6 +39,7 @@ interface MockSyncStore {
   updateSyncConfig: ReturnType<typeof vi.fn>;
   clearSyncError: ReturnType<typeof vi.fn>;
   isAuthenticated: ReturnType<typeof vi.fn>;
+  initializeSync: ReturnType<typeof vi.fn>;
 }
 
 const mockChordChartStore = {
@@ -67,6 +69,7 @@ const mockChordChartStore = {
 };
 
 const mockSyncStore: MockSyncStore = {
+  syncManager: { initialize: vi.fn() },
   isSyncing: false,
   lastSyncTime: null,
   syncError: null,
@@ -81,7 +84,8 @@ const mockSyncStore: MockSyncStore = {
   signOut: vi.fn(),
   updateSyncConfig: vi.fn(),
   clearSyncError: vi.fn(),
-  isAuthenticated: vi.fn()
+  isAuthenticated: vi.fn(),
+  initializeSync: vi.fn()
 };
 
 describe('useChartSync', () => {
@@ -111,6 +115,7 @@ describe('useChartSync', () => {
     });
     
     Object.assign(mockSyncStore, {
+      syncManager: { initialize: vi.fn() },
       isSyncing: false,
       lastSyncTime: null,
       syncError: null,
@@ -131,11 +136,15 @@ describe('useChartSync', () => {
       signOut: vi.fn(),
       updateSyncConfig: vi.fn(),
       clearSyncError: vi.fn(),
-      isAuthenticated: vi.fn().mockReturnValue(false)
+      isAuthenticated: vi.fn().mockReturnValue(false),
+      initializeSync: vi.fn()
     });
     
     vi.mocked(useChartManagement).mockReturnValue(mockChordChartStore);
     vi.mocked(useSyncStore).mockReturnValue(mockSyncStore as ReturnType<typeof useSyncStore>);
+    
+    // Mock useSyncStore.getState() to return the mock state
+    vi.mocked(useSyncStore).getState = vi.fn().mockReturnValue(mockSyncStore);
   });
 
   afterEach(() => {
