@@ -54,8 +54,11 @@ export class SyncManager {
     };
     
     try {
+      console.log(`[SYNC] Starting sync with ${localCharts.length} local charts`);
+      
       // リモートデータを取得
       const { charts: remoteCharts, metadata: remoteMetadata } = await this.adapter.pull();
+      console.log(`[SYNC] Pulled ${remoteCharts.length} remote charts`);
       
       // ローカルメタデータを生成
       const localMetadata = this.generateLocalMetadata(localCharts);
@@ -79,8 +82,11 @@ export class SyncManager {
       const mergedCharts = this.mergeCharts(localCharts, remoteCharts, localMetadata, remoteMetadata);
       const mergedMetadata = this.mergeMetadata(localMetadata, remoteMetadata);
       
+      console.log(`[SYNC] Merged ${mergedCharts.length} charts for push`);
+      
       // プッシュ
       await this.adapter.push(mergedCharts, mergedMetadata);
+      console.log(`[SYNC] Successfully pushed to remote`);
       
       result.success = true;
       result.syncedCharts = mergedCharts.map(c => c.id);
@@ -88,6 +94,7 @@ export class SyncManager {
       
       // 最終同期時刻を更新
       this.updateLastSyncTime();
+      console.log(`[SYNC] Sync completed successfully`);
       
       return result;
       
@@ -108,9 +115,12 @@ export class SyncManager {
     const metadata: Record<string, SyncMetadata> = {};
     
     for (const chart of charts) {
+      // 実際のチャートの更新時刻を使用（既存のupdatedAtがない場合はcreatedAtを使用）
+      const actualModifiedTime = chart.updatedAt || chart.createdAt;
+      
       metadata[chart.id] = {
         lastSyncedAt: this.getLastSyncTime(),
-        lastModifiedAt: new Date().toISOString(),
+        lastModifiedAt: actualModifiedTime.toISOString(),
         deviceId
       };
     }
@@ -140,7 +150,17 @@ export class SyncManager {
       const localModified = new Date(localMeta.lastModifiedAt);
       const remoteModified = new Date(remoteMeta.lastModifiedAt);
       
+      // デバッグログ
+      console.log(`[SYNC] Conflict check for chart ${localChart.id}:`, {
+        lastSync: lastSync.toISOString(),
+        localModified: localModified.toISOString(),
+        remoteModified: remoteModified.toISOString(),
+        localNewerThanSync: localModified > lastSync,
+        remoteNewerThanSync: remoteModified > lastSync
+      });
+      
       if (localModified > lastSync && remoteModified > lastSync) {
+        console.log(`[SYNC] Conflict detected for chart ${localChart.id}`);
         conflicts.push({
           localChart,
           remoteChart,
