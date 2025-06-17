@@ -215,31 +215,85 @@ export class GoogleDriveSyncAdapter implements ISyncAdapter {
     const token = this.auth.getAccessToken();
     if (!token) throw new Error('Not authenticated');
     
+    if (fileId) {
+      // 既存ファイルの更新: 先にメタデータを更新してからコンテンツを更新
+      await this.updateFileMetadata(fileId, fileName);
+      await this.updateFileContent(fileId, content);
+    } else {
+      // 新規ファイル作成: multipart uploadを使用
+      await this.createFileWithContent(fileName, content, folderId);
+    }
+  }
+  
+  private async updateFileMetadata(fileId: string, fileName: string): Promise<void> {
+    const token = this.auth.getAccessToken();
+    if (!token) throw new Error('Not authenticated');
+    
+    const metadata = {
+      name: fileName,
+      mimeType: 'application/json'
+    };
+    
+    const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(metadata)
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Google Drive metadata update error:', response.status, errorText);
+      throw new Error(`Failed to update file metadata: ${response.status} - ${errorText}`);
+    }
+  }
+  
+  private async updateFileContent(fileId: string, content: unknown): Promise<void> {
+    const token = this.auth.getAccessToken();
+    if (!token) throw new Error('Not authenticated');
+    
+    const response = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(content, null, 2)
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Google Drive content update error:', response.status, errorText);
+      throw new Error(`Failed to update file content: ${response.status} - ${errorText}`);
+    }
+  }
+  
+  private async createFileWithContent(fileName: string, content: unknown, folderId: string): Promise<void> {
+    const token = this.auth.getAccessToken();
+    if (!token) throw new Error('Not authenticated');
+    
     const boundary = '-------314159265358979323846';
-    const delimiter = "\r\n--" + boundary + "\r\n";
-    const closeDelim = "\r\n--" + boundary + "--";
     
     const metadata = {
       name: fileName,
       mimeType: 'application/json',
-      ...(fileId ? {} : { parents: [folderId] })
+      parents: [folderId]
     };
     
-    const multipartRequestBody =
-      delimiter +
+    // multipart/relatedの正しい形式でリクエストボディを構築
+    const multipartRequestBody = 
+      '--' + boundary + '\r\n' +
+      'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+      JSON.stringify(metadata) + '\r\n' +
+      '--' + boundary + '\r\n' +
       'Content-Type: application/json\r\n\r\n' +
-      JSON.stringify(metadata) +
-      delimiter +
-      'Content-Type: application/json\r\n\r\n' +
-      JSON.stringify(content, null, 2) +
-      closeDelim;
+      JSON.stringify(content, null, 2) + '\r\n' +
+      '--' + boundary + '--';
     
-    const url = fileId 
-      ? `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`
-      : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
-    
-    const response = await fetch(url, {
-      method: fileId ? 'PATCH' : 'POST',
+    const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+      method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': `multipart/related; boundary="${boundary}"`
@@ -247,6 +301,10 @@ export class GoogleDriveSyncAdapter implements ISyncAdapter {
       body: multipartRequestBody
     });
     
-    if (!response.ok) throw new Error('Failed to upload file');
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Google Drive file creation error:', response.status, errorText);
+      throw new Error(`Failed to create file: ${response.status} - ${errorText}`);
+    }
   }
 }
