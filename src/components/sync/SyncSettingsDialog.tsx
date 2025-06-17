@@ -48,6 +48,14 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
 
   useEffect(() => {
     if (isOpen) {
+      // ダイアログ開いた時にsyncStoreが初期化されていない場合は初期化
+      const state = useSyncStore.getState();
+      if (!state.syncManager) {
+        console.warn('SyncStore not initialized, attempting to initialize...');
+        state.initializeSync().catch(error => {
+          console.error('Failed to initialize sync from dialog:', error);
+        });
+      }
       loadSettings();
     }
   }, [isOpen, loadSettings]);

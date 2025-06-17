@@ -28,12 +28,14 @@ const mockUseSyncStore = {
   isSyncing: false,
   lastSyncTime: null as Date | null,
   syncError: null as string | null,
+  syncManager: {} as any,
   isAuthenticated: vi.fn(),
   authenticate: vi.fn(),
   signOut: vi.fn(),
   sync: vi.fn(),
   clearSyncError: vi.fn(),
   updateSyncConfig: vi.fn(),
+  initializeSync: vi.fn(),
 };
 
 describe('SyncSettingsDialog', () => {
@@ -44,6 +46,7 @@ describe('SyncSettingsDialog', () => {
     // useSyncStoreのモック
     const { useSyncStore } = await import('../../../stores/syncStore');
     vi.mocked(useSyncStore).mockReturnValue(mockUseSyncStore);
+    vi.mocked(useSyncStore.getState).mockReturnValue(mockUseSyncStore);
     
     mockSyncManager.getConfig.mockReturnValue({
       autoSync: false,
