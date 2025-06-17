@@ -7,6 +7,23 @@ export const useChartSync = () => {
   const chordChartStore = useChartManagement();
   const syncStore = useSyncStore();
 
+  // 初期化処理
+  useEffect(() => {
+    const initializeIfNeeded = async () => {
+      const state = useSyncStore.getState();
+      if (!state.syncManager) {
+        console.log('[SYNC] Initializing sync store...');
+        try {
+          await state.initializeSync();
+        } catch (error) {
+          console.error('[SYNC] Failed to initialize sync:', error);
+        }
+      }
+    };
+    
+    initializeIfNeeded();
+  }, []);
+
   // 手動同期実行
   const syncCharts = useCallback(async (
     onConflict?: (conflicts: SyncConflict[]) => Promise<'overwrite' | 'cancel'>
