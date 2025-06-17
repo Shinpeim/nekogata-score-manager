@@ -28,12 +28,20 @@ const mockUseSyncStore = {
   isSyncing: false,
   lastSyncTime: null as Date | null,
   syncError: null as string | null,
+  syncManager: null as SyncManager | null,
+  syncConfig: {
+    autoSync: false,
+    syncInterval: 5,
+    conflictResolution: 'remote' as const,
+    showConflictWarning: true,
+  },
   isAuthenticated: vi.fn(),
   authenticate: vi.fn(),
   signOut: vi.fn(),
   sync: vi.fn(),
   clearSyncError: vi.fn(),
   updateSyncConfig: vi.fn(),
+  initializeSync: vi.fn(),
 };
 
 describe('SyncSettingsDialog', () => {
@@ -44,6 +52,7 @@ describe('SyncSettingsDialog', () => {
     // useSyncStoreのモック
     const { useSyncStore } = await import('../../../stores/syncStore');
     vi.mocked(useSyncStore).mockReturnValue(mockUseSyncStore);
+    vi.mocked(useSyncStore.getState).mockReturnValue(mockUseSyncStore);
     
     mockSyncManager.getConfig.mockReturnValue({
       autoSync: false,
@@ -53,6 +62,8 @@ describe('SyncSettingsDialog', () => {
     });
     
     mockUseSyncStore.isAuthenticated.mockReturnValue(false);
+    // テスト用にモックsyncManagerを設定
+    mockUseSyncStore.syncManager = mockSyncManager as unknown as SyncManager;
     mockAuthProvider.getUserEmail.mockResolvedValue('test@example.com');
     mockSyncManager.getLastSyncTimeAsDate.mockReturnValue(new Date('2024-01-01T00:00:00Z'));
   });
