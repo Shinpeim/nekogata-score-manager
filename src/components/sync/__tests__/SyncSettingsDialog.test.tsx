@@ -63,8 +63,7 @@ describe('SyncSettingsDialog', () => {
     
     mockUseSyncStore.isAuthenticated.mockReturnValue(false);
     // テスト用にモックsyncManagerを設定
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mockUseSyncStore.syncManager = {} as any;
+    mockUseSyncStore.syncManager = mockSyncManager as unknown as SyncManager;
     mockAuthProvider.getUserEmail.mockResolvedValue('test@example.com');
     mockSyncManager.getLastSyncTimeAsDate.mockReturnValue(new Date('2024-01-01T00:00:00Z'));
   });
