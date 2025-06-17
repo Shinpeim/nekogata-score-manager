@@ -28,7 +28,13 @@ const mockUseSyncStore = {
   isSyncing: false,
   lastSyncTime: null as Date | null,
   syncError: null as string | null,
-  syncManager: {} as any,
+  syncManager: null,
+  syncConfig: {
+    autoSync: false,
+    syncInterval: 5,
+    conflictResolution: 'remote' as const,
+    showConflictWarning: true,
+  },
   isAuthenticated: vi.fn(),
   authenticate: vi.fn(),
   signOut: vi.fn(),
@@ -56,6 +62,7 @@ describe('SyncSettingsDialog', () => {
     });
     
     mockUseSyncStore.isAuthenticated.mockReturnValue(false);
+    mockUseSyncStore.syncManager = {} as any; // テスト用にモックsyncManagerを設定
     mockAuthProvider.getUserEmail.mockResolvedValue('test@example.com');
     mockSyncManager.getLastSyncTimeAsDate.mockReturnValue(new Date('2024-01-01T00:00:00Z'));
   });
