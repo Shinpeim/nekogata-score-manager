@@ -19,8 +19,11 @@ export const useChartSync = () => {
       const result = await syncStore.sync(charts, onConflict);
       
       // 成功時にマージ済みデータを適用
+      console.log(`[SYNC] Manual sync result:`, { success: result.success, hasCharts: !!result.mergedCharts, chartCount: result.mergedCharts?.length });
       if (result.success && result.mergedCharts) {
         await chordChartStore.applySyncedCharts(result.mergedCharts);
+      } else {
+        console.log(`[SYNC] Manual sync - not applying charts:`, { success: result.success, mergedCharts: result.mergedCharts });
       }
       
       return result;
