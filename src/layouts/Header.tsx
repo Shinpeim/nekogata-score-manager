@@ -3,6 +3,7 @@ import { useWakeLock } from '../hooks/useWakeLock';
 import { useHiddenFeatures } from '../hooks/useHiddenFeatures';
 import { SyncSettingsDialog } from '../components/sync/SyncSettingsDialog';
 import { SyncStatusIndicator } from '../components/sync/SyncStatusIndicator';
+import { useChartSync } from '../hooks/useChartSync';
 
 interface HeaderProps {
   explorerOpen: boolean;
@@ -13,6 +14,7 @@ const Header: React.FC<HeaderProps> = ({ explorerOpen, setExplorerOpen }) => {
   const { isActive: wakeLockActive, isSupported: wakeLockSupported, toggleWakeLock } = useWakeLock();
   const { syncSettings } = useHiddenFeatures();
   const [syncSettingsOpen, setSyncSettingsOpen] = useState(false);
+  const { syncError } = useChartSync();
 
   return (
     <header className="bg-white shadow-sm border-b border-slate-200">
@@ -38,7 +40,14 @@ const Header: React.FC<HeaderProps> = ({ explorerOpen, setExplorerOpen }) => {
           <h1 className="text-xl font-semibold text-slate-900">Nekogata Score Manager</h1>
           <div className="flex-1"></div>
           {syncSettings && (
-            <SyncStatusIndicator className="mr-4" />
+            <>
+              <SyncStatusIndicator className="mr-4" />
+              {syncError && (
+                <div className="text-xs text-[#EE5840] mr-4">
+                  同期エラー: {syncError}
+                </div>
+              )}
+            </>
           )}
           {syncSettings && (
             <button

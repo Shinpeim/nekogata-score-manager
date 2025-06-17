@@ -1,33 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { CloudArrowUpIcon, CloudIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import { SyncManager } from '../../utils/sync/syncManager';
+import { useSyncStore } from '../../stores/syncStore';
 
 interface SyncStatusIndicatorProps {
   className?: string;
 }
 
 export const SyncStatusIndicator: React.FC<SyncStatusIndicatorProps> = ({ className = '' }) => {
-  const [syncStatus] = useState<'idle' | 'syncing' | 'error'>('idle');
-  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { isSyncing, lastSyncTime, syncError, isAuthenticated } = useSyncStore();
   
-  const syncManager = SyncManager.getInstance();
-  
-  useEffect(() => {
-    const checkStatus = () => {
-      setIsAuthenticated(syncManager.isAuthenticated());
-      setLastSyncTime(new Date(localStorage.getItem('nekogata-last-sync') || new Date(0).toISOString()));
-    };
-    
-    checkStatus();
-    const interval = setInterval(checkStatus, 10000); // 10秒ごとに更新
-    
-    return () => clearInterval(interval);
-  }, [syncManager]);
-  
-  if (!isAuthenticated) {
+  if (!isAuthenticated()) {
     return null;
   }
+  
+  const syncStatus = syncError ? 'error' : isSyncing ? 'syncing' : 'idle';
   
   const formatLastSync = (date: Date | null): string => {
     if (!date || date.getTime() === 0) return '未同期';
