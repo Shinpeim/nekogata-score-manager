@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { SyncManager } from '../../utils/sync/syncManager';
 import { GoogleAuthProvider } from '../../utils/sync/googleAuth';
-import { useSyncStore } from '../../stores/syncStore';
-import { useChartManagement } from '../../hooks/useChartManagement';
+import { useChartSync } from '../../hooks/useChartSync';
 import type { SyncConfig } from '../../types/sync';
 
 interface SyncSettingsDialogProps {
@@ -18,7 +17,6 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   
-  const { charts } = useChartManagement();
   const { 
     isSyncing, 
     lastSyncTime, 
@@ -26,10 +24,10 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
     isAuthenticated, 
     authenticate, 
     signOut, 
-    sync,
+    syncCharts,
     clearSyncError,
     updateSyncConfig
-  } = useSyncStore();
+  } = useChartSync();
 
   const syncManager = SyncManager.getInstance();
   const authProvider = GoogleAuthProvider.getInstance();
@@ -39,7 +37,7 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
       const currentConfig = syncManager.getConfig();
       setConfig(currentConfig);
       
-      if (isAuthenticated()) {
+      if (isAuthenticated) {
         const email = await authProvider.getUserEmail();
         setUserEmail(email || 'ユーザー情報取得失敗');
       }
@@ -50,14 +48,8 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      // ダイアログ開いた時にsyncStoreが初期化されていない場合は初期化
-      const state = useSyncStore.getState();
-      if (!state.syncManager) {
-        console.warn('SyncStore not initialized, attempting to initialize...');
-        state.initializeSync().catch(error => {
-          console.error('Failed to initialize sync from dialog:', error);
-        });
-      }
+      // ダイアログ開いた時に必要な初期化処理があれば実行
+      // useChartSyncが自動的に初期化を処理する
       loadSettings();
     }
   }, [isOpen, loadSettings]);
@@ -93,11 +85,11 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
   };
 
   const handleManualSync = async () => {
-    if (!isAuthenticated()) return;
+    if (!isAuthenticated) return;
     
     try {
       clearSyncError();
-      await sync(Object.values(charts));
+      await syncCharts();
     } catch (error) {
       console.error('Manual sync failed:', error);
     }
@@ -133,7 +125,7 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
         <div className="mb-6 p-4 bg-slate-50 rounded-lg">
           <h3 className="text-sm font-medium text-slate-900 mb-3">アカウント連携</h3>
           
-          {isAuthenticated() ? (
+          {isAuthenticated ? (
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
                 <div className="w-3 h-3 bg-[#85B0B7] rounded-full"></div>
@@ -179,7 +171,7 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
               className={`w-12 h-6 rounded-full transition-colors ${
                 config.autoSync ? 'bg-[#85B0B7]' : 'bg-slate-300'
               }`}
-              disabled={!isAuthenticated()}
+              disabled={!isAuthenticated}
             >
               <div
                 className={`w-5 h-5 bg-white rounded-full transition-transform ${
@@ -214,7 +206,7 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
                 conflictResolution: e.target.value as 'local' | 'remote' | 'manual' 
               })}
               className="w-full text-sm p-2 border border-slate-200 rounded"
-              disabled={!isAuthenticated()}
+              disabled={!isAuthenticated}
             >
               <option value="remote">リモート優先</option>
               <option value="local">ローカル優先</option>

@@ -6,7 +6,7 @@ import { GoogleAuthProvider } from '../../../utils/sync/googleAuth';
 
 vi.mock('../../../utils/sync/syncManager');
 vi.mock('../../../utils/sync/googleAuth');
-vi.mock('../../../stores/syncStore');
+vi.mock('../../../hooks/useChartSync');
 
 const mockSyncManager = {
   getConfig: vi.fn(),
@@ -24,24 +24,33 @@ const mockAuthProvider = {
   validateToken: vi.fn(),
 };
 
-const mockUseSyncStore = {
+const mockUseChartSync = {
+  // 同期関連
+  syncCharts: vi.fn(),
   isSyncing: false,
   lastSyncTime: null as Date | null,
   syncError: null as string | null,
-  syncManager: null as SyncManager | null,
   syncConfig: {
     autoSync: false,
     syncInterval: 5,
     conflictResolution: 'remote' as const,
     showConflictWarning: true,
   },
-  isAuthenticated: vi.fn(),
+  
+  // 認証関連
+  isAuthenticated: false,
   authenticate: vi.fn(),
   signOut: vi.fn(),
-  sync: vi.fn(),
-  clearSyncError: vi.fn(),
+  
+  // 設定関連
   updateSyncConfig: vi.fn(),
-  initializeSync: vi.fn(),
+  clearSyncError: vi.fn(),
+  
+  // チャート関連（useChartSyncの要求プロパティ）
+  charts: {},
+  currentChartId: null as string | null,
+  isLoading: false,
+  error: null as string | null,
 };
 
 describe('SyncSettingsDialog', () => {
@@ -49,10 +58,8 @@ describe('SyncSettingsDialog', () => {
     vi.mocked(SyncManager.getInstance).mockReturnValue(mockSyncManager as unknown as SyncManager);
     vi.mocked(GoogleAuthProvider.getInstance).mockReturnValue(mockAuthProvider as unknown as GoogleAuthProvider);
     
-    // useSyncStoreのモック
-    const { useSyncStore } = await import('../../../stores/syncStore');
-    vi.mocked(useSyncStore).mockReturnValue(mockUseSyncStore);
-    vi.mocked(useSyncStore.getState).mockReturnValue(mockUseSyncStore);
+    const { useChartSync } = await import('../../../hooks/useChartSync');
+    vi.mocked(useChartSync).mockReturnValue(mockUseChartSync);
     
     mockSyncManager.getConfig.mockReturnValue({
       autoSync: false,
@@ -61,9 +68,7 @@ describe('SyncSettingsDialog', () => {
       showConflictWarning: true,
     });
     
-    mockUseSyncStore.isAuthenticated.mockReturnValue(false);
-    // テスト用にモックsyncManagerを設定
-    mockUseSyncStore.syncManager = mockSyncManager as unknown as SyncManager;
+    mockUseChartSync.isAuthenticated = false;
     mockAuthProvider.getUserEmail.mockResolvedValue('test@example.com');
     mockSyncManager.getLastSyncTimeAsDate.mockReturnValue(new Date('2024-01-01T00:00:00Z'));
   });
@@ -100,7 +105,7 @@ describe('SyncSettingsDialog', () => {
   });
 
   it('認証済み状態で正しい表示がされる', async () => {
-    mockUseSyncStore.isAuthenticated.mockReturnValue(true);
+    mockUseChartSync.isAuthenticated = true;
     
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
@@ -119,11 +124,11 @@ describe('SyncSettingsDialog', () => {
       fireEvent.click(signInButton);
     });
     
-    expect(mockUseSyncStore.authenticate).toHaveBeenCalled();
+    expect(mockUseChartSync.authenticate).toHaveBeenCalled();
   });
 
   it('サインアウトボタンをクリックするとサインアウト処理が実行される', async () => {
-    mockUseSyncStore.isAuthenticated.mockReturnValue(true);
+    mockUseChartSync.isAuthenticated = true;
     
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
@@ -132,11 +137,11 @@ describe('SyncSettingsDialog', () => {
       fireEvent.click(signOutButton);
     });
     
-    expect(mockUseSyncStore.signOut).toHaveBeenCalled();
+    expect(mockUseChartSync.signOut).toHaveBeenCalled();
   });
 
   it('手動同期ボタンをクリックすると同期処理が実行される', async () => {
-    mockUseSyncStore.isAuthenticated.mockReturnValue(true);
+    mockUseChartSync.isAuthenticated = true;
     
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
@@ -145,12 +150,12 @@ describe('SyncSettingsDialog', () => {
       fireEvent.click(syncButton);
     });
     
-    expect(mockUseSyncStore.clearSyncError).toHaveBeenCalled();
-    expect(mockUseSyncStore.sync).toHaveBeenCalledWith([]);
+    expect(mockUseChartSync.clearSyncError).toHaveBeenCalled();
+    expect(mockUseChartSync.syncCharts).toHaveBeenCalled();
   });
 
   it('自動同期の設定を変更できる', async () => {
-    mockUseSyncStore.isAuthenticated.mockReturnValue(true);
+    mockUseChartSync.isAuthenticated = true;
     
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
@@ -162,11 +167,11 @@ describe('SyncSettingsDialog', () => {
       fireEvent.click(autoSyncToggle!);
     });
     
-    expect(mockUseSyncStore.updateSyncConfig).toHaveBeenCalled();
+    expect(mockUseChartSync.updateSyncConfig).toHaveBeenCalled();
   });
 
   it('同期間隔の設定を変更できる', async () => {
-    mockUseSyncStore.isAuthenticated.mockReturnValue(true);
+    mockUseChartSync.isAuthenticated = true;
     
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
@@ -175,7 +180,7 @@ describe('SyncSettingsDialog', () => {
       fireEvent.change(intervalSelect, { target: { value: '15' } });
     });
     
-    expect(mockUseSyncStore.updateSyncConfig).toHaveBeenCalledWith(
+    expect(mockUseChartSync.updateSyncConfig).toHaveBeenCalledWith(
       expect.objectContaining({
         syncInterval: 15
       })
@@ -183,7 +188,7 @@ describe('SyncSettingsDialog', () => {
   });
 
   it('コンフリクト解決の設定を変更できる', async () => {
-    mockUseSyncStore.isAuthenticated.mockReturnValue(true);
+    mockUseChartSync.isAuthenticated = true;
     
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
@@ -192,7 +197,7 @@ describe('SyncSettingsDialog', () => {
       fireEvent.change(conflictSelect, { target: { value: 'local' } });
     });
     
-    expect(mockUseSyncStore.updateSyncConfig).toHaveBeenCalledWith(
+    expect(mockUseChartSync.updateSyncConfig).toHaveBeenCalledWith(
       expect.objectContaining({
         conflictResolution: 'local'
       })
@@ -212,7 +217,7 @@ describe('SyncSettingsDialog', () => {
   });
 
   it('最終同期時刻が正しくフォーマットされて表示される', async () => {
-    mockUseSyncStore.lastSyncTime = new Date('2024-01-01T00:00:00Z');
+    mockUseChartSync.lastSyncTime = new Date('2024-01-01T00:00:00Z');
     
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
@@ -245,7 +250,7 @@ describe('SyncSettingsDialog', () => {
   });
 
   it('同期エラーが表示される', async () => {
-    mockUseSyncStore.syncError = 'ネットワークエラーが発生しました';
+    mockUseChartSync.syncError = 'ネットワークエラーが発生しました';
     
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
@@ -255,7 +260,7 @@ describe('SyncSettingsDialog', () => {
   });
 
   it('同期中の状態が表示される', async () => {
-    mockUseSyncStore.isSyncing = true;
+    mockUseChartSync.isSyncing = true;
     
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
