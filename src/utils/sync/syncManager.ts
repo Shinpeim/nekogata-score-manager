@@ -99,6 +99,8 @@ export class SyncManager {
       return result;
       
     } catch (error) {
+      console.error(`[SYNC] syncManager.sync caught error:`, error);
+      console.error(`[SYNC] Error stack:`, error instanceof Error ? error.stack : 'No stack');
       result.errors.push({
         chartId: '',
         error: error as Error,
@@ -106,6 +108,7 @@ export class SyncManager {
       });
       return result;
     } finally {
+      console.log(`[SYNC] syncManager.sync finally block - setting syncInProgress to false`);
       this.syncInProgress = false;
     }
   }

@@ -36,7 +36,17 @@ export const useChartManagement = () => {
     clearError: crudStore.clearError,
     
     // 同期関連（crudStore）
-    applySyncedCharts: crudStore.applySyncedCharts,
+    applySyncedCharts: async (mergedCharts: ChordChart[]) => {
+      console.log(`[SYNC] useChartManagement.applySyncedCharts called with ${mergedCharts.length} charts`);
+      try {
+        const result = await crudStore.applySyncedCharts(mergedCharts);
+        console.log(`[SYNC] useChartManagement.applySyncedCharts completed successfully`);
+        return result;
+      } catch (error) {
+        console.error(`[SYNC] useChartManagement.applySyncedCharts failed:`, error);
+        throw error;
+      }
+    },
     subscribeSyncNotification: crudStore.subscribeSyncNotification,
     notifySyncCallbacks: crudStore.notifySyncCallbacks,
     // syncCallbacks は内部実装のため削除
