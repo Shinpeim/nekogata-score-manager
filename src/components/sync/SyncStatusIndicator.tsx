@@ -9,7 +9,14 @@ interface SyncStatusIndicatorProps {
 export const SyncStatusIndicator: React.FC<SyncStatusIndicatorProps> = ({ className = '' }) => {
   const { isSyncing, lastSyncTime, syncError, isAuthenticated } = useSyncStore();
   
-  if (!isAuthenticated()) {
+  // デバッグログを追加
+  const authStatus = isAuthenticated();
+  console.log('[SyncStatusIndicator] Authentication status:', authStatus);
+  console.log('[SyncStatusIndicator] isSyncing:', isSyncing);
+  console.log('[SyncStatusIndicator] lastSyncTime:', lastSyncTime);
+  console.log('[SyncStatusIndicator] syncError:', syncError);
+  
+  if (!authStatus) {
     return null;
   }
   

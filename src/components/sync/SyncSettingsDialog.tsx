@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { SyncManager } from '../../utils/sync/syncManager';
 import { GoogleAuthProvider } from '../../utils/sync/googleAuth';
+import { useSyncStore } from '../../stores/syncStore';
 import type { SyncConfig } from '../../types/sync';
 
 interface SyncSettingsDialogProps {
@@ -13,12 +14,20 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
   onClose,
 }) => {
   const [config, setConfig] = useState<SyncConfig | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
-  const [syncError, setSyncError] = useState<string | null>(null);
+  
+  const { 
+    isSyncing, 
+    lastSyncTime, 
+    syncError, 
+    isAuthenticated, 
+    authenticate, 
+    signOut, 
+    sync,
+    clearSyncError,
+    updateSyncConfig
+  } = useSyncStore();
 
   const syncManager = SyncManager.getInstance();
   const authProvider = GoogleAuthProvider.getInstance();
@@ -28,46 +37,14 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
       const currentConfig = syncManager.getConfig();
       setConfig(currentConfig);
       
-      // 初回読み込み時は必ず初期化を実行
-      try {
-        await authProvider.initialize();
-      } catch (initError) {
-        console.error('Auth provider initialization error:', initError);
-        setIsAuthenticated(false);
-        setUserEmail(null);
-        return;
+      if (isAuthenticated()) {
+        const email = await authProvider.getUserEmail();
+        setUserEmail(email || 'ユーザー情報取得失敗');
       }
-      
-      const authStatus = authProvider.isAuthenticated();
-      
-      if (authStatus) {
-        const isValidToken = await authProvider.validateToken();
-        if (isValidToken) {
-          try {
-            const email = await authProvider.getUserEmail();
-            setUserEmail(email || 'メールアドレス未取得');
-            setIsAuthenticated(true);
-          } catch (error) {
-            setUserEmail('ユーザー情報取得失敗');
-            setIsAuthenticated(false);
-            setAuthError(error instanceof Error ? error.message : 'ユーザー情報の取得に失敗しました');
-          }
-        } else {
-          setIsAuthenticated(false);
-          setUserEmail(null);
-        }
-      } else {
-        setIsAuthenticated(false);
-        setUserEmail(null);
-      }
-      
-      const lastSync = syncManager.getLastSyncTimeAsDate();
-      setLastSyncTime(lastSync);
     } catch (error) {
-      console.error('設定読み込みエラー:', error);
-      setAuthError(error instanceof Error ? error.message : '設定の読み込みに失敗しました');
+      console.error('設定の読み込みに失敗しました:', error);
     }
-  }, [syncManager, authProvider]);
+  }, [syncManager, authProvider, isAuthenticated]);
 
   useEffect(() => {
     if (isOpen) {
@@ -78,11 +55,10 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
   const handleSignIn = async () => {
     try {
       setAuthError(null);
-      await authProvider.authenticate();
+      await authenticate();
       
       const email = await authProvider.getUserEmail();
       setUserEmail(email || 'ユーザー情報取得失敗');
-      setIsAuthenticated(true);
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : '認証に失敗しました');
     }
@@ -91,9 +67,8 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
   const handleSignOut = async () => {
     try {
       setAuthError(null);
-      authProvider.signOut();
+      await signOut();
       setUserEmail(null);
-      setIsAuthenticated(false);
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : 'サインアウトに失敗しました');
     }
@@ -104,21 +79,17 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
     
     const newConfig = { ...config, ...updates };
     setConfig(newConfig);
-    syncManager.saveConfig(newConfig);
+    updateSyncConfig(newConfig);
   };
 
   const handleManualSync = async () => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated()) return;
     
     try {
-      setIsSyncing(true);
-      setSyncError(null);
-      await syncManager.sync([]);
-      setLastSyncTime(new Date());
+      clearSyncError();
+      await sync([]);
     } catch (error) {
-      setSyncError(error instanceof Error ? error.message : '同期に失敗しました');
-    } finally {
-      setIsSyncing(false);
+      console.error('Manual sync failed:', error);
     }
   };
 
@@ -152,7 +123,7 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
         <div className="mb-6 p-4 bg-slate-50 rounded-lg">
           <h3 className="text-sm font-medium text-slate-900 mb-3">アカウント連携</h3>
           
-          {isAuthenticated ? (
+          {isAuthenticated() ? (
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
                 <div className="w-3 h-3 bg-[#85B0B7] rounded-full"></div>
@@ -198,7 +169,7 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
               className={`w-12 h-6 rounded-full transition-colors ${
                 config.autoSync ? 'bg-[#85B0B7]' : 'bg-slate-300'
               }`}
-              disabled={!isAuthenticated}
+              disabled={!isAuthenticated()}
             >
               <div
                 className={`w-5 h-5 bg-white rounded-full transition-transform ${
@@ -233,7 +204,7 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
                 conflictResolution: e.target.value as 'local' | 'remote' | 'manual' 
               })}
               className="w-full text-sm p-2 border border-slate-200 rounded"
-              disabled={!isAuthenticated}
+              disabled={!isAuthenticated()}
             >
               <option value="remote">リモート優先</option>
               <option value="local">ローカル優先</option>
