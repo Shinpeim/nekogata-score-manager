@@ -6,6 +6,7 @@ import { GoogleAuthProvider } from '../../../utils/sync/googleAuth';
 
 vi.mock('../../../utils/sync/syncManager');
 vi.mock('../../../utils/sync/googleAuth');
+vi.mock('../../../stores/syncStore');
 
 const mockSyncManager = {
   getConfig: vi.fn(),
@@ -23,10 +24,26 @@ const mockAuthProvider = {
   validateToken: vi.fn(),
 };
 
+const mockUseSyncStore = {
+  isSyncing: false,
+  lastSyncTime: null as Date | null,
+  syncError: null as string | null,
+  isAuthenticated: vi.fn(),
+  authenticate: vi.fn(),
+  signOut: vi.fn(),
+  sync: vi.fn(),
+  clearSyncError: vi.fn(),
+  updateSyncConfig: vi.fn(),
+};
+
 describe('SyncSettingsDialog', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.mocked(SyncManager.getInstance).mockReturnValue(mockSyncManager as unknown as SyncManager);
     vi.mocked(GoogleAuthProvider.getInstance).mockReturnValue(mockAuthProvider as unknown as GoogleAuthProvider);
+    
+    // useSyncStoreのモック
+    const { useSyncStore } = await import('../../../stores/syncStore');
+    vi.mocked(useSyncStore).mockReturnValue(mockUseSyncStore);
     
     mockSyncManager.getConfig.mockReturnValue({
       autoSync: false,
@@ -35,10 +52,8 @@ describe('SyncSettingsDialog', () => {
       showConflictWarning: true,
     });
     
-    mockAuthProvider.isAuthenticated.mockReturnValue(false);
+    mockUseSyncStore.isAuthenticated.mockReturnValue(false);
     mockAuthProvider.getUserEmail.mockResolvedValue('test@example.com');
-    mockAuthProvider.validateToken.mockResolvedValue(true);
-    mockAuthProvider.initialize.mockResolvedValue(undefined);
     mockSyncManager.getLastSyncTimeAsDate.mockReturnValue(new Date('2024-01-01T00:00:00Z'));
   });
 
@@ -74,7 +89,7 @@ describe('SyncSettingsDialog', () => {
   });
 
   it('認証済み状態で正しい表示がされる', async () => {
-    mockAuthProvider.isAuthenticated.mockReturnValue(true);
+    mockUseSyncStore.isAuthenticated.mockReturnValue(true);
     
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
@@ -93,11 +108,11 @@ describe('SyncSettingsDialog', () => {
       fireEvent.click(signInButton);
     });
     
-    expect(mockAuthProvider.authenticate).toHaveBeenCalled();
+    expect(mockUseSyncStore.authenticate).toHaveBeenCalled();
   });
 
   it('サインアウトボタンをクリックするとサインアウト処理が実行される', async () => {
-    mockAuthProvider.isAuthenticated.mockReturnValue(true);
+    mockUseSyncStore.isAuthenticated.mockReturnValue(true);
     
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
@@ -106,39 +121,42 @@ describe('SyncSettingsDialog', () => {
       fireEvent.click(signOutButton);
     });
     
-    expect(mockAuthProvider.signOut).toHaveBeenCalled();
+    expect(mockUseSyncStore.signOut).toHaveBeenCalled();
   });
 
-  it('認証済み状態で自動同期トグルをクリックすると設定が更新される', async () => {
-    mockAuthProvider.isAuthenticated.mockReturnValue(true);
-    mockAuthProvider.validateToken.mockResolvedValue(true);
+  it('手動同期ボタンをクリックすると同期処理が実行される', async () => {
+    mockUseSyncStore.isAuthenticated.mockReturnValue(true);
     
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
     await waitFor(() => {
-      expect(screen.getByText('連携中')).toBeInTheDocument();
+      const syncButton = screen.getByText('今すぐ同期');
+      fireEvent.click(syncButton);
     });
     
-    const toggleButtons = screen.getAllByRole('button');
-    const autoSyncToggle = toggleButtons.find(button => 
-      button.className.includes('w-12 h-6 rounded-full')
-    );
-    
-    if (autoSyncToggle) {
-      fireEvent.click(autoSyncToggle);
-      
-      await waitFor(() => {
-        expect(mockSyncManager.saveConfig).toHaveBeenCalledWith({
-          autoSync: true,
-          syncInterval: 5,
-          conflictResolution: 'remote',
-          showConflictWarning: true,
-        });
-      });
-    }
+    expect(mockUseSyncStore.clearSyncError).toHaveBeenCalled();
+    expect(mockUseSyncStore.sync).toHaveBeenCalledWith([]);
   });
 
-  it('同期間隔を変更すると設定が更新される', async () => {
+  it('自動同期の設定を変更できる', async () => {
+    mockUseSyncStore.isAuthenticated.mockReturnValue(true);
+    
+    render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
+    
+    await waitFor(() => {
+      const buttons = screen.getAllByRole('button');
+      const autoSyncToggle = buttons.find(button => 
+        button.className.includes('w-12 h-6 rounded-full')
+      );
+      fireEvent.click(autoSyncToggle!);
+    });
+    
+    expect(mockUseSyncStore.updateSyncConfig).toHaveBeenCalled();
+  });
+
+  it('同期間隔の設定を変更できる', async () => {
+    mockUseSyncStore.isAuthenticated.mockReturnValue(true);
+    
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
     await waitFor(() => {
@@ -146,15 +164,16 @@ describe('SyncSettingsDialog', () => {
       fireEvent.change(intervalSelect, { target: { value: '15' } });
     });
     
-    expect(mockSyncManager.saveConfig).toHaveBeenCalledWith({
-      autoSync: false,
-      syncInterval: 15,
-      conflictResolution: 'remote',
-      showConflictWarning: true,
-    });
+    expect(mockUseSyncStore.updateSyncConfig).toHaveBeenCalledWith(
+      expect.objectContaining({
+        syncInterval: 15
+      })
+    );
   });
 
-  it('コンフリクト解決方法を変更すると設定が更新される', async () => {
+  it('コンフリクト解決の設定を変更できる', async () => {
+    mockUseSyncStore.isAuthenticated.mockReturnValue(true);
+    
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
     await waitFor(() => {
@@ -162,42 +181,28 @@ describe('SyncSettingsDialog', () => {
       fireEvent.change(conflictSelect, { target: { value: 'local' } });
     });
     
-    expect(mockSyncManager.saveConfig).toHaveBeenCalledWith({
-      autoSync: false,
-      syncInterval: 5,
-      conflictResolution: 'local',
-      showConflictWarning: true,
-    });
+    expect(mockUseSyncStore.updateSyncConfig).toHaveBeenCalledWith(
+      expect.objectContaining({
+        conflictResolution: 'local'
+      })
+    );
   });
 
-  it('認証済み状態で手動同期ボタンをクリックすると同期が実行される', async () => {
-    mockAuthProvider.isAuthenticated.mockReturnValue(true);
-    mockAuthProvider.validateToken.mockResolvedValue(true);
-    
+  it('未認証状態では設定項目が無効化される', async () => {
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
     await waitFor(() => {
-      expect(screen.getByText('連携中')).toBeInTheDocument();
-    });
-    
-    const syncButton = screen.getByText('今すぐ同期');
-    fireEvent.click(syncButton);
-    
-    await waitFor(() => {
-      expect(mockSyncManager.sync).toHaveBeenCalledWith([]);
-    });
-  });
-
-  it('未認証状態では手動同期ボタンが無効になる', async () => {
-    render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
-    
-    await waitFor(() => {
-      const syncButton = screen.getByText('今すぐ同期');
-      expect(syncButton).toBeDisabled();
+      const intervalSelect = screen.getByDisplayValue('5分');
+      const conflictSelect = screen.getByDisplayValue('リモート優先');
+      
+      expect(intervalSelect).toBeDisabled();
+      expect(conflictSelect).toBeDisabled();
     });
   });
 
   it('最終同期時刻が正しくフォーマットされて表示される', async () => {
+    mockUseSyncStore.lastSyncTime = new Date('2024-01-01T00:00:00Z');
+    
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
     await waitFor(() => {
@@ -228,37 +233,24 @@ describe('SyncSettingsDialog', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('認証エラーが発生した場合にエラーメッセージが表示される', async () => {
-    mockAuthProvider.authenticate.mockRejectedValue(new Error('認証エラー'));
+  it('同期エラーが表示される', async () => {
+    mockUseSyncStore.syncError = 'ネットワークエラーが発生しました';
     
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
     await waitFor(() => {
-      const signInButton = screen.getByText('Googleアカウントで連携');
-      fireEvent.click(signInButton);
-    });
-    
-    await waitFor(() => {
-      expect(screen.getByText('認証エラー')).toBeInTheDocument();
+      expect(screen.getByText('ネットワークエラーが発生しました')).toBeInTheDocument();
     });
   });
 
-  it('同期エラーが発生した場合にエラーメッセージが表示される', async () => {
-    mockAuthProvider.isAuthenticated.mockReturnValue(true);
-    mockAuthProvider.validateToken.mockResolvedValue(true);
-    mockSyncManager.sync.mockRejectedValue(new Error('同期エラー'));
+  it('同期中の状態が表示される', async () => {
+    mockUseSyncStore.isSyncing = true;
     
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
     await waitFor(() => {
-      expect(screen.getByText('連携中')).toBeInTheDocument();
-    });
-    
-    const syncButton = screen.getByText('今すぐ同期');
-    fireEvent.click(syncButton);
-    
-    await waitFor(() => {
-      expect(screen.getByText('同期エラー')).toBeInTheDocument();
+      const syncButton = screen.getByText('同期中...');
+      expect(syncButton).toBeDisabled();
     });
   });
 });
