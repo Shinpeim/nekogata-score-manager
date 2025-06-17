@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { SyncManager } from '../../utils/sync/syncManager';
 import { GoogleAuthProvider } from '../../utils/sync/googleAuth';
 import { useSyncStore } from '../../stores/syncStore';
+import { useChartManagement } from '../../hooks/useChartManagement';
 import type { SyncConfig } from '../../types/sync';
 
 interface SyncSettingsDialogProps {
@@ -17,6 +18,7 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   
+  const { charts } = useChartManagement();
   const { 
     isSyncing, 
     lastSyncTime, 
@@ -95,7 +97,7 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
     
     try {
       clearSyncError();
-      await sync([]);
+      await sync(Object.values(charts));
     } catch (error) {
       console.error('Manual sync failed:', error);
     }
