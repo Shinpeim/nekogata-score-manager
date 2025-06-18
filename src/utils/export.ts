@@ -39,7 +39,7 @@ export const exportMultipleCharts = (charts: ChordChart[], filename?: string): v
     charts: chartsWithVersion
   };
 
-  const jsonString = JSON.stringify(exportData, null, 2);
+  const jsonString = JSON.stringify(exportData);
   const blob = new Blob([jsonString], { type: JSON_MIME_TYPE });
   const url = URL.createObjectURL(blob);
   

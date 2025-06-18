@@ -4,6 +4,7 @@ import type { ChordChart } from '../types';
 import { chartCrudService } from '../services/chartCrudService';
 import { syncNotificationService } from '../services/syncNotificationService';
 import { useChartDataStore } from './chartDataStore';
+import { storageService } from '../utils/storage';
 
 interface ChartCrudState {
   // 状態
@@ -173,8 +174,16 @@ export const useChartCrudStore = create<ChartCrudState>()(
           // CRUDサービスで初期データ読み込み
           const initialCharts = await chartCrudService.loadInitialData();
           
+          // 最後に開いたチャートIDを取得
+          const lastOpenedChartId = await storageService.loadLastOpenedChartId();
+          
+          // 最後に開いたチャートが存在する場合はそれを優先、そうでなければ最初のチャート
+          const targetChartId = lastOpenedChartId && initialCharts[lastOpenedChartId] 
+            ? lastOpenedChartId 
+            : (Object.keys(initialCharts)[0] || null);
+          
           dataStore.setCharts(initialCharts);
-          dataStore.setCurrentChart(Object.keys(initialCharts)[0] || null);
+          dataStore.setCurrentChart(targetChartId);
           
           set({ isLoading: false });
         } catch (error) {
@@ -195,8 +204,16 @@ export const useChartCrudStore = create<ChartCrudState>()(
           // CRUDサービスで再読み込み
           const storedCharts = await chartCrudService.reloadFromStorage();
           
+          // 最後に開いたチャートIDを取得
+          const lastOpenedChartId = await storageService.loadLastOpenedChartId();
+          
+          // 最後に開いたチャートが存在する場合はそれを優先、そうでなければ最初のチャート
+          const targetChartId = lastOpenedChartId && storedCharts[lastOpenedChartId] 
+            ? lastOpenedChartId 
+            : (Object.keys(storedCharts)[0] || null);
+          
           dataStore.setCharts(storedCharts);
-          dataStore.setCurrentChart(Object.keys(storedCharts)[0] || null);
+          dataStore.setCurrentChart(targetChartId);
           
           set({ isLoading: false });
         } catch (error) {
@@ -228,11 +245,21 @@ export const useChartCrudStore = create<ChartCrudState>()(
           
           // 現在選択中のチャートが削除されていないかチェック
           const { currentChartId } = dataStore;
-          const newCurrentChartId = currentChartId && chartsLibrary[currentChartId] 
-            ? currentChartId 
-            : (Object.keys(chartsLibrary)[0] || null);
           
-          console.log(`[SYNC] Chart ID selection: current=${currentChartId}, new=${newCurrentChartId}`);
+          // 最後に開いたチャートIDを取得
+          const lastOpenedChartId = await storageService.loadLastOpenedChartId();
+          
+          // 優先順位: 現在のチャート → 最後に開いたチャート → 最初のチャート
+          let newCurrentChartId = null;
+          if (currentChartId && chartsLibrary[currentChartId]) {
+            newCurrentChartId = currentChartId;
+          } else if (lastOpenedChartId && chartsLibrary[lastOpenedChartId]) {
+            newCurrentChartId = lastOpenedChartId;
+          } else {
+            newCurrentChartId = Object.keys(chartsLibrary)[0] || null;
+          }
+          
+          console.log(`[SYNC] Chart ID selection: current=${currentChartId}, lastOpened=${lastOpenedChartId}, new=${newCurrentChartId}`);
           
           // データストアを更新
           console.log(`[SYNC] Updating dataStore with new charts...`);

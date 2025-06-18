@@ -251,4 +251,38 @@ describe('storageService', () => {
       expect(isValid).toBe(true);
     });
   });
+
+  describe('lastOpenedChartId', () => {
+    it('should save and load last opened chart ID', async () => {
+      const chartId = 'test-chart-123';
+      
+      await storageService.saveLastOpenedChartId(chartId);
+      expect(localforage.setItem).toHaveBeenCalledWith('last-opened-chart-id', chartId);
+      
+      vi.mocked(localforage.getItem).mockResolvedValue(chartId);
+      
+      const result = await storageService.loadLastOpenedChartId();
+      expect(localforage.getItem).toHaveBeenCalledWith('last-opened-chart-id');
+      expect(result).toBe(chartId);
+    });
+
+    it('should remove last opened chart ID when null is saved', async () => {
+      await storageService.saveLastOpenedChartId(null);
+      expect(localforage.removeItem).toHaveBeenCalledWith('last-opened-chart-id');
+    });
+
+    it('should return null when no last opened chart ID exists', async () => {
+      vi.mocked(localforage.getItem).mockResolvedValue(null);
+      
+      const result = await storageService.loadLastOpenedChartId();
+      expect(result).toBe(null);
+    });
+
+    it('should handle errors gracefully', async () => {
+      vi.mocked(localforage.getItem).mockRejectedValue(new Error('Storage error'));
+      
+      const result = await storageService.loadLastOpenedChartId();
+      expect(result).toBe(null);
+    });
+  });
 });
