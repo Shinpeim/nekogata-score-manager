@@ -93,7 +93,7 @@ const SectionCard: React.FC<SectionCardProps> = ({
 
   return (
     <SortableSectionItem id={section.id}>
-      <div className="mb-6 p-4 border border-slate-300 rounded-lg">
+      <div className="mb-6 p-4 border border-slate-300 rounded-lg" data-section-card={section.id}>
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-3">
           <input
             type="text"
@@ -201,6 +201,7 @@ const SectionCard: React.FC<SectionCardProps> = ({
                 <button
                   onClick={() => onAddChordToSection(section.id)}
                   className="w-full h-full flex flex-col items-center justify-center gap-1 text-[#85B0B7] hover:text-[#6B9CA5] transition-colors"
+                  data-testid="add-chord-button"
                 >
                   <span className="text-2xl">+</span>
                   <span className="text-xs font-medium">コード追加</span>
