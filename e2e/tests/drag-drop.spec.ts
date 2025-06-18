@@ -16,10 +16,6 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
     await page.goto('/');
     await page.evaluate(() => {
       localStorage.clear();
-      // E2Eテストフラグを複数の方法で永続化
-      (window as typeof window & { __playwright_test__?: boolean }).__playwright_test__ = true;
-      sessionStorage.setItem('__playwright_test__', 'true');
-      localStorage.setItem('__playwright_test__', 'true');
     });
   });
 
