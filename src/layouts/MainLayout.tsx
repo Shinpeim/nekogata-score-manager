@@ -5,6 +5,7 @@ import ChordChartForm from '../components/ChordChartForm';
 import ImportDialog from '../components/ImportDialog';
 import ExportDialog from '../components/ExportDialog';
 import Header from './Header';
+import Footer from './Footer';
 import ScoreExplorer from './ScoreExplorer';
 import type { ChordChart } from '../types';
 
@@ -97,13 +98,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 flex flex-col">
       <Header 
         explorerOpen={explorerOpen}
         setExplorerOpen={setExplorerOpen}
       />
 
-      <div className="flex h-[calc(100vh-4rem)]">
+      <div className="flex flex-1">
         {/* Mobile Score Explorer overlay */}
         {explorerOpen && (
           <ScoreExplorer
@@ -173,6 +174,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
           charts={charts.filter(chart => selectedChartIds.includes(chart.id))}
         />
       )}
+      
+      <Footer />
     </div>
   );
 };
