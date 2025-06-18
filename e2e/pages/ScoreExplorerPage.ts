@@ -1,4 +1,4 @@
-import { type Locator, type Page } from '@playwright/test';
+import { type Locator, type Page, expect } from '@playwright/test';
 
 export class ScoreExplorerPage {
   readonly page: Page;
@@ -19,7 +19,7 @@ export class ScoreExplorerPage {
     this.titleDesktop = page.getByTestId('score-explorer-title-desktop');
     this.title = isMobile ? this.titleMobile : this.titleDesktop;
     
-    this.selectAllCheckbox = page.getByTestId('select-all-checkbox');
+    this.selectAllCheckbox = page.getByTestId('select-all-checkbox').first();
     
     this.createNewButtonMobile = page.getByTestId('explorer-create-new-button-mobile');
     this.createNewButtonDesktop = page.getByTestId('explorer-create-new-button-desktop');
@@ -39,26 +39,65 @@ export class ScoreExplorerPage {
   }
 
   async clickSelectAll() {
-    await this.selectAllCheckbox.click();
+    await expect(this.selectAllCheckbox).toBeAttached();
+    await this.selectAllCheckbox.evaluate(el => (el as HTMLElement).click());
   }
 
-  getChartCheckbox(chartId: string) {
-    return this.page.getByTestId(`chart-checkbox-${chartId}`);
+  getChartCheckbox(index: number) {
+    return this.page.getByTestId(`chart-checkbox-${index}`).first();
   }
 
-  getChartItem(chartId: string) {
-    return this.page.getByTestId(`chart-item-${chartId}`);
+  getChartItem(index: number) {
+    return this.page.getByTestId(`chart-item-${index}`).first();
   }
 
-  async selectChart(chartId: string) {
-    await this.getChartCheckbox(chartId).click();
+  async selectChart(index: number) {
+    // DOM要素の存在を確認してからJavaScript経由でクリック
+    await expect(this.getChartCheckbox(index)).toBeAttached();
+    await this.getChartCheckbox(index).evaluate(el => (el as HTMLElement).click());
   }
 
-  async clickChart(chartId: string) {
-    await this.getChartItem(chartId).click();
+  async clickChart(index: number) {
+    await this.getChartItem(index).click();
   }
 
   getSelectionStatus() {
-    return this.page.locator('text=件選択中');
+    return this.page.locator('text=件選択中').first();
+  }
+
+  async openActionDropdown() {
+    const actionButton = this.page.locator('[title="アクション"]').first();
+    await expect(actionButton).toBeAttached();
+    await actionButton.evaluate(el => (el as HTMLElement).click());
+  }
+
+  async clickExportOption() {
+    const exportButton = this.page.locator('button:has-text("エクスポート")').first();
+    await expect(exportButton).toBeAttached();
+    await exportButton.evaluate(el => (el as HTMLElement).click());
+  }
+
+  getExportDialog() {
+    return this.page.locator('[role="dialog"]:has-text("エクスポート")');
+  }
+
+  getFilenameInput() {
+    return this.page.locator('#filename');
+  }
+
+  async clickExportButton() {
+    await this.page.locator('button:has-text("エクスポート")').click();
+  }
+
+  getImportDialog() {
+    return this.page.locator('.fixed.inset-0:has-text("インポート")').first();
+  }
+
+  getFileInput() {
+    return this.page.locator('input[type="file"][accept=".json"]');
+  }
+
+  async clickImportButton() {
+    await this.page.getByTestId('import-button').click({ force: true });
   }
 }

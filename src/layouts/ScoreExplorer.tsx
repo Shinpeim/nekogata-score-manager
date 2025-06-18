@@ -74,17 +74,17 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
         </div>
       )}
       <div className="space-y-2">
-        {charts.map((chart) => (
+        {charts.map((chart, index) => (
           <div 
             key={chart.id} 
-            className="flex items-start gap-2"
+            className="flex items-center gap-2"
           >
             <input
               type="checkbox"
               checked={selectedChartIds.includes(chart.id)}
               onChange={() => onChartSelect(chart.id)}
-              className="mt-3 text-[#85B0B7] focus:ring-[#85B0B7]"
-              data-testid={`chart-checkbox-${chart.id}`}
+              className="text-[#85B0B7] focus:ring-[#85B0B7]"
+              data-testid={`chart-checkbox-${index}`}
             />
             <div 
               className={`flex-1 p-3 rounded-md transition-colors cursor-pointer ${
@@ -93,7 +93,7 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
                   : 'bg-slate-50 hover:bg-slate-100'
               }`}
               onClick={() => handleChartClick(chart.id)}
-              data-testid={`chart-item-${chart.id}`}
+              data-testid={`chart-item-${index}`}
             >
               <h3 className="text-sm font-medium text-slate-900">{chart.title}</h3>
               <p className="text-xs text-slate-500 mt-1">{chart.artist}</p>
