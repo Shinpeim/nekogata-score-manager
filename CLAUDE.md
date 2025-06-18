@@ -91,7 +91,8 @@ Chord: { name, root, base?, duration?, isLineBreak? }
 - **Testing**: このプロジェクトでは必ずテストを書くこと
 - **Linting**: コミットするコードはlintに通っている必要がある  
 - **Building**: コミットするコードは必ずビルドできる必要がある
-- **Pre-commit validation**: `npm test && npm run lint && npm run build` を確認してからコミット
+- **E2E Testing**: E2Eテストが存在する場合は実行して確認すること
+- **Pre-commit validation**: `npm test && npm run lint && npm run build && npm run test:e2e` を確認してからコミット
 
 ### Task Management
 - todoをTODO.mdに書いて管理してください
