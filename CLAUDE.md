@@ -32,12 +32,26 @@ npm run test:coverage # Run tests with coverage report
 npm run preview      # Preview production build locally
 ```
 
+### E2E Testing Commands
+```bash
+npm run test:e2e         # Run E2E tests (headless mode)
+npm run test:e2e:headless # Run E2E tests explicitly headless
+npm run test:e2e:headed  # Run E2E tests with browser UI visible
+npm run test:e2e:ui      # Run E2E tests with Playwright UI mode
+```
+
 ### Single Test Execution
 ```bash
+# Unit Tests
 npx vitest run path/to/test.test.ts              # Run specific test file
 npx vitest run --grep "test name pattern"        # Run tests matching pattern
 npx vitest run src/utils/__tests__/export.test.ts       # Example: run export tests
 npx vitest run src/utils/__tests__/import.test.ts       # Example: run import tests
+
+# E2E Tests
+npx playwright test chart-creation.spec.ts       # Run specific E2E test file
+npx playwright test --grep "should create chart" # Run E2E tests matching pattern
+npx playwright test --project=chromium           # Run tests on specific browser
 ```
 
 ## Architecture Overview
@@ -91,7 +105,7 @@ Chord: { name, root, base?, duration?, isLineBreak? }
 - **Testing**: このプロジェクトでは必ずテストを書くこと
 - **Linting**: コミットするコードはlintに通っている必要がある  
 - **Building**: コミットするコードは必ずビルドできる必要がある
-- **E2E Testing**: E2Eテストが存在する場合は実行して確認すること
+- **E2E Testing**: コア機能変更時はE2Eテストを実行して確認すること
 - **Pre-commit validation**: `npm test && npm run lint && npm run build && npm run test:e2e` を確認してからコミット
 
 ### Task Management
