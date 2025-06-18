@@ -8,6 +8,7 @@ const Footer: React.FC = () => {
   return (
     <>
       <footer className="bg-white border-t border-slate-200 px-4 py-3">
+
         <div className="flex justify-center items-center gap-2 text-xs text-slate-500">
           <div className="flex gap-4">
             <button
