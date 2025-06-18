@@ -109,15 +109,24 @@ export class ChartEditorPage {
 
   async setChordName(sectionIndex: number, chordIndex: number, chordName: string) {
     const section = this.getSectionByIndex(sectionIndex);
-    const chordInput = section.locator('[data-chord-item]').nth(chordIndex).locator('input').first();
+    // コード名専用のinputを取得（placeholderで識別）
+    const chordInput = section.locator('[data-chord-item]').nth(chordIndex).locator('input[placeholder="コード名"]');
+    await chordInput.clear(); // 既存値をクリア
     await chordInput.fill(chordName);
     await chordInput.press('Enter'); // コード名を確定
+    await this.page.waitForTimeout(100); // 入力確定を待機
   }
 
   async getChordName(sectionIndex: number, chordIndex: number): Promise<string> {
     const section = this.getSectionByIndex(sectionIndex);
-    const chordInput = section.locator('[data-chord-item]').nth(chordIndex).locator('input').first();
+    // コード名専用のinputを取得（placeholderで識別）
+    const chordInput = section.locator('[data-chord-item]').nth(chordIndex).locator('input[placeholder="コード名"]');
     return await chordInput.inputValue();
+  }
+
+  getChordByIndex(sectionIndex: number, chordIndex: number) {
+    const section = this.getSectionByIndex(sectionIndex);
+    return section.locator('[data-chord-item]').nth(chordIndex);
   }
 
   async deleteChord(sectionIndex: number, chordIndex: number) {
@@ -187,5 +196,110 @@ export class ChartEditorPage {
       [sectionIndex, expectedCount],
       { timeout: 5000 }
     );
+  }
+
+  // ドラッグ&ドロップ操作用メソッド - 改良版
+  async dragChordToPosition(fromSectionIndex: number, fromChordIndex: number, toSectionIndex: number, toChordIndex: number) {
+    const sourceChord = this.getChordByIndex(fromSectionIndex, fromChordIndex);
+    const targetChord = this.getChordByIndex(toSectionIndex, toChordIndex);
+    
+    // ドラッグハンドルを取得（⋮⋮ボタン）
+    const dragHandle = sourceChord.locator('button[title="ドラッグして移動"]');
+    
+    console.log(`Dragging chord from section ${fromSectionIndex}, index ${fromChordIndex} to section ${toSectionIndex}, index ${toChordIndex}`);
+    
+    // Playwright組み込みのdragToメソッドを使用（改良）
+    try {
+      await dragHandle.dragTo(targetChord, {
+        force: true,
+        timeout: 10000
+      });
+      console.log('dragTo completed successfully');
+    } catch (error) {
+      console.log('dragTo failed, trying manual mouse events:', error);
+      
+      // フォールバック: マニュアルマウス操作
+      const sourceBoundingBox = await dragHandle.boundingBox();
+      const targetBoundingBox = await targetChord.boundingBox();
+      
+      if (sourceBoundingBox && targetBoundingBox) {
+        console.log('Using manual mouse events');
+        await this.page.mouse.move(sourceBoundingBox.x + sourceBoundingBox.width / 2, sourceBoundingBox.y + sourceBoundingBox.height / 2);
+        await this.page.mouse.down();
+        await this.page.waitForTimeout(300);
+        await this.page.mouse.move(targetBoundingBox.x + targetBoundingBox.width / 2, targetBoundingBox.y + targetBoundingBox.height / 2, { steps: 10 });
+        await this.page.waitForTimeout(300);
+        await this.page.mouse.up();
+      }
+    }
+    
+    // ドロップ完了を待機
+    await this.page.waitForTimeout(1000);
+    console.log('Drag operation completed');
+  }
+
+  async dragSectionToPosition(fromSectionIndex: number, toSectionIndex: number) {
+    const sourceSection = this.getSectionByIndex(fromSectionIndex);
+    const targetSection = this.getSectionByIndex(toSectionIndex);
+    
+    console.log(`Dragging section from index ${fromSectionIndex} to index ${toSectionIndex}`);
+    
+    // セクションのドラッグハンドル（SVGアイコン）を取得
+    const dragHandle = sourceSection.locator('svg').first();
+    
+    try {
+      await dragHandle.dragTo(targetSection, {
+        force: true,
+        timeout: 10000
+      });
+      console.log('Section dragTo completed successfully');
+    } catch (error) {
+      console.log('Section dragTo failed, trying manual approach:', error);
+      
+      // フォールバック: マニュアルマウス操作
+      const sourceBoundingBox = await dragHandle.boundingBox();
+      const targetBoundingBox = await targetSection.boundingBox();
+      
+      if (sourceBoundingBox && targetBoundingBox) {
+        console.log('Using manual mouse events for section');
+        await this.page.mouse.move(sourceBoundingBox.x + sourceBoundingBox.width / 2, sourceBoundingBox.y + sourceBoundingBox.height / 2);
+        await this.page.mouse.down();
+        await this.page.waitForTimeout(300);
+        await this.page.mouse.move(targetBoundingBox.x + targetBoundingBox.width / 2, targetBoundingBox.y + targetBoundingBox.height / 2, { steps: 10 });
+        await this.page.waitForTimeout(300);
+        await this.page.mouse.up();
+      }
+    }
+    
+    // ドロップ完了を待機
+    await this.page.waitForTimeout(1000);
+    console.log('Section drag operation completed');
+  }
+
+  // ドラッグ&ドロップ後の順序確認用メソッド
+  async getChordOrderInSection(sectionIndex: number): Promise<string[]> {
+    const section = this.getSectionByIndex(sectionIndex);
+    
+    // 改行ではないコードアイテムのみを取得
+    const chordItems = section.locator('[data-chord-item]').filter({
+      hasNot: this.page.locator('text=改行')
+    });
+    
+    const count = await chordItems.count();
+    const chords: string[] = [];
+    
+    for (let i = 0; i < count; i++) {
+      // 各コードアイテム内のコード名入力フィールドを取得
+      const chordInput = chordItems.nth(i).locator('input[placeholder="コード名"]');
+      const value = await chordInput.inputValue();
+      if (value && value.trim()) {
+        chords.push(value.trim());
+      }
+    }
+    return chords;
+  }
+
+  async getSectionOrder(): Promise<string[]> {
+    return await this.getAllSectionNames();
   }
 }
