@@ -32,7 +32,18 @@ export class HomePage {
   }
 
   async clickOpenExplorer() {
-    await this.openExplorerButton.click();
+    // EmptyChartPlaceholderのopen-explorer-buttonがある場合はそれを使用
+    // そうでなければヘッダーのexplorer-toggleを使用
+    try {
+      if (await this.openExplorerButton.isVisible({ timeout: 1000 })) {
+        await this.openExplorerButton.click();
+      } else {
+        await this.explorerToggle.click();
+      }
+    } catch {
+      // フォールバック: explorer-toggleを使用
+      await this.explorerToggle.click();
+    }
   }
 
   async toggleExplorer() {

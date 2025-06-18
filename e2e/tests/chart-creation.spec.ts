@@ -29,7 +29,7 @@ test.describe('Nekogata Score Manager - チャート作成機能', () => {
     await expect(chartFormPage.form).not.toBeVisible();
     
     // タイトルが表示されていることを確認（チャートが作成された）
-    await expect(chartViewPage.getChartTitle('テストチャート')).toBeVisible();
+    await expect(chartViewPage.getChartTitleWithText('テストチャート')).toBeVisible();
   });
 
   test('フォームのキャンセルが動作する', async ({ page }) => {
@@ -84,6 +84,6 @@ test.describe('Nekogata Score Manager - チャート作成機能', () => {
     await expect(chartFormPage.form).not.toBeVisible();
     
     // 作成されたチャートが表示されていることを確認
-    await expect(chartViewPage.getChartTitle('Explorer テストチャート')).toBeVisible();
+    await expect(chartViewPage.getChartTitleWithText('Explorer テストチャート')).toBeVisible();
   });
 });

@@ -37,22 +37,25 @@ const ChordChartActions: React.FC<ChordChartActionsProps> = ({ chart, currentCha
   };
 
   return (
-    <div className="mt-6 flex flex-wrap gap-3">
+    <div className="mt-6 flex flex-wrap gap-3" data-testid="chart-actions">
       <button 
         onClick={onEdit}
         className="bg-[#85B0B7] hover:bg-[#6B9CA5] text-white px-4 py-2 rounded-md text-sm font-medium"
+        data-testid="edit-button"
       >
         編集
       </button>
       <button 
         onClick={handleDuplicate}
         className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-md text-sm font-medium"
+        data-testid="duplicate-button"
       >
         複製
       </button>
       <button 
         onClick={handleDelete}
         className="bg-[#EE5840] hover:bg-[#D14A2E] text-white px-4 py-2 rounded-md text-sm font-medium"
+        data-testid="delete-button"
       >
         削除
       </button>

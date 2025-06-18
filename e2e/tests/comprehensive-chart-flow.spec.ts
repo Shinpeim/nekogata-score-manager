@@ -35,7 +35,7 @@ test.describe('Nekogata Score Manager - 包括的なチャート作成フロー'
     await expect(chartFormPage.form).not.toBeVisible();
     
     // チャートが正しく表示されることを確認
-    await expect(chartViewPage.getChartTitle('サンプル楽曲')).toBeVisible();
+    await expect(chartViewPage.getChartTitleWithText('サンプル楽曲')).toBeVisible();
   });
 
   test('必須項目のバリデーションが動作する', async ({ page }) => {

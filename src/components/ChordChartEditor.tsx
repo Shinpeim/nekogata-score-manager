@@ -64,15 +64,16 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
   };
 
   return (
-    <div className="h-full bg-white overflow-y-auto">
+    <div className="h-full bg-white overflow-y-auto" data-testid="chart-editor">
       <div className="p-6">
         {/* Header */}
         <div className="mb-6 flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-slate-900">コード譜を編集</h2>
-          <div className="flex gap-3">
+          <h2 className="text-2xl font-bold text-slate-900" data-testid="editor-title">コード譜を編集</h2>
+          <div className="flex gap-3" data-testid="editor-actions">
             <button
               onClick={onCancel}
               className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-md text-sm font-medium"
+              data-testid="editor-cancel-button"
             >
               キャンセル
             </button>
@@ -85,6 +86,7 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
                   : 'bg-slate-300 text-slate-500 cursor-not-allowed'
               }`}
               title={!validationResult.isValid ? '無効な入力値があるため保存できません' : ''}
+              data-testid="editor-save-button"
             >
               保存
             </button>
