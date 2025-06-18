@@ -43,7 +43,7 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
   const content = (
     <div className={isMobile ? "px-4" : "p-4"}>
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-medium text-slate-900">Score Explorer</h2>
+        <h2 className="text-sm font-medium text-slate-900" data-testid={`score-explorer-title-${isMobile ? 'mobile' : 'desktop'}`}>Score Explorer</h2>
       </div>
       {charts.length > 0 && (
         <div className="mb-3 flex items-center gap-2">
@@ -58,6 +58,7 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
             onChange={onSelectAll}
             className="text-[#85B0B7] focus:ring-[#85B0B7]"
             title={selectedChartIds.length === charts.length ? '全て解除' : '全て選択'}
+            data-testid="select-all-checkbox"
           />
           <span className="text-xs text-slate-600">一括選択</span>
           <ActionDropdown
@@ -83,6 +84,7 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
               checked={selectedChartIds.includes(chart.id)}
               onChange={() => onChartSelect(chart.id)}
               className="mt-3 text-[#85B0B7] focus:ring-[#85B0B7]"
+              data-testid={`chart-checkbox-${chart.id}`}
             />
             <div 
               className={`flex-1 p-3 rounded-md transition-colors cursor-pointer ${
@@ -91,6 +93,7 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
                   : 'bg-slate-50 hover:bg-slate-100'
               }`}
               onClick={() => handleChartClick(chart.id)}
+              data-testid={`chart-item-${chart.id}`}
             >
               <h3 className="text-sm font-medium text-slate-900">{chart.title}</h3>
               <p className="text-xs text-slate-500 mt-1">{chart.artist}</p>
@@ -113,12 +116,14 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
         <button 
           onClick={onCreateNew}
           className="w-full bg-[#85B0B7] hover:bg-[#6B9CA5] text-white px-3 py-2 rounded text-sm font-medium"
+          data-testid={`explorer-create-new-button-${isMobile ? 'mobile' : 'desktop'}`}
         >
           新規作成
         </button>
         <button 
           onClick={onImport}
           className="w-full bg-[#BDD0CA] hover:bg-[#A4C2B5] text-slate-800 px-3 py-2 rounded text-sm font-medium"
+          data-testid={`explorer-import-button-${isMobile ? 'mobile' : 'desktop'}`}
         >
           インポート
         </button>

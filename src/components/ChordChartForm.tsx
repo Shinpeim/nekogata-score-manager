@@ -76,7 +76,7 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6" role="form">
+        <form onSubmit={handleSubmit} className="space-y-6" role="form" data-testid="chord-chart-form">
           {/* 基本情報 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -90,6 +90,7 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
                 onChange={(e) => handleChange('title', e.target.value)}
                 className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#85B0B7]"
                 placeholder="楽曲のタイトル"
+                data-testid="title-input"
               />
             </div>
 
@@ -190,12 +191,14 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
               type="button"
               onClick={onCancel}
               className="px-4 py-2 text-slate-700 bg-slate-200 hover:bg-slate-300 rounded-md transition-colors"
+              data-testid="cancel-button"
             >
               キャンセル
             </button>
             <button
               type="submit"
               className="px-4 py-2 text-white bg-[#85B0B7] hover:bg-[#6B9CA5] rounded-md transition-colors"
+              data-testid="save-button"
             >
               {initialData?.id ? '更新' : '作成'}
             </button>
