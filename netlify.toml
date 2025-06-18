@@ -1,0 +1,29 @@
+# Netlify設定ファイル
+# Nekogata Score Manager - PWAアプリケーション用設定
+
+[build]
+  # プロダクションビルド設定
+  publish = "dist"
+  command = "npm run build"
+
+[build.environment]
+  # すべての環境で適用される基本設定
+  NODE_VERSION = "20"
+
+# プロダクション環境設定
+[context.production.environment]
+  VITE_LOG_LEVEL = "ERROR"
+
+# プレビューデプロイ設定（PRやブランチプレビュー）
+[context.deploy-preview.environment]
+  VITE_LOG_LEVEL = "INFO"
+
+# ブランチデプロイ設定（main以外のブランチ）
+[context.branch-deploy.environment]
+  VITE_LOG_LEVEL = "DEBUG"
+
+# リダイレクト設定（SPAサポート）
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
