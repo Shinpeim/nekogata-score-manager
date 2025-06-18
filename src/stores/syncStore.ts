@@ -3,6 +3,7 @@ import { devtools } from 'zustand/middleware';
 import type { ChordChart } from '../types';
 import type { SyncResult, SyncConflict, SyncConfig } from '../types/sync';
 import { SyncManager } from '../utils/sync/syncManager';
+import { logger } from '../utils/logger';
 
 interface SyncState {
   // 同期状態
@@ -91,7 +92,7 @@ export const useSyncStore = create<SyncState>()(
 
       sync: async (charts, onConflict) => {
         try {
-          console.log(`[SYNC] SyncStore.sync called with ${charts.length} charts`);
+          logger.debug(`SyncStore.sync called with ${charts.length} charts`);
           const { syncManager } = get();
           if (!syncManager) {
             throw new Error('同期機能が初期化されていません');
@@ -100,7 +101,7 @@ export const useSyncStore = create<SyncState>()(
           set({ isSyncing: true, syncError: null }, false, 'syncStart');
           
           const result = await syncManager.sync(charts, onConflict);
-          console.log(`[SYNC] SyncStore.sync got result:`, { success: result.success, hasCharts: !!result.mergedCharts, chartCount: result.mergedCharts?.length });
+          logger.debug(`SyncStore.sync got result:`, { success: result.success, hasCharts: !!result.mergedCharts, chartCount: result.mergedCharts?.length });
           
           if (result.success) {
             const lastSyncTime = syncManager.getLastSyncTimeAsDate();
@@ -115,10 +116,10 @@ export const useSyncStore = create<SyncState>()(
             }, false, 'syncFailed');
           }
           
-          console.log(`[SYNC] SyncStore.sync returning result`);
+          logger.debug(`SyncStore.sync returning result`);
           return result;
         } catch (error) {
-          console.error(`[SYNC] SyncStore.sync caught error:`, error);
+          logger.error(`SyncStore.sync caught error:`, error);
           set({ 
             isSyncing: false,
             syncError: error instanceof Error ? error.message : '同期に失敗しました' 

@@ -1,6 +1,7 @@
 import { useChartDataStore } from '../stores/chartDataStore';
 import { useChartCrudStore } from '../stores/chartCrudStore';
-import type { ChordChart, ChordLibrary } from '../types';
+import type { ChordChart } from '../types';
+import { logger } from '../utils/logger';
 
 /**
  * チャート管理の統合フック
@@ -37,13 +38,13 @@ export const useChartManagement = () => {
     
     // 同期関連（crudStore）
     applySyncedCharts: async (mergedCharts: ChordChart[]) => {
-      console.log(`[SYNC] useChartManagement.applySyncedCharts called with ${mergedCharts.length} charts`);
+      logger.debug(`useChartManagement.applySyncedCharts called with ${mergedCharts.length} charts`);
       try {
         const result = await crudStore.applySyncedCharts(mergedCharts);
-        console.log(`[SYNC] useChartManagement.applySyncedCharts completed successfully`);
+        logger.debug(`useChartManagement.applySyncedCharts completed successfully`);
         return result;
       } catch (error) {
-        console.error(`[SYNC] useChartManagement.applySyncedCharts failed:`, error);
+        logger.error(`useChartManagement.applySyncedCharts failed:`, error);
         throw error;
       }
     },
@@ -54,32 +55,4 @@ export const useChartManagement = () => {
 };
 
 
-// 型定義も互換性のために提供
-export interface ChordChartState {
-  // データ
-  charts: ChordLibrary;
-  currentChartId: string | null;
-  isLoading: boolean;
-  error: string | null;
-  
-  // 同期関連（内部実装のため削除）
-    
-  // アクション
-  addChart: (chart: ChordChart) => Promise<void>;
-  updateChart: (id: string, chart: Partial<ChordChart>) => Promise<void>;
-  deleteChart: (id: string) => Promise<void>;
-  deleteMultipleCharts: (ids: string[]) => Promise<void>;
-  setCurrentChart: (id: string | null) => void;
-  loadInitialData: () => Promise<void>;
-  loadFromStorage: () => Promise<void>;
-  createNewChart: (chartData: Partial<ChordChart>) => Promise<ChordChart>;
-  clearError: () => void;
-  
-  // 同期メソッド
-  applySyncedCharts: (mergedCharts: ChordChart[]) => Promise<void>;
-  subscribeSyncNotification: (callback: (charts: ChordChart[]) => void) => () => void;
-  notifySyncCallbacks: () => void;
-}
 
-// 分離されたストアを個別に使用したい場合のエクスポート
-export { useChartDataStore, useChartCrudStore };

@@ -277,7 +277,11 @@ describe('useChartSync', () => {
         await expect(result.current.syncCharts()).rejects.toThrow('Network error');
       });
 
-      expect(consoleSpy).toHaveBeenCalledWith('[SYNC] useChartSync.syncCharts caught error:', syncError);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringMatching(/^\[.*\] \[ERROR\]$/),
+        'useChartSync.syncCharts caught error:',
+        syncError
+      );
       expect(mockChordChartStore.applySyncedCharts).not.toHaveBeenCalled();
 
       consoleSpy.mockRestore();
@@ -392,7 +396,11 @@ describe('useChartSync', () => {
         changeCallback([chart1]);
       });
 
-      expect(consoleSpy).toHaveBeenCalledWith('自動同期エラー:', expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringMatching(/^\[.*\] \[ERROR\]$/),
+        '自動同期エラー:',
+        expect.any(Error)
+      );
 
       consoleSpy.mockRestore();
     });

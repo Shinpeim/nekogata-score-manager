@@ -2,6 +2,7 @@ import { useEffect, useCallback } from 'react';
 import { useChartManagement } from './useChartManagement';
 import { useSyncStore } from '../stores/syncStore';
 import type { SyncConflict } from '../types/sync';
+import { logger } from '../utils/logger';
 
 export const useChartSync = () => {
   const chordChartStore = useChartManagement();
@@ -59,8 +60,8 @@ export const useChartSync = () => {
       console.log(`[SYNC] useChartSync.syncCharts returning result`);
       return result;
     } catch (error) {
-      console.error('[SYNC] useChartSync.syncCharts caught error:', error);
-      console.error('[SYNC] Error stack:', error instanceof Error ? error.stack : 'No stack');
+      logger.error('useChartSync.syncCharts caught error:', error);
+      logger.error('Error stack:', error instanceof Error ? error.stack : 'No stack');
       throw error;
     }
   }, [chordChartStore, syncStore]);
@@ -79,20 +80,20 @@ export const useChartSync = () => {
       try {
         // 同期中でない場合のみ自動同期を実行
         if (!syncStore.isSyncing) {
-          console.log(`[SYNC] Auto sync triggered with ${updatedCharts.length} charts`);
+          logger.debug(`Auto sync triggered with ${updatedCharts.length} charts`);
           const result = await syncStore.sync(updatedCharts);
           
           // 成功時にマージ済みデータを適用
           if (result.success && result.mergedCharts) {
-            console.log(`[SYNC] Auto sync applying ${result.mergedCharts.length} charts`);
+            logger.debug(`Auto sync applying ${result.mergedCharts.length} charts`);
             await chordChartStore.applySyncedCharts(result.mergedCharts);
-            console.log(`[SYNC] Auto sync applySyncedCharts completed`);
+            logger.debug('Auto sync applySyncedCharts completed');
           } else {
-            console.log(`[SYNC] Auto sync - not applying charts:`, { success: result.success, mergedCharts: result.mergedCharts });
+            logger.debug('Auto sync - not applying charts:', { success: result.success, mergedCharts: result.mergedCharts });
           }
         }
       } catch (error) {
-        console.error('自動同期エラー:', error);
+        logger.error('自動同期エラー:', error);
         // 自動同期のエラーは静かに失敗させる（UX考慮）
       }
     });

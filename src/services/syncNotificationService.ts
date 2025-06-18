@@ -1,10 +1,11 @@
 import type { ChordChart } from '../types';
+import { logger } from '../utils/logger';
 
 /**
  * 同期通知サービス
  * 同期コールバックの管理とデータ変更通知を担当
  */
-export class SyncNotificationService {
+class SyncNotificationService {
   private syncCallbacks = new Set<(charts: ChordChart[]) => void>();
 
   /**
@@ -30,7 +31,7 @@ export class SyncNotificationService {
       try {
         callback(charts);
       } catch (error) {
-        console.error('同期コールバック実行エラー:', error);
+        logger.error('同期コールバック実行エラー:', error);
       }
     });
   }

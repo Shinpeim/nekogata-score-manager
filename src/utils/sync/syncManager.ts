@@ -2,6 +2,7 @@ import type { ChordChart } from '../../types/chord';
 import type { ISyncAdapter, SyncMetadata, SyncConflict, SyncResult, SyncConfig } from '../../types/sync';
 import { GoogleDriveSyncAdapter } from './googleDriveAdapter';
 import { getDeviceId } from './deviceId';
+import { logger } from '../logger';
 
 export class SyncManager {
   private static instance: SyncManager;
@@ -54,11 +55,11 @@ export class SyncManager {
     };
     
     try {
-      console.log(`[SYNC] Starting sync with ${localCharts.length} local charts`);
+      logger.debug(`Starting sync with ${localCharts.length} local charts`);
       
       // リモートデータを取得
       const { charts: remoteCharts, metadata: remoteMetadata } = await this.adapter.pull();
-      console.log(`[SYNC] Pulled ${remoteCharts.length} remote charts`);
+      logger.debug(`Pulled ${remoteCharts.length} remote charts`);
       
       // ローカルメタデータを生成
       const localMetadata = this.generateLocalMetadata(localCharts);
@@ -82,11 +83,11 @@ export class SyncManager {
       const mergedCharts = this.mergeCharts(localCharts, remoteCharts, localMetadata, remoteMetadata);
       const mergedMetadata = this.mergeMetadata(localMetadata, remoteMetadata);
       
-      console.log(`[SYNC] Merged ${mergedCharts.length} charts for push`);
+      logger.debug(`Merged ${mergedCharts.length} charts for push`);
       
       // プッシュ
       await this.adapter.push(mergedCharts, mergedMetadata);
-      console.log(`[SYNC] Successfully pushed to remote`);
+      logger.debug(`Successfully pushed to remote`);
       
       result.success = true;
       result.syncedCharts = mergedCharts.map(c => c.id);
@@ -94,13 +95,13 @@ export class SyncManager {
       
       // 最終同期時刻を更新
       this.updateLastSyncTime();
-      console.log(`[SYNC] Sync completed successfully`);
+      logger.debug(`Sync completed successfully`);
       
       return result;
       
     } catch (error) {
-      console.error(`[SYNC] syncManager.sync caught error:`, error);
-      console.error(`[SYNC] Error stack:`, error instanceof Error ? error.stack : 'No stack');
+      logger.error(`syncManager.sync caught error:`, error);
+      logger.error(`Error stack:`, error instanceof Error ? error.stack : 'No stack');
       result.errors.push({
         chartId: '',
         error: error as Error,
@@ -108,7 +109,7 @@ export class SyncManager {
       });
       return result;
     } finally {
-      console.log(`[SYNC] syncManager.sync finally block - setting syncInProgress to false`);
+      logger.debug(`syncManager.sync finally block - setting syncInProgress to false`);
       this.syncInProgress = false;
     }
   }
@@ -154,7 +155,7 @@ export class SyncManager {
       const remoteModified = new Date(remoteMeta.lastModifiedAt);
       
       // デバッグログ
-      console.log(`[SYNC] Conflict check for chart ${localChart.id}:`, {
+      logger.debug(`Conflict check for chart ${localChart.id}:`, {
         lastSync: lastSync.toISOString(),
         localModified: localModified.toISOString(),
         remoteModified: remoteModified.toISOString(),
@@ -163,7 +164,7 @@ export class SyncManager {
       });
       
       if (localModified > lastSync && remoteModified > lastSync) {
-        console.log(`[SYNC] Conflict detected for chart ${localChart.id}`);
+        logger.debug(`Conflict detected for chart ${localChart.id}`);
         conflicts.push({
           localChart,
           remoteChart,

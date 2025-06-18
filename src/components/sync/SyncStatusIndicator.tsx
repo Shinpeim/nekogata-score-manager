@@ -1,6 +1,7 @@
 import React from 'react';
 import { CloudArrowUpIcon, CloudIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useSyncStore } from '../../stores/syncStore';
+import { logger } from '../../utils/logger';
 
 interface SyncStatusIndicatorProps {
   className?: string;
@@ -11,10 +12,10 @@ export const SyncStatusIndicator: React.FC<SyncStatusIndicatorProps> = ({ classN
   
   // デバッグログを追加
   const authStatus = isAuthenticated();
-  console.log('[SyncStatusIndicator] Authentication status:', authStatus);
-  console.log('[SyncStatusIndicator] isSyncing:', isSyncing);
-  console.log('[SyncStatusIndicator] lastSyncTime:', lastSyncTime);
-  console.log('[SyncStatusIndicator] syncError:', syncError);
+  logger.debug('SyncStatusIndicator Authentication status:', authStatus);
+  logger.debug('SyncStatusIndicator isSyncing:', isSyncing);
+  logger.debug('SyncStatusIndicator lastSyncTime:', lastSyncTime);
+  logger.debug('SyncStatusIndicator syncError:', syncError);
   
   if (!authStatus) {
     return null;
