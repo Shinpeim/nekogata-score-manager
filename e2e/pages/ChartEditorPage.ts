@@ -198,7 +198,7 @@ export class ChartEditorPage {
     );
   }
 
-  // ドラッグ&ドロップ操作用メソッド
+  // ドラッグ&ドロップ操作用メソッド - 改良版
   async dragChordToPosition(fromSectionIndex: number, fromChordIndex: number, toSectionIndex: number, toChordIndex: number) {
     const sourceChord = this.getChordByIndex(fromSectionIndex, fromChordIndex);
     const targetChord = this.getChordByIndex(toSectionIndex, toChordIndex);
@@ -206,47 +206,74 @@ export class ChartEditorPage {
     // ドラッグハンドルを取得（⋮⋮ボタン）
     const dragHandle = sourceChord.locator('button[title="ドラッグして移動"]');
     
-    // より詳細なマウス操作でドラッグ&ドロップを実行
-    const sourceBoundingBox = await dragHandle.boundingBox();
-    const targetBoundingBox = await targetChord.boundingBox();
+    console.log(`Dragging chord from section ${fromSectionIndex}, index ${fromChordIndex} to section ${toSectionIndex}, index ${toChordIndex}`);
     
-    if (sourceBoundingBox && targetBoundingBox) {
-      // マウスイベントによるドラッグ操作
-      await this.page.mouse.move(sourceBoundingBox.x + sourceBoundingBox.width / 2, sourceBoundingBox.y + sourceBoundingBox.height / 2);
-      await this.page.mouse.down();
-      await this.page.waitForTimeout(200);
-      await this.page.mouse.move(targetBoundingBox.x + targetBoundingBox.width / 2, targetBoundingBox.y + targetBoundingBox.height / 2, { steps: 5 });
-      await this.page.waitForTimeout(200);
-      await this.page.mouse.up();
+    // Playwright組み込みのdragToメソッドを使用（改良）
+    try {
+      await dragHandle.dragTo(targetChord, {
+        force: true,
+        timeout: 10000
+      });
+      console.log('dragTo completed successfully');
+    } catch (error) {
+      console.log('dragTo failed, trying manual mouse events:', error);
+      
+      // フォールバック: マニュアルマウス操作
+      const sourceBoundingBox = await dragHandle.boundingBox();
+      const targetBoundingBox = await targetChord.boundingBox();
+      
+      if (sourceBoundingBox && targetBoundingBox) {
+        console.log('Using manual mouse events');
+        await this.page.mouse.move(sourceBoundingBox.x + sourceBoundingBox.width / 2, sourceBoundingBox.y + sourceBoundingBox.height / 2);
+        await this.page.mouse.down();
+        await this.page.waitForTimeout(300);
+        await this.page.mouse.move(targetBoundingBox.x + targetBoundingBox.width / 2, targetBoundingBox.y + targetBoundingBox.height / 2, { steps: 10 });
+        await this.page.waitForTimeout(300);
+        await this.page.mouse.up();
+      }
     }
     
     // ドロップ完了を待機
-    await this.page.waitForTimeout(800);
+    await this.page.waitForTimeout(1000);
+    console.log('Drag operation completed');
   }
 
   async dragSectionToPosition(fromSectionIndex: number, toSectionIndex: number) {
     const sourceSection = this.getSectionByIndex(fromSectionIndex);
     const targetSection = this.getSectionByIndex(toSectionIndex);
     
+    console.log(`Dragging section from index ${fromSectionIndex} to index ${toSectionIndex}`);
+    
     // セクションのドラッグハンドル（SVGアイコン）を取得
     const dragHandle = sourceSection.locator('svg').first();
     
-    // より詳細なマウス操作でドラッグ&ドロップを実行
-    const sourceBoundingBox = await dragHandle.boundingBox();
-    const targetBoundingBox = await targetSection.boundingBox();
-    
-    if (sourceBoundingBox && targetBoundingBox) {
-      // マウスイベントによるドラッグ操作
-      await this.page.mouse.move(sourceBoundingBox.x + sourceBoundingBox.width / 2, sourceBoundingBox.y + sourceBoundingBox.height / 2);
-      await this.page.mouse.down();
-      await this.page.waitForTimeout(200);
-      await this.page.mouse.move(targetBoundingBox.x + targetBoundingBox.width / 2, targetBoundingBox.y + targetBoundingBox.height / 2, { steps: 5 });
-      await this.page.waitForTimeout(200);
-      await this.page.mouse.up();
+    try {
+      await dragHandle.dragTo(targetSection, {
+        force: true,
+        timeout: 10000
+      });
+      console.log('Section dragTo completed successfully');
+    } catch (error) {
+      console.log('Section dragTo failed, trying manual approach:', error);
+      
+      // フォールバック: マニュアルマウス操作
+      const sourceBoundingBox = await dragHandle.boundingBox();
+      const targetBoundingBox = await targetSection.boundingBox();
+      
+      if (sourceBoundingBox && targetBoundingBox) {
+        console.log('Using manual mouse events for section');
+        await this.page.mouse.move(sourceBoundingBox.x + sourceBoundingBox.width / 2, sourceBoundingBox.y + sourceBoundingBox.height / 2);
+        await this.page.mouse.down();
+        await this.page.waitForTimeout(300);
+        await this.page.mouse.move(targetBoundingBox.x + targetBoundingBox.width / 2, targetBoundingBox.y + targetBoundingBox.height / 2, { steps: 10 });
+        await this.page.waitForTimeout(300);
+        await this.page.mouse.up();
+      }
     }
     
     // ドロップ完了を待機
-    await this.page.waitForTimeout(800);
+    await this.page.waitForTimeout(1000);
+    console.log('Section drag operation completed');
   }
 
   // ドラッグ&ドロップ後の順序確認用メソッド

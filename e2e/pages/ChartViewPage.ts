@@ -65,4 +65,21 @@ export class ChartViewPage {
     const chartTitle = this.getChartTitleWithText(title);
     return await chartTitle.isVisible();
   }
+
+  // より簡単なアプローチ: 表示されているすべてのコードを順序通りに取得
+  async getAllDisplayedChords(): Promise<string[]> {
+    const chartContent = this.page.locator('[data-testid="chart-content"]');
+    const chordElements = chartContent.locator('text=/^[A-G][#b]?(?:m|dim|aug|sus[24]?|add[69]|M7?|m7?|7|9|11|13)*(?:[/][A-G][#b]?)?$/');
+    const chordCount = await chordElements.count();
+    
+    const chords: string[] = [];
+    for (let i = 0; i < chordCount; i++) {
+      const chordText = await chordElements.nth(i).textContent();
+      if (chordText && chordText.trim()) {
+        chords.push(chordText.trim());
+      }
+    }
+    
+    return chords;
+  }
 }

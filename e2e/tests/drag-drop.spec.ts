@@ -4,14 +4,16 @@ import { ChordChartFormPage } from '../pages/ChordChartFormPage';
 import { ChartViewPage } from '../pages/ChartViewPage';
 import { ChartEditorPage } from '../pages/ChartEditorPage';
 
-test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト (基本動作確認)', () => {
+test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト (正確な順序変更)', () => {
   test.beforeEach(async ({ page }) => {
     // LocalStorageをクリアして各テストを独立させる
     await page.goto('/');
     await page.evaluate(() => localStorage.clear());
   });
 
-  test('コードのドラッグ&ドロップ操作が動作する', async ({ page }) => {
+  test('コード順序変更のドラッグ&ドロップが正確に動作する', async ({ page, browserName }) => {
+    // WebKit系ブラウザでは@dnd-kitの互換性問題により一時的にスキップ
+    test.skip(browserName === 'webkit', 'WebKit系ブラウザでは@dnd-kitドラッグ操作に互換性問題があります');
     const homePage = new HomePage(page);
     const chartFormPage = new ChordChartFormPage(page);
     const chartViewPage = new ChartViewPage(page);
@@ -52,36 +54,26 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
     expect(chordOrder).toEqual(['C', 'Am', 'F', 'G']);
 
     // ドラッグ&ドロップ: Am(index:1) を F(index:2) の後に移動
+    // 期待結果: C - Am - F - G → C - F - Am - G
     await chartEditorPage.dragChordToPosition(sectionIndex, 1, sectionIndex, 2);
 
     // 順序変更後の確認
     chordOrder = await chartEditorPage.getChordOrderInSection(sectionIndex);
+    console.log('実際の順序:', chordOrder);
     
-    // ドラッグ&ドロップが実行されたことを確認
-    // PlaywrightとdndKitの相性により、正確な結果予測は困難だが、
-    // 基本的なドラッグ操作が機能していることを確認
-    expect(chordOrder.length).toBeGreaterThanOrEqual(2); // 最低限のコードが残存
-    expect(chordOrder).toContain('Am'); // ドラッグ対象のコードが存在
-    
-    // ドラッグ操作により何らかの変化が発生したことを確認
-    // (PlaywrightとdndKitの相性により、正確な順序制御は困難だが、操作自体は実行される)
-    const hasOrderChanged = JSON.stringify(chordOrder) !== JSON.stringify(['C', 'Am', 'F', 'G']);
-    expect(hasOrderChanged).toBe(true);
+    // 正確な順序変更を期待
+    expect(chordOrder).toEqual(['C', 'F', 'Am', 'G']);
 
     // 保存して永続化確認
     await chartEditorPage.clickSave();
     await chartViewPage.waitForChartToLoad();
-
-    // 再度編集モードに入って順序が保持されていることを確認
-    await chartViewPage.clickEdit();
-    await chartEditorPage.waitForEditorToLoad();
     
-    const persistedOrder = await chartEditorPage.getChordOrderInSection(sectionIndex);
-    // ドラッグ後の状態が永続化されていることを確認
-    expect(persistedOrder.length).toBeGreaterThanOrEqual(1);
-    // 保存前後でコード要素が存在することを確認（順序は問わない）
-    const hasCommonChords = persistedOrder.some(chord => chordOrder.includes(chord));
-    expect(hasCommonChords).toBe(true);
+    // 表示モードでの順序確認（表示画面でのコード取得）
+    const displayedChords = await chartViewPage.getAllDisplayedChords();
+    console.log('表示モードでの順序:', displayedChords);
+    
+    // 永続化された順序が正しいことを確認
+    expect(displayedChords).toEqual(['C', 'F', 'Am', 'G']);
   });
 
   test('セクションドラッグハンドルの存在と基本操作確認', async ({ page }) => {
@@ -107,7 +99,7 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
     await chartEditorPage.setSectionName(1, 'Aメロ');
 
     // セクションが正しく作成されたことを確認
-    let sectionOrder = await chartEditorPage.getSectionOrder();
+    const sectionOrder = await chartEditorPage.getSectionOrder();
     expect(sectionOrder).toEqual(['イントロ', 'Aメロ']);
 
     // セクションドラッグハンドルの存在確認
