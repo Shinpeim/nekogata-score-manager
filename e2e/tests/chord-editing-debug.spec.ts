@@ -44,8 +44,8 @@ test.describe('Chord Editing Debug Tests', () => {
       // 最初のセクションでコード追加を試行
       await chartEditorPage.addChordToSection(0);
       
-      // 少し待ってからコード要素を確認
-      await page.waitForTimeout(1000);
+      // コード要素の追加を待機
+      await chartEditorPage.waitForChordToAppear(0, 1);
       
       const chordElements = await page.locator('[data-chord-item]').all();
       console.log('Found chord items after adding:', chordElements.length);

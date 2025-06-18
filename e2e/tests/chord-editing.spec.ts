@@ -87,19 +87,19 @@ test.describe('Nekogata Score Manager - コード編集機能テスト', () => {
     
     // コード追加
     await chartEditorPage.addChordToSection(sectionIndex);
-    await page.waitForTimeout(500); // シンプルな待機
+    await chartEditorPage.waitForChordToAppear(sectionIndex, 1);
     await chartEditorPage.setChordName(sectionIndex, 0, 'C');
 
     await chartEditorPage.addChordToSection(sectionIndex);
-    await page.waitForTimeout(500);
+    await chartEditorPage.waitForChordToAppear(sectionIndex, 2);
     await chartEditorPage.setChordName(sectionIndex, 1, 'Am');
 
     await chartEditorPage.addChordToSection(sectionIndex);
-    await page.waitForTimeout(500);
+    await chartEditorPage.waitForChordToAppear(sectionIndex, 3);
     await chartEditorPage.setChordName(sectionIndex, 2, 'F');
 
     await chartEditorPage.addChordToSection(sectionIndex);
-    await page.waitForTimeout(500);
+    await chartEditorPage.waitForChordToAppear(sectionIndex, 4);
     await chartEditorPage.setChordName(sectionIndex, 3, 'G');
 
     // コード名が正しく設定されたことを確認
@@ -304,16 +304,16 @@ test.describe('Nekogata Score Manager - コード編集機能テスト', () => {
     // コードを4つ追加
     const sectionIndex = 0;
     await chartEditorPage.addChordToSection(sectionIndex);
-    await page.waitForTimeout(500);
+    await chartEditorPage.waitForChordToAppear(sectionIndex, 1);
     await chartEditorPage.setChordName(sectionIndex, 0, 'C');
     await chartEditorPage.addChordToSection(sectionIndex);
-    await page.waitForTimeout(500);
+    await chartEditorPage.waitForChordToAppear(sectionIndex, 2);
     await chartEditorPage.setChordName(sectionIndex, 1, 'Am');
     await chartEditorPage.addChordToSection(sectionIndex);
-    await page.waitForTimeout(500);
+    await chartEditorPage.waitForChordToAppear(sectionIndex, 3);
     await chartEditorPage.setChordName(sectionIndex, 2, 'F');
     await chartEditorPage.addChordToSection(sectionIndex);
-    await page.waitForTimeout(500);
+    await chartEditorPage.waitForChordToAppear(sectionIndex, 4);
     await chartEditorPage.setChordName(sectionIndex, 3, 'G');
 
     // 削除前の状態確認
@@ -322,7 +322,7 @@ test.describe('Nekogata Score Manager - コード編集機能テスト', () => {
 
     // 真ん中のコード（Am）を削除
     await chartEditorPage.deleteChord(sectionIndex, 1);
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(500); // 削除処理の完了を待機
 
     // 削除後の確認
     chords = await chartEditorPage.getAllChordsInSection(sectionIndex);

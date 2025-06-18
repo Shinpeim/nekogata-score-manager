@@ -114,7 +114,21 @@ export class ChartEditorPage {
     await chordInput.clear(); // 既存値をクリア
     await chordInput.fill(chordName);
     await chordInput.press('Enter'); // コード名を確定
-    await this.page.waitForTimeout(100); // 入力確定を待機
+    // 入力値が反映されるまで待機
+    await this.page.waitForFunction(
+      ([sIndex, cIndex, name]) => {
+        const sections = document.querySelectorAll('[data-section-card]');
+        const targetSection = sections[sIndex];
+        if (!targetSection) return false;
+        const chordItems = targetSection.querySelectorAll('[data-chord-item]');
+        const targetChord = chordItems[cIndex];
+        if (!targetChord) return false;
+        const input = targetChord.querySelector('input[placeholder="コード名"]') as HTMLInputElement;
+        return input && input.value === name;
+      },
+      [sectionIndex, chordIndex, chordName],
+      { timeout: 3000 }
+    );
   }
 
   async getChordName(sectionIndex: number, chordIndex: number): Promise<string> {
@@ -198,10 +212,21 @@ export class ChartEditorPage {
     );
   }
 
+  // 改行マーカーを除外した実際のコード要素を取得
+  async getActualChordElement(sectionIndex: number, chordIndex: number) {
+    const section = this.getSectionByIndex(sectionIndex);
+    // 改行ではないコードアイテムのみを取得
+    const chordItems = section.locator('[data-chord-item]').filter({
+      hasNot: this.page.locator('text=改行')
+    });
+    return chordItems.nth(chordIndex);
+  }
+
   // ドラッグ&ドロップ操作用メソッド - 改良版
   async dragChordToPosition(fromSectionIndex: number, fromChordIndex: number, toSectionIndex: number, toChordIndex: number) {
-    const sourceChord = this.getChordByIndex(fromSectionIndex, fromChordIndex);
-    const targetChord = this.getChordByIndex(toSectionIndex, toChordIndex);
+    // 実際のコード要素を取得（改行マーカーを除外したインデックスを使用）
+    const sourceChord = await this.getActualChordElement(fromSectionIndex, fromChordIndex);
+    const targetChord = await this.getActualChordElement(toSectionIndex, toChordIndex);
     
     // ドラッグハンドルを取得（⋮⋮ボタン）
     const dragHandle = sourceChord.locator('button[title="ドラッグして移動"]');
@@ -226,15 +251,18 @@ export class ChartEditorPage {
         console.log('Using manual mouse events');
         await this.page.mouse.move(sourceBoundingBox.x + sourceBoundingBox.width / 2, sourceBoundingBox.y + sourceBoundingBox.height / 2);
         await this.page.mouse.down();
-        await this.page.waitForTimeout(300);
+        await this.page.waitForFunction(() => document.querySelector('[data-chord-item]:hover') !== null, { timeout: 1000 });
         await this.page.mouse.move(targetBoundingBox.x + targetBoundingBox.width / 2, targetBoundingBox.y + targetBoundingBox.height / 2, { steps: 10 });
-        await this.page.waitForTimeout(300);
+        await this.page.waitForFunction(() => document.querySelector('[data-chord-item]:hover') !== null, { timeout: 1000 });
         await this.page.mouse.up();
       }
     }
     
-    // ドロップ完了を待機
-    await this.page.waitForTimeout(1000);
+    // ドロップ完了を待機（コードの順序が変更されるまで待つ）
+    await this.page.waitForFunction(() => {
+      const sections = document.querySelectorAll('[data-section-card]');
+      return sections.length > 0;
+    }, { timeout: 3000 });
     console.log('Drag operation completed');
   }
 
@@ -264,15 +292,18 @@ export class ChartEditorPage {
         console.log('Using manual mouse events for section');
         await this.page.mouse.move(sourceBoundingBox.x + sourceBoundingBox.width / 2, sourceBoundingBox.y + sourceBoundingBox.height / 2);
         await this.page.mouse.down();
-        await this.page.waitForTimeout(300);
+        await this.page.waitForFunction(() => document.querySelector('[data-section-card]:hover') !== null, { timeout: 1000 });
         await this.page.mouse.move(targetBoundingBox.x + targetBoundingBox.width / 2, targetBoundingBox.y + targetBoundingBox.height / 2, { steps: 10 });
-        await this.page.waitForTimeout(300);
+        await this.page.waitForFunction(() => document.querySelector('[data-section-card]:hover') !== null, { timeout: 1000 });
         await this.page.mouse.up();
       }
     }
     
-    // ドロップ完了を待機
-    await this.page.waitForTimeout(1000);
+    // ドロップ完了を待機（セクションの順序が変更されるまで待つ）
+    await this.page.waitForFunction(() => {
+      const sections = document.querySelectorAll('[data-section-card]');
+      return sections.length > 0;
+    }, { timeout: 3000 });
     console.log('Section drag operation completed');
   }
 

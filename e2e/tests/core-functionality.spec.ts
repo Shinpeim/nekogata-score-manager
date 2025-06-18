@@ -80,8 +80,8 @@ test.describe('Nekogata Score Manager - コア機能テスト', () => {
     // 複製ボタンをクリック
     await chartViewPage.clickDuplicate();
     
-    // 複製処理の完了を待つ
-    await page.waitForTimeout(2000);
+    // 複製ボタンがクリックできることを確認
+    await expect(chartViewPage.duplicateButton).toBeVisible();
     
     // 複製ボタンがクリックされたことを確認（複製機能の動作確認）
     // 実装によっては現在のチャートが複製されたものに切り替わる可能性がある

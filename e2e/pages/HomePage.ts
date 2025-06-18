@@ -21,6 +21,10 @@ export class HomePage {
 
   async goto() {
     await this.page.goto('/');
+    // E2EテストフラグをsessionStorageで設定（Google Drive同期無効化）
+    await this.page.evaluate(() => {
+      sessionStorage.setItem('__playwright_test__', 'true');
+    });
   }
 
   async clickCreateNew() {

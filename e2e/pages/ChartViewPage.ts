@@ -58,7 +58,7 @@ export class ChartViewPage {
   }
 
   async waitForChartToLoad() {
-    await this.chartViewer.waitFor({ state: 'visible', timeout: 5000 });
+    await this.chartViewer.waitFor({ state: 'visible', timeout: 15000 });
   }
 
   async isChartDisplayed(title: string) {

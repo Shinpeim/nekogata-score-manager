@@ -9,6 +9,13 @@ export const useChartSync = () => {
 
   // 初期化処理
   useEffect(() => {
+    // E2Eテスト環境の検出（sessionStorageベース）
+    const isE2ETest = sessionStorage.getItem('__playwright_test__') === 'true';
+    
+    if (isE2ETest) {
+      return;
+    }
+    
     const initializeIfNeeded = async () => {
       const state = useSyncStore.getState();
       if (!state.syncManager) {
