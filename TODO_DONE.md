@@ -4,6 +4,39 @@
 
 ## 完了済み
 
+### 2025-06-18: Google Drive同期機能完全実装
+- [x] **複数環境でのスコア同期機能** (推定工数: 2-3週間)
+  - [x] 基盤層実装
+    - [x] Google API Console設定 (プロジェクト作成、OAuth 2.0設定) ※.env.exampleファイル作成済み
+    - [x] 認証フロー実装 (GoogleAuthProvider、トークン管理)
+    - [x] 同期アダプター層 (ISyncAdapter、GoogleDriveSyncAdapter)
+  - [x] 同期ロジック実装
+    - [x] タイムスタンプ管理 (lastSyncedAt、lastModifiedAt、deviceId)
+    - [x] コンフリクト検出 (後勝ち戦略、警告表示)
+    - [x] 同期実行フロー (pull → compare → warn → push)
+  - [x] UI/UX実装
+    - [x] 同期状態表示 (SyncStatusIndicator、最終同期時刻)
+    - [x] コンフリクト警告ダイアログ (上書き前プレビュー、バックアップオプション)
+    - [x] 設定画面 (同期有効/無効、アカウント連携状態、手動同期)
+  - [x] エラーハンドリング・テスト
+    - [x] ネットワーク/認証エラー対応、リトライ機構
+    - [x] MockSyncAdapter実装、コンフリクトシナリオテスト
+  - [x] ストア統合・実装完了
+    - [x] ~~chordChartStoreへの同期機能統合~~ → **ストア分離対応済み** (PR#88)
+      - [x] chordChartStore分離 (396行→256行)
+      - [x] syncStore新規作成 (132行、19テスト)
+      - [x] 責務分離による保守性向上
+    - [x] **ストア間連携実装** (2024-12-16完了)
+      - [x] SyncResult型にmergedChartsフィールド追加
+      - [x] chordChartStoreにapplySyncedCharts()とイベント機能追加
+      - [x] SyncManagerでmergedCharts返却対応
+      - [x] useChartSyncカスタムフック作成（手動+自動同期）
+    - [x] **残り実装タスク** 
+      - [x] Header/MainLayoutへの同期UI追加  
+      - [x] App.tsxでの同期初期化処理
+      - [x] 初回認証フロー実装
+      - [x] Google Drive API認証エラーの修正（フォルダ作成処理）
+
 ### 2025-01-15: コードメモ機能実装
 - [x] コードそれぞれに自由記述の「メモ」を割り当て可能
 - [x] 歌詞や演奏記号（クレッシェンド等）の記録
