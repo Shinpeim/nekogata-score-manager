@@ -177,6 +177,7 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
       } ${isDragging ? 'shadow-lg' : ''} ${
         chord.isLineBreak !== true ? 'cursor-pointer hover:border-[#85B0B7]/50' : ''
       }`}
+      data-chord-item={`${sectionId}-${chordIndex}`}
       onClick={(e) => {
         if (e.target instanceof HTMLInputElement || e.target instanceof HTMLButtonElement) {
           return;
@@ -215,6 +216,7 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
           <button
             onClick={() => onDeleteChord(sectionId, chordIndex)}
             className="text-[#EE5840] hover:text-[#D14A2E] text-xs"
+            data-testid="delete-chord-button"
           >
             ✕
           </button>
