@@ -10,7 +10,7 @@ const Footer: React.FC = () => {
       <footer className="bg-white border-t border-slate-200 px-4 py-3">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-slate-500">
           <div>
-            © 2024 Nekogata Score Manager
+            © {new Date().getFullYear()} Nekogata Score Manager
           </div>
           <div className="flex gap-4">
             <button
