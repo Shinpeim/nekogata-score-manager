@@ -17,18 +17,7 @@ export const useChartSync = () => {
     const isLocalhost = window.location.hostname === 'localhost' && window.location.port === '5173';
     const isE2ETest = hasE2EParam || hasSessionFlag || hasLocalFlag || (isLocalhost && hasPlaywrightFlag);
     
-    console.log('[SYNC] Environment check:', { 
-      hasE2EParam, 
-      hasPlaywrightFlag, 
-      hasSessionFlag,
-      hasLocalFlag,
-      isLocalhost, 
-      isE2ETest,
-      url: window.location.href 
-    });
-    
     if (isE2ETest) {
-      console.log('[SYNC] E2E test environment detected, skipping sync initialization');
       return;
     }
     

@@ -6,23 +6,11 @@ import { ChartEditorPage } from '../pages/ChartEditorPage';
 
 test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト (正確な順序変更)', () => {
   test.beforeEach(async ({ page }) => {
-    // より包括的なネットワークブロック（ログ付き）
-    await page.route('**/*googleapis.com/**', route => {
-      console.log('[E2E] Blocked googleapis.com request:', route.request().url());
-      route.abort();
-    });
-    await page.route('**/*accounts.google.com/**', route => {
-      console.log('[E2E] Blocked accounts.google.com request:', route.request().url());
-      route.abort();
-    });
-    await page.route('**/*gstatic.com/**', route => {
-      console.log('[E2E] Blocked gstatic.com request:', route.request().url());
-      route.abort();
-    });
-    await page.route('**/*google.com/**', route => {
-      console.log('[E2E] Blocked google.com request:', route.request().url());
-      route.abort();
-    });
+    // Google API関連の包括的ネットワークブロック
+    await page.route('**/*googleapis.com/**', route => route.abort());
+    await page.route('**/*accounts.google.com/**', route => route.abort());
+    await page.route('**/*gstatic.com/**', route => route.abort());
+    await page.route('**/*google.com/**', route => route.abort());
     
     // LocalStorageをクリアして各テストを独立させる
     await page.goto('/');
@@ -32,10 +20,6 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
       (window as typeof window & { __playwright_test__?: boolean }).__playwright_test__ = true;
       sessionStorage.setItem('__playwright_test__', 'true');
       localStorage.setItem('__playwright_test__', 'true');
-      console.log('[E2E] Test flag set:', (window as any).__playwright_test__);
-      console.log('[E2E] Current URL:', window.location.href);
-      console.log('[E2E] Hostname:', window.location.hostname);
-      console.log('[E2E] Port:', window.location.port);
     });
   });
 
@@ -48,12 +32,6 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
     const chartViewPage = new ChartViewPage(page);
     const chartEditorPage = new ChartEditorPage(page);
     
-    // ブラウザコンソールのログを監視
-    page.on('console', msg => {
-      if (msg.text().includes('[SYNC]') || msg.text().includes('[E2E]')) {
-        console.log(`Browser: ${msg.text()}`);
-      }
-    });
 
     // 基本チャート作成
     await homePage.goto();
