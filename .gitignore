@@ -33,3 +33,7 @@ CLAUDE.local.md
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# E2E test downloads (keep directory but ignore files)
+e2e/downloads/*
+!e2e/downloads/.gitkeep

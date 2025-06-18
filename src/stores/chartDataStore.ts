@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type { ChordChart, ChordLibrary } from '../types';
+import { storageService } from '../utils/storage';
 
 interface ChartDataState {
   // データ
@@ -37,6 +38,8 @@ export const useChartDataStore = create<ChartDataState>()(
       
       setCurrentChart: (id) => {
         set({ currentChartId: id }, false, 'setCurrentChart');
+        // 最後に開いたチャートIDを保存
+        storageService.saveLastOpenedChartId(id).catch(console.error);
       },
       
       addChartToData: (chart) => {

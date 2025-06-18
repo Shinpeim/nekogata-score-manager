@@ -138,7 +138,7 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       
       // 1. 不正なJSONファイルを作成
       const invalidJsonContent = '{ "invalid": json content }'; // 意図的に構文エラー
-      const testFilePath = path.join(__dirname, '../downloads', 'invalid.json');
+      const testFilePath = path.join(__dirname, '../downloads', `invalid-${Date.now()}.json`);
       fs.writeFileSync(testFilePath, invalidJsonContent);
       
       // 2. インポート実行
@@ -161,7 +161,9 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       await page.waitForTimeout(1000);
       
       // クリーンアップ
-      fs.unlinkSync(testFilePath);
+      if (fs.existsSync(testFilePath)) {
+        fs.unlinkSync(testFilePath);
+      }
     });
 
     test('JSONインポート：無効なデータ形式でエラーメッセージが表示される', async ({ page }) => {
@@ -177,7 +179,7 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
         someOtherData: "test"
       };
       
-      const testFilePath = path.join(__dirname, '../downloads', 'invalid-format.json');
+      const testFilePath = path.join(__dirname, '../downloads', `invalid-format-${Date.now()}.json`);
       fs.writeFileSync(testFilePath, JSON.stringify(invalidFormatData, null, 2));
       
       // 2. インポート実行
@@ -200,7 +202,9 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       await page.waitForTimeout(1000);
       
       // クリーンアップ
-      fs.unlinkSync(testFilePath);
+      if (fs.existsSync(testFilePath)) {
+        fs.unlinkSync(testFilePath);
+      }
     });
 
     test('JSONインポート：空ファイルでエラーメッセージが表示される', async ({ page }) => {
@@ -211,7 +215,7 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       await homePage.setDesktopViewport();
       
       // 1. 空ファイルを作成
-      const testFilePath = path.join(__dirname, '../downloads', 'empty.json');
+      const testFilePath = path.join(__dirname, '../downloads', `empty-${Date.now()}.json`);
       fs.writeFileSync(testFilePath, '');
       
       // 2. インポート実行
@@ -235,7 +239,9 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       await page.waitForTimeout(1000);
       
       // クリーンアップ
-      fs.unlinkSync(testFilePath);
+      if (fs.existsSync(testFilePath)) {
+        fs.unlinkSync(testFilePath);
+      }
     });
   });
 });

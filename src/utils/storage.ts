@@ -3,6 +3,7 @@ import type { ChordChart, ChordLibrary } from '../types';
 import { migrateData, getMigrationStats } from './migration';
 
 const STORAGE_KEY = 'chord-charts';
+const LAST_OPENED_CHART_KEY = 'last-opened-chart-id';
 
 // localforage設定
 localforage.config({
@@ -168,6 +169,29 @@ export const storageService = {
     } catch (error) {
       console.error('Failed to get migration info:', error);
       throw new Error('マイグレーション情報の取得に失敗しました');
+    }
+  },
+
+  // 最後に開いたチャートIDを保存
+  async saveLastOpenedChartId(chartId: string | null): Promise<void> {
+    try {
+      if (chartId) {
+        await localforage.setItem(LAST_OPENED_CHART_KEY, chartId);
+      } else {
+        await localforage.removeItem(LAST_OPENED_CHART_KEY);
+      }
+    } catch (error) {
+      console.error('Failed to save last opened chart ID:', error);
+    }
+  },
+
+  // 最後に開いたチャートIDを読み込み
+  async loadLastOpenedChartId(): Promise<string | null> {
+    try {
+      return await localforage.getItem<string>(LAST_OPENED_CHART_KEY);
+    } catch (error) {
+      console.error('Failed to load last opened chart ID:', error);
+      return null;
     }
   }
 };
