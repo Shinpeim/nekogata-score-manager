@@ -91,16 +91,24 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
     // 正確な順序変更を期待
     expect(chordOrder).toEqual(['C', 'F', 'Am', 'G']);
 
+    // ドラッグ&ドロップ後の状態安定化を待つ
+    await page.waitForTimeout(1000);
+    
+    // DOM要素が安定していることを確認
+    await page.waitForFunction(() => {
+      const sections = document.querySelectorAll('[data-section-card]');
+      return sections.length > 0;
+    }, { timeout: 5000 });
+
     // 保存して永続化確認
     await chartEditorPage.clickSave();
-    // 保存処理とデータ移行を考慮した待機時間を延長
-    await page.waitForTimeout(3000);
     
-    // chart-viewerが確実に表示されるまで追加で待機
+    // エディターが無効化されるまで待機（保存処理中の表示）
     await page.waitForFunction(() => {
-      const viewer = document.querySelector('[data-testid="chart-viewer"]');
-      return viewer && viewer.getBoundingClientRect().height > 0;
-    }, { timeout: 10000 });
+      const editorElement = document.querySelector('[data-testid="chart-editor"]');
+      return !editorElement || editorElement.getAttribute('aria-busy') === 'true' || 
+             document.querySelector('[data-testid="chart-viewer"]');
+    }, { timeout: 15000 });
     
     await chartViewPage.waitForChartToLoad();
 
