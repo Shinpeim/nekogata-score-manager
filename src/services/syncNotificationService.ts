@@ -4,7 +4,7 @@ import type { ChordChart } from '../types';
  * 同期通知サービス
  * 同期コールバックの管理とデータ変更通知を担当
  */
-export class SyncNotificationService {
+class SyncNotificationService {
   private syncCallbacks = new Set<(charts: ChordChart[]) => void>();
 
   /**

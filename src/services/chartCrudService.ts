@@ -6,7 +6,7 @@ import { storageService } from '../utils/storage';
  * チャートCRUD操作サービス
  * 純粋な操作ロジックのみを提供し、状態管理には関与しない
  */
-export class ChartCrudService {
+class ChartCrudService {
   /**
    * 新しいチャートを作成
    */

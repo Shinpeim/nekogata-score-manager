@@ -7,7 +7,7 @@ import { storageService } from './storage';
 // 型定義
 // ============================================================================
 
-export interface ImportResult {
+interface ImportResult {
   success: boolean;
   charts: ChordChart[];
   errors: string[];
@@ -34,40 +34,6 @@ const ERROR_MESSAGES = {
 // インポート機能
 // ============================================================================
 
-/**
- * JSONファイルからコード譜をインポート
- */
-export const importChartsFromFile = (file: File): Promise<ImportResult> => {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    
-    reader.onload = (event) => {
-      try {
-        const jsonString = event.target?.result as string;
-        const result = parseImportData(jsonString);
-        resolve(result);
-      } catch (error) {
-        resolve({
-          success: false,
-          charts: [],
-          errors: [`${ERROR_MESSAGES.FILE_READ_FAILED}: ${error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR}`],
-          warnings: []
-        });
-      }
-    };
-    
-    reader.onerror = () => {
-      resolve({
-        success: false,
-        charts: [],
-        errors: ['ファイルの読み込みに失敗しました'],
-        warnings: []
-      });
-    };
-    
-    reader.readAsText(file);
-  });
-};
 
 /**
  * Storage-first方式でJSONファイルからコード譜をインポート

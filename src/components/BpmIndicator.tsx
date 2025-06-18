@@ -12,7 +12,7 @@ const BpmIndicator: React.FC<BpmIndicatorProps> = ({ bpm, className = '' }) => {
     if (bpm <= 0) return;
 
     const interval = 60000 / bpm; // milliseconds per beat
-    let timeoutId: number;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     const pulse = () => {
       setIsActive(true);
