@@ -88,6 +88,27 @@ logger.debug('デバッグメッセージ', data);        // DEBUG時のみ出�
 - **開発環境**: INFO レベル（情報ログ以上）
 - **デバッグ時**: DEBUG レベル（全ログ出力）
 
+## Static Analysis
+
+### 未使用コード検出
+Knipを使用して未使用のファイル、エクスポート、依存関係を検出：
+
+```bash
+npm run knip                    # 未使用コード検出を実行
+```
+
+### Knipの検出項目
+- **未使用ファイル**: どこからも参照されていないファイル
+- **未使用エクスポート**: exportされているが使われていない関数・クラス・型
+- **未使用依存関係**: package.jsonに記載されているが実際に使われていない依存関係
+- **未使用型定義**: TypeScriptの型やインターフェースの未使用エクスポート
+
+### 開発時の活用方法
+- **リファクタリング後**: 不要になったコードの確認
+- **依存関係整理**: 使われなくなったライブラリの検出
+- **コードレビュー**: PRでの未使用コード混入防止
+- **定期メンテナンス**: 月次でのクリーンアップ作業
+
 ## Architecture Overview
 
 ### State Management
@@ -140,7 +161,8 @@ Chord: { name, root, base?, duration?, isLineBreak? }
 - **Linting**: コミットするコードはlintに通っている必要がある  
 - **Building**: コミットするコードは必ずビルドできる必要がある
 - **E2E Testing**: コア機能変更時はE2Eテストを実行して確認すること
-- **Pre-commit validation**: `npm test && npm run lint && npm run build && npm run test:e2e` を確認してからコミット
+- **Static Analysis**: `npm run knip`で未使用コード検出を実行
+- **Pre-commit validation**: `npm test && npm run lint && npm run build && npm run knip` を確認してからコミット
 
 ### Task Management
 - todoをTODO.mdに書いて管理してください
