@@ -6,10 +6,23 @@ import { ChartEditorPage } from '../pages/ChartEditorPage';
 
 test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト (正確な順序変更)', () => {
   test.beforeEach(async ({ page }) => {
-    // Google APIへのアクセスをブロック
-    await page.route('**/*googleapis.com/**', route => route.abort());
-    await page.route('**/*accounts.google.com/**', route => route.abort());
-    await page.route('**/*gstatic.com/**', route => route.abort());
+    // より包括的なネットワークブロック（ログ付き）
+    await page.route('**/*googleapis.com/**', route => {
+      console.log('[E2E] Blocked googleapis.com request:', route.request().url());
+      route.abort();
+    });
+    await page.route('**/*accounts.google.com/**', route => {
+      console.log('[E2E] Blocked accounts.google.com request:', route.request().url());
+      route.abort();
+    });
+    await page.route('**/*gstatic.com/**', route => {
+      console.log('[E2E] Blocked gstatic.com request:', route.request().url());
+      route.abort();
+    });
+    await page.route('**/*google.com/**', route => {
+      console.log('[E2E] Blocked google.com request:', route.request().url());
+      route.abort();
+    });
     
     // LocalStorageをクリアして各テストを独立させる
     await page.goto('/');
@@ -80,8 +93,15 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
 
     // 保存して永続化確認
     await chartEditorPage.clickSave();
-    // 保存処理とデータ移行を考慮した待機時間
-    await page.waitForTimeout(2000);
+    // 保存処理とデータ移行を考慮した待機時間を延長
+    await page.waitForTimeout(3000);
+    
+    // chart-viewerが確実に表示されるまで追加で待機
+    await page.waitForFunction(() => {
+      const viewer = document.querySelector('[data-testid="chart-viewer"]');
+      return viewer && viewer.getBoundingClientRect().height > 0;
+    }, { timeout: 10000 });
+    
     await chartViewPage.waitForChartToLoad();
 
     // 表示モードでの順序確認（表示画面でのコード取得）

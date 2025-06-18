@@ -9,10 +9,19 @@ export const useChartSync = () => {
 
   // 初期化処理
   useEffect(() => {
-    // E2Eテスト環境では同期を無効化
-    const isE2ETest = window.location.search.includes('e2e=true') || 
-                      window.location.hostname === 'localhost' && window.location.port === '5173' &&
-                      (window as typeof window & { __playwright_test__?: boolean }).__playwright_test__;
+    // E2Eテスト環境の検出を強化
+    const hasE2EParam = window.location.search.includes('e2e=true');
+    const hasPlaywrightFlag = (window as typeof window & { __playwright_test__?: boolean }).__playwright_test__;
+    const isLocalhost = window.location.hostname === 'localhost' && window.location.port === '5173';
+    const isE2ETest = hasE2EParam || (isLocalhost && hasPlaywrightFlag);
+    
+    console.log('[SYNC] Environment check:', { 
+      hasE2EParam, 
+      hasPlaywrightFlag, 
+      isLocalhost, 
+      isE2ETest,
+      url: window.location.href 
+    });
     
     if (isE2ETest) {
       console.log('[SYNC] E2E test environment detected, skipping sync initialization');
