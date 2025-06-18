@@ -1,4 +1,5 @@
 import type { ChordChart } from '../types';
+import { logger } from '../utils/logger';
 
 /**
  * 同期通知サービス
@@ -30,7 +31,7 @@ class SyncNotificationService {
       try {
         callback(charts);
       } catch (error) {
-        console.error('同期コールバック実行エラー:', error);
+        logger.error('同期コールバック実行エラー:', error);
       }
     });
   }

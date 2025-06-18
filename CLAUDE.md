@@ -54,6 +54,40 @@ npx playwright test --grep "should create chart" --reporter=list # Run E2E tests
 npx playwright test --project=chromium --reporter=list         # Run tests on specific browser
 ```
 
+## Logging System
+
+### ログレベル制御
+環境変数`VITE_LOG_LEVEL`でログ出力レベルを制御できます：
+
+```bash
+# エラーのみ出力（本番環境推奨）
+VITE_LOG_LEVEL=ERROR npm run dev
+
+# 警告以上を出力
+VITE_LOG_LEVEL=WARN npm run dev
+
+# 情報ログ以上を出力（開発環境デフォルト）
+VITE_LOG_LEVEL=INFO npm run dev
+
+# デバッグログ含む全て出力（デバッグ時推奨）
+VITE_LOG_LEVEL=DEBUG npm run dev
+```
+
+### ログユーティリティの使用
+```typescript
+import { logger } from '../utils/logger';
+
+logger.error('エラーメッセージ', errorObject);  // 常に出力
+logger.warn('警告メッセージ');                  // WARN以上で出力
+logger.info('情報メッセージ');                  // INFO以上で出力
+logger.debug('デバッグメッセージ', data);        // DEBUG時のみ出力
+```
+
+### 環境別デフォルト設定
+- **本番環境**: ERROR レベル（エラーのみ）
+- **開発環境**: INFO レベル（情報ログ以上）
+- **デバッグ時**: DEBUG レベル（全ログ出力）
+
 ## Architecture Overview
 
 ### State Management

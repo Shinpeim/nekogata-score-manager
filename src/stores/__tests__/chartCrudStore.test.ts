@@ -277,6 +277,7 @@ describe('chartCrudStore', () => {
       });
       const chart = createNewChordChart({ title: 'Test Chart' });
       
+      // Logger.error outputs timestamp prefix, so we need to adjust expectations
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       vi.mocked(storageService.saveChart).mockResolvedValue(undefined);
       
@@ -286,7 +287,12 @@ describe('chartCrudStore', () => {
       
       await addChart(chart);
       
-      expect(consoleSpy).toHaveBeenCalledWith('同期コールバック実行エラー:', expect.any(Error));
+      // Logger adds timestamp prefix, so check that error message is included
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringMatching(/^\[.*\] \[ERROR\]$/),
+        '同期コールバック実行エラー:',
+        expect.any(Error)
+      );
       
       consoleSpy.mockRestore();
     });
