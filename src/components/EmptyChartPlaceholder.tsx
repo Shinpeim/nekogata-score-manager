@@ -20,18 +20,21 @@ const EmptyChartPlaceholder: React.FC<EmptyChartPlaceholderProps> = ({
           <button 
             onClick={onCreateNew}
             className="bg-[#85B0B7] hover:bg-[#6B9CA5] text-white px-6 py-3 rounded-md text-sm font-medium"
+            data-testid="create-new-button"
           >
             新規作成
           </button>
           <button 
             onClick={onOpenImport}
             className="bg-[#BDD0CA] hover:bg-[#A4C2B5] text-slate-800 px-6 py-3 rounded-md text-sm font-medium"
+            data-testid="import-button"
           >
             インポート
           </button>
           <button 
             onClick={onOpenExplorer}
             className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-6 py-3 rounded-md text-sm font-medium"
+            data-testid="open-explorer-button"
           >
             Score Explorerを開く
           </button>
