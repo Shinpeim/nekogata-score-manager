@@ -178,15 +178,13 @@ export class ChartEditorPage {
   }
 
   async waitForChordToAppear(sectionIndex: number, expectedCount: number) {
-    const section = this.getSectionByIndex(sectionIndex);
     await this.page.waitForFunction(
-      (sectionIndex, count) => {
+      ([sectionIndex, count]) => {
         const sections = document.querySelectorAll('[data-section-card]');
         const targetSection = sections[sectionIndex];
         return targetSection ? targetSection.querySelectorAll('[data-chord-item]').length === count : false;
       },
-      sectionIndex,
-      expectedCount,
+      [sectionIndex, expectedCount],
       { timeout: 5000 }
     );
   }
