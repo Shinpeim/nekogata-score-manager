@@ -22,7 +22,7 @@ export interface SyncResult {
   errors: SyncError[];
 }
 
-export interface SyncError {
+interface SyncError {
   chartId: string;
   error: Error;
   type: 'auth' | 'network' | 'storage' | 'unknown';
