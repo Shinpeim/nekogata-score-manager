@@ -38,6 +38,9 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
 
+  /* Global setup for all tests */
+  // globalSetup: './e2e/global-setup.ts',
+
   /* Configure projects for major browsers */
   projects: [
     {

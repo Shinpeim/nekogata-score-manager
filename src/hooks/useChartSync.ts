@@ -9,6 +9,16 @@ export const useChartSync = () => {
 
   // 初期化処理
   useEffect(() => {
+    // E2Eテスト環境では同期を無効化
+    const isE2ETest = window.location.search.includes('e2e=true') || 
+                      window.location.hostname === 'localhost' && window.location.port === '5173' &&
+                      (window as any).__playwright_test__;
+    
+    if (isE2ETest) {
+      console.log('[SYNC] E2E test environment detected, skipping sync initialization');
+      return;
+    }
+    
     const initializeIfNeeded = async () => {
       const state = useSyncStore.getState();
       if (!state.syncManager) {

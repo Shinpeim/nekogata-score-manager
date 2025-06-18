@@ -6,14 +6,24 @@ import { ChartEditorPage } from '../pages/ChartEditorPage';
 
 test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト (正確な順序変更)', () => {
   test.beforeEach(async ({ page }) => {
+    // Google APIへのアクセスをブロック
+    await page.route('**/*googleapis.com/**', route => route.abort());
+    await page.route('**/*accounts.google.com/**', route => route.abort());
+    await page.route('**/*gstatic.com/**', route => route.abort());
+    
     // LocalStorageをクリアして各テストを独立させる
     await page.goto('/');
-    await page.evaluate(() => localStorage.clear());
+    await page.evaluate(() => {
+      localStorage.clear();
+      // E2Eテストフラグを設定
+      (window as any).__playwright_test__ = true;
+    });
   });
 
   test('コード順序変更のドラッグ&ドロップが正確に動作する', async ({ page, browserName }) => {
     // WebKit系ブラウザでは@dnd-kitの互換性問題により一時的にスキップ
     test.skip(browserName === 'webkit', 'WebKit系ブラウザでは@dnd-kitドラッグ操作に互換性問題があります');
+    
     const homePage = new HomePage(page);
     const chartFormPage = new ChordChartFormPage(page);
     const chartViewPage = new ChartViewPage(page);
@@ -53,24 +63,29 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
     let chordOrder = await chartEditorPage.getChordOrderInSection(sectionIndex);
     expect(chordOrder).toEqual(['C', 'Am', 'F', 'G']);
 
-    // ドラッグ&ドロップ: Am(index:1) を F(index:2) の後に移動
-    // 期待結果: C - Am - F - G → C - F - Am - G
-    await chartEditorPage.dragChordToPosition(sectionIndex, 1, sectionIndex, 2);
+    // ドラッグ&ドロップ: Am を F の後に移動
+    const beforeOrder = await chartEditorPage.getChordOrderInSection(sectionIndex);
+    
+    const amIndex = beforeOrder.indexOf('Am');
+    const fIndex = beforeOrder.indexOf('F');
+    
+    // AmをFの後に移動
+    await chartEditorPage.dragChordToPosition(sectionIndex, amIndex, sectionIndex, fIndex);
 
     // 順序変更後の確認
     chordOrder = await chartEditorPage.getChordOrderInSection(sectionIndex);
-    console.log('実際の順序:', chordOrder);
     
     // 正確な順序変更を期待
     expect(chordOrder).toEqual(['C', 'F', 'Am', 'G']);
 
     // 保存して永続化確認
     await chartEditorPage.clickSave();
+    // 保存処理とデータ移行を考慮した待機時間
+    await page.waitForTimeout(2000);
     await chartViewPage.waitForChartToLoad();
-    
+
     // 表示モードでの順序確認（表示画面でのコード取得）
     const displayedChords = await chartViewPage.getAllDisplayedChords();
-    console.log('表示モードでの順序:', displayedChords);
     
     // 永続化された順序が正しいことを確認
     expect(displayedChords).toEqual(['C', 'F', 'Am', 'G']);
