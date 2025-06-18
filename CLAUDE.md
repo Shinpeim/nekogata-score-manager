@@ -49,9 +49,9 @@ npx vitest run src/utils/__tests__/export.test.ts       # Example: run export te
 npx vitest run src/utils/__tests__/import.test.ts       # Example: run import tests
 
 # E2E Tests
-npx playwright test chart-creation.spec.ts       # Run specific E2E test file
-npx playwright test --grep "should create chart" # Run E2E tests matching pattern
-npx playwright test --project=chromium           # Run tests on specific browser
+npx playwright test chart-creation.spec.ts --reporter=list      # Run specific E2E test file
+npx playwright test --grep "should create chart" --reporter=list # Run E2E tests matching pattern
+npx playwright test --project=chromium --reporter=list         # Run tests on specific browser
 ```
 
 ## Architecture Overview
