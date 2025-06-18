@@ -28,8 +28,14 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
     await page.goto('/');
     await page.evaluate(() => {
       localStorage.clear();
-      // E2Eテストフラグを設定
+      // E2Eテストフラグを複数の方法で永続化
       (window as typeof window & { __playwright_test__?: boolean }).__playwright_test__ = true;
+      sessionStorage.setItem('__playwright_test__', 'true');
+      localStorage.setItem('__playwright_test__', 'true');
+      console.log('[E2E] Test flag set:', (window as any).__playwright_test__);
+      console.log('[E2E] Current URL:', window.location.href);
+      console.log('[E2E] Hostname:', window.location.hostname);
+      console.log('[E2E] Port:', window.location.port);
     });
   });
 
@@ -41,6 +47,13 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
     const chartFormPage = new ChordChartFormPage(page);
     const chartViewPage = new ChartViewPage(page);
     const chartEditorPage = new ChartEditorPage(page);
+    
+    // ブラウザコンソールのログを監視
+    page.on('console', msg => {
+      if (msg.text().includes('[SYNC]') || msg.text().includes('[E2E]')) {
+        console.log(`Browser: ${msg.text()}`);
+      }
+    });
 
     // 基本チャート作成
     await homePage.goto();

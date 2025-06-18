@@ -9,15 +9,19 @@ export const useChartSync = () => {
 
   // 初期化処理
   useEffect(() => {
-    // E2Eテスト環境の検出を強化
+    // E2Eテスト環境の検出を強化（複数の方法）
     const hasE2EParam = window.location.search.includes('e2e=true');
     const hasPlaywrightFlag = (window as typeof window & { __playwright_test__?: boolean }).__playwright_test__;
+    const hasSessionFlag = sessionStorage.getItem('__playwright_test__') === 'true';
+    const hasLocalFlag = localStorage.getItem('__playwright_test__') === 'true';
     const isLocalhost = window.location.hostname === 'localhost' && window.location.port === '5173';
-    const isE2ETest = hasE2EParam || (isLocalhost && hasPlaywrightFlag);
+    const isE2ETest = hasE2EParam || hasSessionFlag || hasLocalFlag || (isLocalhost && hasPlaywrightFlag);
     
     console.log('[SYNC] Environment check:', { 
       hasE2EParam, 
       hasPlaywrightFlag, 
+      hasSessionFlag,
+      hasLocalFlag,
       isLocalhost, 
       isE2ETest,
       url: window.location.href 
