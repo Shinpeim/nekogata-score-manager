@@ -42,7 +42,7 @@ Nekogata Score Managerは、利用者さまのプライバシーを尊重しま�
 
 ## 7. ご意見・フィードバック
 
-本プライバシーポリシーに関するご意見やフィードバックがございましたら、shinpeim@gmail.com までお寄せください。
+本プライバシーポリシーに関するご意見やフィードバックがございましたら、GitHubのIssuesページ（https://github.com/Shinpeim/nekogata-score-manager/issues）からお寄せください。
 `;
 
 export const TERMS_OF_SERVICE = `# 利用規約
@@ -89,7 +89,7 @@ Nekogata Score Manager（以下「本サービス」）は、音楽のコード�
 
 - 本利用規約の一部が無効となった場合も、その他の部分は有効に存続します
 - 本サービスは個人開発によるものであり、商用サポートは提供されません
-- ご意見やフィードバックは、shinpeim@gmail.com までお寄せください
+- ご意見やフィードバックは、GitHubのIssuesページ（https://github.com/Shinpeim/nekogata-score-manager/issues）からお寄せください
 
 ---
 

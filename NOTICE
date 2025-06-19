@@ -1,0 +1,12 @@
+Nekogata Score Manager
+Copyright (c) 2024 Shinpei Maruyama
+
+This software contains third-party code licensed under the Apache License 2.0.
+See LICENSE-THIRD-PARTY.md for details.
+
+Apache License 2.0 Dependencies:
+- localforage (https://github.com/localForage/localForage)
+- typescript (https://github.com/microsoft/TypeScript)
+- aria-query (https://github.com/A11yance/aria-query)
+
+For complete license information of all dependencies, see LICENSE-THIRD-PARTY.md
