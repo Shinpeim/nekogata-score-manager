@@ -206,8 +206,8 @@
                     <ul class="nav-links">
                         <li><a href="#features">機能</a></li>
                         <li><a href="#privacy">プライバシー</a></li>
-                        <li><a href="#privacy-policy">プライバシーポリシー</a></li>
-                        <li><a href="#terms">利用規約</a></li>
+                        <li><a href="/privacy-policy.html">プライバシーポリシー</a></li>
+                        <li><a href="/terms.html">利用規約</a></li>
                     </ul>
                 </nav>
             </div>
@@ -295,146 +295,16 @@
     <footer>
         <div class="container">
             <div class="footer-links">
-                <a href="#privacy-policy" onclick="showPrivacyPolicy()">プライバシーポリシー</a>
-                <a href="#terms" onclick="showTermsOfService()">利用規約</a>
+                <a href="/privacy-policy.html">プライバシーポリシー</a>
+                <a href="/terms.html">利用規約</a>
                 <a href="mailto:shinpeim@gmail.com">お問い合わせ</a>
             </div>
             <p>&copy; 2024 Nekogata Score Manager. Made with ❤️ by Shinpei</p>
         </div>
     </footer>
 
-    <!-- Modal for Privacy Policy and Terms -->
-    <div id="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
-        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2rem; border-radius: 12px; max-width: 800px; max-height: 80vh; overflow-y: auto; margin: 1rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <h2 id="modal-title"></h2>
-                <button onclick="closeModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
-            </div>
-            <div id="modal-content" style="white-space: pre-wrap; line-height: 1.6;"></div>
-        </div>
-    </div>
 
     <script>
-        const PRIVACY_POLICY = `プライバシーポリシー
-
-最終更新日: 2024年6月18日
-
-1. データ収集について
-
-Nekogata Score Managerは、利用者さまのプライバシーを尊重します。本アプリケーションは以下の特徴があります：
-
-- データ収集なし: 本アプリケーションは、利用者さまの個人情報を一切収集しません
-- ローカル保存: すべてのデータは利用者さまのブラウザ内に保存されます
-- 任意の同期機能: 利用者さまが明示的にGoogle アカウント連携を選択した場合のみ、コード譜データが利用者さまのGoogle Driveに同期されます
-- トラッキングなし: アクセス解析やユーザー行動の追跡は行いません
-
-2. データの保存場所
-
-- すべてのデータはブラウザのローカルストレージ（IndexedDB）に保存されます
-- 利用者さまが同期機能を有効にした場合、データは利用者さまのGoogle Driveにも保存されます
-- データは開発者やその他の第三者がアクセスできません（Google Drive上のデータも同様）
-- ブラウザのデータを削除することで、ローカルデータを完全に削除できます
-
-3. Cookie・ローカルストレージの使用
-
-本アプリケーションは以下の目的でローカルストレージを使用します：
-
-- 作成したコード譜の保存
-- アプリケーション設定の保存
-- PWA機能のためのサービスワーカー
-
-これらは基本的に利用者さまの端末内で完結します。ただし、利用者さまが任意でGoogle Drive同期機能を有効にした場合、コード譜データのみが利用者さまのGoogle Driveアカウントに送信・保存されます。
-
-4. データの共有
-
-本アプリケーションは、利用者さまのデータを第三者と共有、販売、または提供することはありません。Google Drive同期機能を使用する場合、データは利用者さま自身のGoogle Driveアカウントにのみ保存され、開発者を含む第三者がアクセスすることはできません。
-
-5. セキュリティ
-
-利用者さまのデータは主にローカルに保存されるため、一般的なWebサービスと比較してプライバシーが保護されやすい設計となっています。ただし、利用者さまの端末やブラウザのセキュリティ、およびGoogle Drive同期を使用する場合のGoogleアカウントのセキュリティについては、利用者さま自身で適切に管理していただく必要があります。
-
-6. 本ポリシーの変更
-
-本プライバシーポリシーは必要に応じて更新される場合があります。重要な変更がある場合は、アプリケーション内で通知いたします。
-
-7. ご意見・フィードバック
-
-本プライバシーポリシーに関するご意見やフィードバックがございましたら、shinpeim@gmail.com までお寄せください。`;
-
-        const TERMS_OF_SERVICE = `利用規約
-
-最終更新日: 2024年6月18日
-
-1. サービスについて
-
-Nekogata Score Manager（以下「本サービス」）は、音楽のコード譜を作成・管理するためのWebアプリケーションです。本サービスは無償で提供され、ブラウザ上で動作するPWA（Progressive Web App）として実装されています。
-
-2. 利用条件
-
-本サービスをご利用いただくことで、以下の利用規約に同意したものとみなします：
-
-- 本サービスは現在の状態のまま、保証なしで提供されます
-- 本サービスの利用は個人利用に限ります
-- 著作権法その他の法令を遵守してご利用ください
-- 本サービスの機能を悪用したり、他のユーザーに迷惑をかける行為は禁止します
-
-3. 責任の制限
-
-本サービスは善意により無償で提供されており、以下について開発者は一切の責任を負いません：
-
-- データの損失: ブラウザの問題、端末の故障、操作ミス等によるデータ損失
-- サービスの中断: メンテナンス、技術的問題等によるサービス利用不可
-- 動作不良: 特定の環境での動作不良やバグ
-- 間接損害: 本サービスの利用または利用不能により生じた一切の間接的、付随的、特別な損害
-- データの正確性: 作成されたコード譜の音楽理論的正確性
-
-4. 知的財産権
-
-- 利用者さまが作成したコード譜の著作権は、利用者さまに帰属します
-- 既存楽曲のコード譜を作成する場合は、著作権法を遵守してください
-
-5. サービスの変更・終了
-
-開発者は以下の権利を有します：
-
-- 本サービスの機能を予告なく変更、追加、削除すること
-- 本サービスを予告なく一時停止または終了すること
-- 本利用規約を必要に応じて変更すること
-
-6. その他
-
-- 本利用規約の一部が無効となった場合も、その他の部分は有効に存続します
-- 本サービスは個人開発によるものであり、商用サポートは提供されません
-- ご意見やフィードバックは、shinpeim@gmail.com までお寄せください
-
----
-
-重要な注意事項
-本サービスは無償かつ善意による運営のため、利用に際して利用者さまが被った一切の損害について、開発者は責任を負いかねます。ご理解とご了承のうえ、ご利用ください。`;
-
-        function showPrivacyPolicy() {
-            document.getElementById('modal-title').textContent = 'プライバシーポリシー';
-            document.getElementById('modal-content').textContent = PRIVACY_POLICY;
-            document.getElementById('modal').style.display = 'block';
-        }
-
-        function showTermsOfService() {
-            document.getElementById('modal-title').textContent = '利用規約';
-            document.getElementById('modal-content').textContent = TERMS_OF_SERVICE;
-            document.getElementById('modal').style.display = 'block';
-        }
-
-        function closeModal() {
-            document.getElementById('modal').style.display = 'none';
-        }
-
-        // Close modal when clicking outside
-        document.getElementById('modal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal();
-            }
-        });
-
         // Smooth scrolling for navigation links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {

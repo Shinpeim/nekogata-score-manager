@@ -4,6 +4,17 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
+  build: {
+    rollupOptions: {
+      input: {
+        main: 'index.html',
+        lp: 'lp.html',
+        privacyPolicy: 'privacy-policy.html',
+        terms: 'terms.html',
+        googleVerification: 'googleab0226c32fff037a.html'
+      }
+    }
+  },
   plugins: [
     react(),
     VitePWA({
