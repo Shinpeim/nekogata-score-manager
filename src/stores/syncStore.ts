@@ -8,6 +8,7 @@ import { logger } from '../utils/logger';
 interface SyncState {
   // 同期状態
   syncManager: SyncManager | null;
+  isAuthenticated: boolean;
   isSyncing: boolean;
   lastSyncTime: Date | null;
   syncError: string | null;
@@ -20,7 +21,6 @@ interface SyncState {
   sync: (charts: ChordChart[], onConflict?: (conflicts: SyncConflict[]) => Promise<'overwrite' | 'cancel'>) => Promise<SyncResult>;
   updateSyncConfig: (config: Partial<SyncConfig>) => void;
   clearSyncError: () => void;
-  isAuthenticated: () => boolean;
 }
 
 export const useSyncStore = create<SyncState>()(
@@ -28,6 +28,7 @@ export const useSyncStore = create<SyncState>()(
     (set, get) => ({
       // 同期初期状態
       syncManager: null,
+      isAuthenticated: false,
       isSyncing: false,
       lastSyncTime: null,
       syncError: null,
@@ -45,9 +46,11 @@ export const useSyncStore = create<SyncState>()(
           await syncManager.initialize();
           const config = syncManager.getConfig();
           const lastSyncTime = syncManager.getLastSyncTimeAsDate();
+          const isAuthenticated = syncManager.isAuthenticated();
           
           set({ 
             syncManager, 
+            isAuthenticated,
             syncConfig: config,
             lastSyncTime: lastSyncTime.getTime() === 0 ? null : lastSyncTime
           }, false, 'initializeSync');
@@ -67,9 +70,17 @@ export const useSyncStore = create<SyncState>()(
           
           set({ syncError: null }, false, 'authenticateStart');
           await syncManager.authenticate();
+          
+          // 認証成功後に状態を更新
+          const isAuthenticated = syncManager.isAuthenticated();
+          set({ 
+            syncError: null,
+            isAuthenticated
+          }, false, 'authenticateSuccess');
         } catch (error) {
           set({ 
-            syncError: error instanceof Error ? error.message : '認証に失敗しました' 
+            syncError: error instanceof Error ? error.message : '認証に失敗しました',
+            isAuthenticated: false
           }, false, 'authenticateError');
           throw error;
         }
@@ -81,7 +92,10 @@ export const useSyncStore = create<SyncState>()(
           if (!syncManager) return;
           
           await syncManager.signOut();
-          set({ syncError: null }, false, 'signOut');
+          set({ 
+            syncError: null,
+            isAuthenticated: false
+          }, false, 'signOut');
         } catch (error) {
           set({ 
             syncError: error instanceof Error ? error.message : 'サインアウトに失敗しました' 
@@ -141,11 +155,6 @@ export const useSyncStore = create<SyncState>()(
 
       clearSyncError: () => {
         set({ syncError: null }, false, 'clearSyncError');
-      },
-
-      isAuthenticated: () => {
-        const { syncManager } = get();
-        return syncManager ? syncManager.isAuthenticated() : false;
       }
     }),
     {

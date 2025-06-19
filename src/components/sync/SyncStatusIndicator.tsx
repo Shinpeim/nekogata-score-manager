@@ -11,13 +11,12 @@ export const SyncStatusIndicator: React.FC<SyncStatusIndicatorProps> = ({ classN
   const { isSyncing, lastSyncTime, syncError, isAuthenticated } = useSyncStore();
   
   // デバッグログを追加
-  const authStatus = isAuthenticated();
-  logger.debug('SyncStatusIndicator Authentication status:', authStatus);
+  logger.debug('SyncStatusIndicator Authentication status:', isAuthenticated);
   logger.debug('SyncStatusIndicator isSyncing:', isSyncing);
   logger.debug('SyncStatusIndicator lastSyncTime:', lastSyncTime);
   logger.debug('SyncStatusIndicator syncError:', syncError);
   
-  if (!authStatus) {
+  if (!isAuthenticated) {
     return null;
   }
   
