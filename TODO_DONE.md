@@ -72,6 +72,22 @@
   - [x] E2EテストPage Object Model実装（ChartEditorPage.ts）
   - [x] ESLintエラー修正（未使用変数削除とwaitForFunction修正）
 
+### 2025-06-19: 削除操作の同期修正
+- [x] **削除操作の同期修正** (実施工数: 2日) - PR #149
+  - [x] Phase 1: 削除追跡システム実装
+    - [x] 削除されたチャートIDをLocalForageで記録する仕組み追加
+    - [x] deletedChartIdsをSyncManagerの同期処理に統合
+    - [x] ChartCrudServiceの削除メソッドで削除記録を更新
+  - [x] Phase 2: 同期ロジック修正  
+    - [x] SyncManager.sync()で削除リストも含めて処理するよう修正
+    - [x] mergeCharts()で削除されたチャートを除外するロジック追加
+    - [x] GoogleDriveSyncAdapterで削除情報の永続化対応
+  - [x] Phase 3: テスト・検証
+    - [x] 削除同期の包括的テスト実装
+    - [x] 削除コンフリクト処理のテスト追加
+    - [x] MANUAL_TESTING.mdに手動テスト手順追加
+  - **成果**: コミット618d564で完全実装。削除されたチャートが確実に同期されるようになり、実ユーザー体験が大幅に改善
+
 ### 2025-06-18: Google Drive同期機能完全実装
 - [x] **複数環境でのスコア同期機能** (推定工数: 2-3週間)
   - [x] 基盤層実装
