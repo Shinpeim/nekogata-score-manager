@@ -1,5 +1,5 @@
 import type { ChordChart } from '../../types/chord';
-import type { ISyncAdapter, SyncMetadata } from '../../types/sync';
+import type { ISyncAdapter, SyncMetadata, DeletedChartRecord } from '../../types/sync';
 import { GoogleAuthProvider } from './googleAuth';
 
 export class GoogleDriveSyncAdapter implements ISyncAdapter {
@@ -7,6 +7,7 @@ export class GoogleDriveSyncAdapter implements ISyncAdapter {
   private readonly APP_FOLDER_NAME = 'NekogataScoreManager';
   private readonly METADATA_FILE_NAME = 'sync-metadata.json';
   private readonly CHARTS_FILE_NAME = 'charts.json';
+  private readonly DELETED_CHARTS_FILE_NAME = 'deleted-charts.json';
   
   constructor() {
     this.auth = GoogleAuthProvider.getInstance();
@@ -34,28 +35,34 @@ export class GoogleDriveSyncAdapter implements ISyncAdapter {
     this.auth.signOut();
   }
   
-  async pull(): Promise<{ charts: ChordChart[]; metadata: Record<string, SyncMetadata> }> {
+  async pull(): Promise<{ charts: ChordChart[]; metadata: Record<string, SyncMetadata>; deletedCharts: DeletedChartRecord[] }> {
     const token = this.auth.getAccessToken();
     if (!token) throw new Error('Not authenticated');
     
     const folderId = await this.getAppFolderId();
     if (!folderId) {
-      return { charts: [], metadata: {} };
+      return { charts: [], metadata: {}, deletedCharts: [] };
     }
     
     // チャートファイルを取得
     const chartsFileId = await this.getFileId(this.CHARTS_FILE_NAME, folderId);
     const metadataFileId = await this.getFileId(this.METADATA_FILE_NAME, folderId);
+    const deletedChartsFileId = await this.getFileId(this.DELETED_CHARTS_FILE_NAME, folderId);
     
-    const [charts, metadata] = await Promise.all([
+    const [charts, metadata, deletedCharts] = await Promise.all([
       chartsFileId ? this.downloadFile<ChordChart[]>(chartsFileId) : [],
-      metadataFileId ? this.downloadFile<Record<string, SyncMetadata>>(metadataFileId) : {}
+      metadataFileId ? this.downloadFile<Record<string, SyncMetadata>>(metadataFileId) : {},
+      deletedChartsFileId ? this.downloadFile<DeletedChartRecord[]>(deletedChartsFileId) : []
     ]);
     
-    return { charts: charts || [], metadata: metadata || {} };
+    return { 
+      charts: charts || [], 
+      metadata: metadata || {},
+      deletedCharts: deletedCharts || []
+    };
   }
   
-  async push(charts: ChordChart[], metadata: Record<string, SyncMetadata>): Promise<void> {
+  async push(charts: ChordChart[], metadata: Record<string, SyncMetadata>, deletedCharts: DeletedChartRecord[]): Promise<void> {
     const token = this.auth.getAccessToken();
     if (!token) throw new Error('Not authenticated');
     
@@ -64,11 +71,13 @@ export class GoogleDriveSyncAdapter implements ISyncAdapter {
     // 既存のファイルIDを取得
     const chartsFileId = await this.getFileId(this.CHARTS_FILE_NAME, folderId);
     const metadataFileId = await this.getFileId(this.METADATA_FILE_NAME, folderId);
+    const deletedChartsFileId = await this.getFileId(this.DELETED_CHARTS_FILE_NAME, folderId);
     
     // ファイルを更新または作成
     await Promise.all([
       this.uploadFile(this.CHARTS_FILE_NAME, charts, folderId, chartsFileId),
-      this.uploadFile(this.METADATA_FILE_NAME, metadata, folderId, metadataFileId)
+      this.uploadFile(this.METADATA_FILE_NAME, metadata, folderId, metadataFileId),
+      this.uploadFile(this.DELETED_CHARTS_FILE_NAME, deletedCharts, folderId, deletedChartsFileId)
     ]);
   }
   

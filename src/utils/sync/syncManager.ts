@@ -1,7 +1,8 @@
 import type { ChordChart } from '../../types/chord';
-import type { ISyncAdapter, SyncMetadata, SyncConflict, SyncResult, SyncConfig } from '../../types/sync';
+import type { ISyncAdapter, SyncMetadata, SyncConflict, SyncResult, SyncConfig, DeletedChartRecord } from '../../types/sync';
 import { GoogleDriveSyncAdapter } from './googleDriveAdapter';
 import { getDeviceId } from './deviceId';
+import { storageService } from '../storage';
 import { logger } from '../logger';
 
 export class SyncManager {
@@ -23,7 +24,9 @@ export class SyncManager {
   }
   
   async initialize(): Promise<void> {
-    await (this.adapter as GoogleDriveSyncAdapter).initialize();
+    if (this.adapter instanceof GoogleDriveSyncAdapter) {
+      await this.adapter.initialize();
+    }
   }
   
   isAuthenticated(): boolean {
@@ -58,11 +61,12 @@ export class SyncManager {
       logger.debug(`Starting sync with ${localCharts.length} local charts`);
       
       // リモートデータを取得
-      const { charts: remoteCharts, metadata: remoteMetadata } = await this.adapter.pull();
-      logger.debug(`Pulled ${remoteCharts.length} remote charts`);
+      const { charts: remoteCharts, metadata: remoteMetadata, deletedCharts: remoteDeletedCharts } = await this.adapter.pull();
+      logger.debug(`Pulled ${remoteCharts.length} remote charts and ${remoteDeletedCharts.length} deleted records`);
       
-      // ローカルメタデータを生成
+      // ローカルメタデータと削除記録を取得
       const localMetadata = this.generateLocalMetadata(localCharts);
+      const localDeletedCharts = await storageService.loadDeletedCharts();
       
       // コンフリクトを検出
       const conflicts = this.detectConflicts(localCharts, remoteCharts, localMetadata, remoteMetadata);
@@ -79,14 +83,15 @@ export class SyncManager {
         }
       }
       
-      // マージ処理（後勝ち戦略）
-      const mergedCharts = this.mergeCharts(localCharts, remoteCharts, localMetadata, remoteMetadata);
+      // マージ処理（後勝ち戦略、削除記録も考慮）
+      const mergedCharts = this.mergeCharts(localCharts, remoteCharts, localMetadata, remoteMetadata, localDeletedCharts, remoteDeletedCharts);
       const mergedMetadata = this.mergeMetadata(localMetadata, remoteMetadata);
+      const mergedDeletedCharts = this.mergeDeletedCharts(localDeletedCharts, remoteDeletedCharts);
       
-      logger.debug(`Merged ${mergedCharts.length} charts for push`);
+      logger.debug(`Merged ${mergedCharts.length} charts and ${mergedDeletedCharts.length} deleted records for push`);
       
       // プッシュ
-      await this.adapter.push(mergedCharts, mergedMetadata);
+      await this.adapter.push(mergedCharts, mergedMetadata, mergedDeletedCharts);
       logger.debug(`Successfully pushed to remote`);
       
       result.success = true;
@@ -186,17 +191,31 @@ export class SyncManager {
     localCharts: ChordChart[],
     remoteCharts: ChordChart[],
     localMetadata: Record<string, SyncMetadata>,
-    remoteMetadata: Record<string, SyncMetadata>
+    remoteMetadata: Record<string, SyncMetadata>,
+    localDeletedCharts: DeletedChartRecord[],
+    remoteDeletedCharts: DeletedChartRecord[]
   ): ChordChart[] {
     const merged = new Map<string, ChordChart>();
     
-    // リモートチャートを先に追加
+    // 削除されたチャートのIDをセットに保存
+    const allDeletedIds = new Set<string>();
+    [...localDeletedCharts, ...remoteDeletedCharts].forEach(record => {
+      allDeletedIds.add(record.id);
+    });
+    
+    // リモートチャートを先に追加（削除されていないもののみ）
     for (const remoteChart of remoteCharts) {
-      merged.set(remoteChart.id, remoteChart);
+      if (!allDeletedIds.has(remoteChart.id)) {
+        merged.set(remoteChart.id, remoteChart);
+      }
     }
     
-    // ローカルチャートで上書き（後勝ち戦略）
+    // ローカルチャートで上書き（後勝ち戦略、削除されていないもののみ）
     for (const localChart of localCharts) {
+      if (allDeletedIds.has(localChart.id)) {
+        continue; // 削除されたチャートはスキップ
+      }
+      
       const localMeta = localMetadata[localChart.id];
       const remoteMeta = remoteMetadata[localChart.id];
       
@@ -213,6 +232,23 @@ export class SyncManager {
         }
       }
     }
+    
+    return Array.from(merged.values());
+  }
+  
+  private mergeDeletedCharts(
+    localDeletedCharts: DeletedChartRecord[],
+    remoteDeletedCharts: DeletedChartRecord[]
+  ): DeletedChartRecord[] {
+    const merged = new Map<string, DeletedChartRecord>();
+    
+    // すべての削除記録を統合し、より新しい削除時刻を採用
+    [...localDeletedCharts, ...remoteDeletedCharts].forEach(record => {
+      const existing = merged.get(record.id);
+      if (!existing || new Date(record.deletedAt) > new Date(existing.deletedAt)) {
+        merged.set(record.id, record);
+      }
+    });
     
     return Array.from(merged.values());
   }

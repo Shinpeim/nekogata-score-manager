@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { storageService } from '../storage';
 import type { ChordChart } from '../../types';
+import type { DeletedChartRecord } from '../../types/sync';
 
 // localforageをモック
 vi.mock('localforage', () => ({
@@ -283,6 +284,89 @@ describe('storageService', () => {
       
       const result = await storageService.loadLastOpenedChartId();
       expect(result).toBe(null);
+    });
+  });
+
+  describe('deleted charts management', () => {
+    it('should save and load deleted charts', async () => {
+      const deletedCharts = [
+        { id: 'chart-1', deletedAt: '2024-01-01T00:00:00.000Z', deviceId: 'device-1' },
+        { id: 'chart-2', deletedAt: '2024-01-02T00:00:00.000Z', deviceId: 'device-2' }
+      ];
+
+      await storageService.saveDeletedCharts(deletedCharts);
+      expect(localforage.setItem).toHaveBeenCalledWith('deleted-charts', deletedCharts);
+
+      vi.mocked(localforage.getItem).mockResolvedValue(deletedCharts);
+      const result = await storageService.loadDeletedCharts();
+      expect(result).toEqual(deletedCharts);
+    });
+
+    it('should return empty array when no deleted charts exist', async () => {
+      vi.mocked(localforage.getItem).mockResolvedValue(null);
+      
+      const result = await storageService.loadDeletedCharts();
+      expect(result).toEqual([]);
+    });
+
+    it('should add single deleted chart', async () => {
+      const existingDeleted = [
+        { id: 'chart-1', deletedAt: '2024-01-01T00:00:00.000Z', deviceId: 'device-1' }
+      ];
+      
+      vi.mocked(localforage.getItem).mockResolvedValue(existingDeleted);
+      
+      await storageService.addDeletedChart('chart-2', 'device-2');
+      
+      expect(localforage.setItem).toHaveBeenCalledWith('deleted-charts', 
+        expect.arrayContaining([
+          expect.objectContaining({ id: 'chart-1' }),
+          expect.objectContaining({ id: 'chart-2', deviceId: 'device-2' })
+        ])
+      );
+    });
+
+    it('should update existing deleted chart record', async () => {
+      const existingDeleted = [
+        { id: 'chart-1', deletedAt: '2024-01-01T00:00:00.000Z', deviceId: 'device-1' }
+      ];
+      
+      vi.mocked(localforage.getItem).mockResolvedValue(existingDeleted);
+      
+      await storageService.addDeletedChart('chart-1', 'device-2');
+      
+      const savedData = vi.mocked(localforage.setItem).mock.calls[0][1] as DeletedChartRecord[];
+      expect(savedData).toHaveLength(1);
+      expect(savedData[0].id).toBe('chart-1');
+      expect(savedData[0].deviceId).toBe('device-2');
+    });
+
+    it('should add multiple deleted charts', async () => {
+      vi.mocked(localforage.getItem).mockResolvedValue([]);
+      
+      await storageService.addMultipleDeletedCharts(['chart-1', 'chart-2'], 'device-1');
+      
+      const savedData = vi.mocked(localforage.setItem).mock.calls[0][1] as DeletedChartRecord[];
+      expect(savedData).toHaveLength(2);
+      expect(savedData[0].id).toBe('chart-1');
+      expect(savedData[1].id).toBe('chart-2');
+      expect(savedData[0].deviceId).toBe('device-1');
+      expect(savedData[1].deviceId).toBe('device-1');
+    });
+
+    it('should clear deleted charts', async () => {
+      await storageService.clearDeletedCharts();
+      expect(localforage.removeItem).toHaveBeenCalledWith('deleted-charts');
+    });
+
+    it('should handle errors in deleted charts operations', async () => {
+      vi.mocked(localforage.setItem).mockRejectedValue(new Error('Storage error'));
+      
+      await expect(storageService.saveDeletedCharts([])).rejects.toThrow('削除記録の保存に失敗しました');
+      
+      vi.mocked(localforage.getItem).mockRejectedValue(new Error('Storage error'));
+      const result = await storageService.loadDeletedCharts();
+      expect(result).toEqual([]);
     });
   });
 });

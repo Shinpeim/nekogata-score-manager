@@ -8,6 +8,13 @@ vi.mock('../googleDriveAdapter');
 vi.mock('../deviceId', () => ({
   getDeviceId: () => 'test-device-id'
 }));
+vi.mock('../../storage', () => ({
+  storageService: {
+    loadDeletedCharts: vi.fn().mockResolvedValue([])
+  }
+}));
+
+import { storageService } from '../../storage';
 
 describe('SyncManager', () => {
   let syncManager: SyncManager;
@@ -79,7 +86,8 @@ describe('SyncManager', () => {
     beforeEach(() => {
       (mockAdapter.pull as ReturnType<typeof vi.fn>).mockResolvedValue({
         charts: mockRemoteCharts,
-        metadata: mockRemoteMetadata
+        metadata: mockRemoteMetadata,
+        deletedCharts: []
       });
       (mockAdapter.push as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
     });
@@ -109,7 +117,8 @@ describe('SyncManager', () => {
             lastModifiedAt: remoteModified,
             deviceId: 'other-device'
           }
-        }
+        },
+        deletedCharts: []
       });
 
       const onConflict = vi.fn().mockResolvedValue('overwrite');
@@ -134,7 +143,8 @@ describe('SyncManager', () => {
             lastModifiedAt: new Date().toISOString(),
             deviceId: 'other-device'
           }
-        }
+        },
+        deletedCharts: []
       });
 
       const onConflict = vi.fn().mockResolvedValue('cancel');
@@ -190,6 +200,192 @@ describe('SyncManager', () => {
       
       expect(syncManager.getConfig()).toEqual(newConfig);
       expect(localStorage.getItem('nekogata-sync-config')).toBe(JSON.stringify(newConfig));
+    });
+  });
+
+  describe('deleted charts synchronization', () => {
+    const mockLocalCharts: ChordChart[] = [
+      {
+        id: 'chart-1',
+        title: 'Local Chart',
+        artist: 'Local Artist',
+        key: 'C',
+        tempo: 120,
+        timeSignature: '4/4',
+        sections: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        version: '2.0.0'
+      }
+    ];
+
+    const mockRemoteCharts: ChordChart[] = [
+      {
+        id: 'chart-2',
+        title: 'Remote Chart',
+        artist: 'Remote Artist',
+        key: 'G',
+        tempo: 140,
+        timeSignature: '4/4',
+        sections: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        version: '2.0.0'
+      }
+    ];
+
+    it('should exclude deleted charts from sync result', async () => {
+      const deletedCharts = [
+        { id: 'chart-2', deletedAt: new Date().toISOString(), deviceId: 'device-1' }
+      ];
+      
+      (mockAdapter.pull as ReturnType<typeof vi.fn>).mockResolvedValue({
+        charts: mockRemoteCharts,
+        metadata: {},
+        deletedCharts
+      });
+
+      const result = await syncManager.sync(mockLocalCharts);
+
+      expect(result.success).toBe(true);
+      expect(result.mergedCharts).toHaveLength(1);
+      expect(result.mergedCharts?.[0].id).toBe('chart-1');
+      expect(result.mergedCharts?.find(c => c.id === 'chart-2')).toBeUndefined();
+    });
+
+    it('should merge deleted charts from local and remote', async () => {
+      const localDeletedCharts = [
+        { id: 'chart-3', deletedAt: '2024-01-01T00:00:00.000Z', deviceId: 'device-1' }
+      ];
+      const remoteDeletedCharts = [
+        { id: 'chart-4', deletedAt: '2024-01-02T00:00:00.000Z', deviceId: 'device-2' }
+      ];
+
+      vi.mocked(storageService.loadDeletedCharts).mockResolvedValue(localDeletedCharts);
+      
+      (mockAdapter.pull as ReturnType<typeof vi.fn>).mockResolvedValue({
+        charts: [],
+        metadata: {},
+        deletedCharts: remoteDeletedCharts
+      });
+
+      await syncManager.sync([]);
+
+      expect(mockAdapter.push).toHaveBeenCalledWith(
+        expect.any(Array),
+        expect.any(Object),
+        expect.arrayContaining([
+          expect.objectContaining({ id: 'chart-3' }),
+          expect.objectContaining({ id: 'chart-4' })
+        ])
+      );
+    });
+
+    it('should handle newer deleted chart records', async () => {
+      const olderDeletedChart = { id: 'chart-5', deletedAt: '2024-01-01T00:00:00.000Z', deviceId: 'device-1' };
+      const newerDeletedChart = { id: 'chart-5', deletedAt: '2024-01-02T00:00:00.000Z', deviceId: 'device-2' };
+
+      vi.mocked(storageService.loadDeletedCharts).mockResolvedValue([olderDeletedChart]);
+      
+      (mockAdapter.pull as ReturnType<typeof vi.fn>).mockResolvedValue({
+        charts: [],
+        metadata: {},
+        deletedCharts: [newerDeletedChart]
+      });
+
+      await syncManager.sync([]);
+
+      expect(mockAdapter.push).toHaveBeenCalledWith(
+        expect.any(Array),
+        expect.any(Object),
+        expect.arrayContaining([
+          expect.objectContaining({ 
+            id: 'chart-5', 
+            deletedAt: '2024-01-02T00:00:00.000Z',
+            deviceId: 'device-2'
+          })
+        ])
+      );
+    });
+
+    it('should handle deletion conflicts correctly', async () => {
+      // ローカルで削除されたが、リモートで更新されたチャート
+      const remoteChart: ChordChart = {
+        id: 'conflicted-chart',
+        title: 'Updated Remotely',
+        artist: 'Remote Artist',
+        key: 'G',
+        tempo: 140,
+        timeSignature: '4/4',
+        sections: [],
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-03'), // リモートで更新
+        version: '2.0.0'
+      };
+
+      const localDeletedChart = {
+        id: 'conflicted-chart',
+        deletedAt: '2024-01-02T00:00:00.000Z', // ローカルで削除
+        deviceId: 'local-device'
+      };
+
+      vi.mocked(storageService.loadDeletedCharts).mockResolvedValue([localDeletedChart]);
+      
+      (mockAdapter.pull as ReturnType<typeof vi.fn>).mockResolvedValue({
+        charts: [remoteChart],
+        metadata: {
+          'conflicted-chart': {
+            lastSyncedAt: '2024-01-01T00:00:00.000Z',
+            lastModifiedAt: '2024-01-03T00:00:00.000Z',
+            deviceId: 'remote-device'
+          }
+        },
+        deletedCharts: []
+      });
+
+      const result = await syncManager.sync([]);
+
+      // 削除が優先されるため、チャートは同期結果に含まれない
+      expect(result.success).toBe(true);
+      expect(result.mergedCharts?.find(c => c.id === 'conflicted-chart')).toBeUndefined();
+      
+      // 削除記録は保持される
+      expect(mockAdapter.push).toHaveBeenCalledWith(
+        expect.any(Array),
+        expect.any(Object),
+        expect.arrayContaining([
+          expect.objectContaining({ id: 'conflicted-chart' })
+        ])
+      );
+    });
+
+    it('should exclude charts deleted on multiple devices', async () => {
+      const localDeletedCharts = [
+        { id: 'chart-a', deletedAt: '2024-01-01T00:00:00.000Z', deviceId: 'device-1' }
+      ];
+      const remoteDeletedCharts = [
+        { id: 'chart-b', deletedAt: '2024-01-02T00:00:00.000Z', deviceId: 'device-2' }
+      ];
+
+      const remoteCharts: ChordChart[] = [
+        { id: 'chart-a', title: 'Chart A' } as ChordChart, // ローカルで削除済み
+        { id: 'chart-b', title: 'Chart B' } as ChordChart, // リモートで削除済み
+        { id: 'chart-c', title: 'Chart C' } as ChordChart  // 削除されていない
+      ];
+
+      vi.mocked(storageService.loadDeletedCharts).mockResolvedValue(localDeletedCharts);
+      
+      (mockAdapter.pull as ReturnType<typeof vi.fn>).mockResolvedValue({
+        charts: remoteCharts,
+        metadata: {},
+        deletedCharts: remoteDeletedCharts
+      });
+
+      const result = await syncManager.sync([]);
+
+      expect(result.success).toBe(true);
+      expect(result.mergedCharts).toHaveLength(1);
+      expect(result.mergedCharts?.[0].id).toBe('chart-c');
     });
   });
 });

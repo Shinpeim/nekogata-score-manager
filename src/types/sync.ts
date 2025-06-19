@@ -7,6 +7,12 @@ export interface SyncMetadata {
   remoteId?: string;
 }
 
+export interface DeletedChartRecord {
+  id: string;
+  deletedAt: string;
+  deviceId: string;
+}
+
 export interface SyncConflict {
   localChart: ChordChart;
   remoteChart: ChordChart;
@@ -35,8 +41,8 @@ export interface ISyncAdapter {
   signOut(): Promise<void>;
   
   // 同期操作
-  pull(): Promise<{ charts: ChordChart[]; metadata: Record<string, SyncMetadata> }>;
-  push(charts: ChordChart[], metadata: Record<string, SyncMetadata>): Promise<void>;
+  pull(): Promise<{ charts: ChordChart[]; metadata: Record<string, SyncMetadata>; deletedCharts: DeletedChartRecord[] }>;
+  push(charts: ChordChart[], metadata: Record<string, SyncMetadata>, deletedCharts: DeletedChartRecord[]): Promise<void>;
   
   // メタデータ操作
   getRemoteMetadata(): Promise<Record<string, SyncMetadata>>;
