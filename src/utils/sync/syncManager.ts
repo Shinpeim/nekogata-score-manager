@@ -122,9 +122,14 @@ export class SyncManager {
       // 実際のチャートの更新時刻を使用（既存のupdatedAtがない場合はcreatedAtを使用）
       const actualModifiedTime = chart.updatedAt || chart.createdAt;
       
+      // 日付がすでに文字列の場合とDateオブジェクトの場合の両方を処理
+      const modifiedTimeString = actualModifiedTime instanceof Date 
+        ? actualModifiedTime.toISOString()
+        : String(actualModifiedTime);
+      
       metadata[chart.id] = {
         lastSyncedAt: this.getLastSyncTime(),
-        lastModifiedAt: actualModifiedTime.toISOString(),
+        lastModifiedAt: modifiedTimeString,
         deviceId
       };
     }

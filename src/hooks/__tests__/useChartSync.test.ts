@@ -24,6 +24,7 @@ vi.mock('localforage', () => ({
 
 interface MockSyncStore {
   syncManager: unknown;
+  isAuthenticated: boolean;
   isSyncing: boolean;
   lastSyncTime: Date | null;
   syncError: string | null;
@@ -38,7 +39,6 @@ interface MockSyncStore {
   signOut: ReturnType<typeof vi.fn>;
   updateSyncConfig: ReturnType<typeof vi.fn>;
   clearSyncError: ReturnType<typeof vi.fn>;
-  isAuthenticated: ReturnType<typeof vi.fn>;
   initializeSync: ReturnType<typeof vi.fn>;
 }
 
@@ -70,6 +70,7 @@ const mockChordChartStore = {
 
 const mockSyncStore: MockSyncStore = {
   syncManager: { initialize: vi.fn() },
+  isAuthenticated: false,
   isSyncing: false,
   lastSyncTime: null,
   syncError: null,
@@ -84,7 +85,6 @@ const mockSyncStore: MockSyncStore = {
   signOut: vi.fn(),
   updateSyncConfig: vi.fn(),
   clearSyncError: vi.fn(),
-  isAuthenticated: vi.fn(),
   initializeSync: vi.fn()
 };
 
@@ -94,7 +94,7 @@ describe('useChartSync', () => {
     
     // Reset mock implementations
     mockChordChartStore.subscribeSyncNotification.mockReturnValue(() => {});
-    mockSyncStore.isAuthenticated.mockReturnValue(false);
+    mockSyncStore.isAuthenticated = false;
     mockSyncStore.sync.mockResolvedValue({
       success: true,
       conflicts: [],
@@ -291,7 +291,7 @@ describe('useChartSync', () => {
   describe('auto sync on chart changes', () => {
     it('should subscribe to chart changes when auto sync is enabled and authenticated', () => {
       mockSyncStore.syncConfig.autoSync = true;
-      mockSyncStore.isAuthenticated.mockReturnValue(true);
+      mockSyncStore.isAuthenticated = true;
 
       renderHook(() => useChartSync());
 
@@ -300,7 +300,7 @@ describe('useChartSync', () => {
 
     it('should not subscribe when auto sync is disabled', () => {
       mockSyncStore.syncConfig.autoSync = false;
-      mockSyncStore.isAuthenticated.mockReturnValue(true);
+      mockSyncStore.isAuthenticated = true;
 
       renderHook(() => useChartSync());
 
@@ -309,7 +309,7 @@ describe('useChartSync', () => {
 
     it('should not subscribe when not authenticated', () => {
       mockSyncStore.syncConfig.autoSync = true;
-      mockSyncStore.isAuthenticated.mockReturnValue(false);
+      mockSyncStore.isAuthenticated = false;
 
       renderHook(() => useChartSync());
 
@@ -320,7 +320,7 @@ describe('useChartSync', () => {
       const unsubscribe = vi.fn();
       mockChordChartStore.subscribeSyncNotification.mockReturnValue(unsubscribe);
       mockSyncStore.syncConfig.autoSync = true;
-      mockSyncStore.isAuthenticated.mockReturnValue(true);
+      mockSyncStore.isAuthenticated = true;
 
       const { unmount } = renderHook(() => useChartSync());
 
@@ -339,7 +339,7 @@ describe('useChartSync', () => {
       });
 
       mockSyncStore.syncConfig.autoSync = true;
-      mockSyncStore.isAuthenticated.mockReturnValue(true);
+      mockSyncStore.isAuthenticated = true;
       mockSyncStore.isSyncing = false;
 
       renderHook(() => useChartSync());
@@ -362,7 +362,7 @@ describe('useChartSync', () => {
       });
 
       mockSyncStore.syncConfig.autoSync = true;
-      mockSyncStore.isAuthenticated.mockReturnValue(true);
+      mockSyncStore.isAuthenticated = true;
       mockSyncStore.isSyncing = true; // Already syncing
 
       renderHook(() => useChartSync());
@@ -384,7 +384,7 @@ describe('useChartSync', () => {
       });
 
       mockSyncStore.syncConfig.autoSync = true;
-      mockSyncStore.isAuthenticated.mockReturnValue(true);
+      mockSyncStore.isAuthenticated = true;
       mockSyncStore.isSyncing = false;
       mockSyncStore.sync.mockRejectedValue(new Error('Auto sync failed'));
 
@@ -416,7 +416,7 @@ describe('useChartSync', () => {
       mockChordChartStore.charts = { [chart1.id]: chart1 };
       mockSyncStore.syncConfig.autoSync = true;
       mockSyncStore.syncConfig.syncInterval = 5; // 5 minutes
-      mockSyncStore.isAuthenticated.mockReturnValue(true);
+      mockSyncStore.isAuthenticated = true;
       mockSyncStore.isSyncing = false;
 
       const { unmount } = renderHook(() => useChartSync());
@@ -430,7 +430,7 @@ describe('useChartSync', () => {
 
     it('should not set up timer when auto sync is disabled', () => {
       mockSyncStore.syncConfig.autoSync = false;
-      mockSyncStore.isAuthenticated.mockReturnValue(true);
+      mockSyncStore.isAuthenticated = true;
 
       renderHook(() => useChartSync());
 
@@ -443,7 +443,7 @@ describe('useChartSync', () => {
 
     it('should not sync during timer if already syncing', async () => {
       mockSyncStore.syncConfig.autoSync = true;
-      mockSyncStore.isAuthenticated.mockReturnValue(true);
+      mockSyncStore.isAuthenticated = true;
       mockSyncStore.isSyncing = true; // Already syncing
 
       renderHook(() => useChartSync());
@@ -457,7 +457,7 @@ describe('useChartSync', () => {
 
     it('should handle periodic sync errors silently', () => {
       mockSyncStore.syncConfig.autoSync = true;
-      mockSyncStore.isAuthenticated.mockReturnValue(true);
+      mockSyncStore.isAuthenticated = true;
       mockSyncStore.isSyncing = false;
 
       const { unmount } = renderHook(() => useChartSync());
@@ -471,7 +471,7 @@ describe('useChartSync', () => {
 
     it('should clear timer on unmount', () => {
       mockSyncStore.syncConfig.autoSync = true;
-      mockSyncStore.isAuthenticated.mockReturnValue(true);
+      mockSyncStore.isAuthenticated = true;
 
       const { unmount } = renderHook(() => useChartSync());
 

@@ -408,18 +408,18 @@ describe('syncStore', () => {
     });
 
     it('認証状態が正しく取得される', () => {
-      mockSyncManager.isAuthenticated.mockReturnValue(true);
+      // 認証状態をセット
+      useSyncStore.setState({ isAuthenticated: true });
 
-      const isAuthenticated = useSyncStore.getState().isAuthenticated();
+      const isAuthenticated = useSyncStore.getState().isAuthenticated;
 
       expect(isAuthenticated).toBe(true);
-      expect(mockSyncManager.isAuthenticated).toHaveBeenCalledTimes(1);
     });
 
     it('syncManagerがnullの場合はfalseを返す', () => {
-      useSyncStore.setState({ syncManager: null });
+      useSyncStore.setState({ syncManager: null, isAuthenticated: false });
 
-      const isAuthenticated = useSyncStore.getState().isAuthenticated();
+      const isAuthenticated = useSyncStore.getState().isAuthenticated;
 
       expect(isAuthenticated).toBe(false);
     });

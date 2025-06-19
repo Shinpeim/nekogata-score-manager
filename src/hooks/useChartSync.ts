@@ -69,7 +69,7 @@ export const useChartSync = () => {
   // 自動同期の設定
   useEffect(() => {
     const isAutoSyncEnabled = syncStore.syncConfig.autoSync;
-    const isAuthenticated = syncStore.isAuthenticated();
+    const isAuthenticated = syncStore.isAuthenticated;
     
     if (!isAutoSyncEnabled || !isAuthenticated) {
       return;
@@ -109,7 +109,7 @@ export const useChartSync = () => {
   // 定期同期タイマー
   useEffect(() => {
     const isAutoSyncEnabled = syncStore.syncConfig.autoSync;
-    const isAuthenticated = syncStore.isAuthenticated();
+    const isAuthenticated = syncStore.isAuthenticated;
     
     if (!isAutoSyncEnabled || !isAuthenticated) {
       return;
@@ -154,7 +154,7 @@ export const useChartSync = () => {
     syncConfig: syncStore.syncConfig,
     
     // 認証関連
-    isAuthenticated: syncStore.isAuthenticated(),
+    isAuthenticated: syncStore.isAuthenticated,
     authenticate: syncStore.authenticate,
     signOut: syncStore.signOut,
     
