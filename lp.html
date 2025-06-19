@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nekogata Score Manager - 音楽コード譜管理アプリ</title>
+    <meta name="description" content="ブラウザで動作する無料のコード譜作成・管理アプリケーション。オフライン対応、移調機能、Google Drive同期機能付き。">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #334155;
+            background-color: #f8fafc;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1rem 0;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #85B0B7;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .nav-links a:hover {
+            color: #85B0B7;
+        }
+        
+        .hero {
+            background: linear-gradient(135deg, #85B0B7 0%, #BDD0CA 100%);
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+        
+        .hero p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: white;
+            color: #85B0B7;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: transform 0.2s;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .features {
+            padding: 4rem 0;
+            background: white;
+        }
+        
+        .features h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: #1e293b;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            padding: 2rem;
+            border-radius: 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .feature-card h3 {
+            color: #85B0B7;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        
+        .privacy-section {
+            padding: 4rem 0;
+            background: #f1f5f9;
+        }
+        
+        .privacy-section h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: #1e293b;
+        }
+        
+        .privacy-content {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .privacy-highlight {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .privacy-highlight h3 {
+            color: #0369a1;
+            margin-bottom: 0.5rem;
+        }
+        
+        footer {
+            background: #1e293b;
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+        
+        .footer-links {
+            margin-bottom: 1rem;
+        }
+        
+        .footer-links a {
+            color: #cbd5e1;
+            text-decoration: none;
+            margin: 0 1rem;
+        }
+        
+        .footer-links a:hover {
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">🐱 Nekogata Score Manager</div>
+                <nav>
+                    <ul class="nav-links">
+                        <li><a href="#features">機能</a></li>
+                        <li><a href="#privacy">プライバシー</a></li>
+                        <li><a href="#privacy-policy">プライバシーポリシー</a></li>
+                        <li><a href="#terms">利用規約</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>音楽のコード譜を<br>簡単に作成・管理</h1>
+                <p>ブラウザだけで動作する無料のコード譜管理アプリケーション<br>オフライン対応・プライバシー重視の設計</p>
+                <a href="/index.html" class="cta-button">今すぐ始める</a>
+            </div>
+        </section>
+
+        <section id="features" class="features">
+            <div class="container">
+                <h2>主な機能</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h3>🎵 コード譜作成・編集</h3>
+                        <p>直感的なインターフェースでコード譜を簡単に作成・編集できます。ドラッグ&ドロップによる並び替えにも対応。</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🔄 移調機能</h3>
+                        <p>楽曲のキーを自由に変更できます。演奏者の声域や楽器に合わせて、ワンクリックで移調が可能。</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>📱 オフライン対応</h3>
+                        <p>PWA（Progressive Web App）として動作し、インターネット接続がない環境でも利用できます。</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>💾 ローカル保存</h3>
+                        <p>すべてのデータはブラウザ内に安全に保存されます。サーバーにデータを送信することはありません。</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>📤 インポート・エクスポート</h3>
+                        <p>作成したコード譜をJSON形式でエクスポート・インポートできます。データの移行やバックアップが簡単。</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>☁️ Google Drive同期（任意）</h3>
+                        <p>必要に応じてGoogle Driveと同期可能。複数デバイス間でのデータ共有ができます。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="privacy" class="privacy-section">
+            <div class="container">
+                <h2>プライバシーとデータの取り扱い</h2>
+                <div class="privacy-content">
+                    <div class="privacy-highlight">
+                        <h3>🔒 プライバシー重視の設計</h3>
+                        <p>Nekogata Score Managerは、利用者のプライバシーを最優先に設計されています。</p>
+                    </div>
+                    
+                    <h3>データ収集について</h3>
+                    <ul style="margin: 1rem 0; padding-left: 2rem;">
+                        <li><strong>個人情報の収集なし:</strong> 本アプリケーションは利用者の個人情報を一切収集しません</li>
+                        <li><strong>アクセス解析なし:</strong> ユーザー行動の追跡やアクセス解析は行いません</li>
+                        <li><strong>ローカル保存:</strong> すべてのデータはブラウザのローカルストレージに保存されます</li>
+                    </ul>
+
+                    <h3>Google Drive同期機能について</h3>
+                    <p>Google Drive同期機能は<strong>完全に任意</strong>です。利用者が明示的に有効化を選択した場合のみ動作します：</p>
+                    <ul style="margin: 1rem 0; padding-left: 2rem;">
+                        <li><strong>用途:</strong> 作成したコード譜データを利用者のGoogle Driveに保存し、複数デバイス間で同期</li>
+                        <li><strong>スコープ:</strong> 本アプリが作成したファイルのみにアクセス（drive.file権限）</li>
+                        <li><strong>データ所有者:</strong> すべてのデータは利用者に帰属し、開発者はアクセスできません</li>
+                        <li><strong>透明性:</strong> 同期されるデータは利用者が作成したコード譜のみです</li>
+                    </ul>
+
+                    <div class="privacy-highlight">
+                        <h3>📋 Google Drive APIの使用目的</h3>
+                        <p>Google Drive APIは、利用者が作成したコード譜データを利用者自身のGoogle Driveアカウントに保存し、複数のデバイス間で同期するためにのみ使用されます。開発者や第三者がデータにアクセスすることは一切ありません。</p>
+                    </div>
+
+                    <h3>セキュリティ</h3>
+                    <p>データは主にローカルに保存されるため、一般的なWebサービスと比較してプライバシーが保護されやすい設計となっています。利用者の端末やブラウザ、Google アカウントのセキュリティについては、利用者自身で適切に管理していただく必要があります。</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <a href="#privacy-policy" onclick="showPrivacyPolicy()">プライバシーポリシー</a>
+                <a href="#terms" onclick="showTermsOfService()">利用規約</a>
+                <a href="mailto:shinpeim@gmail.com">お問い合わせ</a>
+            </div>
+            <p>&copy; 2024 Nekogata Score Manager. Made with ❤️ by Shinpei</p>
+        </div>
+    </footer>
+
+    <!-- Modal for Privacy Policy and Terms -->
+    <div id="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2rem; border-radius: 12px; max-width: 800px; max-height: 80vh; overflow-y: auto; margin: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2 id="modal-title"></h2>
+                <button onclick="closeModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            <div id="modal-content" style="white-space: pre-wrap; line-height: 1.6;"></div>
+        </div>
+    </div>
+
+    <script>
+        const PRIVACY_POLICY = `プライバシーポリシー
+
+最終更新日: 2024年6月18日
+
+1. データ収集について
+
+Nekogata Score Managerは、利用者さまのプライバシーを尊重します。本アプリケーションは以下の特徴があります：
+
+- データ収集なし: 本アプリケーションは、利用者さまの個人情報を一切収集しません
+- ローカル保存: すべてのデータは利用者さまのブラウザ内に保存されます
+- 任意の同期機能: 利用者さまが明示的にGoogle アカウント連携を選択した場合のみ、コード譜データが利用者さまのGoogle Driveに同期されます
+- トラッキングなし: アクセス解析やユーザー行動の追跡は行いません
+
+2. データの保存場所
+
+- すべてのデータはブラウザのローカルストレージ（IndexedDB）に保存されます
+- 利用者さまが同期機能を有効にした場合、データは利用者さまのGoogle Driveにも保存されます
+- データは開発者やその他の第三者がアクセスできません（Google Drive上のデータも同様）
+- ブラウザのデータを削除することで、ローカルデータを完全に削除できます
+
+3. Cookie・ローカルストレージの使用
+
+本アプリケーションは以下の目的でローカルストレージを使用します：
+
+- 作成したコード譜の保存
+- アプリケーション設定の保存
+- PWA機能のためのサービスワーカー
+
+これらは基本的に利用者さまの端末内で完結します。ただし、利用者さまが任意でGoogle Drive同期機能を有効にした場合、コード譜データのみが利用者さまのGoogle Driveアカウントに送信・保存されます。
+
+4. データの共有
+
+本アプリケーションは、利用者さまのデータを第三者と共有、販売、または提供することはありません。Google Drive同期機能を使用する場合、データは利用者さま自身のGoogle Driveアカウントにのみ保存され、開発者を含む第三者がアクセスすることはできません。
+
+5. セキュリティ
+
+利用者さまのデータは主にローカルに保存されるため、一般的なWebサービスと比較してプライバシーが保護されやすい設計となっています。ただし、利用者さまの端末やブラウザのセキュリティ、およびGoogle Drive同期を使用する場合のGoogleアカウントのセキュリティについては、利用者さま自身で適切に管理していただく必要があります。
+
+6. 本ポリシーの変更
+
+本プライバシーポリシーは必要に応じて更新される場合があります。重要な変更がある場合は、アプリケーション内で通知いたします。
+
+7. ご意見・フィードバック
+
+本プライバシーポリシーに関するご意見やフィードバックがございましたら、shinpeim@gmail.com までお寄せください。`;
+
+        const TERMS_OF_SERVICE = `利用規約
+
+最終更新日: 2024年6月18日
+
+1. サービスについて
+
+Nekogata Score Manager（以下「本サービス」）は、音楽のコード譜を作成・管理するためのWebアプリケーションです。本サービスは無償で提供され、ブラウザ上で動作するPWA（Progressive Web App）として実装されています。
+
+2. 利用条件
+
+本サービスをご利用いただくことで、以下の利用規約に同意したものとみなします：
+
+- 本サービスは現在の状態のまま、保証なしで提供されます
+- 本サービスの利用は個人利用に限ります
+- 著作権法その他の法令を遵守してご利用ください
+- 本サービスの機能を悪用したり、他のユーザーに迷惑をかける行為は禁止します
+
+3. 責任の制限
+
+本サービスは善意により無償で提供されており、以下について開発者は一切の責任を負いません：
+
+- データの損失: ブラウザの問題、端末の故障、操作ミス等によるデータ損失
+- サービスの中断: メンテナンス、技術的問題等によるサービス利用不可
+- 動作不良: 特定の環境での動作不良やバグ
+- 間接損害: 本サービスの利用または利用不能により生じた一切の間接的、付随的、特別な損害
+- データの正確性: 作成されたコード譜の音楽理論的正確性
+
+4. 知的財産権
+
+- 利用者さまが作成したコード譜の著作権は、利用者さまに帰属します
+- 既存楽曲のコード譜を作成する場合は、著作権法を遵守してください
+
+5. サービスの変更・終了
+
+開発者は以下の権利を有します：
+
+- 本サービスの機能を予告なく変更、追加、削除すること
+- 本サービスを予告なく一時停止または終了すること
+- 本利用規約を必要に応じて変更すること
+
+6. その他
+
+- 本利用規約の一部が無効となった場合も、その他の部分は有効に存続します
+- 本サービスは個人開発によるものであり、商用サポートは提供されません
+- ご意見やフィードバックは、shinpeim@gmail.com までお寄せください
+
+---
+
+重要な注意事項
+本サービスは無償かつ善意による運営のため、利用に際して利用者さまが被った一切の損害について、開発者は責任を負いかねます。ご理解とご了承のうえ、ご利用ください。`;
+
+        function showPrivacyPolicy() {
+            document.getElementById('modal-title').textContent = 'プライバシーポリシー';
+            document.getElementById('modal-content').textContent = PRIVACY_POLICY;
+            document.getElementById('modal').style.display = 'block';
+        }
+
+        function showTermsOfService() {
+            document.getElementById('modal-title').textContent = '利用規約';
+            document.getElementById('modal-content').textContent = TERMS_OF_SERVICE;
+            document.getElementById('modal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
