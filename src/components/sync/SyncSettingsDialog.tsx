@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { SyncManager } from '../../utils/sync/syncManager';
-import { GoogleAuthProvider } from '../../utils/sync/googleAuth';
 import { useChartSync } from '../../hooks/useChartSync';
 import type { SyncConfig } from '../../types/sync';
 
@@ -14,7 +13,6 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
   onClose,
 }) => {
   const [config, setConfig] = useState<SyncConfig | null>(null);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   
   const { 
@@ -30,21 +28,16 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
   } = useChartSync();
 
   const syncManager = SyncManager.getInstance();
-  const authProvider = GoogleAuthProvider.getInstance();
 
   const loadSettings = useCallback(async () => {
     try {
       const currentConfig = syncManager.getConfig();
       setConfig(currentConfig);
       
-      if (isAuthenticated) {
-        const email = await authProvider.getUserEmail();
-        setUserEmail(email || 'ユーザー情報取得失敗');
-      }
     } catch (error) {
       console.error('設定の読み込みに失敗しました:', error);
     }
-  }, [syncManager, authProvider, isAuthenticated]);
+  }, [syncManager]);
 
   useEffect(() => {
     if (isOpen) {
@@ -59,8 +52,6 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
       setAuthError(null);
       await authenticate();
       
-      const email = await authProvider.getUserEmail();
-      setUserEmail(email || 'ユーザー情報取得失敗');
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : '認証に失敗しました');
     }
@@ -70,7 +61,6 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
     try {
       setAuthError(null);
       await signOut();
-      setUserEmail(null);
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : 'サインアウトに失敗しました');
     }
@@ -131,7 +121,6 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
                 <div className="w-3 h-3 bg-[#85B0B7] rounded-full"></div>
                 <span className="text-sm text-slate-700">連携中</span>
               </div>
-              <div className="text-xs text-slate-600">{userEmail}</div>
               <button
                 onClick={handleSignOut}
                 className="text-sm px-3 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300"
