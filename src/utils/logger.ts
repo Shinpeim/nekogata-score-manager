@@ -1,14 +1,14 @@
 /**
  * ログレベル定義
  */
-export const LogLevel = {
+const LogLevel = {
   ERROR: 0,
   WARN: 1,
   INFO: 2,
   DEBUG: 3,
 } as const;
 
-export type LogLevelType = typeof LogLevel[keyof typeof LogLevel];
+type LogLevelType = typeof LogLevel[keyof typeof LogLevel];
 
 /**
  * 現在のログレベルを環境変数から取得

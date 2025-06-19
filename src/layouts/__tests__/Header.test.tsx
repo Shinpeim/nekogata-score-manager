@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import Header from '../Header';
 
 // useWakeLockフックのモック
@@ -43,57 +43,75 @@ describe('Header', () => {
     vi.clearAllMocks();
   });
 
-  it('should render the header with title', () => {
-    render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+  it('should render the header with title', async () => {
+    await act(async () => {
+      render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+    });
     
     expect(screen.getByText('Nekogata Score Manager')).toBeInTheDocument();
   });
 
-  it('should render open explorer button when explorer is closed', () => {
-    render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+  it('should render open explorer button when explorer is closed', async () => {
+    await act(async () => {
+      render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+    });
     
     const button = screen.getByRole('button', { name: /open score explorer/i });
     expect(button).toBeInTheDocument();
     expect(screen.getByText('open score explorer')).toBeInTheDocument();
   });
 
-  it('should render close explorer button when explorer is open', () => {
-    render(<Header explorerOpen={true} setExplorerOpen={mockSetExplorerOpen} />);
+  it('should render close explorer button when explorer is open', async () => {
+    await act(async () => {
+      render(<Header explorerOpen={true} setExplorerOpen={mockSetExplorerOpen} />);
+    });
     
     const button = screen.getByRole('button', { name: /close score explorer/i });
     expect(button).toBeInTheDocument();
     expect(screen.getByText('close score explorer')).toBeInTheDocument();
   });
 
-  it('should call setExplorerOpen when explorer toggle button is clicked', () => {
-    render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+  it('should call setExplorerOpen when explorer toggle button is clicked', async () => {
+    await act(async () => {
+      render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+    });
     
     const button = screen.getByRole('button', { name: /open score explorer/i });
-    fireEvent.click(button);
+    await act(async () => {
+      fireEvent.click(button);
+    });
     
     expect(mockSetExplorerOpen).toHaveBeenCalledWith(true);
   });
 
-  it('should render wake lock button when supported', () => {
-    render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+  it('should render wake lock button when supported', async () => {
+    await act(async () => {
+      render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+    });
     
     const wakeLockButton = screen.getByTitle('スリープ防止を有効にする');
     expect(wakeLockButton).toBeInTheDocument();
     expect(screen.getByText('スリープ防止')).toBeInTheDocument();
   });
 
-  it('should call toggleWakeLock when wake lock button is clicked', () => {
-    render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+  it('should call toggleWakeLock when wake lock button is clicked', async () => {
+    await act(async () => {
+      render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+    });
     
     const wakeLockButton = screen.getByTitle('スリープ防止を有効にする');
-    fireEvent.click(wakeLockButton);
+    await act(async () => {
+      fireEvent.click(wakeLockButton);
+    });
     
     expect(mockToggleWakeLock).toHaveBeenCalled();
   });
 
   describe('Wake Lock States', () => {
-    it('should show correct styles for non-active wake lock', () => {
-      render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+    it('should show correct styles for non-active wake lock', async () => {
+      await act(async () => {
+        render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+      });
       
       // 非アクティブ状態のスタイル確認（デフォルトのモック状態）
       const wakeLockButton = screen.getByTitle('スリープ防止を有効にする');
@@ -101,21 +119,27 @@ describe('Header', () => {
       expect(screen.getByText('スリープ防止')).toBeInTheDocument();
     });
 
-    it('should handle wake lock button interactions', () => {
-      render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+    it('should handle wake lock button interactions', async () => {
+      await act(async () => {
+        render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+      });
       
       const wakeLockButton = screen.getByTitle('スリープ防止を有効にする');
       
       // 複数回クリックしても正常に動作することを確認
-      fireEvent.click(wakeLockButton);
-      fireEvent.click(wakeLockButton);
-      fireEvent.click(wakeLockButton);
+      await act(async () => {
+        fireEvent.click(wakeLockButton);
+        fireEvent.click(wakeLockButton);
+        fireEvent.click(wakeLockButton);
+      });
       
       expect(mockToggleWakeLock).toHaveBeenCalledTimes(3);
     });
 
-    it('should show wake lock button when supported', () => {
-      render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+    it('should show wake lock button when supported', async () => {
+      await act(async () => {
+        render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+      });
       
       // デフォルトのモックではサポートされている
       expect(screen.getByTitle('スリープ防止を有効にする')).toBeInTheDocument();
@@ -124,56 +148,72 @@ describe('Header', () => {
   });
 
   describe('Sync Settings Feature', () => {
-    it('同期設定機能が無効の場合は同期設定ボタンが表示されない', () => {
+    it('同期設定機能が無効の場合は同期設定ボタンが表示されない', async () => {
       mockHiddenFeatures.syncSettings = false;
       
-      render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+      await act(async () => {
+        render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+      });
       
       expect(screen.queryByTitle('Google Drive同期設定')).not.toBeInTheDocument();
     });
 
-    it('同期設定機能が有効の場合は同期設定ボタンが表示される', () => {
+    it('同期設定機能が有効の場合は同期設定ボタンが表示される', async () => {
       mockHiddenFeatures.syncSettings = true;
       
-      render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+      await act(async () => {
+        render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+      });
       
       expect(screen.getByTitle('Google Drive同期設定')).toBeInTheDocument();
       expect(screen.getByText('同期設定')).toBeInTheDocument();
     });
 
-    it('同期設定ボタンをクリックするとダイアログが開く', () => {
+    it('同期設定ボタンをクリックするとダイアログが開く', async () => {
       mockHiddenFeatures.syncSettings = true;
       
-      render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+      await act(async () => {
+        render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+      });
       
       const syncButton = screen.getByTitle('Google Drive同期設定');
-      fireEvent.click(syncButton);
+      await act(async () => {
+        fireEvent.click(syncButton);
+      });
       
       expect(screen.getByTestId('sync-settings-dialog')).toBeInTheDocument();
     });
 
-    it('ダイアログの閉じるボタンをクリックするとダイアログが閉じる', () => {
+    it('ダイアログの閉じるボタンをクリックするとダイアログが閉じる', async () => {
       mockHiddenFeatures.syncSettings = true;
       
-      render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+      await act(async () => {
+        render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+      });
       
       // ダイアログを開く
       const syncButton = screen.getByTitle('Google Drive同期設定');
-      fireEvent.click(syncButton);
+      await act(async () => {
+        fireEvent.click(syncButton);
+      });
       
       expect(screen.getByTestId('sync-settings-dialog')).toBeInTheDocument();
       
       // ダイアログを閉じる
       const closeButton = screen.getByText('Close Dialog');
-      fireEvent.click(closeButton);
+      await act(async () => {
+        fireEvent.click(closeButton);
+      });
       
       expect(screen.queryByTestId('sync-settings-dialog')).not.toBeInTheDocument();
     });
 
-    it('同期設定ボタンのアイコンとテキストが正しく表示される', () => {
+    it('同期設定ボタンのアイコンとテキストが正しく表示される', async () => {
       mockHiddenFeatures.syncSettings = true;
       
-      render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+      await act(async () => {
+        render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+      });
       
       const syncButton = screen.getByTitle('Google Drive同期設定');
       
@@ -185,10 +225,12 @@ describe('Header', () => {
       expect(screen.getByText('同期設定')).toBeInTheDocument();
     });
 
-    it('同期設定ボタンが正しい位置に配置される', () => {
+    it('同期設定ボタンが正しい位置に配置される', async () => {
       mockHiddenFeatures.syncSettings = true;
       
-      render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+      await act(async () => {
+        render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+      });
       
       const syncButton = screen.getByTitle('Google Drive同期設定');
       const wakeLockButton = screen.getByTitle('スリープ防止を有効にする');
