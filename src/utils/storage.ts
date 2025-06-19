@@ -1,8 +1,10 @@
 import localforage from 'localforage';
 import type { ChordChart, ChordLibrary } from '../types';
+import type { DeletedChartRecord } from '../types/sync';
 import { migrateData, getMigrationStats } from './migration';
 
 const STORAGE_KEY = 'chord-charts';
+const DELETED_CHARTS_KEY = 'deleted-charts';
 const LAST_OPENED_CHART_KEY = 'last-opened-chart-id';
 
 // localforage設定
@@ -192,6 +194,87 @@ export const storageService = {
     } catch (error) {
       console.error('Failed to load last opened chart ID:', error);
       return null;
+    }
+  },
+
+  // 削除記録の管理
+  async saveDeletedCharts(deletedCharts: DeletedChartRecord[]): Promise<void> {
+    try {
+      await localforage.setItem(DELETED_CHARTS_KEY, deletedCharts);
+    } catch (error) {
+      console.error('Failed to save deleted charts:', error);
+      throw new Error('削除記録の保存に失敗しました');
+    }
+  },
+
+  async loadDeletedCharts(): Promise<DeletedChartRecord[]> {
+    try {
+      const deletedCharts = await localforage.getItem<DeletedChartRecord[]>(DELETED_CHARTS_KEY);
+      return deletedCharts || [];
+    } catch (error) {
+      console.error('Failed to load deleted charts:', error);
+      return [];
+    }
+  },
+
+  async addDeletedChart(chartId: string, deviceId: string): Promise<void> {
+    try {
+      const deletedCharts = await this.loadDeletedCharts();
+      const deletedRecord: DeletedChartRecord = {
+        id: chartId,
+        deletedAt: new Date().toISOString(),
+        deviceId
+      };
+      
+      // 既に存在する場合は更新、存在しない場合は追加
+      const existingIndex = deletedCharts.findIndex(record => record.id === chartId);
+      if (existingIndex >= 0) {
+        deletedCharts[existingIndex] = deletedRecord;
+      } else {
+        deletedCharts.push(deletedRecord);
+      }
+      
+      await this.saveDeletedCharts(deletedCharts);
+    } catch (error) {
+      console.error('Failed to add deleted chart:', error);
+      throw new Error('削除記録の追加に失敗しました');
+    }
+  },
+
+  async addMultipleDeletedCharts(chartIds: string[], deviceId: string): Promise<void> {
+    try {
+      const deletedCharts = await this.loadDeletedCharts();
+      const deletedAt = new Date().toISOString();
+      
+      chartIds.forEach(chartId => {
+        const deletedRecord: DeletedChartRecord = {
+          id: chartId,
+          deletedAt,
+          deviceId
+        };
+        
+        // 既に存在する場合は更新、存在しない場合は追加
+        const existingIndex = deletedCharts.findIndex(record => record.id === chartId);
+        if (existingIndex >= 0) {
+          deletedCharts[existingIndex] = deletedRecord;
+        } else {
+          deletedCharts.push(deletedRecord);
+        }
+      });
+      
+      await this.saveDeletedCharts(deletedCharts);
+    } catch (error) {
+      console.error('Failed to add multiple deleted charts:', error);
+      throw new Error('複数削除記録の追加に失敗しました');
+    }
+  },
+
+  async clearDeletedCharts(): Promise<void> {
+    try {
+      await localforage.removeItem(DELETED_CHARTS_KEY);
+    } catch (error) {
+      console.error('Failed to clear deleted charts:', error);
+      throw new Error('削除記録のクリアに失敗しました');
     }
   }
 };

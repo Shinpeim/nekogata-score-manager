@@ -12,7 +12,9 @@ vi.mock('../../utils/storage', () => ({
     loadCharts: vi.fn(),
     saveCharts: vi.fn(),
     saveLastOpenedChartId: vi.fn().mockResolvedValue(undefined),
-    loadLastOpenedChartId: vi.fn().mockResolvedValue(null)
+    loadLastOpenedChartId: vi.fn().mockResolvedValue(null),
+    addDeletedChart: vi.fn().mockResolvedValue(undefined),
+    addMultipleDeletedCharts: vi.fn().mockResolvedValue(undefined)
   }
 }));
 

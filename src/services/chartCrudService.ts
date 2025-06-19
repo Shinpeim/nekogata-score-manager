@@ -1,6 +1,7 @@
 import type { ChordChart } from '../types';
 import { createNewChordChart } from '../utils/chordCreation';
 import { storageService } from '../utils/storage';
+import { getDeviceId } from '../utils/sync/deviceId';
 
 /**
  * チャートCRUD操作サービス
@@ -35,6 +36,10 @@ class ChartCrudService {
    */
   async deleteChart(id: string): Promise<void> {
     await storageService.deleteChart(id);
+    
+    // 削除記録を追加（同期用）
+    const deviceId = getDeviceId();
+    await storageService.addDeletedChart(id, deviceId);
   }
 
   /**
@@ -42,6 +47,10 @@ class ChartCrudService {
    */
   async deleteMultipleCharts(ids: string[]): Promise<void> {
     await storageService.deleteMultipleCharts(ids);
+    
+    // 削除記録を追加（同期用）
+    const deviceId = getDeviceId();
+    await storageService.addMultipleDeletedCharts(ids, deviceId);
   }
 
   /**
