@@ -34,7 +34,7 @@ export class GoogleAuthProvider {
   private isInitialized = false;
   
   private readonly CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
-  private readonly SCOPES = 'https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/userinfo.email';
+  private readonly SCOPES = 'https://www.googleapis.com/auth/drive';
   
   private constructor() {}
   
@@ -161,37 +161,6 @@ export class GoogleAuthProvider {
     return this.accessToken;
   }
 
-  async getUserEmail(): Promise<string | null> {
-    if (!this.accessToken) {
-      return null;
-    }
-
-    try {
-      const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-        headers: {
-          'Authorization': `Bearer ${this.accessToken}`,
-        },
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          this.accessToken = null;
-          this.removeTokenFromStorage();
-          throw new Error('認証が無効です。再度サインインしてください。');
-        }
-        throw new Error(`ユーザー情報の取得に失敗しました (${response.status})`);
-      }
-
-      const userInfo = await response.json();
-      return userInfo.email || null;
-    } catch (error) {
-      console.error('Error fetching user email:', error);
-      if (error instanceof Error) {
-        throw error;
-      }
-      throw new Error('ユーザー情報の取得中にエラーが発生しました');
-    }
-  }
   
   private saveTokenToStorage(token: string): void {
     localStorage.setItem('nekogata-google-token', token);

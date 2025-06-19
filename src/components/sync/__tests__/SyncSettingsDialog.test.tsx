@@ -2,10 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { SyncSettingsDialog } from '../SyncSettingsDialog';
 import { SyncManager } from '../../../utils/sync/syncManager';
-import { GoogleAuthProvider } from '../../../utils/sync/googleAuth';
 
 vi.mock('../../../utils/sync/syncManager');
-vi.mock('../../../utils/sync/googleAuth');
 vi.mock('../../../hooks/useChartSync');
 
 const mockSyncManager = {
@@ -15,14 +13,6 @@ const mockSyncManager = {
   sync: vi.fn(),
 };
 
-const mockAuthProvider = {
-  isAuthenticated: vi.fn(),
-  authenticate: vi.fn(),
-  signOut: vi.fn(),
-  initialize: vi.fn(),
-  getUserEmail: vi.fn(),
-  validateToken: vi.fn(),
-};
 
 const mockUseChartSync = {
   // 同期関連
@@ -56,7 +46,6 @@ const mockUseChartSync = {
 describe('SyncSettingsDialog', () => {
   beforeEach(async () => {
     vi.mocked(SyncManager.getInstance).mockReturnValue(mockSyncManager as unknown as SyncManager);
-    vi.mocked(GoogleAuthProvider.getInstance).mockReturnValue(mockAuthProvider as unknown as GoogleAuthProvider);
     
     const { useChartSync } = await import('../../../hooks/useChartSync');
     vi.mocked(useChartSync).mockReturnValue(mockUseChartSync);
@@ -69,7 +58,6 @@ describe('SyncSettingsDialog', () => {
     });
     
     mockUseChartSync.isAuthenticated = false;
-    mockAuthProvider.getUserEmail.mockResolvedValue('test@example.com');
     mockSyncManager.getLastSyncTimeAsDate.mockReturnValue(new Date('2024-01-01T00:00:00Z'));
   });
 
@@ -111,7 +99,6 @@ describe('SyncSettingsDialog', () => {
     
     await waitFor(() => {
       expect(screen.getByText('連携中')).toBeInTheDocument();
-      expect(screen.getByText('test@example.com')).toBeInTheDocument();
       expect(screen.getByText('サインアウト')).toBeInTheDocument();
     });
   });
