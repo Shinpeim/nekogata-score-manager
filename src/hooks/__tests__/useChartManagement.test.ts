@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { renderHook } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { useChartManagement } from '../useChartManagement';
 import { useChartDataStore } from '../../stores/chartDataStore';
 import { useChartCrudStore } from '../../stores/chartCrudStore';
@@ -76,7 +76,7 @@ describe('useChartManagement', () => {
     // syncCallbacks は内部実装のため削除
   });
 
-  it('should reflect data store state changes', () => {
+  it('should reflect data store state changes', async () => {
     const chart = createNewChordChart({ title: 'Test Chart' });
     
     const { result, rerender } = renderHook(() => useChartManagement());
@@ -88,8 +88,10 @@ describe('useChartManagement', () => {
     expect(result.current.getChartsCount()).toBe(0);
 
     // Add chart to data store
-    useChartDataStore.getState().addChartToData(chart);
-    useChartDataStore.getState().setCurrentChart(chart.id);
+    await act(async () => {
+      useChartDataStore.getState().addChartToData(chart);
+      useChartDataStore.getState().setCurrentChart(chart.id);
+    });
     
     rerender();
 
@@ -103,7 +105,7 @@ describe('useChartManagement', () => {
     expect(result.current.getChartsArray()).toContain(chart);
   });
 
-  it('should reflect crud store state changes', () => {
+  it('should reflect crud store state changes', async () => {
     const { result, rerender } = renderHook(() => useChartManagement());
 
     // Initially not loading, no error
@@ -111,9 +113,11 @@ describe('useChartManagement', () => {
     expect(result.current.error).toBeNull();
 
     // Set loading and error
-    useChartCrudStore.setState({
-      isLoading: true,
-      error: 'Test error'
+    await act(async () => {
+      useChartCrudStore.setState({
+        isLoading: true,
+        error: 'Test error'
+      });
     });
     
     rerender();
@@ -164,7 +168,7 @@ describe('useChartManagement', () => {
     });
   });
 
-  it('should maintain reactivity between stores', () => {
+  it('should maintain reactivity between stores', async () => {
     const chart = createNewChordChart({ title: 'Test Chart' });
     
     const { result, rerender } = renderHook(() => useChartManagement());
@@ -174,8 +178,10 @@ describe('useChartManagement', () => {
     expect(result.current.isLoading).toBe(false);
 
     // Simulate CRUD operation effect on both stores
-    useChartDataStore.getState().addChartToData(chart);
-    useChartCrudStore.setState({ isLoading: true });
+    await act(async () => {
+      useChartDataStore.getState().addChartToData(chart);
+      useChartCrudStore.setState({ isLoading: true });
+    });
     
     rerender();
 
