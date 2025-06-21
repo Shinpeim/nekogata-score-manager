@@ -110,7 +110,19 @@ export class DropboxAuthProvider {
       return this.tokens.accessToken;
     }
     
-    // Dropboxは短期間トークンを推奨するため、リフレッシュトークンは使用しない
+    // アクセストークンが期限切れの場合、リフレッシュトークンで更新を試行
+    if (this.tokens?.refreshToken) {
+      try {
+        await this.refreshAccessToken();
+        return this.tokens.accessToken;
+      } catch (error) {
+        console.warn('リフレッシュトークンによる更新に失敗しました:', error);
+        // リフレッシュに失敗した場合は、既存のトークンをクリアして新しい認証フローを開始
+        this.tokens = null;
+        this.removeTokensFromStorage();
+      }
+    }
+    
     // 新しい認証フローを開始
     return this.startAuthFlow();
   }
@@ -202,6 +214,7 @@ export class DropboxAuthProvider {
       state: pkceState.state,
       code_challenge: pkceState.codeChallenge,
       code_challenge_method: 'S256',
+      token_access_type: 'offline', // リフレッシュトークンを取得するために必要
     });
     
     return `${this.AUTH_URL}?${params.toString()}`;
@@ -282,6 +295,7 @@ export class DropboxAuthProvider {
     // トークンを保存
     this.tokens = {
       accessToken: tokenResponse.access_token,
+      refreshToken: tokenResponse.refresh_token,
       expiresAt: Date.now() + (tokenResponse.expires_in * 1000),
     };
 
@@ -342,5 +356,42 @@ export class DropboxAuthProvider {
   
   private removeTokensFromStorage(): void {
     localStorage.removeItem('nekogata-dropbox-tokens');
+  }
+
+  // リフレッシュトークンを使ってアクセストークンを更新
+  private async refreshAccessToken(): Promise<void> {
+    if (!this.tokens?.refreshToken) {
+      throw new Error('リフレッシュトークンがありません');
+    }
+
+    const params = new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: this.tokens.refreshToken,
+      client_id: this.CLIENT_ID,
+    });
+
+    const response = await fetch(this.TOKEN_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: params,
+    });
+
+    if (!response.ok) {
+      const errorData: OAuthErrorResponse = await response.json();
+      throw new Error(`トークンリフレッシュに失敗しました: ${errorData.error_description || errorData.error}`);
+    }
+
+    const tokenResponse: OAuthTokenResponse = await response.json();
+
+    // 新しいアクセストークンで更新（リフレッシュトークンは維持）
+    this.tokens = {
+      accessToken: tokenResponse.access_token,
+      refreshToken: tokenResponse.refresh_token || this.tokens.refreshToken, // 新しいリフレッシュトークンがない場合は既存を保持
+      expiresAt: Date.now() + (tokenResponse.expires_in * 1000),
+    };
+
+    this.saveTokensToStorage(this.tokens);
   }
 }
