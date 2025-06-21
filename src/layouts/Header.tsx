@@ -27,18 +27,12 @@ const Header: React.FC<HeaderProps> = ({ explorerOpen, setExplorerOpen }) => {
             data-testid="explorer-toggle"
           >
             {explorerOpen ? (
-              <span className="flex items-center gap-1">
-                <span className="text-lg font-bold">&lt;</span>
-                <span className="text-xs">close score explorer</span>
-              </span>
+              <span className="text-lg font-bold">&lt;</span>
             ) : (
-              <span className="flex items-center gap-1">
-                <span className="text-lg font-bold">&gt;</span>
-                <span className="text-xs">open score explorer</span>
-              </span>
+              <span className="text-lg font-bold">&gt;</span>
             )}
           </button>
-          <h1 className="text-xl font-semibold text-slate-900" data-testid="app-title">Nekogata Score Manager</h1>
+          <h1 className="text-xl font-semibold text-slate-900 hidden" data-testid="app-title">Nekogata Score Manager</h1>
           <div className="flex-1"></div>
           {syncSettings && (
             <SyncStatusIndicator className="mr-4" />
