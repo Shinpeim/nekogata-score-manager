@@ -3,7 +3,7 @@ import { useWakeLock } from '../hooks/useWakeLock';
 import { useHiddenFeatures } from '../hooks/useHiddenFeatures';
 import { SyncSettingsDialog } from '../components/sync/SyncSettingsDialog';
 import { SyncStatusIndicator } from '../components/sync/SyncStatusIndicator';
-import { useChartSync } from '../hooks/useChartSync';
+import { SyncDropdown } from '../components/sync/SyncDropdown';
 
 interface HeaderProps {
   explorerOpen: boolean;
@@ -14,7 +14,7 @@ const Header: React.FC<HeaderProps> = ({ explorerOpen, setExplorerOpen }) => {
   const { isActive: wakeLockActive, isSupported: wakeLockSupported, toggleWakeLock } = useWakeLock();
   const { syncSettings } = useHiddenFeatures();
   const [syncSettingsOpen, setSyncSettingsOpen] = useState(false);
-  const { syncError } = useChartSync();
+  const [syncDropdownOpen, setSyncDropdownOpen] = useState(false);
 
   return (
     <header className="bg-white shadow-sm border-b border-slate-200" data-testid="header">
@@ -41,29 +41,16 @@ const Header: React.FC<HeaderProps> = ({ explorerOpen, setExplorerOpen }) => {
           <h1 className="text-xl font-semibold text-slate-900" data-testid="app-title">Nekogata Score Manager</h1>
           <div className="flex-1"></div>
           {syncSettings && (
-            <>
-              <SyncStatusIndicator className="mr-4" />
-              {syncError && (
-                <div className="text-xs text-[#EE5840] mr-4">
-                  同期エラー: {syncError}
-                </div>
-              )}
-            </>
+            <SyncStatusIndicator className="mr-4" />
           )}
           {syncSettings && (
-            <button
-              onClick={() => setSyncSettingsOpen(true)}
-              className="px-3 py-2 rounded-md bg-slate-100 border border-slate-300 text-slate-600 hover:bg-slate-200 hover:text-slate-700 hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mr-3 shadow-sm transition-all duration-150 text-sm font-medium"
-              title="Google Drive同期設定"
-              data-testid="sync-settings-button"
-            >
-              <span className="flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                <span className="hidden sm:inline">同期設定</span>
-              </span>
-            </button>
+            <div className="mr-3">
+              <SyncDropdown
+                showDropdown={syncDropdownOpen}
+                setShowDropdown={setSyncDropdownOpen}
+                onOpenSettings={() => setSyncSettingsOpen(true)}
+              />
+            </div>
           )}
           {wakeLockSupported && (
             <button

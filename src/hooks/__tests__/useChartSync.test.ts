@@ -30,7 +30,6 @@ interface MockSyncStore {
   syncError: string | null;
   syncConfig: {
     autoSync: boolean;
-    syncInterval: number;
     conflictResolution: string;
     showConflictWarning: boolean;
   };
@@ -76,7 +75,6 @@ const mockSyncStore: MockSyncStore = {
   syncError: null,
   syncConfig: {
     autoSync: false,
-    syncInterval: 5,
     conflictResolution: 'remote',
     showConflictWarning: true
   },
@@ -121,7 +119,6 @@ describe('useChartSync', () => {
       syncError: null,
       syncConfig: {
         autoSync: false,
-        syncInterval: 5,
         conflictResolution: 'remote',
         showConflictWarning: true
       },
@@ -406,84 +403,6 @@ describe('useChartSync', () => {
     });
   });
 
-  describe('periodic sync timer', () => {
-    beforeEach(() => {
-      vi.useFakeTimers();
-    });
-
-    it('should set up periodic sync when auto sync is enabled and authenticated', () => {
-      const chart1 = createNewChordChart({ title: 'Chart 1' });
-      mockChordChartStore.charts = { [chart1.id]: chart1 };
-      mockSyncStore.syncConfig.autoSync = true;
-      mockSyncStore.syncConfig.syncInterval = 5; // 5 minutes
-      mockSyncStore.isAuthenticated = true;
-      mockSyncStore.isSyncing = false;
-
-      const { unmount } = renderHook(() => useChartSync());
-
-      // Verify that setInterval was called
-      expect(vi.getTimerCount()).toBeGreaterThan(0);
-
-      // Cleanup
-      unmount();
-    });
-
-    it('should not set up timer when auto sync is disabled', () => {
-      mockSyncStore.syncConfig.autoSync = false;
-      mockSyncStore.isAuthenticated = true;
-
-      renderHook(() => useChartSync());
-
-      act(() => {
-        vi.advanceTimersByTime(10 * 60 * 1000); // 10 minutes
-      });
-
-      expect(mockSyncStore.sync).not.toHaveBeenCalled();
-    });
-
-    it('should not sync during timer if already syncing', async () => {
-      mockSyncStore.syncConfig.autoSync = true;
-      mockSyncStore.isAuthenticated = true;
-      mockSyncStore.isSyncing = true; // Already syncing
-
-      renderHook(() => useChartSync());
-
-      await act(async () => {
-        vi.advanceTimersByTime(5 * 60 * 1000);
-      });
-
-      expect(mockSyncStore.sync).not.toHaveBeenCalled();
-    });
-
-    it('should handle periodic sync errors silently', () => {
-      mockSyncStore.syncConfig.autoSync = true;
-      mockSyncStore.isAuthenticated = true;
-      mockSyncStore.isSyncing = false;
-
-      const { unmount } = renderHook(() => useChartSync());
-
-      // Just verify timer is set up
-      expect(vi.getTimerCount()).toBeGreaterThan(0);
-
-      // Cleanup
-      unmount();
-    });
-
-    it('should clear timer on unmount', () => {
-      mockSyncStore.syncConfig.autoSync = true;
-      mockSyncStore.isAuthenticated = true;
-
-      const { unmount } = renderHook(() => useChartSync());
-
-      // Verify timer was created
-      expect(vi.getTimerCount()).toBeGreaterThan(0);
-
-      unmount();
-
-      // Verify timer was cleared
-      expect(vi.getTimerCount()).toBe(0);
-    });
-  });
 
   describe('combined loading state', () => {
     it('should combine chart store and sync store loading states', () => {

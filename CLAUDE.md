@@ -260,3 +260,9 @@ Nekogata Score Managerでは、統一感があり直感的なユーザーイン�
 - パディング: `px-3 py-2` (ボタン), `p-4` (カード)
 
 この色彩設計により、ユーザーは直感的に各要素の機能を理解でき、一貫性のある操作体験を得ることができます。
+
+## Project Testing Information
+
+### E2E Testing
+
+- **E2E Tests Location**: e2eディレクトリにE2Eテストがある

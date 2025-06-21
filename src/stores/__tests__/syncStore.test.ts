@@ -63,7 +63,6 @@ describe('syncStore', () => {
       syncError: null,
       syncConfig: {
         autoSync: false,
-        syncInterval: 5,
         conflictResolution: 'remote',
         showConflictWarning: true
       }
@@ -84,7 +83,6 @@ describe('syncStore', () => {
       expect(state.syncError).toBeNull();
       expect(state.syncConfig).toEqual({
         autoSync: false,
-        syncInterval: 5,
         conflictResolution: 'remote',
         showConflictWarning: true
       });
@@ -95,7 +93,6 @@ describe('syncStore', () => {
     it('正常に初期化される', async () => {
       const mockConfig = {
         autoSync: true,
-        syncInterval: 10,
         conflictResolution: 'local' as const,
         showConflictWarning: false
       };
@@ -132,7 +129,6 @@ describe('syncStore', () => {
     it('最終同期時刻が0の場合はnullが設定される', async () => {
       const mockConfig = {
         autoSync: false,
-        syncInterval: 5,
         conflictResolution: 'remote' as const,
         showConflictWarning: true
       };
@@ -154,7 +150,6 @@ describe('syncStore', () => {
       mockSyncManager.initialize.mockResolvedValue(undefined);
       mockSyncManager.getConfig.mockReturnValue({
         autoSync: false,
-        syncInterval: 5,
         conflictResolution: 'remote',
         showConflictWarning: true
       });
@@ -197,7 +192,6 @@ describe('syncStore', () => {
       mockSyncManager.initialize.mockResolvedValue(undefined);
       mockSyncManager.getConfig.mockReturnValue({
         autoSync: false,
-        syncInterval: 5,
         conflictResolution: 'remote',
         showConflictWarning: true
       });
@@ -268,7 +262,6 @@ describe('syncStore', () => {
       mockSyncManager.initialize.mockResolvedValue(undefined);
       mockSyncManager.getConfig.mockReturnValue({
         autoSync: false,
-        syncInterval: 5,
         conflictResolution: 'remote',
         showConflictWarning: true
       });
@@ -354,7 +347,6 @@ describe('syncStore', () => {
       mockSyncManager.initialize.mockResolvedValue(undefined);
       mockSyncManager.getConfig.mockReturnValue({
         autoSync: false,
-        syncInterval: 5,
         conflictResolution: 'remote',
         showConflictWarning: true
       });
@@ -364,20 +356,18 @@ describe('syncStore', () => {
     });
 
     it('設定が正常に更新される', () => {
-      const configUpdate = { autoSync: true, syncInterval: 10 };
+      const configUpdate = { autoSync: true };
 
       useSyncStore.getState().updateSyncConfig(configUpdate);
 
       expect(mockSyncManager.saveConfig).toHaveBeenCalledWith({
         autoSync: true,
-        syncInterval: 10,
         conflictResolution: 'remote',
         showConflictWarning: true
       });
 
       const state = useSyncStore.getState();
       expect(state.syncConfig.autoSync).toBe(true);
-      expect(state.syncConfig.syncInterval).toBe(10);
     });
 
     it('syncManagerがnullの場合でも設定は更新される', () => {
@@ -398,7 +388,6 @@ describe('syncStore', () => {
       mockSyncManager.initialize.mockResolvedValue(undefined);
       mockSyncManager.getConfig.mockReturnValue({
         autoSync: false,
-        syncInterval: 5,
         conflictResolution: 'remote',
         showConflictWarning: true
       });

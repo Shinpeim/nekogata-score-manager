@@ -283,12 +283,17 @@ export class SyncManager {
   private loadConfig(): SyncConfig {
     const stored = localStorage.getItem('nekogata-sync-config');
     if (stored) {
-      return JSON.parse(stored);
+      const parsed = JSON.parse(stored);
+      // 古い設定との互換性のために、不要なプロパティを除外
+      return {
+        autoSync: parsed.autoSync ?? false,
+        conflictResolution: parsed.conflictResolution ?? 'remote',
+        showConflictWarning: parsed.showConflictWarning ?? true
+      };
     }
     
     return {
       autoSync: false,
-      syncInterval: 5,
       conflictResolution: 'remote',
       showConflictWarning: true
     };
