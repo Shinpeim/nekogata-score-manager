@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>認証中... - Nekogata Score Manager</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f8fafc;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #85B0B7;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error {
+            color: #ef4444;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="spinner"></div>
+        <h2>認証処理中...</h2>
+        <p>しばらくお待ちください。</p>
+        <div id="error-message" class="error" style="display: none;"></div>
+    </div>
+
+    <script>
+        (async function() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const code = urlParams.get('code');
+                const state = urlParams.get('state');
+                const error = urlParams.get('error');
+
+                if (error) {
+                    throw new Error(`認証エラー: ${error}`);
+                }
+
+                if (!code || !state) {
+                    throw new Error('必要なパラメータが不足しています');
+                }
+
+                // 親ウィンドウに成功を通知
+                if (window.opener) {
+                    window.opener.postMessage({
+                        type: 'OAUTH_SUCCESS',
+                        code: code,
+                        state: state
+                    }, window.location.origin);
+                    window.close();
+                } else {
+                    // 直接アクセスされた場合はメインページにリダイレクト
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('Authentication callback error:', error);
+                
+                const errorElement = document.getElementById('error-message');
+                errorElement.textContent = error.message;
+                errorElement.style.display = 'block';
+                
+                // 親ウィンドウにエラーを通知
+                if (window.opener) {
+                    window.opener.postMessage({
+                        type: 'OAUTH_ERROR',
+                        error: error.message
+                    }, window.location.origin);
+                    
+                    // 5秒後にウィンドウを閉じる
+                    setTimeout(() => {
+                        window.close();
+                    }, 5000);
+                }
+            }
+        })();
+    </script>
+</body>
+</html>
