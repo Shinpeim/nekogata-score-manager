@@ -23,6 +23,13 @@
   VITE_LOG_LEVEL = "DEBUG"
 
 # リダイレクト設定（SPAサポート）
+# OAuth認証コールバック
+[[redirects]]
+  from = "/auth/callback"
+  to = "/auth/callback.html"
+  status = 200
+
+# SPAフォールバック（最後に評価される）
 [[redirects]]
   from = "/*"
   to = "/index.html"
