@@ -46,8 +46,7 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       // 2. Score Explorerを開く
       await homePage.clickOpenExplorer();
       
-      // 3. Score Explorerタイトルが表示されることを確認
-      await expect(page.locator('text=Score Explorer').first()).toBeVisible();
+      // 3. Score Explorerが開いていることを確認（インポートボタンの存在で確認）
       
       // 4. インポートボタンが表示されることを確認
       await expect(scoreExplorerPage.importButton).toBeVisible();

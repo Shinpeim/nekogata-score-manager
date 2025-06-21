@@ -83,7 +83,7 @@ describe('Header', () => {
     
     const button = screen.getByRole('button', { name: /open score explorer/i });
     expect(button).toBeInTheDocument();
-    expect(screen.getByText('open score explorer')).toBeInTheDocument();
+    expect(screen.getByText('>')).toBeInTheDocument();
   });
 
   it('should render close explorer button when explorer is open', async () => {
@@ -93,7 +93,7 @@ describe('Header', () => {
     
     const button = screen.getByRole('button', { name: /close score explorer/i });
     expect(button).toBeInTheDocument();
-    expect(screen.getByText('close score explorer')).toBeInTheDocument();
+    expect(screen.getByText('<')).toBeInTheDocument();
   });
 
   it('should call setExplorerOpen when explorer toggle button is clicked', async () => {
