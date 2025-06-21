@@ -170,21 +170,6 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
             </button>
           </div>
 
-          {/* 同期間隔 */}
-          <div className="space-y-2">
-            <label className="text-sm text-slate-700">同期間隔</label>
-            <select
-              value={config.syncInterval}
-              onChange={(e) => handleConfigChange({ syncInterval: Number(e.target.value) })}
-              className="w-full text-sm p-2 border border-slate-200 rounded"
-              disabled={!isAuthenticated || !config.autoSync}
-            >
-              <option value={5}>5分</option>
-              <option value={15}>15分</option>
-              <option value={30}>30分</option>
-              <option value={60}>1時間</option>
-            </select>
-          </div>
 
           {/* コンフリクト解決方法 */}
           <div className="space-y-2">

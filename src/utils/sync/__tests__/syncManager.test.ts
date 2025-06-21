@@ -182,7 +182,6 @@ describe('SyncManager', () => {
       
       expect(config).toEqual({
         autoSync: false,
-        syncInterval: 5,
         conflictResolution: 'remote',
         showConflictWarning: true
       });
@@ -191,7 +190,6 @@ describe('SyncManager', () => {
     it('should save and load config', () => {
       const newConfig = {
         autoSync: true,
-        syncInterval: 10,
         conflictResolution: 'local' as const,
         showConflictWarning: false
       };

@@ -22,7 +22,6 @@ const mockUseChartSync = {
   syncError: null as string | null,
   syncConfig: {
     autoSync: false,
-    syncInterval: 5,
     conflictResolution: 'remote' as const,
     showConflictWarning: true,
   },
@@ -52,7 +51,6 @@ describe('SyncSettingsDialog', () => {
     
     mockSyncManager.getConfig.mockReturnValue({
       autoSync: false,
-      syncInterval: 5,
       conflictResolution: 'remote',
       showConflictWarning: true,
     });
@@ -157,22 +155,6 @@ describe('SyncSettingsDialog', () => {
     expect(mockUseChartSync.updateSyncConfig).toHaveBeenCalled();
   });
 
-  it('同期間隔の設定を変更できる', async () => {
-    mockUseChartSync.isAuthenticated = true;
-    
-    render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
-    
-    await waitFor(() => {
-      const intervalSelect = screen.getByDisplayValue('5分');
-      fireEvent.change(intervalSelect, { target: { value: '15' } });
-    });
-    
-    expect(mockUseChartSync.updateSyncConfig).toHaveBeenCalledWith(
-      expect.objectContaining({
-        syncInterval: 15
-      })
-    );
-  });
 
   it('コンフリクト解決の設定を変更できる', async () => {
     mockUseChartSync.isAuthenticated = true;
@@ -195,10 +177,8 @@ describe('SyncSettingsDialog', () => {
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
     await waitFor(() => {
-      const intervalSelect = screen.getByDisplayValue('5分');
       const conflictSelect = screen.getByDisplayValue('リモート優先');
       
-      expect(intervalSelect).toBeDisabled();
       expect(conflictSelect).toBeDisabled();
     });
   });

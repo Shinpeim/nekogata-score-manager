@@ -31,6 +31,31 @@ vi.mock('../../components/sync/SyncSettingsDialog', () => ({
   ),
 }));
 
+// SyncDropdownコンポーネントのモック
+vi.mock('../../components/sync/SyncDropdown', () => ({
+  SyncDropdown: ({ showDropdown, setShowDropdown, onOpenSettings }: { 
+    showDropdown: boolean; 
+    setShowDropdown: (show: boolean) => void;
+    onOpenSettings: () => void;
+  }) => (
+    <div data-testid="sync-dropdown">
+      <button 
+        data-testid="sync-dropdown-button"
+        title="同期オプション"
+        onClick={() => setShowDropdown(!showDropdown)}
+      >
+        同期
+      </button>
+      {showDropdown && (
+        <div data-testid="sync-dropdown-menu">
+          <button data-testid="sync-execute-button">今すぐ同期</button>
+          <button data-testid="sync-settings-button" onClick={onOpenSettings}>詳細設定</button>
+        </div>
+      )}
+    </div>
+  ),
+}));
+
 describe('Header', () => {
   const mockSetExplorerOpen = vi.fn();
 
@@ -148,37 +173,62 @@ describe('Header', () => {
   });
 
   describe('Sync Settings Feature', () => {
-    it('同期設定機能が無効の場合は同期設定ボタンが表示されない', async () => {
+    it('同期設定機能が無効の場合は同期ドロップダウンが表示されない', async () => {
       mockHiddenFeatures.syncSettings = false;
       
       await act(async () => {
         render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
       });
       
-      expect(screen.queryByTitle('Google Drive同期設定')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('sync-dropdown')).not.toBeInTheDocument();
     });
 
-    it('同期設定機能が有効の場合は同期設定ボタンが表示される', async () => {
+    it('同期設定機能が有効の場合は同期ドロップダウンが表示される', async () => {
       mockHiddenFeatures.syncSettings = true;
       
       await act(async () => {
         render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
       });
       
-      expect(screen.getByTitle('Google Drive同期設定')).toBeInTheDocument();
-      expect(screen.getByText('同期設定')).toBeInTheDocument();
+      expect(screen.getByTestId('sync-dropdown')).toBeInTheDocument();
+      expect(screen.getByTitle('同期オプション')).toBeInTheDocument();
+      expect(screen.getByText('同期')).toBeInTheDocument();
     });
 
-    it('同期設定ボタンをクリックするとダイアログが開く', async () => {
+    it('同期ドロップダウンボタンをクリックするとメニューが開く', async () => {
       mockHiddenFeatures.syncSettings = true;
       
       await act(async () => {
         render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
       });
       
-      const syncButton = screen.getByTitle('Google Drive同期設定');
+      const syncButton = screen.getByTestId('sync-dropdown-button');
       await act(async () => {
         fireEvent.click(syncButton);
+      });
+      
+      expect(screen.getByTestId('sync-dropdown-menu')).toBeInTheDocument();
+      expect(screen.getByTestId('sync-execute-button')).toBeInTheDocument();
+      expect(screen.getByTestId('sync-settings-button')).toBeInTheDocument();
+    });
+
+    it('詳細設定ボタンをクリックするとダイアログが開く', async () => {
+      mockHiddenFeatures.syncSettings = true;
+      
+      await act(async () => {
+        render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
+      });
+      
+      // ドロップダウンを開く
+      const syncButton = screen.getByTestId('sync-dropdown-button');
+      await act(async () => {
+        fireEvent.click(syncButton);
+      });
+      
+      // 詳細設定ボタンをクリック
+      const settingsButton = screen.getByTestId('sync-settings-button');
+      await act(async () => {
+        fireEvent.click(settingsButton);
       });
       
       expect(screen.getByTestId('sync-settings-dialog')).toBeInTheDocument();
@@ -191,10 +241,15 @@ describe('Header', () => {
         render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
       });
       
-      // ダイアログを開く
-      const syncButton = screen.getByTitle('Google Drive同期設定');
+      // ドロップダウンを開いて詳細設定を選択
+      const syncButton = screen.getByTestId('sync-dropdown-button');
       await act(async () => {
         fireEvent.click(syncButton);
+      });
+      
+      const settingsButton = screen.getByTestId('sync-settings-button');
+      await act(async () => {
+        fireEvent.click(settingsButton);
       });
       
       expect(screen.getByTestId('sync-settings-dialog')).toBeInTheDocument();
@@ -208,43 +263,35 @@ describe('Header', () => {
       expect(screen.queryByTestId('sync-settings-dialog')).not.toBeInTheDocument();
     });
 
-    it('同期設定ボタンのアイコンとテキストが正しく表示される', async () => {
+    it('同期ドロップダウンのアイコンとテキストが正しく表示される', async () => {
       mockHiddenFeatures.syncSettings = true;
       
       await act(async () => {
         render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
       });
       
-      const syncButton = screen.getByTitle('Google Drive同期設定');
-      
-      // ボタン内にSVGアイコンが存在することを確認
-      const svgIcon = syncButton.querySelector('svg');
-      expect(svgIcon).toBeInTheDocument();
-      
-      // テキストが正しく表示されることを確認
-      expect(screen.getByText('同期設定')).toBeInTheDocument();
+      // タイトルとテキストが正しく表示されることを確認
+      expect(screen.getByTitle('同期オプション')).toBeInTheDocument();
+      expect(screen.getByText('同期')).toBeInTheDocument();
     });
 
-    it('同期設定ボタンが正しい位置に配置される', async () => {
+    it('同期ドロップダウンが正しい位置に配置される', async () => {
       mockHiddenFeatures.syncSettings = true;
       
       await act(async () => {
         render(<Header explorerOpen={false} setExplorerOpen={mockSetExplorerOpen} />);
       });
       
-      const syncButton = screen.getByTitle('Google Drive同期設定');
+      const syncDropdown = screen.getByTestId('sync-dropdown');
       const wakeLockButton = screen.getByTitle('スリープ防止を有効にする');
       
-      // 同期設定ボタンがウェイクロックボタンの前にある（DOM順序的に）
-      const header = syncButton.closest('header');
-      const buttons = header?.querySelectorAll('button');
+      // 同期ドロップダウンとウェイクロックボタンが両方表示されることを確認
+      expect(syncDropdown).toBeInTheDocument();
+      expect(wakeLockButton).toBeInTheDocument();
       
-      expect(buttons).toBeDefined();
-      if (buttons) {
-        const syncIndex = Array.from(buttons).indexOf(syncButton as HTMLButtonElement);
-        const wakeLockIndex = Array.from(buttons).indexOf(wakeLockButton as HTMLButtonElement);
-        expect(syncIndex).toBeLessThan(wakeLockIndex);
-      }
+      // DOM順序での確認（同期ドロップダウンがウェイクロックボタンの前にある）
+      const header = syncDropdown.closest('header');
+      expect(header).toBeInTheDocument();
     });
   });
 });

@@ -106,44 +106,6 @@ export const useChartSync = () => {
     syncStore
   ]);
 
-  // 定期同期タイマー
-  useEffect(() => {
-    const isAutoSyncEnabled = syncStore.syncConfig.autoSync;
-    const isAuthenticated = syncStore.isAuthenticated;
-    
-    if (!isAutoSyncEnabled || !isAuthenticated) {
-      return;
-    }
-
-    const intervalMs = syncStore.syncConfig.syncInterval * 60 * 1000;
-    const interval = setInterval(async () => {
-      try {
-        if (!syncStore.isSyncing) {
-          const charts = Object.values(chordChartStore.charts);
-          console.log(`[SYNC] Periodic sync triggered with ${charts.length} charts`);
-          const result = await syncStore.sync(charts);
-          
-          if (result.success && result.mergedCharts) {
-            console.log(`[SYNC] Periodic sync applying ${result.mergedCharts.length} charts`);
-            await chordChartStore.applySyncedCharts(result.mergedCharts);
-            console.log(`[SYNC] Periodic sync applySyncedCharts completed`);
-          } else {
-            console.log(`[SYNC] Periodic sync - not applying charts:`, { success: result.success, mergedCharts: result.mergedCharts });
-          }
-        }
-      } catch (error) {
-        console.error('定期同期エラー:', error);
-      }
-    }, intervalMs);
-
-    return () => clearInterval(interval);
-  }, [
-    syncStore.syncConfig.autoSync,
-    syncStore.syncConfig.syncInterval,
-    syncStore.isSyncing,
-    chordChartStore,
-    syncStore
-  ]);
 
   return {
     // 同期関連
