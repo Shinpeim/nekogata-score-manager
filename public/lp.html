@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nekogata Score Manager - 音楽コード譜管理アプリ</title>
-    <meta name="description" content="ブラウザで動作する無料のコード譜作成・管理アプリケーション。オフライン対応、移調機能、Google Drive同期機能付き。">
+    <meta name="description" content="ブラウザで動作する無料のコード譜作成・管理アプリケーション。オフライン対応、移調機能、Dropbox同期機能付き。">
     <link rel="icon" type="image/png" href="/favicon.png">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <style>
@@ -248,8 +248,8 @@
                         <p>作成したコード譜をJSON形式でエクスポート・インポートできます。データの移行やバックアップが簡単。</p>
                     </div>
                     <div class="feature-card">
-                        <h3>☁️ Google Drive同期（任意）</h3>
-                        <p>必要に応じてGoogle Driveと同期可能。複数デバイス間でのデータ共有ができます。</p>
+                        <h3>☁️ Dropbox同期（任意）</h3>
+                        <p>必要に応じてDropboxと同期可能。複数デバイス間でのデータ共有ができます。</p>
                     </div>
                 </div>
             </div>
@@ -271,22 +271,22 @@
                         <li><strong>ローカル保存:</strong> すべてのデータはブラウザのローカルストレージに保存されます</li>
                     </ul>
 
-                    <h3>Google Drive同期機能について</h3>
-                    <p>Google Drive同期機能は<strong>完全に任意</strong>です。利用者が明示的に有効化を選択した場合のみ動作します：</p>
+                    <h3>Dropbox同期機能について</h3>
+                    <p>Dropbox同期機能は<strong>完全に任意</strong>です。利用者が明示的に有効化を選択した場合のみ動作します：</p>
                     <ul style="margin: 1rem 0; padding-left: 2rem;">
-                        <li><strong>用途:</strong> 作成したコード譜データを利用者のGoogle Driveに保存し、複数デバイス間で同期</li>
-                        <li><strong>スコープ:</strong> 本アプリが作成したファイルのみにアクセス（drive.file権限）</li>
+                        <li><strong>用途:</strong> 作成したコード譜データを利用者のDropboxに保存し、複数デバイス間で同期</li>
+                        <li><strong>スコープ:</strong> 本アプリが作成したフォルダ内のファイルのみにアクセス</li>
                         <li><strong>データ所有者:</strong> すべてのデータは利用者に帰属し、開発者はアクセスできません</li>
                         <li><strong>透明性:</strong> 同期されるデータは利用者が作成したコード譜のみです</li>
                     </ul>
 
                     <div class="privacy-highlight">
-                        <h3>📋 Google Drive APIの使用目的</h3>
-                        <p>Google Drive APIは、利用者が作成したコード譜データを利用者自身のGoogle Driveアカウントに保存し、複数のデバイス間で同期するためにのみ使用されます。開発者や第三者がデータにアクセスすることは一切ありません。</p>
+                        <h3>📋 Dropbox APIの使用目的</h3>
+                        <p>Dropbox APIは、利用者が作成したコード譜データを利用者自身のDropboxアカウントに保存し、複数のデバイス間で同期するためにのみ使用されます。開発者や第三者がデータにアクセスすることは一切ありません。</p>
                     </div>
 
                     <h3>セキュリティ</h3>
-                    <p>データは主にローカルに保存されるため、一般的なWebサービスと比較してプライバシーが保護されやすい設計となっています。利用者の端末やブラウザ、Google アカウントのセキュリティについては、利用者自身で適切に管理していただく必要があります。</p>
+                    <p>データは主にローカルに保存されるため、一般的なWebサービスと比較してプライバシーが保護されやすい設計となっています。利用者の端末やブラウザ、Dropboxアカウントのセキュリティについては、利用者自身で適切に管理していただく必要があります。</p>
                 </div>
             </div>
         </section>

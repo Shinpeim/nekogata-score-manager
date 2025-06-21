@@ -1,6 +1,6 @@
 import type { ChordChart } from '../../types/chord';
 import type { ISyncAdapter, SyncMetadata, SyncConflict, SyncResult, SyncConfig, DeletedChartRecord } from '../../types/sync';
-import { GoogleDriveSyncAdapter } from './googleDriveAdapter';
+import { DropboxSyncAdapter } from './dropboxAdapter';
 import { getDeviceId } from './deviceId';
 import { storageService } from '../storage';
 import { logger } from '../logger';
@@ -12,7 +12,7 @@ export class SyncManager {
   private syncInProgress = false;
   
   private constructor() {
-    this.adapter = new GoogleDriveSyncAdapter();
+    this.adapter = new DropboxSyncAdapter();
     this.config = this.loadConfig();
   }
   
@@ -24,7 +24,7 @@ export class SyncManager {
   }
   
   async initialize(): Promise<void> {
-    if (this.adapter instanceof GoogleDriveSyncAdapter) {
+    if (this.adapter instanceof DropboxSyncAdapter) {
       await this.adapter.initialize();
     }
   }

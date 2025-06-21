@@ -18,29 +18,55 @@
         const state = urlParams.get('state');
         const error = urlParams.get('error');
 
-        if (error) {
-            // エラーの場合
-            window.opener.postMessage({
-                type: 'OAUTH_ERROR',
-                error: error
-            }, window.location.origin);
-        } else if (code && state) {
-            // 成功の場合
-            window.opener.postMessage({
-                type: 'OAUTH_SUCCESS',
-                code: code,
-                state: state
-            }, window.location.origin);
-        } else {
-            // パラメータが不足している場合
-            window.opener.postMessage({
-                type: 'OAUTH_ERROR',
-                error: 'Missing parameters'
-            }, window.location.origin);
-        }
+        if (window.opener && !window.opener.closed) {
+            // ポップアップウィンドウの場合
+            try {
+                if (error) {
+                    // エラーの場合
+                    window.opener.postMessage({
+                        type: 'OAUTH_ERROR',
+                        error: error
+                    }, window.location.origin);
+                } else if (code && state) {
+                    // 成功の場合
+                    window.opener.postMessage({
+                        type: 'OAUTH_SUCCESS',
+                        code: code,
+                        state: state
+                    }, window.location.origin);
+                } else {
+                    // パラメータが不足している場合
+                    window.opener.postMessage({
+                        type: 'OAUTH_ERROR',
+                        error: 'Missing parameters'
+                    }, window.location.origin);
+                }
 
-        // ウィンドウを閉じる
-        window.close();
+                // 少し待ってからウィンドウを閉じる
+                setTimeout(() => {
+                    window.close();
+                }, 500);
+            } catch (err) {
+                console.error('Failed to send message to opener:', err);
+                document.body.innerHTML = `
+                    <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+                        <h2>認証完了</h2>
+                        <p>メッセージの送信に失敗しました。このウィンドウを閉じてください。</p>
+                        <button onclick="window.close()" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">ウィンドウを閉じる</button>
+                    </div>
+                `;
+            }
+        } else {
+            // メインウィンドウで開かれた場合
+            document.body.innerHTML = `
+                <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+                    <h2>認証完了</h2>
+                    <p>ポップアップがブロックされているか、メインウィンドウで開かれました。</p>
+                    <p>認証コード: ${code}</p>
+                    <p>このウィンドウを閉じて、アプリで再度お試しください。</p>
+                </div>
+            `;
+        }
     </script>
 </body>
 </html>
