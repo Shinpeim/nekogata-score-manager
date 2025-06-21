@@ -37,3 +37,7 @@ CLAUDE.local.md
 # E2E test downloads (keep directory but ignore files)
 e2e/downloads/*
 !e2e/downloads/.gitkeep
+
+# Environment files
+.env
+.envrc

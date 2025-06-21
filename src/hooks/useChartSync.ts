@@ -20,7 +20,7 @@ export const useChartSync = () => {
     const initializeIfNeeded = async () => {
       const state = useSyncStore.getState();
       if (!state.syncManager) {
-        console.log('[SYNC] Initializing sync store...');
+        logger.debug('[SYNC] Initializing sync store...');
         try {
           await state.initializeSync();
         } catch (error) {
@@ -36,28 +36,28 @@ export const useChartSync = () => {
   const syncCharts = useCallback(async (
     onConflict?: (conflicts: SyncConflict[]) => Promise<'overwrite' | 'cancel'>
   ) => {
-    console.log(`[SYNC] useChartSync.syncCharts called`);
+    logger.debug(`[SYNC] useChartSync.syncCharts called`);
     try {
       // 現在のチャートデータを取得
       const charts = Object.values(chordChartStore.charts);
-      console.log(`[SYNC] useChartSync got ${charts.length} local charts for sync`);
+      logger.debug(`[SYNC] useChartSync got ${charts.length} local charts for sync`);
       
       // 同期実行
-      console.log(`[SYNC] useChartSync calling syncStore.sync...`);
+      logger.debug(`[SYNC] useChartSync calling syncStore.sync...`);
       const result = await syncStore.sync(charts, onConflict);
-      console.log(`[SYNC] useChartSync received result from syncStore.sync`);
+      logger.debug(`[SYNC] useChartSync received result from syncStore.sync`);
       
       // 成功時にマージ済みデータを適用
-      console.log(`[SYNC] Manual sync result:`, { success: result.success, hasCharts: !!result.mergedCharts, chartCount: result.mergedCharts?.length });
+      logger.info(`[SYNC] Manual sync result:`, { success: result.success, hasCharts: !!result.mergedCharts, chartCount: result.mergedCharts?.length });
       if (result.success && result.mergedCharts) {
-        console.log(`[SYNC] useChartSync calling applySyncedCharts with ${result.mergedCharts.length} charts`);
+        logger.debug(`[SYNC] useChartSync calling applySyncedCharts with ${result.mergedCharts.length} charts`);
         await chordChartStore.applySyncedCharts(result.mergedCharts);
-        console.log(`[SYNC] useChartSync applySyncedCharts completed`);
+        logger.debug(`[SYNC] useChartSync applySyncedCharts completed`);
       } else {
-        console.log(`[SYNC] Manual sync - not applying charts:`, { success: result.success, mergedCharts: result.mergedCharts });
+        logger.warn(`[SYNC] Manual sync - not applying charts:`, { success: result.success, mergedCharts: result.mergedCharts });
       }
       
-      console.log(`[SYNC] useChartSync.syncCharts returning result`);
+      logger.debug(`[SYNC] useChartSync.syncCharts returning result`);
       return result;
     } catch (error) {
       logger.error('useChartSync.syncCharts caught error:', error);

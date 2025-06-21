@@ -1,3 +1,5 @@
+import { logger } from '../logger';
+
 // PKCE関連の型定義
 interface PKCEState {
   codeVerifier: string;
@@ -219,7 +221,7 @@ export class GoogleAuthProvider {
       prompt: 'consent',
     });
     
-    console.log('Auth URL params:', {
+    logger.debug('Auth URL params:', {
       client_id: this.CLIENT_ID,
       code_challenge_length: pkceState.codeChallenge.length,
       code_verifier_length: pkceState.codeVerifier.length,
@@ -370,7 +372,7 @@ export class GoogleAuthProvider {
       redirect_uri: this.REDIRECT_URI,
     });
 
-    console.log('Token exchange request:', {
+    logger.debug('Token exchange request:', {
       url: this.TOKEN_URL,
       client_id: this.CLIENT_ID,
       code_verifier_length: codeVerifier.length,

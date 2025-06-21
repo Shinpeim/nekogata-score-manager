@@ -2,6 +2,7 @@ import localforage from 'localforage';
 import type { ChordChart, ChordLibrary } from '../types';
 import type { DeletedChartRecord } from '../types/sync';
 import { migrateData, getMigrationStats } from './migration';
+import { logger } from './logger';
 
 const STORAGE_KEY = 'chord-charts';
 const DELETED_CHARTS_KEY = 'deleted-charts';
@@ -37,7 +38,7 @@ export const storageService = {
       
       // 移行が実行された場合は、最新形式で保存し直す
       if (JSON.stringify(rawData) !== JSON.stringify(migratedCharts)) {
-        console.log('データ移行が実行されました。最新形式で保存します。');
+        logger.info('データ移行が実行されました。最新形式で保存します。');
         await this.saveCharts(migratedCharts);
       }
       
