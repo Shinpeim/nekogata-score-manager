@@ -14,6 +14,7 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
 }) => {
   const [config, setConfig] = useState<SyncConfig | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [isInitializing, setIsInitializing] = useState(false);
   
   const { 
     isSyncing, 
@@ -31,11 +32,19 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
 
   const loadSettings = useCallback(async () => {
     try {
+      setIsInitializing(true);
+      
+      // 同期マネージャーの初期化を確実に行う
+      await syncManager.initialize();
+      
       const currentConfig = syncManager.getConfig();
       setConfig(currentConfig);
       
     } catch (error) {
       console.error('設定の読み込みに失敗しました:', error);
+      setAuthError(error instanceof Error ? error.message : '初期化に失敗しました');
+    } finally {
+      setIsInitializing(false);
     }
   }, [syncManager]);
 
@@ -50,9 +59,12 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
   const handleSignIn = async () => {
     try {
       setAuthError(null);
+      console.log('handleSignIn: Starting authentication...');
       await authenticate();
+      console.log('handleSignIn: Authentication successful');
       
     } catch (error) {
+      console.error('handleSignIn: Authentication failed:', error);
       setAuthError(error instanceof Error ? error.message : '認証に失敗しました');
     }
   };
@@ -102,7 +114,7 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-semibold text-slate-900">Google Drive同期設定</h2>
+          <h2 className="text-lg font-semibold text-slate-900">Dropbox同期設定</h2>
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-slate-600"
@@ -136,9 +148,10 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
               </div>
               <button
                 onClick={handleSignIn}
-                className="text-sm px-3 py-2 bg-[#85B0B7] text-white rounded hover:bg-[#6B9CA5]"
+                disabled={isInitializing}
+                className="text-sm px-3 py-2 bg-[#85B0B7] text-white rounded hover:bg-[#6B9CA5] disabled:bg-slate-300 disabled:text-slate-500"
               >
-                Googleアカウントで連携
+                {isInitializing ? '初期化中...' : 'Dropboxアカウントで連携'}
               </button>
             </div>
           )}
@@ -215,7 +228,7 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
 
         {/* 注意事項 */}
         <div className="text-xs text-slate-500 space-y-1">
-          <p>• Google Driveの「Nekogata Score Manager」フォルダに保存されます</p>
+          <p>• Dropboxの「NekogataScoreManager」フォルダに保存されます</p>
           <p>• 同期機能は現在テスト段階です</p>
           <p>• 重要なデータは定期的にエクスポートしてください</p>
         </div>

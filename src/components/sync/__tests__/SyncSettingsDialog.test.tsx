@@ -7,6 +7,7 @@ vi.mock('../../../utils/sync/syncManager');
 vi.mock('../../../hooks/useChartSync');
 
 const mockSyncManager = {
+  initialize: vi.fn(),
   getConfig: vi.fn(),
   saveConfig: vi.fn(),
   getLastSyncTimeAsDate: vi.fn(),
@@ -66,14 +67,14 @@ describe('SyncSettingsDialog', () => {
   it('ダイアログが開いていない時は何も表示されない', () => {
     render(<SyncSettingsDialog isOpen={false} onClose={() => {}} />);
     
-    expect(screen.queryByText('Google Drive同期設定')).not.toBeInTheDocument();
+    expect(screen.queryByText('Dropbox同期設定')).not.toBeInTheDocument();
   });
 
   it('ダイアログが開いている時に設定画面が表示される', async () => {
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
     await waitFor(() => {
-      expect(screen.getByText('Google Drive同期設定')).toBeInTheDocument();
+      expect(screen.getByText('Dropbox同期設定')).toBeInTheDocument();
     });
     
     expect(screen.getByText('アカウント連携')).toBeInTheDocument();
@@ -86,7 +87,7 @@ describe('SyncSettingsDialog', () => {
     
     await waitFor(() => {
       expect(screen.getByText('未連携')).toBeInTheDocument();
-      expect(screen.getByText('Googleアカウントで連携')).toBeInTheDocument();
+      expect(screen.getByText('Dropboxアカウントで連携')).toBeInTheDocument();
     });
   });
 
@@ -105,7 +106,7 @@ describe('SyncSettingsDialog', () => {
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
     await waitFor(() => {
-      const signInButton = screen.getByText('Googleアカウントで連携');
+      const signInButton = screen.getByText('Dropboxアカウントで連携');
       fireEvent.click(signInButton);
     });
     

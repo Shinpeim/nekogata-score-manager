@@ -41,9 +41,36 @@ cd claude-code-playground
 # 依存関係をインストール
 npm install
 
+# 環境変数を設定（オプション）
+cp .env.example .env
+# .envファイルを編集してDropboxのクライアントIDを設定
+
 # 開発サーバーを起動
 npm run dev
 ```
+
+### Dropbox同期機能の設定（オプション）
+
+同期機能を使用する場合は、Dropbox APIアプリの設定が必要です。
+
+1. [Dropbox App Console](https://www.dropbox.com/developers/apps) にアクセス
+2. "Create app" をクリック
+3. 設定項目：
+   - **API**: "Scoped access" を選択
+   - **Access**: "App folder" を選択（推奨）
+   - **App name**: 任意の名前を入力
+4. アプリ作成後の設定：
+   - **App key** をコピー
+   - **Permissions** タブで以下を有効化：
+     - `files.content.write`
+     - `files.content.read`
+   - **Redirect URIs** に以下を追加：
+     - 開発環境: `http://localhost:5173/auth/callback`
+     - 本番環境: `https://your-domain.com/auth/callback`
+5. `.env` ファイルに App key を設定：
+   ```
+   VITE_DROPBOX_CLIENT_ID=your-dropbox-app-key-here
+   ```
 
 ## 開発コマンド
 
