@@ -1,4 +1,7 @@
+# ログレベル設定 (ERROR, WARN, INFO, DEBUG)
+export VITE_LOG_LEVEL=INFO
+
 # Dropbox同期機能用
 # Dropbox App ConsoleでScopedアクセスアプリを作成して設定
 # 必要なPermissions: files.content.write, files.content.read
-VITE_DROPBOX_CLIENT_ID=your-dropbox-app-key-here
+export VITE_DROPBOX_CLIENT_ID=your-dropbox-app-key-here

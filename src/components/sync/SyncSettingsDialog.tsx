@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { SyncManager } from '../../utils/sync/syncManager';
 import { useChartSync } from '../../hooks/useChartSync';
 import type { SyncConfig } from '../../types/sync';
+import { logger } from '../../utils/logger';
 
 interface SyncSettingsDialogProps {
   isOpen: boolean;
@@ -59,9 +60,9 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
   const handleSignIn = async () => {
     try {
       setAuthError(null);
-      console.log('handleSignIn: Starting authentication...');
+      logger.debug('handleSignIn: Starting authentication...');
       await authenticate();
-      console.log('handleSignIn: Authentication successful');
+      logger.info('handleSignIn: Authentication successful');
       
     } catch (error) {
       console.error('handleSignIn: Authentication failed:', error);
