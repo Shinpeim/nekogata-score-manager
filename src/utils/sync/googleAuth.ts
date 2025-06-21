@@ -150,20 +150,30 @@ export class GoogleAuthProvider {
       
       // 認証コールバックリスナーを設定
       const handleAuthCallback = async (event: MessageEvent) => {
+        console.log('Received message:', {
+          origin: event.origin,
+          expectedOrigin: window.location.origin,
+          data: event.data
+        });
+        
         if (event.origin !== window.location.origin) {
+          console.log('Ignoring message from different origin');
           return;
         }
         
         if (event.data.type === 'OAUTH_SUCCESS') {
+          console.log('OAuth success message received');
           window.removeEventListener('message', handleAuthCallback);
           try {
             // 認証コードをトークンに交換
             await this.handleAuthCallback(event.data.code, event.data.state);
             resolve(this.tokens!.accessToken);
           } catch (error) {
+            console.error('Error in handleAuthCallback:', error);
             reject(error);
           }
         } else if (event.data.type === 'OAUTH_ERROR') {
+          console.log('OAuth error message received:', event.data.error);
           window.removeEventListener('message', handleAuthCallback);
           reject(new Error(event.data.error));
         }
@@ -217,6 +227,13 @@ export class GoogleAuthProvider {
       code_challenge_method: 'S256',
       access_type: 'offline',
       prompt: 'consent',
+    });
+    
+    console.log('Auth URL params:', {
+      client_id: this.CLIENT_ID,
+      redirect_uri: this.REDIRECT_URI,
+      code_challenge_length: pkceState.codeChallenge.length,
+      code_verifier_length: pkceState.codeVerifier.length,
     });
     
     return `${this.AUTH_URL}?${params.toString()}`;
@@ -356,22 +373,33 @@ export class GoogleAuthProvider {
   }
 
   private async exchangeCodeForTokens(code: string, codeVerifier: string): Promise<OAuthTokenResponse> {
+    const params = new URLSearchParams({
+      client_id: this.CLIENT_ID,
+      code,
+      code_verifier: codeVerifier,
+      grant_type: 'authorization_code',
+      redirect_uri: this.REDIRECT_URI,
+    });
+
+    console.log('Token exchange request:', {
+      url: this.TOKEN_URL,
+      client_id: this.CLIENT_ID,
+      redirect_uri: this.REDIRECT_URI,
+      code_verifier_length: codeVerifier.length,
+      code_length: code.length,
+    });
+
     const response = await fetch(this.TOKEN_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: new URLSearchParams({
-        client_id: this.CLIENT_ID,
-        code,
-        code_verifier: codeVerifier,
-        grant_type: 'authorization_code',
-        redirect_uri: this.REDIRECT_URI,
-      }),
+      body: params,
     });
 
     if (!response.ok) {
       const errorData: OAuthErrorResponse = await response.json();
+      console.error('Token exchange error:', errorData);
       throw new Error(`Token exchange failed: ${errorData.error_description || errorData.error}`);
     }
 
