@@ -150,30 +150,20 @@ export class GoogleAuthProvider {
       
       // 認証コールバックリスナーを設定
       const handleAuthCallback = async (event: MessageEvent) => {
-        console.log('Received message:', {
-          origin: event.origin,
-          expectedOrigin: window.location.origin,
-          data: event.data
-        });
-        
         if (event.origin !== window.location.origin) {
-          console.log('Ignoring message from different origin');
           return;
         }
         
         if (event.data.type === 'OAUTH_SUCCESS') {
-          console.log('OAuth success message received');
           window.removeEventListener('message', handleAuthCallback);
           try {
             // 認証コードをトークンに交換
             await this.handleAuthCallback(event.data.code, event.data.state);
             resolve(this.tokens!.accessToken);
           } catch (error) {
-            console.error('Error in handleAuthCallback:', error);
             reject(error);
           }
         } else if (event.data.type === 'OAUTH_ERROR') {
-          console.log('OAuth error message received:', event.data.error);
           window.removeEventListener('message', handleAuthCallback);
           reject(new Error(event.data.error));
         }
@@ -231,7 +221,6 @@ export class GoogleAuthProvider {
     
     console.log('Auth URL params:', {
       client_id: this.CLIENT_ID,
-      redirect_uri: this.REDIRECT_URI,
       code_challenge_length: pkceState.codeChallenge.length,
       code_verifier_length: pkceState.codeVerifier.length,
     });
@@ -384,7 +373,6 @@ export class GoogleAuthProvider {
     console.log('Token exchange request:', {
       url: this.TOKEN_URL,
       client_id: this.CLIENT_ID,
-      redirect_uri: this.REDIRECT_URI,
       code_verifier_length: codeVerifier.length,
       code_length: code.length,
     });
@@ -399,7 +387,12 @@ export class GoogleAuthProvider {
 
     if (!response.ok) {
       const errorData: OAuthErrorResponse = await response.json();
-      console.error('Token exchange error:', errorData);
+      console.error('Token exchange error:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorData,
+        requestParams: Object.fromEntries(params)
+      });
       throw new Error(`Token exchange failed: ${errorData.error_description || errorData.error}`);
     }
 
