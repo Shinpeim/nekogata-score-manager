@@ -63,7 +63,6 @@ describe('syncStore', () => {
       syncError: null,
       syncConfig: {
         autoSync: false,
-        conflictResolution: 'remote',
         showConflictWarning: true
       }
     });
@@ -83,7 +82,6 @@ describe('syncStore', () => {
       expect(state.syncError).toBeNull();
       expect(state.syncConfig).toEqual({
         autoSync: false,
-        conflictResolution: 'remote',
         showConflictWarning: true
       });
     });
@@ -93,7 +91,6 @@ describe('syncStore', () => {
     it('正常に初期化される', async () => {
       const mockConfig = {
         autoSync: true,
-        conflictResolution: 'local' as const,
         showConflictWarning: false
       };
       const mockLastSyncTime = new Date('2023-01-01T00:00:00Z');
@@ -129,7 +126,6 @@ describe('syncStore', () => {
     it('最終同期時刻が0の場合はnullが設定される', async () => {
       const mockConfig = {
         autoSync: false,
-        conflictResolution: 'remote' as const,
         showConflictWarning: true
       };
       const mockLastSyncTime = new Date(0);
@@ -150,7 +146,6 @@ describe('syncStore', () => {
       mockSyncManager.initialize.mockResolvedValue(undefined);
       mockSyncManager.getConfig.mockReturnValue({
         autoSync: false,
-        conflictResolution: 'remote',
         showConflictWarning: true
       });
       mockSyncManager.getLastSyncTimeAsDate.mockReturnValue(new Date());
@@ -192,7 +187,6 @@ describe('syncStore', () => {
       mockSyncManager.initialize.mockResolvedValue(undefined);
       mockSyncManager.getConfig.mockReturnValue({
         autoSync: false,
-        conflictResolution: 'remote',
         showConflictWarning: true
       });
       mockSyncManager.getLastSyncTimeAsDate.mockReturnValue(new Date());
@@ -262,7 +256,6 @@ describe('syncStore', () => {
       mockSyncManager.initialize.mockResolvedValue(undefined);
       mockSyncManager.getConfig.mockReturnValue({
         autoSync: false,
-        conflictResolution: 'remote',
         showConflictWarning: true
       });
       mockSyncManager.getLastSyncTimeAsDate.mockReturnValue(new Date());
@@ -347,7 +340,6 @@ describe('syncStore', () => {
       mockSyncManager.initialize.mockResolvedValue(undefined);
       mockSyncManager.getConfig.mockReturnValue({
         autoSync: false,
-        conflictResolution: 'remote',
         showConflictWarning: true
       });
       mockSyncManager.getLastSyncTimeAsDate.mockReturnValue(new Date());
@@ -362,7 +354,6 @@ describe('syncStore', () => {
 
       expect(mockSyncManager.saveConfig).toHaveBeenCalledWith({
         autoSync: true,
-        conflictResolution: 'remote',
         showConflictWarning: true
       });
 
@@ -388,7 +379,6 @@ describe('syncStore', () => {
       mockSyncManager.initialize.mockResolvedValue(undefined);
       mockSyncManager.getConfig.mockReturnValue({
         autoSync: false,
-        conflictResolution: 'remote',
         showConflictWarning: true
       });
       mockSyncManager.getLastSyncTimeAsDate.mockReturnValue(new Date());

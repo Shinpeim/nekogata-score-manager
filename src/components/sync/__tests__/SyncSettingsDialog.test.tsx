@@ -23,7 +23,6 @@ const mockUseChartSync = {
   syncError: null as string | null,
   syncConfig: {
     autoSync: false,
-    conflictResolution: 'remote' as const,
     showConflictWarning: true,
   },
   
@@ -52,7 +51,6 @@ describe('SyncSettingsDialog', () => {
     
     mockSyncManager.getConfig.mockReturnValue({
       autoSync: false,
-      conflictResolution: 'remote',
       showConflictWarning: true,
     });
     
@@ -157,30 +155,17 @@ describe('SyncSettingsDialog', () => {
   });
 
 
-  it('コンフリクト解決の設定を変更できる', async () => {
-    mockUseChartSync.isAuthenticated = true;
-    
-    render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
-    
-    await waitFor(() => {
-      const conflictSelect = screen.getByDisplayValue('リモート優先');
-      fireEvent.change(conflictSelect, { target: { value: 'local' } });
-    });
-    
-    expect(mockUseChartSync.updateSyncConfig).toHaveBeenCalledWith(
-      expect.objectContaining({
-        conflictResolution: 'local'
-      })
-    );
-  });
 
   it('未認証状態では設定項目が無効化される', async () => {
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
     await waitFor(() => {
-      const conflictSelect = screen.getByDisplayValue('リモート優先');
+      const buttons = screen.getAllByRole('button');
+      const autoSyncToggle = buttons.find(button => 
+        button.className.includes('w-12 h-6 rounded-full')
+      );
       
-      expect(conflictSelect).toBeDisabled();
+      expect(autoSyncToggle).toBeDisabled();
     });
   });
 

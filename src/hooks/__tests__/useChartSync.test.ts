@@ -30,7 +30,6 @@ interface MockSyncStore {
   syncError: string | null;
   syncConfig: {
     autoSync: boolean;
-    conflictResolution: string;
     showConflictWarning: boolean;
   };
   sync: ReturnType<typeof vi.fn>;
@@ -75,7 +74,6 @@ const mockSyncStore: MockSyncStore = {
   syncError: null,
   syncConfig: {
     autoSync: false,
-    conflictResolution: 'remote',
     showConflictWarning: true
   },
   sync: vi.fn(),

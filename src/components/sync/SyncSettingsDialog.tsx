@@ -166,9 +166,12 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
         <div className="mb-6 space-y-4">
           <h3 className="text-sm font-medium text-slate-900">同期設定</h3>
           
-          {/* 自動同期 */}
+          {/* 変更時同期 */}
           <div className="flex items-center justify-between">
-            <label className="text-sm text-slate-700">自動同期</label>
+            <div className="flex flex-col">
+              <label className="text-sm text-slate-700">変更時同期</label>
+              <span className="text-xs text-slate-500">楽譜を編集したときに自動同期</span>
+            </div>
             <button
               onClick={() => handleConfigChange({ autoSync: !config.autoSync })}
               className={`w-12 h-6 rounded-full transition-colors ${
@@ -184,22 +187,12 @@ export const SyncSettingsDialog: React.FC<SyncSettingsDialogProps> = ({
             </button>
           </div>
 
-
-          {/* コンフリクト解決方法 */}
-          <div className="space-y-2">
-            <label className="text-sm text-slate-700">コンフリクト解決</label>
-            <select
-              value={config.conflictResolution}
-              onChange={(e) => handleConfigChange({ 
-                conflictResolution: e.target.value as 'local' | 'remote' | 'manual' 
-              })}
-              className="w-full text-sm p-2 border border-slate-200 rounded"
-              disabled={!isAuthenticated}
-            >
-              <option value="remote">リモート優先</option>
-              <option value="local">ローカル優先</option>
-              <option value="manual">手動選択</option>
-            </select>
+          {/* コンフリクト解決の説明 */}
+          <div className="p-3 bg-slate-50 rounded-md">
+            <p className="text-xs text-slate-600">
+              <strong>データの競合について:</strong><br/>
+              複数のデバイスで同じ楽譜を編集した場合、より新しいタイムスタンプの変更が優先されます。
+            </p>
           </div>
         </div>
 

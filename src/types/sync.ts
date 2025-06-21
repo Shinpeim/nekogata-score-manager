@@ -54,6 +54,5 @@ export interface ISyncAdapter {
 
 export interface SyncConfig {
   autoSync: boolean;
-  conflictResolution: 'local' | 'remote' | 'manual';
   showConflictWarning: boolean;
 }

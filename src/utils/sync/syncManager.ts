@@ -287,14 +287,12 @@ export class SyncManager {
       // 古い設定との互換性のために、不要なプロパティを除外
       return {
         autoSync: parsed.autoSync ?? false,
-        conflictResolution: parsed.conflictResolution ?? 'remote',
         showConflictWarning: parsed.showConflictWarning ?? true
       };
     }
     
     return {
       autoSync: false,
-      conflictResolution: 'remote',
       showConflictWarning: true
     };
   }

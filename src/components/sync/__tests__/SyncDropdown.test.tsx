@@ -12,7 +12,6 @@ const mockUseChartSync = {
   syncError: null as string | null,
   syncConfig: {
     autoSync: false,
-    conflictResolution: 'remote' as const,
     showConflictWarning: true,
   },
   
