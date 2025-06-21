@@ -20,7 +20,9 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         runtimeCaching: [
           {
-            urlPattern: ({ request }) => request.destination === 'document',
+            urlPattern: ({ request, url }) => 
+              request.destination === 'document' && 
+              !url.pathname.startsWith('/auth/'),
             handler: 'NetworkFirst',
             options: {
               cacheName: 'documents',
