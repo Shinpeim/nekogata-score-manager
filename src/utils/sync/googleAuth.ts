@@ -42,6 +42,7 @@ export class GoogleAuthProvider {
   
   private readonly CLIENT_ID: string;
   private readonly SCOPES = 'https://www.googleapis.com/auth/drive.file';
+  private readonly REDIRECT_URI = `${window.location.origin}/auth/callback`;
   
   // OAuth 2.0エンドポイント
   private readonly AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
@@ -139,30 +140,58 @@ export class GoogleAuthProvider {
   private async startAuthFlow(): Promise<string> {
     const pkceState = await this.generatePKCEState();
     
-    // PKCE状態を一時保存
-    sessionStorage.setItem('nekogata-pkce-state', JSON.stringify(pkceState));
-    
-    // 認証URLを構築
-    const authUrl = this.buildAuthUrl(pkceState);
-    
-    // 新しいタブで認証ページを開く
-    window.open(authUrl, '_blank');
-    
-    // ユーザーにコードの入力を求める
     return new Promise((resolve, reject) => {
-      const authCode = prompt(
-        'Googleの認証ページで表示された認証コードをコピーして、ここに貼り付けてください。'
+      
+      // PKCE状態を一時保存
+      sessionStorage.setItem('nekogata-pkce-state', JSON.stringify(pkceState));
+      
+      // 認証URLを構築
+      const authUrl = this.buildAuthUrl(pkceState);
+      
+      // 認証コールバックリスナーを設定
+      const handleAuthCallback = async (event: MessageEvent) => {
+        if (event.origin !== window.location.origin) {
+          return;
+        }
+        
+        if (event.data.type === 'OAUTH_SUCCESS') {
+          window.removeEventListener('message', handleAuthCallback);
+          try {
+            // 認証コードをトークンに交換
+            await this.handleAuthCallback(event.data.code, event.data.state);
+            resolve(this.tokens!.accessToken);
+          } catch (error) {
+            reject(error);
+          }
+        } else if (event.data.type === 'OAUTH_ERROR') {
+          window.removeEventListener('message', handleAuthCallback);
+          reject(new Error(event.data.error));
+        }
+      };
+      
+      window.addEventListener('message', handleAuthCallback);
+      
+      // 新しいウィンドウで認証を開始
+      const authWindow = window.open(
+        authUrl,
+        'google-auth',
+        'width=500,height=600,scrollbars=yes,resizable=yes'
       );
       
-      if (!authCode) {
-        reject(new Error('認証がキャンセルされました'));
+      if (!authWindow) {
+        window.removeEventListener('message', handleAuthCallback);
+        reject(new Error('Failed to open authentication window'));
         return;
       }
       
-      // 認証コードをトークンに交換
-      this.handleAuthCode(authCode.trim(), pkceState.state)
-        .then(() => resolve(this.tokens!.accessToken))
-        .catch(reject);
+      // ウィンドウが閉じられた場合の処理
+      const checkClosed = setInterval(() => {
+        if (authWindow.closed) {
+          clearInterval(checkClosed);
+          window.removeEventListener('message', handleAuthCallback);
+          reject(new Error('Authentication window was closed'));
+        }
+      }, 1000);
     });
   }
 
@@ -181,6 +210,7 @@ export class GoogleAuthProvider {
     const params = new URLSearchParams({
       response_type: 'code',
       client_id: this.CLIENT_ID,
+      redirect_uri: this.REDIRECT_URI,
       scope: this.SCOPES,
       state: pkceState.state,
       code_challenge: pkceState.codeChallenge,
@@ -302,8 +332,8 @@ export class GoogleAuthProvider {
     return this.tokens?.accessToken || null;
   }
 
-  // 認証コード処理（ユーザーが入力したコードを処理）
-  async handleAuthCode(code: string, state: string): Promise<void> {
+  // 認証コールバック処理（新しいウィンドウから呼ばれる）
+  async handleAuthCallback(code: string, state: string): Promise<void> {
     const savedPkceState = sessionStorage.getItem('nekogata-pkce-state');
     if (!savedPkceState) {
       throw new Error('PKCE state not found');
@@ -337,6 +367,7 @@ export class GoogleAuthProvider {
       code,
       code_verifier: codeVerifier,
       grant_type: 'authorization_code',
+      redirect_uri: this.REDIRECT_URI,
     });
 
     console.log('Token exchange request:', {

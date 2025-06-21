@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>認証完了</title>
+</head>
+<body>
+    <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+        <h2>認証処理中...</h2>
+        <p>しばらくお待ちください。</p>
+    </div>
+
+    <script>
+        // URLからパラメータを取得
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const state = urlParams.get('state');
+        const error = urlParams.get('error');
+
+        if (error) {
+            // エラーの場合
+            window.opener.postMessage({
+                type: 'OAUTH_ERROR',
+                error: error
+            }, window.location.origin);
+        } else if (code && state) {
+            // 成功の場合
+            window.opener.postMessage({
+                type: 'OAUTH_SUCCESS',
+                code: code,
+                state: state
+            }, window.location.origin);
+        } else {
+            // パラメータが不足している場合
+            window.opener.postMessage({
+                type: 'OAUTH_ERROR',
+                error: 'Missing parameters'
+            }, window.location.origin);
+        }
+
+        // ウィンドウを閉じる
+        window.close();
+    </script>
+</body>
+</html>
