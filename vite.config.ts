@@ -7,11 +7,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        main: 'index.html',
-        lp: 'lp.html',
-        privacyPolicy: 'privacy-policy.html',
-        terms: 'terms.html',
-        googleVerification: 'googleab0226c32fff037a.html'
+        main: 'index.html'
       }
     }
   },
