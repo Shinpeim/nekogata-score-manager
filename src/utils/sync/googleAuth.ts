@@ -387,7 +387,12 @@ export class GoogleAuthProvider {
 
     if (!response.ok) {
       const errorData: OAuthErrorResponse = await response.json();
-      console.error('Token exchange error:', errorData);
+      console.error('Token exchange error:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorData,
+        requestParams: Object.fromEntries(params)
+      });
       throw new Error(`Token exchange failed: ${errorData.error_description || errorData.error}`);
     }
 
