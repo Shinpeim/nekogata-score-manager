@@ -18,45 +18,74 @@ export default defineConfig({
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        // サービスワーカーを常に最新に保つ設定
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
+            // auth以下は完全にキャッシュしない
+            urlPattern: ({ url }) => url.pathname.startsWith('/auth/'),
+            handler: 'NetworkOnly'
+          },
+          {
+            // ドキュメント: ネットワーク優先、タイムアウトなし（失敗時のみキャッシュ使用）
             urlPattern: ({ request, url }) => 
               request.destination === 'document' && 
               !url.pathname.startsWith('/auth/'),
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'documents',
-              networkTimeoutSeconds: 3,
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 24 * 60 * 60 // 24 hours
-              }
+              cacheName: 'offline-documents',
+              // タイムアウトを設定しない = ネットワークが完全に失敗するまで待つ
+              plugins: [
+                {
+                  cacheWillUpdate: async ({ response }) => {
+                    // 200 OK のレスポンスのみキャッシュ
+                    if (response && response.status === 200) {
+                      return response;
+                    }
+                    return null;
+                  }
+                }
+              ]
             }
           },
           {
+            // JS/CSS: ネットワーク優先、タイムアウトなし
             urlPattern: ({ request }) => 
               request.destination === 'script' || 
               request.destination === 'style',
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'assets',
-              networkTimeoutSeconds: 3,
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 24 * 60 * 60 // 24 hours
-              }
+              cacheName: 'offline-assets',
+              plugins: [
+                {
+                  cacheWillUpdate: async ({ response }) => {
+                    if (response && response.status === 200) {
+                      return response;
+                    }
+                    return null;
+                  }
+                }
+              ]
             }
           },
           {
+            // 画像: ネットワーク優先、タイムアウトなし
             urlPattern: ({ request }) => request.destination === 'image',
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'images',
-              networkTimeoutSeconds: 3,
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 30 * 24 * 60 * 60 // 30 days
-              }
+              cacheName: 'offline-images',
+              plugins: [
+                {
+                  cacheWillUpdate: async ({ response }) => {
+                    if (response && response.status === 200) {
+                      return response;
+                    }
+                    return null;
+                  }
+                }
+              ]
             }
           }
         ]
