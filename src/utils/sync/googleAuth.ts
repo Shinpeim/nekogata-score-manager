@@ -42,7 +42,6 @@ export class GoogleAuthProvider {
   
   private readonly CLIENT_ID: string;
   private readonly SCOPES = 'https://www.googleapis.com/auth/drive.file';
-  private readonly REDIRECT_URI = 'urn:ietf:wg:oauth:2.0:oob';
   
   // OAuth 2.0エンドポイント
   private readonly AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
@@ -182,7 +181,6 @@ export class GoogleAuthProvider {
     const params = new URLSearchParams({
       response_type: 'code',
       client_id: this.CLIENT_ID,
-      redirect_uri: this.REDIRECT_URI,
       scope: this.SCOPES,
       state: pkceState.state,
       code_challenge: pkceState.codeChallenge,
@@ -193,7 +191,6 @@ export class GoogleAuthProvider {
     
     console.log('Auth URL params:', {
       client_id: this.CLIENT_ID,
-      redirect_uri: this.REDIRECT_URI,
       code_challenge_length: pkceState.codeChallenge.length,
       code_verifier_length: pkceState.codeVerifier.length,
     });
@@ -340,13 +337,11 @@ export class GoogleAuthProvider {
       code,
       code_verifier: codeVerifier,
       grant_type: 'authorization_code',
-      redirect_uri: this.REDIRECT_URI,
     });
 
     console.log('Token exchange request:', {
       url: this.TOKEN_URL,
       client_id: this.CLIENT_ID,
-      redirect_uri: this.REDIRECT_URI,
       code_verifier_length: codeVerifier.length,
       code_length: code.length,
     });
