@@ -42,7 +42,7 @@ export class GoogleAuthProvider {
   
   private readonly CLIENT_ID: string;
   private readonly SCOPES = 'https://www.googleapis.com/auth/drive.file';
-  private readonly REDIRECT_URI = `${window.location.origin}/auth/callback`;
+  private readonly REDIRECT_URI = 'urn:ietf:wg:oauth:2.0:oob';
   
   // OAuth 2.0エンドポイント
   private readonly AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
@@ -140,68 +140,30 @@ export class GoogleAuthProvider {
   private async startAuthFlow(): Promise<string> {
     const pkceState = await this.generatePKCEState();
     
+    // PKCE状態を一時保存
+    sessionStorage.setItem('nekogata-pkce-state', JSON.stringify(pkceState));
+    
+    // 認証URLを構築
+    const authUrl = this.buildAuthUrl(pkceState);
+    
+    // 新しいタブで認証ページを開く
+    window.open(authUrl, '_blank');
+    
+    // ユーザーにコードの入力を求める
     return new Promise((resolve, reject) => {
-      
-      // PKCE状態を一時保存
-      sessionStorage.setItem('nekogata-pkce-state', JSON.stringify(pkceState));
-      
-      // 認証URLを構築
-      const authUrl = this.buildAuthUrl(pkceState);
-      
-      // 認証コールバックリスナーを設定
-      const handleAuthCallback = async (event: MessageEvent) => {
-        console.log('Received message:', {
-          origin: event.origin,
-          expectedOrigin: window.location.origin,
-          data: event.data
-        });
-        
-        if (event.origin !== window.location.origin) {
-          console.log('Ignoring message from different origin');
-          return;
-        }
-        
-        if (event.data.type === 'OAUTH_SUCCESS') {
-          console.log('OAuth success message received');
-          window.removeEventListener('message', handleAuthCallback);
-          try {
-            // 認証コードをトークンに交換
-            await this.handleAuthCallback(event.data.code, event.data.state);
-            resolve(this.tokens!.accessToken);
-          } catch (error) {
-            console.error('Error in handleAuthCallback:', error);
-            reject(error);
-          }
-        } else if (event.data.type === 'OAUTH_ERROR') {
-          console.log('OAuth error message received:', event.data.error);
-          window.removeEventListener('message', handleAuthCallback);
-          reject(new Error(event.data.error));
-        }
-      };
-      
-      window.addEventListener('message', handleAuthCallback);
-      
-      // 新しいウィンドウで認証を開始
-      const authWindow = window.open(
-        authUrl,
-        'google-auth',
-        'width=500,height=600,scrollbars=yes,resizable=yes'
+      const authCode = prompt(
+        'Googleの認証ページで表示された認証コードをコピーして、ここに貼り付けてください。'
       );
       
-      if (!authWindow) {
-        window.removeEventListener('message', handleAuthCallback);
-        reject(new Error('Failed to open authentication window'));
+      if (!authCode) {
+        reject(new Error('認証がキャンセルされました'));
         return;
       }
       
-      // ウィンドウが閉じられた場合の処理
-      const checkClosed = setInterval(() => {
-        if (authWindow.closed) {
-          clearInterval(checkClosed);
-          window.removeEventListener('message', handleAuthCallback);
-          reject(new Error('Authentication window was closed'));
-        }
-      }, 1000);
+      // 認証コードをトークンに交換
+      this.handleAuthCode(authCode.trim(), pkceState.state)
+        .then(() => resolve(this.tokens!.accessToken))
+        .catch(reject);
     });
   }
 
@@ -343,8 +305,8 @@ export class GoogleAuthProvider {
     return this.tokens?.accessToken || null;
   }
 
-  // 認証コールバック処理（新しいウィンドウから呼ばれる）
-  async handleAuthCallback(code: string, state: string): Promise<void> {
+  // 認証コード処理（ユーザーが入力したコードを処理）
+  async handleAuthCode(code: string, state: string): Promise<void> {
     const savedPkceState = sessionStorage.getItem('nekogata-pkce-state');
     if (!savedPkceState) {
       throw new Error('PKCE state not found');
