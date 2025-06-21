@@ -4,6 +4,9 @@ import { DropboxAuthProvider } from '../dropboxAuth';
 // グローバルfetchのモック
 global.fetch = vi.fn();
 
+// import.meta.envのモック
+vi.stubEnv('VITE_DROPBOX_CLIENT_ID', '');
+
 // localStorage のモック
 const mockLocalStorage = {
   getItem: vi.fn(),

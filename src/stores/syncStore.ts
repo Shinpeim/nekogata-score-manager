@@ -34,7 +34,6 @@ export const useSyncStore = create<SyncState>()(
       syncError: null,
       syncConfig: {
         autoSync: false,
-        conflictResolution: 'remote',
         showConflictWarning: true
       },
 
