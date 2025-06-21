@@ -50,11 +50,21 @@
 
     <script>
         (async function() {
+            console.log('OAuth callback started');
+            console.log('Current URL:', window.location.href);
+            console.log('Window opener:', window.opener);
+            
             try {
                 const urlParams = new URLSearchParams(window.location.search);
                 const code = urlParams.get('code');
                 const state = urlParams.get('state');
                 const error = urlParams.get('error');
+
+                console.log('URL params:', {
+                    code: code ? `${code.substring(0, 10)}...` : null,
+                    state: state,
+                    error: error
+                });
 
                 if (error) {
                     throw new Error(`認証エラー: ${error}`);
@@ -66,13 +76,25 @@
 
                 // 親ウィンドウに成功を通知
                 if (window.opener) {
-                    window.opener.postMessage({
+                    console.log('Sending message to opener window');
+                    const message = {
                         type: 'OAUTH_SUCCESS',
                         code: code,
                         state: state
-                    }, window.location.origin);
-                    window.close();
+                    };
+                    console.log('Message to send:', {
+                        type: message.type,
+                        codeLength: code.length,
+                        state: state
+                    });
+                    
+                    window.opener.postMessage(message, window.location.origin);
+                    console.log('Message sent, closing window');
+                    // デバッグ中はウィンドウを閉じない
+                    console.log('DEBUG: Window close is disabled for debugging');
+                    // window.close();
                 } else {
+                    console.log('No opener window, redirecting to main page');
                     // 直接アクセスされた場合はメインページにリダイレクト
                     window.location.href = '/';
                 }
@@ -90,10 +112,12 @@
                         error: error.message
                     }, window.location.origin);
                     
+                    // デバッグ中はウィンドウを閉じない
+                    console.log('DEBUG: Auto-close is disabled for debugging');
                     // 5秒後にウィンドウを閉じる
-                    setTimeout(() => {
-                        window.close();
-                    }, 5000);
+                    // setTimeout(() => {
+                    //     window.close();
+                    // }, 5000);
                 }
             }
         })();
