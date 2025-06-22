@@ -177,12 +177,14 @@ describe('chordCopyPaste', () => {
       expect(result).toHaveLength(4);
     });
 
-    it('should filter out invalid chords and normalize valid roots', () => {
+    it('should accept all text input including non-musical terms', () => {
       const result = textToChords('Bb invalid Eb');
       
-      expect(result).toHaveLength(2);
+      // 寛容な入力により、「invalid」も受け入れられる
+      expect(result).toHaveLength(3);
       expect(result[0]).toEqual({ name: 'Bb', root: 'B♭', duration: 4, memo: '' });
-      expect(result[1]).toEqual({ name: 'Eb', root: 'E♭', duration: 4, memo: '' });
+      expect(result[1]).toEqual({ name: 'invalid', root: 'C', duration: 4, memo: '' });
+      expect(result[2]).toEqual({ name: 'Eb', root: 'E♭', duration: 4, memo: '' });
     });
   });
 
@@ -194,10 +196,16 @@ describe('chordCopyPaste', () => {
       expect(isValidChordProgression('E7(#9)[2] C7(b5)[4]')).toBe(true);
     });
 
-    it('should return false for invalid progressions', () => {
+    it('should return false for empty progressions', () => {
       expect(isValidChordProgression('')).toBe(false);
       expect(isValidChordProgression('   ')).toBe(false);
-      expect(isValidChordProgression('invalid text')).toBe(false);
+    });
+
+    it('should return true for any non-empty text (tolerant input)', () => {
+      // 寛容な入力により、どんなテキストでも有効として扱われる
+      expect(isValidChordProgression('invalid text')).toBe(true);
+      expect(isValidChordProgression('練習 休符')).toBe(true);
+      expect(isValidChordProgression('123 456')).toBe(true);
     });
 
     it('should return true for mixed valid/invalid input', () => {
@@ -270,12 +278,16 @@ describe('chordCopyPaste', () => {
         expect(result).toBeNull();
       });
 
-      it('should return null for invalid content', async () => {
+      it('should accept any content as valid (tolerant input)', async () => {
         mockReadText.mockResolvedValue('invalid content');
 
         const result = await pasteChordProgressionFromClipboard();
 
-        expect(result).toBeNull();
+        // 寛容な入力により、どんなテキストでも有効なコード進行として扱われる
+        expect(result).toEqual([
+          { name: 'invalid', root: 'C', base: undefined, duration: 4, memo: '' },
+          { name: 'content', root: 'C', base: undefined, duration: 4, memo: '' }
+        ]);
       });
 
       it('should return null on error', async () => {

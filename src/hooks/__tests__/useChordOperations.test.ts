@@ -8,6 +8,7 @@ import * as chordParsing from '../../utils/chordParsing';
 vi.mock('../../utils/chordParsing', () => ({
   extractChordRoot: vi.fn(),
   parseOnChord: vi.fn(),
+  parseChordInput: vi.fn(),
 }));
 
 vi.mock('../../utils/lineBreakHelpers', () => ({
@@ -108,11 +109,16 @@ describe('useChordOperations', () => {
   });
 
   it('finalizeChordNameがコード名をパースして更新する', () => {
-    const mockParseOnChord = vi.mocked(chordParsing.parseOnChord);
-    const mockExtractChordRoot = vi.mocked(chordParsing.extractChordRoot);
+    const mockParseChordInput = vi.mocked(chordParsing.parseChordInput);
     
-    mockParseOnChord.mockReturnValue({ chord: 'Am', base: 'C' });
-    mockExtractChordRoot.mockReturnValue('A');
+    // parseChordInputが期待するオブジェクトを返すようにモック
+    mockParseChordInput.mockReturnValue({
+      name: 'Am',
+      root: 'A',
+      base: 'C',
+      duration: 4,
+      memo: ''
+    });
 
     const { result } = renderUseChordOperations();
 
@@ -120,8 +126,7 @@ describe('useChordOperations', () => {
       result.current.finalizeChordName('section-1', 0, 'Am/C');
     });
 
-    expect(mockParseOnChord).toHaveBeenCalledWith('Am/C');
-    expect(mockExtractChordRoot).toHaveBeenCalledWith('Am');
+    expect(mockParseChordInput).toHaveBeenCalledWith('Am/C', 4); // デフォルト拍数4で呼び出される
     expect(mockOnUpdateChart).toHaveBeenCalledWith({
       ...mockChart,
       sections: [
