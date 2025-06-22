@@ -15,16 +15,18 @@ const ChordChartViewer: React.FC<ChordChartViewerProps> = ({ chart, currentChart
   return (
     <div className="h-full bg-white overflow-y-auto" data-testid="chart-viewer">
       <div className="p-2">
-        <div className="mb-3">
-          <h2 className="text-xl font-bold text-slate-900 mb-1" data-testid="chart-title">{chart.title}</h2>
-          <div className="flex flex-wrap gap-3 text-sm text-slate-600">
-            <span data-testid="chart-artist">{chart.artist}</span>
-            <span data-testid="chart-key">キー: {KEY_DISPLAY_NAMES[chart.key] || chart.key}</span>
-            {chart.tempo && <BpmIndicator bpm={chart.tempo} />}
-            <span data-testid="chart-time-signature">拍子: {chart.timeSignature}</span>
+        <div className="mb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 flex-wrap">
+            <h2 className="text-lg font-bold text-slate-900" data-testid="chart-title">{chart.title}</h2>
+            <span className="text-sm text-slate-600" data-testid="chart-artist">{chart.artist}</span>
+            <div className="flex flex-wrap gap-3 text-sm text-slate-600">
+              <span data-testid="chart-key">キー: {KEY_DISPLAY_NAMES[chart.key] || chart.key}</span>
+              {chart.tempo && <BpmIndicator bpm={chart.tempo} />}
+              <span data-testid="chart-time-signature">拍子: {chart.timeSignature}</span>
+            </div>
           </div>
           {chart.tags && chart.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-2" data-testid="chart-tags">
+            <div className="flex flex-wrap gap-2 mt-1" data-testid="chart-tags">
               {chart.tags.map((tag, index) => (
                 <span key={index} className="px-2 py-1 bg-slate-100 text-slate-800 text-xs rounded-full">
                   {tag}
