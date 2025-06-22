@@ -18,18 +18,21 @@ export default defineConfig({
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        globIgnores: ['**/auth/**'],
+        navigateFallback: null,
         // サービスワーカーを常に最新に保つ設定
         skipWaiting: true,
         clientsClaim: true,
         cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
-            // auth以下は完全にキャッシュしない
+            // auth以下は完全にキャッシュしない（最優先）
             urlPattern: ({ url }) => url.pathname.startsWith('/auth/'),
             handler: 'NetworkOnly'
           },
           {
             // ドキュメント: ネットワーク優先、タイムアウトなし（失敗時のみキャッシュ使用）
+            // auth以下は除外
             urlPattern: ({ request, url }) => 
               request.destination === 'document' && 
               !url.pathname.startsWith('/auth/'),
