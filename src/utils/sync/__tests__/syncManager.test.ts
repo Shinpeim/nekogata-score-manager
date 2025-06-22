@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SyncManager } from '../syncManager';
-import { GoogleDriveSyncAdapter } from '../googleDriveAdapter';
+import { DropboxSyncAdapter } from '../dropboxAdapter';
 import type { ChordChart } from '../../../types/chord';
 import type { SyncMetadata } from '../../../types/sync';
 
-vi.mock('../googleDriveAdapter');
+vi.mock('../dropboxAdapter');
 vi.mock('../deviceId', () => ({
   getDeviceId: () => 'test-device-id'
 }));
@@ -18,7 +18,7 @@ import { storageService } from '../../storage';
 
 describe('SyncManager', () => {
   let syncManager: SyncManager;
-  let mockAdapter: GoogleDriveSyncAdapter;
+  let mockAdapter: DropboxSyncAdapter;
 
   beforeEach(() => {
     localStorage.clear();
@@ -35,8 +35,8 @@ describe('SyncManager', () => {
       updateMetadata: vi.fn(),
       getStorageInfo: vi.fn(),
       initialize: vi.fn()
-    } as unknown as GoogleDriveSyncAdapter;
-    (syncManager as unknown as { adapter: GoogleDriveSyncAdapter }).adapter = mockAdapter;
+    } as unknown as DropboxSyncAdapter;
+    (syncManager as unknown as { adapter: DropboxSyncAdapter }).adapter = mockAdapter;
   });
 
   describe('authentication', () => {
