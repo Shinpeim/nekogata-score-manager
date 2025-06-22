@@ -16,8 +16,12 @@ export const extractChordRoot = (chordName: string): string => {
   
   if (rootMatch) {
     const root = rootMatch[1];
-    // bを♭に正規化
-    return root.replace(/b/g, '♭');
+    // ルートが2文字で、2文字目がbの場合のみ♭に正規化
+    if (root.length === 2 && root[1] === 'b') {
+      return root[0].toUpperCase() + '♭';
+    }
+    // 常に大文字に正規化
+    return root.toUpperCase();
   }
   
   // マッチしない場合はデフォルト値を返す
@@ -65,8 +69,13 @@ export const parseOnChord = (chordName: string): { chord: string; base?: string 
   if (onChordMatch) {
     const chord = onChordMatch[1];
     const base = onChordMatch[2];
-    // bを♭に正規化
-    const normalizedBase = base.replace(/b/g, '♭');
+    // bを♭に正規化し、大文字に統一
+    let normalizedBase = base;
+    if (base.length === 2 && base[1] === 'b') {
+      normalizedBase = base[0].toUpperCase() + '♭';
+    } else {
+      normalizedBase = base.toUpperCase();
+    }
     return { chord, base: normalizedBase };
   }
   
@@ -105,19 +114,29 @@ export const parseChordInput = (text: string, defaultDuration: number = 4): Chor
     return null;
   }
 
-  // [拍数]記法をチェック（オンコード対応）
-  const bracketMatch = trimmed.match(/^([A-G][#b♭]?(?:maj|min|m|dim|aug|sus[24]|add\d+|\d+)*(?:\([#b♭]?\d+\))*(?:\/[A-G][#b♭]?)?)\[(\d*\.?\d*)\]$/i);
+  // [拍数]記法をチェック（任意の文字列に対応、拍数は数値のみ、負数も含む）
+  const bracketMatch = trimmed.match(/^(.+?)\[(-?\d+(?:\.\d+)?)\]$/);
   if (bracketMatch) {
-    const [, fullChordName, durationStr] = bracketMatch;
-    const duration = durationStr ? parseFloat(durationStr) : defaultDuration;
+    const [, inputText, durationStr] = bracketMatch;
+    const duration = parseFloat(durationStr);
     
     // 無効な拍数をチェック
     if (isNaN(duration) || duration <= 0 || duration > 16) {
-      return null;
+      // 拍数が無効でも、テキスト部分はそのまま使用
+      const parsed = parseOnChord(inputText);
+      const root = extractChordRoot(parsed.chord);
+      
+      return {
+        name: parsed.chord,
+        root,
+        base: parsed.base,
+        duration: defaultDuration,
+        memo: ''
+      };
     }
     
-    // オンコード解析
-    const parsed = parseOnChord(fullChordName);
+    // オンコード解析（コード名として認識できない場合でもそのまま使用）
+    const parsed = parseOnChord(inputText);
     const root = extractChordRoot(parsed.chord);
     
     return {
@@ -129,23 +148,16 @@ export const parseChordInput = (text: string, defaultDuration: number = 4): Chor
     };
   }
   
-  // 拍数指定なしのコード名のみ（テンションコード・オンコード含む）
-  const basicMatch = trimmed.match(/^([A-G][#b♭]?(?:maj|min|m|dim|aug|sus[24]|add\d+|\d+)*(?:\([#b♭]?\d+\))*(?:\/[A-G][#b♭]?)?)$/i);
-  if (basicMatch) {
-    const [, fullChordName] = basicMatch;
-    
-    // オンコード解析
-    const parsed = parseOnChord(fullChordName);
-    const root = extractChordRoot(parsed.chord);
-    
-    return {
-      name: parsed.chord,
-      root,
-      base: parsed.base,
-      duration: defaultDuration,
-      memo: ''
-    };
-  }
+  // 拍数指定なしの場合、どんな文字列でも受け入れる
+  // コード名として認識できない場合でもそのまま使用
+  const parsed = parseOnChord(trimmed);
+  const root = extractChordRoot(parsed.chord);
   
-  return null;
+  return {
+    name: parsed.chord,
+    root,
+    base: parsed.base,
+    duration: defaultDuration,
+    memo: ''
+  };
 };
