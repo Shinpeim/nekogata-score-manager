@@ -183,7 +183,7 @@ describe('ChordGridRenderer', () => {
       expect(gridElements.length).toBeGreaterThan(0);
 
       // Check for flex layout
-      const flexElements = container.querySelectorAll('.flex.min-h-12');
+      const flexElements = container.querySelectorAll('.flex.min-h-8');
       expect(flexElements.length).toBeGreaterThan(0);
     });
 
