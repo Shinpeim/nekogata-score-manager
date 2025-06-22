@@ -36,7 +36,8 @@ describe('ChordGridRenderer', () => {
       render(<ChordGridRenderer section={mockSection} timeSignature="4/4" />);
 
       expect(screen.getByText('C')).toBeInTheDocument();
-      expect(screen.getByText('Am')).toBeInTheDocument();
+      expect(screen.getByText('A')).toBeInTheDocument();
+      expect(screen.getByText('m')).toBeInTheDocument();
       expect(screen.getByText('F')).toBeInTheDocument();
       expect(screen.getByText('G')).toBeInTheDocument();
     });
@@ -72,7 +73,8 @@ describe('ChordGridRenderer', () => {
 
       expect(screen.getByText('C')).toBeInTheDocument();
       expect(screen.getByText('G')).toBeInTheDocument();
-      expect(screen.getByText('Am')).toBeInTheDocument();
+      expect(screen.getByText('A')).toBeInTheDocument();
+      expect(screen.getByText('m')).toBeInTheDocument();
     });
 
     it('should use default duration when chord duration is not specified', () => {
@@ -133,7 +135,8 @@ describe('ChordGridRenderer', () => {
       render(<ChordGridRenderer section={mockSection} timeSignature="3/4" />);
 
       expect(screen.getByText('C')).toBeInTheDocument();
-      expect(screen.getByText('Am')).toBeInTheDocument();
+      expect(screen.getByText('A')).toBeInTheDocument();
+      expect(screen.getByText('m')).toBeInTheDocument();
       expect(screen.getByText('F')).toBeInTheDocument();
       expect(screen.getByText('G')).toBeInTheDocument();
     });
@@ -147,7 +150,8 @@ describe('ChordGridRenderer', () => {
       render(<ChordGridRenderer section={sectionWithCustomBeats} timeSignature="4/4" />);
 
       expect(screen.getByText('C')).toBeInTheDocument();
-      expect(screen.getByText('Am')).toBeInTheDocument();
+      expect(screen.getByText('A')).toBeInTheDocument();
+      expect(screen.getByText('m')).toBeInTheDocument();
       expect(screen.getByText('F')).toBeInTheDocument();
       expect(screen.getByText('G')).toBeInTheDocument();
     });
@@ -156,7 +160,8 @@ describe('ChordGridRenderer', () => {
       render(<ChordGridRenderer section={mockSection} timeSignature="" />);
 
       expect(screen.getByText('C')).toBeInTheDocument();
-      expect(screen.getByText('Am')).toBeInTheDocument();
+      expect(screen.getByText('A')).toBeInTheDocument();
+      expect(screen.getByText('m')).toBeInTheDocument();
       expect(screen.getByText('F')).toBeInTheDocument();
       expect(screen.getByText('G')).toBeInTheDocument();
     });

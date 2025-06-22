@@ -200,6 +200,7 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
     // コードが表示されていることを確認
     const chartContent = page.locator('[data-testid="chart-content"]');
     await expect(chartContent.getByText('C').first()).toBeVisible();
-    await expect(chartContent.getByText('Am').first()).toBeVisible();
+    await expect(chartContent.getByText('A')).toBeVisible();
+    await expect(chartContent.getByText('m')).toBeVisible();
   });
 });
