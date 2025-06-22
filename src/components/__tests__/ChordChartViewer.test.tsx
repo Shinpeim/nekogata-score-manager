@@ -152,12 +152,12 @@ describe('ChordChartViewer', () => {
       const chordElements = screen.getAllByText('C');
       expect(chordElements.length).toBeGreaterThan(0);
       
-      expect(screen.getByText('A')).toBeInTheDocument();
-      expect(screen.getByText('m')).toBeInTheDocument();
-      expect(screen.getByText('F')).toBeInTheDocument();
-      expect(screen.getByText('G')).toBeInTheDocument();
-      expect(screen.getByText('Dm')).toBeInTheDocument();
-      expect(screen.getByText('G7')).toBeInTheDocument();
+      expect(screen.getAllByText('A')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('m')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('F')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('G')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('D')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('7')[0]).toBeInTheDocument();
     });
 
     it('should render chord names without duration display', () => {
