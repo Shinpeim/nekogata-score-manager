@@ -112,6 +112,9 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({
           <div className="relative bg-white">
             <div className="flex min-h-8 py-0">
               {rowBars.map((bar, barIndex) => {
+                // この行にメモがあるかどうかをチェック
+                const hasAnyMemoInRow = rowBars.some(b => b.some(chord => chord.memo));
+                
                 // 各コードの必要幅を先に計算（コードファースト方式）
                 const chordWidthsPx = useDynamicWidth ? bar.map(chord => {
                   const chordDuration = chord.duration || 4;
@@ -149,10 +152,10 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({
                     }}
                   >
                     {barIndex > 0 && (
-                      <div className="absolute left-0 top-2 bottom-2 w-0.5 bg-slate-600"></div>
+                      <div className="absolute left-0 top-1 bottom-1 w-0.5 bg-slate-600"></div>
                     )}
                     
-                    <div className="px-0.5 py-0.5 h-full flex items-center">
+                    <div className="px-0.5 py-0.5 h-full flex items-stretch" style={{ minHeight: '36px' }}>
                       {bar.map((chord, chordIndex) => {
                         // 動的幅計算の場合は外側で計算済みの幅を使用、従来の場合は基本幅
                         const chordWidthPx = useDynamicWidth && chordWidthsPx 
@@ -162,13 +165,13 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({
                         return (
                           <div 
                             key={chordIndex} 
-                            className="flex flex-col justify-center hover:bg-slate-100 cursor-pointer rounded px-0.5 flex-shrink-0"
+                            className={`flex flex-col hover:bg-slate-100 cursor-pointer rounded px-0.5 flex-shrink-0 h-full ${chord.memo ? 'justify-center' : hasAnyMemoInRow ? 'justify-start pt-1' : 'justify-center'}`}
                             style={{ 
                               width: `${chordWidthPx}px`,
                               minWidth: `${chordWidthPx}px`
                             }}
                           >
-                            <div className="text-left flex items-center">
+                            <div className={`text-left flex items-center ${chord.memo ? 'flex-1' : hasAnyMemoInRow ? '' : 'flex-1'}`}>
                               <span className="text-xs font-medium leading-none">
                                 {(() => {
                                   // コード名をルート音とクオリティに分ける
@@ -192,7 +195,7 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({
                               </span>
                             </div>
                             {chord.memo && (
-                              <div className="text-left text-[10px] text-slate-600 leading-tight">
+                              <div className="text-left text-[10px] text-slate-600 leading-tight px-0.5 pb-1">
                                 {chord.memo}
                               </div>
                             )}
@@ -202,14 +205,14 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({
                     </div>
                     
                     {barIndex === rowBars.length - 1 && (
-                      <div className="absolute right-0 top-2 bottom-2 w-0.5 bg-slate-600"></div>
+                      <div className="absolute right-0 top-1 bottom-1 w-0.5 bg-slate-600"></div>
                     )}
                   </div>
                 );
               })}
             </div>
             
-            <div className="absolute left-0 top-2 bottom-2 w-0.5 bg-slate-600"></div>
+            <div className="absolute left-0 top-1 bottom-1 w-0.5 bg-slate-600"></div>
           </div>
         </div>
       ))}

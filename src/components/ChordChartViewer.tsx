@@ -37,7 +37,7 @@ const ChordChartViewer: React.FC<ChordChartViewerProps> = ({ chart, currentChart
         <div className="bg-slate-50 rounded-lg p-1" data-testid="chart-content">
           {chart.sections && chart.sections.length > 0 ? (
             chart.sections.map((section) => (
-              <div key={section.id} className="mb-3 last:mb-0" data-testid={`section-${section.id}`}>
+              <div key={section.id} className="mb-1 last:mb-0" data-testid={`section-${section.id}`}>
                 {section.name && (
                   <h3 className="text-xs font-medium text-slate-600 mb-0.5" data-testid={`section-name-${section.id}`}>
                     【{section.name}】
