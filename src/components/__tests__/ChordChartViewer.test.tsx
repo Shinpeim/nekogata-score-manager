@@ -152,7 +152,8 @@ describe('ChordChartViewer', () => {
       const chordElements = screen.getAllByText('C');
       expect(chordElements.length).toBeGreaterThan(0);
       
-      expect(screen.getByText('Am')).toBeInTheDocument();
+      expect(screen.getByText('A')).toBeInTheDocument();
+      expect(screen.getByText('m')).toBeInTheDocument();
       expect(screen.getByText('F')).toBeInTheDocument();
       expect(screen.getByText('G')).toBeInTheDocument();
       expect(screen.getByText('Dm')).toBeInTheDocument();

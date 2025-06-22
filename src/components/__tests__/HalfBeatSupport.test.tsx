@@ -155,7 +155,8 @@ describe('Half Beat Support', () => {
 
       // 各コード名が表示されることを確認（拍数表示は削除済み）
       expect(screen.getByText('C')).toBeInTheDocument();
-      expect(screen.getByText('Am')).toBeInTheDocument();
+      expect(screen.getByText('A')).toBeInTheDocument();
+      expect(screen.getByText('m')).toBeInTheDocument();
       expect(screen.getByText('F')).toBeInTheDocument();
       expect(screen.getByText('G')).toBeInTheDocument();
     });
@@ -195,7 +196,8 @@ describe('Half Beat Support', () => {
       expect(screen.getByText('C')).toBeInTheDocument();
       expect(screen.getByText('F')).toBeInTheDocument();
       expect(screen.getByText('G')).toBeInTheDocument();
-      expect(screen.getByText('Am')).toBeInTheDocument();
+      expect(screen.getByText('A')).toBeInTheDocument();
+      expect(screen.getByText('m')).toBeInTheDocument();
       expect(screen.getByText('Dm')).toBeInTheDocument();
       expect(screen.getByText('G7')).toBeInTheDocument();
     });

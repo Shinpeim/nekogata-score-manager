@@ -54,17 +54,44 @@ export class ChartViewPage {
     return await chartTitle.isVisible();
   }
 
-  // より簡単なアプローチ: 表示されているすべてのコードを順序通りに取得
+  // 分離表示されたコード名を結合して取得
   async getAllDisplayedChords(): Promise<string[]> {
     const chartContent = this.page.locator('[data-testid="chart-content"]');
-    const chordElements = chartContent.locator('text=/^[A-G][#b]?(?:m|dim|aug|sus[24]?|add[69]|M7?|m7?|7|9|11|13)*(?:[/][A-G][#b]?)?$/');
-    const chordCount = await chordElements.count();
+    // コード要素を特定（コードクラスまたはflexコンテナ）
+    const chordContainers = chartContent.locator('.flex.flex-col.justify-center, .flex.flex-col.justify-start').filter({
+      has: this.page.locator('.text-xs.font-medium')
+    });
+    const chordCount = await chordContainers.count();
     
     const chords: string[] = [];
     for (let i = 0; i < chordCount; i++) {
-      const chordText = await chordElements.nth(i).textContent();
-      if (chordText && chordText.trim()) {
-        chords.push(chordText.trim());
+      const chordContainer = chordContainers.nth(i);
+      const chordSpan = chordContainer.locator('.text-xs.font-medium');
+      
+      // 分離表示の場合、個別のspan要素を取得して結合
+      const spanElements = chordSpan.locator('span');
+      const spanCount = await spanElements.count();
+      
+      let chordName = '';
+      for (let j = 0; j < spanCount; j++) {
+        const spanText = await spanElements.nth(j).textContent();
+        if (spanText) {
+          chordName += spanText;
+        }
+      }
+      
+      // ベース音部分も取得（/C など）
+      const baseSpan = chordSpan.locator('.text-slate-500');
+      const baseCount = await baseSpan.count();
+      if (baseCount > 0) {
+        const baseText = await baseSpan.textContent();
+        if (baseText) {
+          chordName += baseText;
+        }
+      }
+      
+      if (chordName.trim()) {
+        chords.push(chordName.trim());
       }
     }
     

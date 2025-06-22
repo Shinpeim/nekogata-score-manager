@@ -6,7 +6,7 @@ import { splitChordsIntoRows } from '../utils/lineBreakHelpers';
 // コード表示幅の設定
 const CHORD_WIDTH_CONFIG = {
   MIN_WIDTH_PX: 47, // コード1つの最低表示幅（px）- 36px * 1.3 ≈ 47px
-} as const;
+};
 
 interface ChordGridRendererProps {
   section: ChordSection;
@@ -19,7 +19,7 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({
   timeSignature, 
   useDynamicWidth = true // デフォルトで動的幅計算を使用
 }) => {
-  const { barsPerRow, config, calculateDynamicLayout, getBarWidth } = useResponsiveBars();
+  const { barsPerRow, config, calculateDynamicLayout } = useResponsiveBars();
 
   const timeSignatureBeats = timeSignature ? parseInt(timeSignature.split('/')[0]) : 4;
   const beatsPerBar = section.beatsPerBar && section.beatsPerBar !== 4 ? section.beatsPerBar : timeSignatureBeats;
@@ -112,8 +112,27 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({
           <div className="relative bg-white">
             <div className="flex min-h-8 py-0">
               {rowBars.map((bar, barIndex) => {
-                // 動的幅計算を使用する場合は実際の幅を計算、そうでなければ従来通り
-                const barWidth = useDynamicWidth ? getBarWidth(bar, beatsPerBar) : undefined;
+                // 各コードの必要幅を先に計算（コードファースト方式）
+                const chordWidthsPx = useDynamicWidth ? bar.map(chord => {
+                  const chordDuration = chord.duration || 4;
+                  
+                  // メモの文字数に応じて基本幅を動的に計算
+                  let baseWidth = CHORD_WIDTH_CONFIG.MIN_WIDTH_PX;
+                  if (chord.memo && chord.memo.trim() !== '') {
+                    // メモの文字数に基づいて幅を計算（1文字あたり約10pxとして概算）
+                    const memoWidth = chord.memo.length * 10 + 16; // パディング分を考慮
+                    baseWidth = Math.max(CHORD_WIDTH_CONFIG.MIN_WIDTH_PX, memoWidth);
+                  }
+                  
+                  // 拍数による調整（拍数が多ければより幅を取る）
+                  const durationMultiplier = chordDuration / 4; // 4拍を基準とした倍率
+                  return baseWidth * Math.max(durationMultiplier, 1);
+                }) : undefined;
+                
+                // 小節の幅は全コード幅の合計 + パディング（動的幅計算の場合）
+                const barWidth = useDynamicWidth && chordWidthsPx 
+                  ? chordWidthsPx.reduce((sum, width) => sum + width, 0) + 8
+                  : undefined;
                 
                 return (
                   <div 
@@ -134,49 +153,52 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({
                     )}
                     
                     <div className="px-0.5 py-0.5 h-full flex items-center">
-                      {(() => {
-                        // 小節の実際の幅を取得（動的幅計算の結果）
-                        const barWidthPx = useDynamicWidth ? getBarWidth(bar, beatsPerBar) : 200; // フォールバック値
+                      {bar.map((chord, chordIndex) => {
+                        // 動的幅計算の場合は外側で計算済みの幅を使用、従来の場合は基本幅
+                        const chordWidthPx = useDynamicWidth && chordWidthsPx 
+                          ? chordWidthsPx[chordIndex] 
+                          : CHORD_WIDTH_CONFIG.MIN_WIDTH_PX;
                         
-                        // 各コードの幅を比例配分で計算（小節幅が十分確保されているため）
-                        const chordWidthsPx = bar.map(chord => {
-                          const chordDuration = chord.duration || 4;
-                          const availableWidth = barWidthPx - 8; // パディング分を除く
-                          const proportionalWidth = (chordDuration / beatsPerBar) * availableWidth;
-                          
-                          // 最低幅は保証
-                          return Math.max(proportionalWidth, CHORD_WIDTH_CONFIG.MIN_WIDTH_PX);
-                        });
-                        
-                        return bar.map((chord, chordIndex) => {
-                          const chordWidthPx = chordWidthsPx[chordIndex];
-                          
-                          return (
-                            <div 
-                              key={chordIndex} 
-                              className="flex flex-col justify-center hover:bg-slate-100 cursor-pointer rounded px-0.5 flex-shrink-0"
-                              style={{ 
-                                width: `${chordWidthPx}px`,
-                                minWidth: `${CHORD_WIDTH_CONFIG.MIN_WIDTH_PX}px`
-                              }}
-                            >
-                              <div className="text-left flex items-center">
-                                <span className="text-xs font-medium leading-none">
-                                  {chord.name}
-                                  {chord.base && (
-                                    <span className="text-slate-500">/{chord.base}</span>
-                                  )}
-                                </span>
-                              </div>
-                              {chord.memo && (
-                                <div className="text-left text-[10px] text-slate-600 leading-tight">
-                                  {chord.memo}
-                                </div>
-                              )}
+                        return (
+                          <div 
+                            key={chordIndex} 
+                            className="flex flex-col justify-center hover:bg-slate-100 cursor-pointer rounded px-0.5 flex-shrink-0"
+                            style={{ 
+                              width: `${chordWidthPx}px`,
+                              minWidth: `${chordWidthPx}px`
+                            }}
+                          >
+                            <div className="text-left flex items-center">
+                              <span className="text-xs font-medium leading-none">
+                                {(() => {
+                                  // コード名をルート音とクオリティに分ける
+                                  const match = chord.name.match(/^([A-G][#b♭]?)(.*)/);
+                                  if (match) {
+                                    const [, root, quality] = match;
+                                    return (
+                                      <>
+                                        <span>{root}</span>
+                                        {quality && (
+                                          <span className="text-[10px]">{quality}</span>
+                                        )}
+                                      </>
+                                    );
+                                  }
+                                  return chord.name;
+                                })()}
+                                {chord.base && (
+                                  <span className="text-slate-500">/{chord.base}</span>
+                                )}
+                              </span>
                             </div>
-                          );
-                        });
-                      })()}
+                            {chord.memo && (
+                              <div className="text-left text-[10px] text-slate-600 leading-tight">
+                                {chord.memo}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                     
                     {barIndex === rowBars.length - 1 && (

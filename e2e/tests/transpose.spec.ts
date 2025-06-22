@@ -71,7 +71,8 @@ test.describe('Nekogata Score Manager - 移調機能テスト (音楽アプリ�
     await expect(transposeDialog).toBeVisible();
 
     // 移調ダイアログの内容確認
-    await expect(page.locator('text=キーを C / Am から G / Em に変更します')).toBeVisible();
+    await expect(page.locator('text=キーを C / A')).toBeVisible();
+    await expect(page.locator('text=m から G / Em に変更します')).toBeVisible();
     await expect(page.locator('text=コードも一緒に移調しますか？')).toBeVisible();
 
     // 「はい、コードも一緒に移調する」ボタンをクリック
