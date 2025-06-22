@@ -1,5 +1,5 @@
 import type { Chord } from '../types';
-import { extractChordRoot, parseOnChord } from './chordParsing';
+import { parseChordInput } from './chordParsing';
 
 /**
  * コード進行を文字列形式に変換する
@@ -77,50 +77,7 @@ export const textToChords = (text: string): Chord[] => {
  * @returns パースされたコード、またはnull
  */
 const parseChordText = (text: string): Chord | null => {
-  // [拍数]記法をチェック（オンコード対応）
-  const bracketMatch = text.match(/^([A-G][#b♭]?(?:maj|min|m|dim|aug|sus[24]|add\d+|\d+)*(?:\([#b♭]?\d+\))*(?:\/[A-G][#b♭]?)?)\[(\d*\.?\d*)\]$/i);
-  if (bracketMatch) {
-    const [, fullChordName, durationStr] = bracketMatch;
-    const duration = durationStr ? parseFloat(durationStr) : 4;
-    
-    // 無効な拍数をチェック
-    if (isNaN(duration) || duration <= 0 || duration > 16) {
-      return null;
-    }
-    
-    // オンコード解析
-    const parsed = parseOnChord(fullChordName);
-    const root = extractChordRoot(parsed.chord);
-    
-    return {
-      name: parsed.chord,
-      root,
-      base: parsed.base,
-      duration,
-      memo: ''
-    };
-  }
-  
-  // 拍数指定なしのコード名のみ（テンションコード・オンコード含む）
-  const basicMatch = text.match(/^([A-G][#b♭]?(?:maj|min|m|dim|aug|sus[24]|add\d+|\d+)*(?:\([#b♭]?\d+\))*(?:\/[A-G][#b♭]?)?)$/i);
-  if (basicMatch) {
-    const [, fullChordName] = basicMatch;
-    const duration = 4;
-    
-    // オンコード解析
-    const parsed = parseOnChord(fullChordName);
-    const root = extractChordRoot(parsed.chord);
-    
-    return {
-      name: parsed.chord,
-      root,
-      base: parsed.base,
-      duration,
-      memo: ''
-    };
-  }
-  
-  return null;
+  return parseChordInput(text, 4);
 };
 
 /**

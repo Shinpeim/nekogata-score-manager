@@ -1,5 +1,5 @@
 import type { ChordChart, Chord } from '../types';
-import { extractChordRoot, parseOnChord } from '../utils/chordParsing';
+import { parseChordInput } from '../utils/chordParsing';
 import { createLineBreakMarker } from '../utils/lineBreakHelpers';
 
 interface UseChordOperationsProps {
@@ -64,7 +64,15 @@ export const useChordOperations = ({
       return;
     }
     
-    const parsed = parseOnChord(value);
+    // 既存のコードの拍数をデフォルトとして使用
+    const currentChord = chart.sections?.find(s => s.id === sectionId)?.chords[chordIndex];
+    const defaultDuration = currentChord?.duration || 4;
+    
+    const parsed = parseChordInput(value, defaultDuration);
+    if (!parsed) {
+      return; // パースに失敗した場合は何もしない
+    }
+    
     const updatedChart = {
       ...chart,
       sections: chart.sections?.map(section =>
@@ -75,9 +83,10 @@ export const useChordOperations = ({
                 if (index === chordIndex) {
                   return {
                     ...chord,
-                    name: parsed.chord,
-                    root: extractChordRoot(parsed.chord),
-                    base: parsed.base
+                    name: parsed.name,
+                    root: parsed.root,
+                    base: parsed.base,
+                    duration: parsed.duration
                   };
                 }
                 return chord;
