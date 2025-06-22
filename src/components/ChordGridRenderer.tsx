@@ -133,7 +133,7 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({
                       <div className="absolute left-0 top-2 bottom-2 w-0.5 bg-slate-600"></div>
                     )}
                     
-                    <div className="px-0.5 py-0.5 h-full flex items-center">
+                    <div className="px-0.5 pt-2.5 pb-0.5 h-full flex items-start">
                       {(() => {
                         // 小節の実際の幅を取得（動的幅計算の結果）
                         const barWidthPx = useDynamicWidth ? getBarWidth(bar, beatsPerBar) : 200; // フォールバック値
@@ -154,7 +154,7 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({
                           return (
                             <div 
                               key={chordIndex} 
-                              className="flex flex-col justify-center hover:bg-slate-100 cursor-pointer rounded px-0.5 flex-shrink-0"
+                              className="flex flex-col justify-start hover:bg-slate-100 cursor-pointer rounded px-0.5 flex-shrink-0"
                               style={{ 
                                 width: `${chordWidthPx}px`,
                                 minWidth: `${CHORD_WIDTH_CONFIG.MIN_WIDTH_PX}px`
