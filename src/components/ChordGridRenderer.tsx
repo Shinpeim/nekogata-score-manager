@@ -56,7 +56,7 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({ section, timeSign
       {processedRows.map((rowBars, rowIndex) => (
         <div key={rowIndex}>
           <div className="relative bg-white">
-            <div className="flex min-h-12 py-1">
+            <div className="flex min-h-8 py-0.5">
               {rowBars.map((bar, barIndex) => (
                 <div 
                   key={barIndex} 
@@ -68,10 +68,10 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({ section, timeSign
                   }}
                 >
                   {barIndex > 0 && (
-                    <div className="absolute left-0 top-3 bottom-3 w-0.5 bg-slate-600"></div>
+                    <div className="absolute left-0 top-2 bottom-2 w-0.5 bg-slate-600"></div>
                   )}
                   
-                  <div className="px-1 py-1 h-full flex items-center">
+                  <div className="px-0.5 py-0.5 h-full flex items-center">
                     {bar.map((chord, chordIndex) => {
                       const chordDuration = chord.duration || 4;
                       const widthPercentage = (chordDuration / beatsPerBar) * 100;
@@ -79,11 +79,11 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({ section, timeSign
                       return (
                         <div 
                           key={chordIndex} 
-                          className="flex flex-col justify-center hover:bg-slate-100 cursor-pointer rounded px-1"
+                          className="flex flex-col justify-center hover:bg-slate-100 cursor-pointer rounded px-0.5"
                           style={{ width: `${widthPercentage}%` }}
                         >
                           <div className="text-left flex items-center">
-                            <span className="text-xs font-semibold">
+                            <span className="text-xs font-medium leading-none">
                               {chord.name}
                               {chord.base && (
                                 <span className="text-slate-500">/{chord.base}</span>
@@ -91,7 +91,7 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({ section, timeSign
                             </span>
                           </div>
                           {chord.memo && (
-                            <div className="text-left text-xs text-slate-600 leading-tight mt-0.5">
+                            <div className="text-left text-[10px] text-slate-600 leading-tight">
                               {chord.memo}
                             </div>
                           )}
@@ -101,13 +101,13 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({ section, timeSign
                   </div>
                   
                   {barIndex === rowBars.length - 1 && (
-                    <div className="absolute right-0 top-3 bottom-3 w-0.5 bg-slate-600"></div>
+                    <div className="absolute right-0 top-2 bottom-2 w-0.5 bg-slate-600"></div>
                   )}
                 </div>
               ))}
             </div>
             
-            <div className="absolute left-0 top-4 bottom-4 w-0.5 bg-slate-600"></div>
+            <div className="absolute left-0 top-2 bottom-2 w-0.5 bg-slate-600"></div>
           </div>
         </div>
       ))}

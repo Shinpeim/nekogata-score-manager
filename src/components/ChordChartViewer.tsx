@@ -14,10 +14,10 @@ interface ChordChartViewerProps {
 const ChordChartViewer: React.FC<ChordChartViewerProps> = ({ chart, currentChartId, onEdit }) => {
   return (
     <div className="h-full bg-white overflow-y-auto" data-testid="chart-viewer">
-      <div className="p-6">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-slate-900 mb-2" data-testid="chart-title">{chart.title}</h2>
-          <div className="flex flex-wrap gap-4 text-slate-600">
+      <div className="p-3">
+        <div className="mb-3">
+          <h2 className="text-xl font-bold text-slate-900 mb-1" data-testid="chart-title">{chart.title}</h2>
+          <div className="flex flex-wrap gap-3 text-sm text-slate-600">
             <span data-testid="chart-artist">{chart.artist}</span>
             <span data-testid="chart-key">キー: {KEY_DISPLAY_NAMES[chart.key] || chart.key}</span>
             {chart.tempo && <BpmIndicator bpm={chart.tempo} />}
@@ -34,12 +34,12 @@ const ChordChartViewer: React.FC<ChordChartViewerProps> = ({ chart, currentChart
           )}
         </div>
 
-        <div className="bg-slate-50 rounded-lg p-3 sm:p-6" data-testid="chart-content">
+        <div className="bg-slate-50 rounded-lg p-2" data-testid="chart-content">
           {chart.sections && chart.sections.length > 0 ? (
             chart.sections.map((section) => (
-              <div key={section.id} className="mb-8 last:mb-0" data-testid={`section-${section.id}`}>
+              <div key={section.id} className="mb-3 last:mb-0" data-testid={`section-${section.id}`}>
                 {section.name && (
-                  <h3 className="text-sm font-medium text-slate-600 mb-1" data-testid={`section-name-${section.id}`}>
+                  <h3 className="text-xs font-medium text-slate-600 mb-0.5" data-testid={`section-name-${section.id}`}>
                     【{section.name}】
                   </h3>
                 )}
@@ -55,9 +55,9 @@ const ChordChartViewer: React.FC<ChordChartViewerProps> = ({ chart, currentChart
         </div>
 
         {chart.notes && (
-          <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200" data-testid="chart-notes">
-            <h4 className="font-semibold text-slate-800 mb-2">メモ</h4>
-            <p className="text-slate-700">{chart.notes}</p>
+          <div className="mt-3 p-2 bg-yellow-50 rounded-lg border border-yellow-200" data-testid="chart-notes">
+            <h4 className="text-sm font-semibold text-slate-800 mb-1">メモ</h4>
+            <p className="text-sm text-slate-700">{chart.notes}</p>
           </div>
         )}
 
