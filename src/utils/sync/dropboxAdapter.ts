@@ -4,13 +4,19 @@ import { DropboxAuthProvider } from './dropboxAuth';
 
 export class DropboxSyncAdapter implements ISyncAdapter {
   private auth: DropboxAuthProvider;
-  private readonly APP_FOLDER_PATH = '/NekogataScoreManager';
-  private readonly METADATA_FILE_PATH = '/NekogataScoreManager/sync-metadata.json';
-  private readonly CHARTS_FILE_PATH = '/NekogataScoreManager/charts.json';
-  private readonly DELETED_CHARTS_FILE_PATH = '/NekogataScoreManager/deleted-charts.json';
+  private readonly APP_FOLDER_PATH: string;
+  private readonly METADATA_FILE_PATH: string;
+  private readonly CHARTS_FILE_PATH: string;
+  private readonly DELETED_CHARTS_FILE_PATH: string;
   
   constructor() {
     this.auth = DropboxAuthProvider.getInstance();
+    
+    const folderName = this.generateFolderNameFromOrigin();
+    this.APP_FOLDER_PATH = `/${folderName}`;
+    this.METADATA_FILE_PATH = `/${folderName}/sync-metadata.json`;
+    this.CHARTS_FILE_PATH = `/${folderName}/charts.json`;
+    this.DELETED_CHARTS_FILE_PATH = `/${folderName}/deleted-charts.json`;
   }
   
   async initialize(): Promise<void> {
@@ -218,5 +224,18 @@ export class DropboxSyncAdapter implements ISyncAdapter {
       console.error('Dropbox file upload error:', response.status, errorText);
       throw new Error(`Failed to upload file: ${response.status} - ${errorText}`);
     }
+  }
+
+  private generateFolderNameFromOrigin(): string {
+    const origin = window.location.origin;
+    return this.sanitizeOriginForFolderName(origin);
+  }
+
+  private sanitizeOriginForFolderName(origin: string): string {
+    return `NekogataScoreManager-${origin
+      .replace(/^https?:\/\//, '')
+      .replace(/[:.]/g, '-')
+      .replace(/[^a-zA-Z0-9\-_]/g, '')
+      .toLowerCase()}`;
   }
 }
