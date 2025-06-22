@@ -6,7 +6,9 @@ import type { ChordSection } from '../../types';
 vi.mock('../../hooks/useResponsiveBars', () => ({
   useResponsiveBars: () => ({
     barsPerRow: 4,
-    config: { MAX_WIDTH: 200 }
+    config: { MAX_WIDTH: 200 },
+    calculateDynamicLayout: vi.fn((bars) => [bars]), // 動的幅計算モック
+    getBarWidth: vi.fn(() => 200) // 小節幅計算モック
   })
 }));
 

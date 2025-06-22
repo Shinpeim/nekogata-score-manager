@@ -43,19 +43,19 @@ describe('useResponsiveBars', () => {
   });
 
   it('デフォルトで適切な小節数を計算する', () => {
-    // 1200px - 48px(padding) = 1152px
-    // 最小幅120pxで計算: 1152 / 120 = 9.6 → 9小節
+    // 1200px - 32px(padding) = 1168px
+    // 最小幅120pxで計算: 1168 / 120 = 9.73 → 9小節
     const { result } = renderHook(() => useResponsiveBars());
     
     expect(result.current.barsPerRow).toBe(9);
     expect(result.current.config.MIN_WIDTH).toBe(120);
     expect(result.current.config.MAX_WIDTH).toBe(340);
-    expect(result.current.config.PADDING).toBe(48);
+    expect(result.current.config.PADDING).toBe(32);
   });
 
   it('小さい画面幅で最小幅での計算をする', () => {
-    // 500px - 48px = 452px
-    // 最小幅120pxで計算: 452 / 120 = 3.77 → 3小節
+    // 500px - 32px = 468px
+    // 最小幅120pxで計算: 468 / 120 = 3.9 → 3小節
     (globalThis.window as MockWindow).innerWidth = 500;
     
     const { result } = renderHook(() => useResponsiveBars());
@@ -64,8 +64,8 @@ describe('useResponsiveBars', () => {
   });
 
   it('最小幅で計算する', () => {
-    // 300px - 48px = 252px
-    // 最小幅120px: 252 / 120 = 2.1 → 2小節
+    // 300px - 32px = 268px
+    // 最小幅120px: 268 / 120 = 2.23 → 2小節
     (globalThis.window as MockWindow).innerWidth = 300;
     
     const { result } = renderHook(() => useResponsiveBars());
@@ -74,8 +74,8 @@ describe('useResponsiveBars', () => {
   });
 
   it('最大幅でも入らない場合は最小幅で計算', () => {
-    // 150px - 48px = 102px (最大幅200pxより小さい)
-    // 最小幅120px: 102 / 120 = 0.85 → 1小節（最低保証）
+    // 150px - 32px = 118px (最小幅120pxより小さい)
+    // 最小幅120px: 118 / 120 = 0.98 → 1小節（最低保証）
     (globalThis.window as MockWindow).innerWidth = 150;
     
     const { result } = renderHook(() => useResponsiveBars());
@@ -84,7 +84,7 @@ describe('useResponsiveBars', () => {
   });
 
   it('非常に小さい画面でも最低1小節は表示', () => {
-    // 100px - 48px = 52px (最小幅120pxより小さい)
+    // 100px - 32px = 68px (最小幅120pxより小さい)
     (globalThis.window as MockWindow).innerWidth = 100;
     
     const { result } = renderHook(() => useResponsiveBars());
@@ -93,8 +93,8 @@ describe('useResponsiveBars', () => {
   });
 
   it('非常に大きい画面では最大16小節に制限', () => {
-    // 4000px - 48px = 3952px
-    // 最大幅200pxで計算: 3952 / 200 = 19.76 → 16小節(制限)
+    // 4000px - 32px = 3968px
+    // 最小幅120pxで計算: 3968 / 120 = 33.07 → 16小節(制限)
     (globalThis.window as MockWindow).innerWidth = 4000;
     
     const { result } = renderHook(() => useResponsiveBars());
@@ -138,8 +138,8 @@ describe('useResponsiveBars', () => {
       });
     }
     
-    // 800px - 48px = 752px
-    // 最小幅120pxで計算: 752 / 120 = 6.27 → 6小節
+    // 800px - 32px = 768px
+    // 最小幅120pxで計算: 768 / 120 = 6.4 → 6小節
     expect(result.current.barsPerRow).toBe(6);
   });
 
