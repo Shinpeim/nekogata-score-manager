@@ -13,6 +13,7 @@ interface ScoreExplorerProps {
   onImport: () => void;
   onExportSelected: () => void;
   onDeleteSelected: () => void;
+  onDuplicateSelected: () => void;
   isMobile?: boolean;
   onClose?: () => void;
 }
@@ -28,6 +29,7 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
   onImport,
   onExportSelected,
   onDeleteSelected,
+  onDuplicateSelected,
   isMobile = false,
   onClose,
 }) => {
@@ -67,6 +69,7 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
             setShowActionsDropdown={setShowActionsDropdown}
             onExportSelected={onExportSelected}
             onDeleteSelected={onDeleteSelected}
+            onDuplicateSelected={onDuplicateSelected}
           />
           <span className="text-xs text-slate-500">
             {selectedChartIds.length > 0 ? `${selectedChartIds.length}件選択中` : '未選択'}

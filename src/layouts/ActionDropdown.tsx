@@ -6,6 +6,7 @@ interface ActionDropdownProps {
   setShowActionsDropdown: (show: boolean) => void;
   onExportSelected: () => void;
   onDeleteSelected: () => void;
+  onDuplicateSelected: () => void;
 }
 
 const ActionDropdown: React.FC<ActionDropdownProps> = ({
@@ -14,6 +15,7 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
   setShowActionsDropdown,
   onExportSelected,
   onDeleteSelected,
+  onDuplicateSelected,
 }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -55,6 +57,17 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
       </button>
       {showActionsDropdown && selectedChartIds.length > 0 && (
         <div className="absolute top-full left-0 mt-1 bg-white border border-slate-200 rounded-md shadow-lg z-10 min-w-32">
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setShowActionsDropdown(false);
+              setTimeout(() => onDuplicateSelected(), 0);
+            }}
+            className="block w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-100"
+          >
+            複製
+          </button>
           <button
             onClick={(e) => {
               e.preventDefault();

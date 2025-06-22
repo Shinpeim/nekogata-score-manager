@@ -3,6 +3,7 @@ import { HomePage } from '../pages/HomePage';
 import { ChordChartFormPage } from '../pages/ChordChartFormPage';
 import { ChartViewPage } from '../pages/ChartViewPage';
 import { ChartEditorPage } from '../pages/ChartEditorPage';
+import { ScoreExplorerPage } from '../pages/ScoreExplorerPage';
 
 test.describe('Nekogata Score Manager - コア機能テスト', () => {
   test('チャート作成→表示→編集→保存の基本フローが動作する', async ({ page }) => {
@@ -55,10 +56,11 @@ test.describe('Nekogata Score Manager - コア機能テスト', () => {
     await expect(chartViewPage.editButton).toBeVisible();
   });
 
-  test('チャートの複製機能が動作する', async ({ page }) => {
+  test('チャートの複製機能が動作する（Score Explorer経由）', async ({ page }) => {
     const homePage = new HomePage(page);
     const chartFormPage = new ChordChartFormPage(page);
     const chartViewPage = new ChartViewPage(page);
+    const scoreExplorerPage = new ScoreExplorerPage(page, false);
     
     // デスクトップビューポートに設定（モバイル環境での問題を回避）
     await homePage.goto();
@@ -77,16 +79,35 @@ test.describe('Nekogata Score Manager - コア機能テスト', () => {
     await chartViewPage.waitForChartToLoad();
     await expect(chartViewPage.chartTitle).toContainText('複製テスト');
     
-    // 複製ボタンをクリック
-    await chartViewPage.clickDuplicate();
+    // Score Explorerを開く
+    await homePage.clickOpenExplorer();
     
-    // 複製ボタンがクリックできることを確認
-    await expect(chartViewPage.duplicateButton).toBeVisible();
+    // 複製前のチャート数を記録（デスクトップScore Explorerのみ）
+    const initialItemCount = await scoreExplorerPage.getChartItemCount();
     
-    // 複製ボタンがクリックされたことを確認（複製機能の動作確認）
-    // 実装によっては現在のチャートが複製されたものに切り替わる可能性がある
-    // 少なくとも複製ボタンが機能することを確認
-    await expect(chartViewPage.duplicateButton).toBeVisible();
+    // チャートを選択
+    await scoreExplorerPage.selectChart(0);
+    
+    // 選択状態を確認（デバッグ用）
+    const selectionStatus = await scoreExplorerPage.getSelectionStatus().textContent();
+    console.log('Selection status:', selectionStatus);
+    
+    // Score Explorerから複製を実行
+    await scoreExplorerPage.clickActionDropdown();
+    await scoreExplorerPage.clickDuplicateSelected();
+    
+    // 複製が完了したことを確認（少し待機）
+    await page.waitForTimeout(1000);
+    
+    // Score Explorer内で複製されたチャートを確認
+    // 複製された結果チャート数が1つ増えていることを確認
+    const finalItemCount = await scoreExplorerPage.getChartItemCount();
+    expect(finalItemCount).toBe(initialItemCount + 1);
+    
+    // 複製されたタイトル「複製テスト (コピー)」が1個存在することを確認
+    const duplicatedTitles = scoreExplorerPage.getSpecificTitleLocator('複製テスト (コピー)');
+    const duplicatedCount = await duplicatedTitles.count();
+    expect(duplicatedCount).toBe(1);
   });
 
   test('編集キャンセル機能が動作する', async ({ page }) => {

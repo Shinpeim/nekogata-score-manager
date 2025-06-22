@@ -40,6 +40,7 @@ describe('ScoreExplorer', () => {
   const mockOnImport = vi.fn();
   const mockOnExportSelected = vi.fn();
   const mockOnDeleteSelected = vi.fn();
+  const mockOnDuplicateSelected = vi.fn();
   const mockOnClose = vi.fn();
 
   beforeEach(() => {
@@ -59,6 +60,7 @@ describe('ScoreExplorer', () => {
         onImport={mockOnImport}
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
+        onDuplicateSelected={mockOnDuplicateSelected}
       />
     );
 
@@ -78,6 +80,7 @@ describe('ScoreExplorer', () => {
         onImport={mockOnImport}
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
+        onDuplicateSelected={mockOnDuplicateSelected}
       />
     );
 
@@ -98,6 +101,7 @@ describe('ScoreExplorer', () => {
         onImport={mockOnImport}
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
+        onDuplicateSelected={mockOnDuplicateSelected}
       />
     );
 
@@ -118,6 +122,7 @@ describe('ScoreExplorer', () => {
         onImport={mockOnImport}
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
+        onDuplicateSelected={mockOnDuplicateSelected}
       />
     );
 
@@ -138,6 +143,7 @@ describe('ScoreExplorer', () => {
         onImport={mockOnImport}
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
+        onDuplicateSelected={mockOnDuplicateSelected}
       />
     );
 
@@ -160,6 +166,7 @@ describe('ScoreExplorer', () => {
         onImport={mockOnImport}
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
+        onDuplicateSelected={mockOnDuplicateSelected}
       />
     );
 
@@ -180,6 +187,7 @@ describe('ScoreExplorer', () => {
         onImport={mockOnImport}
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
+        onDuplicateSelected={mockOnDuplicateSelected}
       />
     );
 
@@ -200,6 +208,7 @@ describe('ScoreExplorer', () => {
         onImport={mockOnImport}
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
+        onDuplicateSelected={mockOnDuplicateSelected}
       />
     );
 
@@ -220,6 +229,7 @@ describe('ScoreExplorer', () => {
         onImport={mockOnImport}
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
+        onDuplicateSelected={mockOnDuplicateSelected}
       />
     );
 
@@ -241,6 +251,7 @@ describe('ScoreExplorer', () => {
         onImport={mockOnImport}
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
+        onDuplicateSelected={mockOnDuplicateSelected}
       />
     );
 
@@ -263,6 +274,7 @@ describe('ScoreExplorer', () => {
         onImport={mockOnImport}
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
+        onDuplicateSelected={mockOnDuplicateSelected}
       />
     );
 
@@ -282,6 +294,7 @@ describe('ScoreExplorer', () => {
         onImport={mockOnImport}
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
+        onDuplicateSelected={mockOnDuplicateSelected}
       />
     );
 
@@ -303,6 +316,7 @@ describe('ScoreExplorer', () => {
           onImport={mockOnImport}
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
+          onDuplicateSelected={mockOnDuplicateSelected}
         />
       );
 
@@ -325,6 +339,7 @@ describe('ScoreExplorer', () => {
           onImport={mockOnImport}
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
+          onDuplicateSelected={mockOnDuplicateSelected}
         />
       );
 
@@ -344,6 +359,7 @@ describe('ScoreExplorer', () => {
           onImport={mockOnImport}
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
+          onDuplicateSelected={mockOnDuplicateSelected}
         />
       );
 
@@ -364,6 +380,7 @@ describe('ScoreExplorer', () => {
           onImport={mockOnImport}
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
+          onDuplicateSelected={mockOnDuplicateSelected}
         />
       );
 
@@ -383,6 +400,7 @@ describe('ScoreExplorer', () => {
           onImport={mockOnImport}
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
+          onDuplicateSelected={mockOnDuplicateSelected}
         />
       );
 
@@ -402,6 +420,7 @@ describe('ScoreExplorer', () => {
           onImport={mockOnImport}
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
+          onDuplicateSelected={mockOnDuplicateSelected}
         />
       );
 
@@ -430,6 +449,7 @@ describe('ScoreExplorer', () => {
           onImport={mockOnImport}
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
+          onDuplicateSelected={mockOnDuplicateSelected}
         />
       );
 
@@ -459,6 +479,7 @@ describe('ScoreExplorer', () => {
           onImport={mockOnImport}
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
+          onDuplicateSelected={mockOnDuplicateSelected}
         />
       );
 
@@ -495,6 +516,7 @@ describe('ScoreExplorer', () => {
           onImport={mockOnImport}
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
+          onDuplicateSelected={mockOnDuplicateSelected}
         />
       );
 
@@ -522,6 +544,7 @@ describe('ScoreExplorer', () => {
           onImport={mockOnImport}
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
+          onDuplicateSelected={mockOnDuplicateSelected}
           isMobile={true}
           onClose={mockOnClose}
         />
@@ -548,6 +571,7 @@ describe('ScoreExplorer', () => {
           onImport={mockOnImport}
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
+          onDuplicateSelected={mockOnDuplicateSelected}
           isMobile={true}
           onClose={mockOnClose}
         />
@@ -571,6 +595,7 @@ describe('ScoreExplorer', () => {
           onImport={mockOnImport}
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
+          onDuplicateSelected={mockOnDuplicateSelected}
           isMobile={true}
           onClose={mockOnClose}
         />
@@ -596,6 +621,7 @@ describe('ScoreExplorer', () => {
           onImport={mockOnImport}
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
+          onDuplicateSelected={mockOnDuplicateSelected}
           isMobile={true}
           onClose={mockOnClose}
         />
@@ -619,6 +645,7 @@ describe('ScoreExplorer', () => {
           onImport={mockOnImport}
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
+          onDuplicateSelected={mockOnDuplicateSelected}
           isMobile={false}
         />
       );
@@ -641,6 +668,7 @@ describe('ScoreExplorer', () => {
           onImport={mockOnImport}
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
+          onDuplicateSelected={mockOnDuplicateSelected}
           isMobile={false}
         />
       );
@@ -666,6 +694,7 @@ describe('ScoreExplorer', () => {
           onImport={mockOnImport}
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
+          onDuplicateSelected={mockOnDuplicateSelected}
           isMobile={false}
         />
       );
@@ -686,6 +715,7 @@ describe('ScoreExplorer', () => {
           onImport={mockOnImport}
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
+          onDuplicateSelected={mockOnDuplicateSelected}
           isMobile={true}
           onClose={mockOnClose}
         />
