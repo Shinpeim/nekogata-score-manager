@@ -1,6 +1,6 @@
 import type { Chord } from '../types';
 
-export interface BarContentAnalysis {
+interface BarContentAnalysis {
   chordCount: number;
   hasLongMemo: boolean;
   maxMemoLength: number;
@@ -80,7 +80,7 @@ export function calculateDynamicBarWidth(analysis: BarContentAnalysis): number {
 /**
  * コードの実際の必要幅を計算（最低幅考慮）
  */
-export function calculateRequiredWidth(chords: Chord[], beatsPerBar: number): number {
+function calculateRequiredWidth(chords: Chord[], beatsPerBar: number): number {
   if (chords.length === 0) return DYNAMIC_BAR_WIDTH_CONFIG.BASE_MIN_WIDTH;
   
   const MIN_CHORD_WIDTH = 47; // ChordGridRendererの値と合わせる（36px * 1.3）
