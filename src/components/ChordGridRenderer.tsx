@@ -24,14 +24,24 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({
   const timeSignatureBeats = timeSignature ? parseInt(timeSignature.split('/')[0]) : 4;
   const beatsPerBar = section.beatsPerBar && section.beatsPerBar !== 4 ? section.beatsPerBar : timeSignatureBeats;
   
-  // 小節データの前処理（コードを小節に分割）
+  // 小節データの前処理（改行マーカーを考慮してコードを小節に分割）
   const allBars = useMemo(() => {
     const bars: Chord[][] = [];
     let currentBar: Chord[] = [];
     let currentBeats = 0;
     
     for (const chord of section.chords) {
-      if (chord.isLineBreak === true) continue;
+      if (chord.isLineBreak === true) {
+        // 改行マーカーに出会ったら現在の小節を終了し、強制改行
+        if (currentBar.length > 0) {
+          bars.push([...currentBar]);
+          currentBar = [];
+          currentBeats = 0;
+        }
+        // 改行マーカーを示す特別な小節を追加
+        bars.push([]);
+        continue;
+      }
       
       const chordDuration = chord.duration || 4;
       

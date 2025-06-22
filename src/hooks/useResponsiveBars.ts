@@ -31,6 +31,7 @@ export const useResponsiveBars = () => {
 
   /**
    * 動的幅計算モード: 小節ごとの実際のコンテンツに基づいて行分割を計算
+   * 改行マーカー（空の小節）を考慮
    */
   const calculateDynamicLayout = useCallback((bars: Chord[][]): Chord[][][] => {
     const containerWidth = window.innerWidth - BAR_WIDTH_CONFIG.PADDING;
@@ -39,6 +40,17 @@ export const useResponsiveBars = () => {
     let currentRowWidth = 0;
 
     for (const bar of bars) {
+      // 空の小節は改行マーカーとして処理
+      if (bar.length === 0) {
+        // 現在の行を終了して新しい行を開始
+        if (currentRow.length > 0) {
+          rows.push([...currentRow]);
+          currentRow = [];
+          currentRowWidth = 0;
+        }
+        continue;
+      }
+
       const barWidth = calculateBarWidth(bar, 4); // 拍数パラメータを追加
       
       // 現在の行に追加できるかチェック
