@@ -14,7 +14,7 @@ interface ChordChartViewerProps {
 const ChordChartViewer: React.FC<ChordChartViewerProps> = ({ chart, currentChartId, onEdit }) => {
   return (
     <div className="h-full bg-white overflow-y-auto" data-testid="chart-viewer">
-      <div className="p-3">
+      <div className="p-2">
         <div className="mb-3">
           <h2 className="text-xl font-bold text-slate-900 mb-1" data-testid="chart-title">{chart.title}</h2>
           <div className="flex flex-wrap gap-3 text-sm text-slate-600">
@@ -34,7 +34,7 @@ const ChordChartViewer: React.FC<ChordChartViewerProps> = ({ chart, currentChart
           )}
         </div>
 
-        <div className="bg-slate-50 rounded-lg p-2" data-testid="chart-content">
+        <div className="bg-slate-50 rounded-lg p-1" data-testid="chart-content">
           {chart.sections && chart.sections.length > 0 ? (
             chart.sections.map((section) => (
               <div key={section.id} className="mb-3 last:mb-0" data-testid={`section-${section.id}`}>
