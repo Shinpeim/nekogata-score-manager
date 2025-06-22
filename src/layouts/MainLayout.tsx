@@ -32,7 +32,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
     setCurrentChart,
     createNewChart,
     loadFromStorage,
-    deleteMultipleCharts
+    deleteMultipleCharts,
+    addChart
   } = useChartManagement();
   
   const handleImportComplete = async () => {
@@ -97,6 +98,29 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
     setShowExportDialog(true);
   };
 
+  const handleDuplicateSelected = async () => {
+    if (selectedChartIds.length === 0) return;
+    
+    try {
+      for (const chartId of selectedChartIds) {
+        const originalChart = chartsData[chartId];
+        if (originalChart) {
+          const duplicatedChart = {
+            ...originalChart,
+            id: `chord-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            title: `${originalChart.title} (コピー)`,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          };
+          await addChart(duplicatedChart);
+        }
+      }
+      setSelectedChartIds([]);
+    } catch (error) {
+      console.error('Failed to duplicate charts:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <Header 
@@ -118,6 +142,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
             onImport={() => setShowImportDialog(true)}
             onExportSelected={handleExportSelected}
             onDeleteSelected={handleDeleteSelected}
+            onDuplicateSelected={handleDuplicateSelected}
             isMobile={true}
             onClose={() => setExplorerOpen(false)}
           />
@@ -136,6 +161,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
             onImport={() => setShowImportDialog(true)}
             onExportSelected={handleExportSelected}
             onDeleteSelected={handleDeleteSelected}
+            onDuplicateSelected={handleDuplicateSelected}
             isMobile={false}
           />
         </aside>

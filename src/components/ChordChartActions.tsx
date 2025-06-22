@@ -1,6 +1,5 @@
 import React from 'react';
 import type { ChordChart as ChordChartType } from '../types';
-import { useChartManagement } from '../hooks/useChartManagement';
 
 interface ChordChartActionsProps {
   chart: ChordChartType;
@@ -8,34 +7,7 @@ interface ChordChartActionsProps {
   onEdit: () => void;
 }
 
-const ChordChartActions: React.FC<ChordChartActionsProps> = ({ chart, currentChartId, onEdit }) => {
-  const { deleteChart, addChart } = useChartManagement();
-
-  const handleDelete = async () => {
-    if (currentChartId && confirm('このコード譜を削除しますか？')) {
-      try {
-        await deleteChart(currentChartId);
-      } catch (error) {
-        console.error('Failed to delete chart:', error);
-      }
-    }
-  };
-
-  const handleDuplicate = async () => {
-    try {
-      const duplicatedChart = {
-        ...chart,
-        id: `chord-${Date.now()}`,
-        title: `${chart.title} (コピー)`,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      await addChart(duplicatedChart);
-    } catch (error) {
-      console.error('Failed to duplicate chart:', error);
-    }
-  };
-
+const ChordChartActions: React.FC<ChordChartActionsProps> = ({ onEdit }) => {
   return (
     <div className="mt-6 flex flex-wrap gap-3" data-testid="chart-actions">
       <button 
@@ -44,20 +16,6 @@ const ChordChartActions: React.FC<ChordChartActionsProps> = ({ chart, currentCha
         data-testid="edit-button"
       >
         編集
-      </button>
-      <button 
-        onClick={handleDuplicate}
-        className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-md text-sm font-medium"
-        data-testid="duplicate-button"
-      >
-        複製
-      </button>
-      <button 
-        onClick={handleDelete}
-        className="bg-[#EE5840] hover:bg-[#D14A2E] text-white px-4 py-2 rounded-md text-sm font-medium"
-        data-testid="delete-button"
-      >
-        削除
       </button>
     </div>
   );

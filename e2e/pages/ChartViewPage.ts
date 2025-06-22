@@ -12,8 +12,6 @@ export class ChartViewPage {
   readonly chartNotes: Locator;
   readonly chartActions: Locator;
   readonly editButton: Locator;
-  readonly duplicateButton: Locator;
-  readonly deleteButton: Locator;
   readonly emptySections: Locator;
 
   constructor(page: Page) {
@@ -28,21 +26,11 @@ export class ChartViewPage {
     this.chartNotes = page.getByTestId('chart-notes');
     this.chartActions = page.getByTestId('chart-actions');
     this.editButton = page.getByTestId('edit-button');
-    this.duplicateButton = page.getByTestId('duplicate-button');
-    this.deleteButton = page.getByTestId('delete-button');
     this.emptySections = page.getByTestId('empty-sections');
   }
 
   async clickEdit() {
     await this.editButton.click();
-  }
-
-  async clickDuplicate() {
-    await this.duplicateButton.click();
-  }
-
-  async clickDelete() {
-    await this.deleteButton.click();
   }
 
   getChartTitleWithText(title: string) {

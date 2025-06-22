@@ -6,13 +6,15 @@ import { ChartEditorPage } from '../pages/ChartEditorPage';
 import { ScoreExplorerPage } from '../pages/ScoreExplorerPage';
 
 test.describe('Nekogata Score Manager - チャート管理機能テスト', () => {
-  test('チャート削除機能が動作する', async ({ page }) => {
+  test('チャート削除機能が動作する（Score Explorer経由）', async ({ page }) => {
     const homePage = new HomePage(page);
     const chartFormPage = new ChordChartFormPage(page);
     const chartViewPage = new ChartViewPage(page);
+    const scoreExplorerPage = new ScoreExplorerPage(page, false);
     
     // チャート作成
     await homePage.goto();
+    await homePage.setDesktopViewport();
     await homePage.clickCreateNew();
     
     await chartFormPage.fillBasicInfo({
@@ -25,14 +27,21 @@ test.describe('Nekogata Score Manager - チャート管理機能テスト', () =
     await chartViewPage.waitForChartToLoad();
     await expect(chartViewPage.chartTitle).toContainText('削除テスト');
     
+    // Score Explorerを開く
+    await homePage.clickOpenExplorer();
+    
+    // チャートを選択
+    await scoreExplorerPage.selectChart(0);
+    
     // 確認ダイアログで削除を承認（ブラウザのconfirmダイアログ）
     page.on('dialog', async dialog => {
       expect(dialog.message()).toContain('削除しますか');
       await dialog.accept();
     });
     
-    // 削除ボタンをクリック
-    await chartViewPage.clickDelete();
+    // Score Explorerから削除を実行
+    await scoreExplorerPage.clickActionDropdown();
+    await scoreExplorerPage.clickDeleteSelected();
     
     // 削除後は空の状態に戻ることを確認
     await expect(homePage.getEmptyStateMessage()).toBeVisible({ timeout: 10000 });

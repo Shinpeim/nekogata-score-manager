@@ -6,6 +6,7 @@ describe('ActionDropdown', () => {
   const mockSetShowActionsDropdown = vi.fn();
   const mockOnExportSelected = vi.fn();
   const mockOnDeleteSelected = vi.fn();
+  const mockOnDuplicateSelected = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -19,6 +20,7 @@ describe('ActionDropdown', () => {
         setShowActionsDropdown={mockSetShowActionsDropdown}
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
+        onDuplicateSelected={mockOnDuplicateSelected}
       />
     );
 
@@ -35,6 +37,7 @@ describe('ActionDropdown', () => {
         setShowActionsDropdown={mockSetShowActionsDropdown}
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
+        onDuplicateSelected={mockOnDuplicateSelected}
       />
     );
 
@@ -51,6 +54,7 @@ describe('ActionDropdown', () => {
         setShowActionsDropdown={mockSetShowActionsDropdown}
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
+        onDuplicateSelected={mockOnDuplicateSelected}
       />
     );
 
@@ -68,6 +72,7 @@ describe('ActionDropdown', () => {
         setShowActionsDropdown={mockSetShowActionsDropdown}
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
+        onDuplicateSelected={mockOnDuplicateSelected}
       />
     );
 
@@ -85,6 +90,7 @@ describe('ActionDropdown', () => {
         setShowActionsDropdown={mockSetShowActionsDropdown}
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
+        onDuplicateSelected={mockOnDuplicateSelected}
       />
     );
 
@@ -100,6 +106,7 @@ describe('ActionDropdown', () => {
         setShowActionsDropdown={mockSetShowActionsDropdown}
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
+        onDuplicateSelected={mockOnDuplicateSelected}
       />
     );
 
@@ -115,6 +122,7 @@ describe('ActionDropdown', () => {
         setShowActionsDropdown={mockSetShowActionsDropdown}
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
+        onDuplicateSelected={mockOnDuplicateSelected}
       />
     );
 
@@ -129,6 +137,29 @@ describe('ActionDropdown', () => {
     });
   });
 
+  it('should call onDuplicateSelected when duplicate button is clicked', async () => {
+    render(
+      <ActionDropdown
+        selectedChartIds={['chart1']}
+        showActionsDropdown={true}
+        setShowActionsDropdown={mockSetShowActionsDropdown}
+        onExportSelected={mockOnExportSelected}
+        onDeleteSelected={mockOnDeleteSelected}
+        onDuplicateSelected={mockOnDuplicateSelected}
+      />
+    );
+
+    const duplicateButton = screen.getByText('複製');
+    fireEvent.click(duplicateButton);
+
+    expect(mockSetShowActionsDropdown).toHaveBeenCalledWith(false);
+    
+    // setTimeoutを使用しているので少し待つ
+    await waitFor(() => {
+      expect(mockOnDuplicateSelected).toHaveBeenCalled();
+    });
+  });
+
   it('should call onDeleteSelected when delete button is clicked', async () => {
     render(
       <ActionDropdown
@@ -137,6 +168,7 @@ describe('ActionDropdown', () => {
         setShowActionsDropdown={mockSetShowActionsDropdown}
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
+        onDuplicateSelected={mockOnDuplicateSelected}
       />
     );
 
@@ -160,6 +192,7 @@ describe('ActionDropdown', () => {
           setShowActionsDropdown={mockSetShowActionsDropdown}
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
+          onDuplicateSelected={mockOnDuplicateSelected}
         />
         <div data-testid="outside">Outside element</div>
       </div>
@@ -183,6 +216,7 @@ describe('ActionDropdown', () => {
             setShowActionsDropdown={mockSetShowActionsDropdown}
             onExportSelected={mockOnExportSelected}
             onDeleteSelected={mockOnDeleteSelected}
+            onDuplicateSelected={mockOnDuplicateSelected}
           />
           <div data-testid="outside-1">Outside 1</div>
           <div data-testid="outside-2">Outside 2</div>
@@ -207,6 +241,7 @@ describe('ActionDropdown', () => {
             setShowActionsDropdown={mockSetShowActionsDropdown}
             onExportSelected={mockOnExportSelected}
             onDeleteSelected={mockOnDeleteSelected}
+            onDuplicateSelected={mockOnDuplicateSelected}
           />
           <div data-testid="outside-1">Outside 1</div>
           <div data-testid="outside-2">Outside 2</div>
@@ -229,6 +264,7 @@ describe('ActionDropdown', () => {
             setShowActionsDropdown={mockSetShowActionsDropdown}
             onExportSelected={mockOnExportSelected}
             onDeleteSelected={mockOnDeleteSelected}
+            onDuplicateSelected={mockOnDuplicateSelected}
           />
           <div data-testid="outside">Outside element</div>
         </div>
@@ -251,6 +287,7 @@ describe('ActionDropdown', () => {
           setShowActionsDropdown={mockSetShowActionsDropdown}
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
+          onDuplicateSelected={mockOnDuplicateSelected}
         />
       );
 
@@ -281,6 +318,7 @@ describe('ActionDropdown', () => {
           setShowActionsDropdown={mockSetShowActionsDropdown}
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
+          onDuplicateSelected={mockOnDuplicateSelected}
         />
       );
 
@@ -305,6 +343,7 @@ describe('ActionDropdown', () => {
           setShowActionsDropdown={mockSetShowActionsDropdown}
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
+          onDuplicateSelected={mockOnDuplicateSelected}
         />
       );
 
@@ -337,6 +376,7 @@ describe('ActionDropdown', () => {
           setShowActionsDropdown={mockSetShowActionsDropdown}
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
+          onDuplicateSelected={mockOnDuplicateSelected}
         />
       );
 
