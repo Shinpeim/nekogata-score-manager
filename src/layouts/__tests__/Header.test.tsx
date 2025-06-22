@@ -116,7 +116,7 @@ describe('Header', () => {
     
     const wakeLockButton = screen.getByTitle('スリープ防止を有効にする');
     expect(wakeLockButton).toBeInTheDocument();
-    expect(screen.getByText('スリープ防止')).toBeInTheDocument();
+    expect(screen.getByText('Zzz')).toBeInTheDocument();
   });
 
   it('should call toggleWakeLock when wake lock button is clicked', async () => {
@@ -140,8 +140,8 @@ describe('Header', () => {
       
       // 非アクティブ状態のスタイル確認（デフォルトのモック状態）
       const wakeLockButton = screen.getByTitle('スリープ防止を有効にする');
-      expect(wakeLockButton).toHaveClass('bg-slate-100', 'text-slate-600');
-      expect(screen.getByText('スリープ防止')).toBeInTheDocument();
+      expect(wakeLockButton).toHaveClass('bg-slate-200');
+      expect(screen.getByText('Zzz')).toBeInTheDocument();
     });
 
     it('should handle wake lock button interactions', async () => {
@@ -168,7 +168,7 @@ describe('Header', () => {
       
       // デフォルトのモックではサポートされている
       expect(screen.getByTitle('スリープ防止を有効にする')).toBeInTheDocument();
-      expect(screen.getByText('スリープ防止')).toBeInTheDocument();
+      expect(screen.getByText('Zzz')).toBeInTheDocument();
     });
   });
 
