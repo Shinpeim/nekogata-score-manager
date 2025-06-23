@@ -38,6 +38,12 @@ CLAUDE.local.md
 e2e/downloads/*
 !e2e/downloads/.gitkeep
 
+# Test coverage
+coverage
+
+# Documentation
+docs
+
 # Environment files
 .env
 .envrc
