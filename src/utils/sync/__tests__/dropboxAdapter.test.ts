@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach, vi, Mock } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { DropboxSyncAdapter } from '../dropboxAdapter';
 import { DropboxAuthProvider } from '../dropboxAuth';
 import type { ChordChart } from '../../../types/chord';
@@ -114,45 +115,51 @@ describe('DropboxSyncAdapter', () => {
         key: 'C',
         tempo: 120,
         timeSignature: '4/4',
-        sections: []
+        sections: [],
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01')
       }];
       
       const mockMetadata: Record<string, SyncMetadata> = {
         'chart-1': {
-          lastModified: new Date().toISOString(),
+          lastModifiedAt: new Date().toISOString(),
           lastSyncedAt: new Date().toISOString(),
-          version: 1,
           deviceId: 'device-1'
         }
       };
       
       const mockDeletedCharts: DeletedChartRecord[] = [{
-        chartId: 'deleted-1',
+        id: 'deleted-1',
         deletedAt: new Date().toISOString(),
-        deletedBy: 'device-1'
+        deviceId: 'device-1'
       }];
 
       // ファイルダウンロードのモック
+      // JSON.stringify/parseでDate型が文字列に変換されることを考慮
+      const chartsJson = JSON.parse(JSON.stringify(mockCharts));
+      const metadataJson = JSON.parse(JSON.stringify(mockMetadata));
+      const deletedChartsJson = JSON.parse(JSON.stringify(mockDeletedCharts));
+      
       (global.fetch as Mock)
         .mockResolvedValueOnce({
           ok: true,
-          text: () => Promise.resolve(JSON.stringify(mockCharts))
+          text: () => Promise.resolve(JSON.stringify(chartsJson))
         })
         .mockResolvedValueOnce({
           ok: true,
-          text: () => Promise.resolve(JSON.stringify(mockMetadata))
+          text: () => Promise.resolve(JSON.stringify(metadataJson))
         })
         .mockResolvedValueOnce({
           ok: true,
-          text: () => Promise.resolve(JSON.stringify(mockDeletedCharts))
+          text: () => Promise.resolve(JSON.stringify(deletedChartsJson))
         });
 
       const result = await adapter.pull();
       
       expect(result).toEqual({
-        charts: mockCharts,
-        metadata: mockMetadata,
-        deletedCharts: mockDeletedCharts
+        charts: chartsJson,
+        metadata: metadataJson,
+        deletedCharts: deletedChartsJson
       });
       expect(global.fetch).toHaveBeenCalledTimes(3);
     });
@@ -188,14 +195,15 @@ describe('DropboxSyncAdapter', () => {
         key: 'C',
         tempo: 120,
         timeSignature: '4/4',
-        sections: []
+        sections: [],
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01')
       }];
       
       const mockMetadata: Record<string, SyncMetadata> = {
         'chart-1': {
-          lastModified: new Date().toISOString(),
+          lastModifiedAt: new Date().toISOString(),
           lastSyncedAt: new Date().toISOString(),
-          version: 1,
           deviceId: 'device-1'
         }
       };
@@ -242,9 +250,8 @@ describe('DropboxSyncAdapter', () => {
     it('should return metadata from pull', async () => {
       const mockMetadata: Record<string, SyncMetadata> = {
         'chart-1': {
-          lastModified: new Date().toISOString(),
+          lastModifiedAt: new Date().toISOString(),
           lastSyncedAt: new Date().toISOString(),
-          version: 1,
           deviceId: 'device-1'
         }
       };
@@ -263,17 +270,15 @@ describe('DropboxSyncAdapter', () => {
     it('should update metadata for a specific chart', async () => {
       const existingMetadata: Record<string, SyncMetadata> = {
         'chart-1': {
-          lastModified: '2024-01-01T00:00:00Z',
+          lastModifiedAt: '2024-01-01T00:00:00Z',
           lastSyncedAt: '2024-01-01T00:00:00Z',
-          version: 1,
           deviceId: 'device-1'
         }
       };
 
       const newMetadata: SyncMetadata = {
-        lastModified: '2024-01-02T00:00:00Z',
+        lastModifiedAt: '2024-01-02T00:00:00Z',
         lastSyncedAt: '2024-01-02T00:00:00Z',
-        version: 2,
         deviceId: 'device-1'
       };
 

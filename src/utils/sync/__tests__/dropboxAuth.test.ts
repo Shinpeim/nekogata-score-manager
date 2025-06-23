@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi, Mock } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { DropboxAuthProvider } from '../dropboxAuth';
 
 // グローバルオブジェクトのモック
