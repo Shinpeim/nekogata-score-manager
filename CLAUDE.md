@@ -29,6 +29,8 @@ npm run lint         # ESLint code quality check
 npm test             # Run all tests with Vitest
 npm run test:ui      # Run tests with UI interface
 npm run test:coverage # Run tests with coverage report
+npm run test:coverage:ui # Run tests with coverage and UI
+npm run test:coverage:html # Generate HTML coverage report
 npm run preview      # Preview production build locally
 ```
 
@@ -162,6 +164,7 @@ Chord: { name, root, base?, duration?, isLineBreak? }
 - **Building**: コミットするコードは必ずビルドできる必要がある
 - **E2E Testing**: コア機能変更時はE2Eテストを実行して確認すること
 - **Static Analysis**: `npm run knip`で未使用コード検出を実行
+- **Coverage**: `npm run test:coverage`でテストカバレッジを確認
 - **Pre-commit validation**: `npm test && npm run lint && npm run build && npm run knip` を確認してからコミット
 
 ### Task Management
@@ -260,6 +263,26 @@ Nekogata Score Managerでは、統一感があり直感的なユーザーイン�
 - パディング: `px-3 py-2` (ボタン), `p-4` (カード)
 
 この色彩設計により、ユーザーは直感的に各要素の機能を理解でき、一貫性のある操作体験を得ることができます。
+
+## Code Quality & Documentation
+
+### Test Coverage
+プロジェクトではv8を使用したコードカバレッジ計測を導入済み：
+
+```bash
+npm run test:coverage        # ターミナルでカバレッジ表示
+npm run test:coverage:ui     # ブラウザUIでカバレッジ表示
+npm run test:coverage:html   # HTMLレポート生成
+```
+
+- **カバレッジレポート**: `coverage/`ディレクトリに生成
+- **目標**: 主要な機能ロジックで80%以上のカバレッジ維持
+- **除外対象**: テストファイル、型定義ファイル、設定ファイル
+
+### Documentation Guidelines
+- 公開API関数には必ずJSDocコメントを記述
+- コンポーネントのPropsインターフェースにはコメント追加
+- 複雑なビジネスロジックには内部ドキュメント記述
 
 ## Project Testing Information
 
