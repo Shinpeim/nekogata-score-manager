@@ -357,7 +357,7 @@ describe('DropboxSyncAdapter', () => {
         { origin: 'https://sub.domain.com:8080', expected: 'nekogatascoremanager-subdomaincom-8080' }
       ];
 
-      testCases.forEach(({ origin, expected }) => {
+      testCases.forEach(({ origin }) => {
         Object.defineProperty(window, 'location', {
           value: { origin },
           writable: true
