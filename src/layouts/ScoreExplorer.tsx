@@ -104,15 +104,6 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
                 <div className="flex-1">
                   <h3 className="text-sm font-medium text-slate-900">{chart.title}</h3>
                   <p className="text-xs text-slate-500 mt-1">{chart.artist}</p>
-                  {chart.tags && chart.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {chart.tags.slice(0, 2).map((tag, index) => (
-                        <span key={index} className="px-1.5 py-0.5 bg-[#BDD0CA] text-slate-800 text-xs rounded">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
                 </div>
                 <button
                   onClick={(e) => {

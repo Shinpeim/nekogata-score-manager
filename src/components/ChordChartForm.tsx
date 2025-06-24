@@ -21,7 +21,6 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
     key: initialData?.key || 'C',
     tempo: initialData?.tempo || 120,
     timeSignature: initialData?.timeSignature || '4/4',
-    tags: initialData?.tags?.join(', ') || '',
     notes: initialData?.notes || ''
   });
 
@@ -32,7 +31,6 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
     
     const chartData = {
       ...formData,
-      tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
       sections: initialData?.sections
     };
 
@@ -155,19 +153,6 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
               </select>
             </div>
 
-            <div>
-              <label htmlFor="tags" className="block text-sm font-medium text-slate-700 mb-2">
-                タグ (カンマ区切り)
-              </label>
-              <input
-                id="tags"
-                type="text"
-                value={formData.tags}
-                onChange={(e) => handleChange('tags', e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#85B0B7]"
-                placeholder="例: ポップス, バラード"
-              />
-            </div>
           </div>
 
           {/* メモ */}

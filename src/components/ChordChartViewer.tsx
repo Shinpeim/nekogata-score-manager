@@ -24,15 +24,6 @@ const ChordChartViewer: React.FC<ChordChartViewerProps> = ({ chart }) => {
               <span data-testid="chart-time-signature">拍子: {chart.timeSignature}</span>
             </div>
           </div>
-          {chart.tags && chart.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-1" data-testid="chart-tags">
-              {chart.tags.map((tag, index) => (
-                <span key={index} className="px-2 py-1 bg-slate-100 text-slate-800 text-xs rounded-full">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
         </div>
 
         <div className="bg-slate-50 rounded-lg p-1" data-testid="chart-content">

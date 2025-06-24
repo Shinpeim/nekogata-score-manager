@@ -38,7 +38,6 @@ describe('ChordChartForm', () => {
       expect(screen.getByLabelText('キー *')).toBeInTheDocument();
       expect(screen.getByLabelText('テンポ (BPM)')).toBeInTheDocument();
       expect(screen.getByLabelText('拍子 *')).toBeInTheDocument();
-      expect(screen.getByLabelText('タグ (カンマ区切り)')).toBeInTheDocument();
       expect(screen.getByLabelText('メモ')).toBeInTheDocument();
     });
 
@@ -61,7 +60,6 @@ describe('ChordChartForm', () => {
         key: 'G',
         tempo: 140,
         timeSignature: '3/4',
-        tags: ['rock', 'classic'],
         notes: 'Some notes'
       };
 
@@ -75,7 +73,6 @@ describe('ChordChartForm', () => {
       expect(keySelect.value).toBe('G');
       expect(screen.getByDisplayValue('140')).toBeInTheDocument();
       expect(screen.getByDisplayValue('3/4')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('rock, classic')).toBeInTheDocument();
       expect(screen.getByDisplayValue('Some notes')).toBeInTheDocument();
     });
   });
@@ -167,7 +164,6 @@ describe('ChordChartForm', () => {
       await user.selectOptions(screen.getByLabelText('キー *'), 'G');
       // Use fireEvent for number input to avoid concatenation issues
       fireEvent.change(screen.getByLabelText('テンポ (BPM)'), { target: { value: '140' } });
-      await user.type(screen.getByLabelText('タグ (カンマ区切り)'), 'rock, test');
       await user.type(screen.getByLabelText('メモ'), 'Test notes');
 
       await user.click(screen.getByText('作成'));
@@ -181,27 +177,12 @@ describe('ChordChartForm', () => {
       expect(savedChart.artist).toBe('Test Artist');
       expect(savedChart.key).toBe('G');
       expect(savedChart.tempo).toBe(140);
-      expect(savedChart.tags).toEqual(['rock', 'test']);
       expect(savedChart.notes).toBe('Test notes');
       expect(savedChart.id).toBeDefined();
       expect(savedChart.createdAt).toBeInstanceOf(Date);
       expect(savedChart.updatedAt).toBeInstanceOf(Date);
     });
 
-    it('should handle tag parsing correctly', async () => {
-      const user = userEvent.setup();
-      renderForm();
-
-      await user.type(screen.getByLabelText('タグ (カンマ区切り)'), 'rock, pop , jazz,  , electronic');
-      await user.click(screen.getByText('作成'));
-
-      await waitFor(() => {
-        expect(mockOnSave).toHaveBeenCalledTimes(1);
-      });
-
-      const savedChart = mockOnSave.mock.calls[0][0];
-      expect(savedChart.tags).toEqual(['rock', 'pop', 'jazz', 'electronic']);
-    });
   });
 
   describe('Cancel Functionality', () => {
@@ -234,7 +215,7 @@ describe('ChordChartForm', () => {
       renderForm();
 
       expect(screen.getByRole('form')).toBeInTheDocument();
-      expect(screen.getAllByRole('textbox')).toHaveLength(4); // title, artist, tags, notes
+      expect(screen.getAllByRole('textbox')).toHaveLength(3); // title, artist, notes
       expect(screen.getAllByRole('spinbutton')).toHaveLength(1); // tempo
       expect(screen.getAllByRole('combobox')).toHaveLength(2); // key, timeSignature
       expect(screen.getAllByRole('button')).toHaveLength(2); // cancel, submit

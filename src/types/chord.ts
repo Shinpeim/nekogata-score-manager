@@ -25,7 +25,6 @@ export interface ChordChart {
   sections: ChordSection[];
   createdAt: Date;
   updatedAt: Date;
-  tags?: string[];
   notes?: string;
   version?: string;
 }

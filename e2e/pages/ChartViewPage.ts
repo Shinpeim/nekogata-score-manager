@@ -7,7 +7,6 @@ export class ChartViewPage {
   readonly chartArtist: Locator;
   readonly chartKey: Locator;
   readonly chartTimeSignature: Locator;
-  readonly chartTags: Locator;
   readonly chartContent: Locator;
   readonly chartNotes: Locator;
   readonly chartActions: Locator;
@@ -21,7 +20,6 @@ export class ChartViewPage {
     this.chartArtist = page.getByTestId('chart-artist');
     this.chartKey = page.getByTestId('chart-key');
     this.chartTimeSignature = page.getByTestId('chart-time-signature');
-    this.chartTags = page.getByTestId('chart-tags');
     this.chartContent = page.getByTestId('chart-content');
     this.chartNotes = page.getByTestId('chart-notes');
     this.chartActions = page.getByTestId('chart-actions');

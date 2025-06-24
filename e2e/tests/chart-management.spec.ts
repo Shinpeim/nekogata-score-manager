@@ -103,7 +103,6 @@ test.describe('Nekogata Score Manager - チャート管理機能テスト', () =
     await chartFormPage.fillBasicInfo({
       title: '情報表示テスト',
       artist: 'テストアーティスト',
-      tags: 'テスト, 表示'
     });
     await chartFormPage.clickSave();
     
@@ -113,10 +112,6 @@ test.describe('Nekogata Score Manager - チャート管理機能テスト', () =
     await expect(chartViewPage.chartTitle).toContainText('情報表示テスト');
     await expect(chartViewPage.chartArtist).toContainText('テストアーティスト');
     
-    // タグが正しく表示されていることを確認
-    const tagsSection = page.locator('[data-testid="chart-tags"]');
-    await expect(tagsSection).toContainText('テスト');
-    await expect(tagsSection).toContainText('表示');
   });
 
   test('チャート情報の編集と更新が正しく反映される', async ({ page }) => {

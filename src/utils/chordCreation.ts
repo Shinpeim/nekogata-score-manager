@@ -10,7 +10,6 @@ export const createEmptyChordChart = (): Omit<ChordChart, 'id' | 'createdAt' | '
     tempo: 120,
     timeSignature,
     sections: [createEmptySection('イントロ', timeSignature)],
-    tags: [],
     notes: ''
   };
 };

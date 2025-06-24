@@ -8,7 +8,6 @@ export class ChordChartFormPage {
   readonly keySelect: Locator;
   readonly tempoInput: Locator;
   readonly timeSignatureSelect: Locator;
-  readonly tagsInput: Locator;
   readonly notesTextarea: Locator;
   readonly cancelButton: Locator;
   readonly saveButton: Locator;
@@ -21,7 +20,6 @@ export class ChordChartFormPage {
     this.keySelect = page.locator('#key');
     this.tempoInput = page.locator('#tempo');
     this.timeSignatureSelect = page.locator('#timeSignature');
-    this.tagsInput = page.locator('#tags');
     this.notesTextarea = page.locator('#notes');
     this.cancelButton = page.getByTestId('cancel-button');
     this.saveButton = page.getByTestId('save-button');
@@ -50,10 +48,6 @@ export class ChordChartFormPage {
     await this.timeSignatureSelect.selectOption(timeSignature);
   }
 
-  async fillTags(tags: string) {
-    await this.tagsInput.clear();
-    await this.tagsInput.fill(tags);
-  }
 
   async fillNotes(notes: string) {
     await this.notesTextarea.clear();
@@ -74,7 +68,6 @@ export class ChordChartFormPage {
     key?: string;
     tempo?: number;
     timeSignature?: string;
-    tags?: string;
     notes?: string;
   }) {
     if (data.title !== undefined) await this.fillTitle(data.title);
@@ -82,7 +75,6 @@ export class ChordChartFormPage {
     if (data.key !== undefined) await this.selectKey(data.key);
     if (data.tempo !== undefined) await this.fillTempo(data.tempo);
     if (data.timeSignature !== undefined) await this.selectTimeSignature(data.timeSignature);
-    if (data.tags !== undefined) await this.fillTags(data.tags);
     if (data.notes !== undefined) await this.fillNotes(data.notes);
   }
 

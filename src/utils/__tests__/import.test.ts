@@ -25,7 +25,6 @@ const mockChart: ChordChart = {
   ],
   createdAt: new Date('2023-01-01'),
   updatedAt: new Date('2023-01-01'),
-  tags: ['test'],
   notes: 'テストメモ'
 };
 

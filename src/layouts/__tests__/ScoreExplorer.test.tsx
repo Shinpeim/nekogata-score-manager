@@ -13,7 +13,6 @@ const mockCharts: ChordChart[] = [
     timeSignature: '4/4',
     sections: [],
     notes: '',
-    tags: ['tag1', 'tag2'],
     createdAt: new Date('2023-01-01T00:00:00.000Z'),
     updatedAt: new Date('2023-01-01T00:00:00.000Z'),
   },
@@ -26,7 +25,6 @@ const mockCharts: ChordChart[] = [
     timeSignature: '4/4',
     sections: [],
     notes: '',
-    tags: [],
     createdAt: new Date('2023-01-02T00:00:00.000Z'),
     updatedAt: new Date('2023-01-02T00:00:00.000Z'),
   },
@@ -293,27 +291,6 @@ describe('ScoreExplorer', () => {
     expect(screen.getByText('1件選択中')).toBeInTheDocument();
   });
 
-  it('should render tags when available', () => {
-    render(
-      <ScoreExplorer
-        charts={mockCharts}
-        currentChartId={null}
-        selectedChartIds={[]}
-        onChartSelect={mockOnChartSelect}
-        onSelectAll={mockOnSelectAll}
-        onSetCurrentChart={mockOnSetCurrentChart}
-        onCreateNew={mockOnCreateNew}
-        onImport={mockOnImport}
-        onExportSelected={mockOnExportSelected}
-        onDeleteSelected={mockOnDeleteSelected}
-        onDuplicateSelected={mockOnDuplicateSelected}
-        onEditChart={mockOnEditChart}
-      />
-    );
-
-    expect(screen.getByText('tag1')).toBeInTheDocument();
-    expect(screen.getByText('tag2')).toBeInTheDocument();
-  });
 
   describe('Complex Selection Behaviors', () => {
     it('should show correct bulk select checkbox states', () => {
@@ -513,7 +490,6 @@ describe('ScoreExplorer', () => {
           ...mockCharts[0],
           title: 'Very Long Chart Title That Might Overflow The Container Width',
           artist: 'Artist With Very Long Name That Also Might Cause Layout Issues',
-          tags: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6'],
         }
       ];
 
@@ -536,10 +512,9 @@ describe('ScoreExplorer', () => {
       expect(screen.getByText('Very Long Chart Title That Might Overflow The Container Width')).toBeInTheDocument();
       expect(screen.getByText('Artist With Very Long Name That Also Might Cause Layout Issues')).toBeInTheDocument();
       
-      // 最初の2つのタグのみ表示される（slice(0, 2)の実装による）
-      expect(screen.getByText('tag1')).toBeInTheDocument();
-      expect(screen.getByText('tag2')).toBeInTheDocument();
-      expect(screen.queryByText('tag3')).not.toBeInTheDocument();
+      // タグは表示されないため、タイトルとアーティストのみ確認
+      expect(screen.getByText('Very Long Chart Title That Might Overflow The Container Width')).toBeInTheDocument();
+      expect(screen.getByText('Artist With Very Long Name That Also Might Cause Layout Issues')).toBeInTheDocument();
     });
   });
 
