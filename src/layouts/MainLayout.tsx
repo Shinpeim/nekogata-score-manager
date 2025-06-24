@@ -13,9 +13,10 @@ interface MainLayoutProps {
   children: ReactNode;
   explorerOpen?: boolean;
   setExplorerOpen?: (open: boolean) => void;
+  onEditChart?: (chartId: string) => void;
 }
 
-const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExplorerOpen, setExplorerOpen: propSetExplorerOpen }) => {
+const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExplorerOpen, setExplorerOpen: propSetExplorerOpen, onEditChart }) => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [localExplorerOpen, setLocalExplorerOpen] = useState(false);
   
@@ -121,6 +122,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
     }
   };
 
+  const handleEditChart = (chartId: string) => {
+    setCurrentChart(chartId);
+    if (onEditChart) {
+      onEditChart(chartId);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <Header 
@@ -143,6 +151,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
             onExportSelected={handleExportSelected}
             onDeleteSelected={handleDeleteSelected}
             onDuplicateSelected={handleDuplicateSelected}
+            onEditChart={handleEditChart}
             isMobile={true}
             onClose={() => setExplorerOpen(false)}
           />
@@ -162,6 +171,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
             onExportSelected={handleExportSelected}
             onDeleteSelected={handleDeleteSelected}
             onDuplicateSelected={handleDuplicateSelected}
+            onEditChart={handleEditChart}
             isMobile={false}
           />
         </aside>
