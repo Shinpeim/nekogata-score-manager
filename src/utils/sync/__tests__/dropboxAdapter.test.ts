@@ -20,6 +20,7 @@ describe('DropboxSyncAdapter', () => {
   let mockAuthProvider: {
     initialize: Mock;
     isAuthenticated: Mock;
+    hasValidRefreshToken: Mock;
     authenticate: Mock;
     signOut: Mock;
     getAccessToken: Mock;
@@ -33,6 +34,7 @@ describe('DropboxSyncAdapter', () => {
     mockAuthProvider = {
       initialize: vi.fn().mockResolvedValue(undefined),
       isAuthenticated: vi.fn().mockReturnValue(true),
+      hasValidRefreshToken: vi.fn().mockReturnValue(false),
       authenticate: vi.fn().mockResolvedValue(undefined),
       signOut: vi.fn(),
       getAccessToken: vi.fn().mockReturnValue('mock-access-token'),
@@ -66,10 +68,31 @@ describe('DropboxSyncAdapter', () => {
   });
 
   describe('isAuthenticated', () => {
-    it('should return auth provider authentication status', () => {
+    it('should return true when access token is valid', () => {
+      mockAuthProvider.isAuthenticated.mockReturnValue(true);
+      mockAuthProvider.hasValidRefreshToken.mockReturnValue(false);
+      
       const result = adapter.isAuthenticated();
       expect(result).toBe(true);
       expect(mockAuthProvider.isAuthenticated).toHaveBeenCalled();
+    });
+
+    it('should return true when only refresh token exists', () => {
+      mockAuthProvider.isAuthenticated.mockReturnValue(false);
+      mockAuthProvider.hasValidRefreshToken.mockReturnValue(true);
+      
+      const result = adapter.isAuthenticated();
+      expect(result).toBe(true);
+      expect(mockAuthProvider.isAuthenticated).toHaveBeenCalled();
+      expect(mockAuthProvider.hasValidRefreshToken).toHaveBeenCalled();
+    });
+
+    it('should return false when neither token exists', () => {
+      mockAuthProvider.isAuthenticated.mockReturnValue(false);
+      mockAuthProvider.hasValidRefreshToken.mockReturnValue(false);
+      
+      const result = adapter.isAuthenticated();
+      expect(result).toBe(false);
     });
   });
 

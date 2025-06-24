@@ -135,6 +135,48 @@ describe('DropboxAuthProvider', () => {
     });
   });
 
+  describe('hasValidRefreshToken', () => {
+    it('should return false when no tokens', () => {
+      expect(authProvider.hasValidRefreshToken()).toBe(false);
+    });
+
+    it('should return true when refresh token exists', async () => {
+      const tokenWithRefresh = {
+        accessToken: 'access-token',
+        refreshToken: 'refresh-token',
+        expiresAt: Date.now() + 3600000
+      };
+      localStorageMock.setItem('nekogata-dropbox-tokens', JSON.stringify(tokenWithRefresh));
+      await authProvider.initialize();
+      
+      expect(authProvider.hasValidRefreshToken()).toBe(true);
+    });
+
+    it('should return false when no refresh token', async () => {
+      const tokenWithoutRefresh = {
+        accessToken: 'access-token',
+        expiresAt: Date.now() + 3600000
+      };
+      localStorageMock.setItem('nekogata-dropbox-tokens', JSON.stringify(tokenWithoutRefresh));
+      await authProvider.initialize();
+      
+      expect(authProvider.hasValidRefreshToken()).toBe(false);
+    });
+
+    it('should return true even when access token is expired but refresh token exists', async () => {
+      const expiredTokenWithRefresh = {
+        accessToken: 'expired-token',
+        refreshToken: 'refresh-token',
+        expiresAt: Date.now() - 3600000
+      };
+      localStorageMock.setItem('nekogata-dropbox-tokens', JSON.stringify(expiredTokenWithRefresh));
+      await authProvider.initialize();
+      
+      expect(authProvider.hasValidRefreshToken()).toBe(true);
+      expect(authProvider.isAuthenticated()).toBe(false); // アクセストークンは期限切れ
+    });
+  });
+
   describe('authenticate', () => {
     it('should return existing valid token', async () => {
       const validToken = {
