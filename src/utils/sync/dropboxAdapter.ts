@@ -24,7 +24,8 @@ export class DropboxSyncAdapter implements ISyncAdapter {
   }
   
   isAuthenticated(): boolean {
-    return this.auth.isAuthenticated();
+    // アクセストークンが有効、またはリフレッシュトークンがある場合は認証済みとする
+    return this.auth.isAuthenticated() || this.auth.hasValidRefreshToken();
   }
   
   async authenticate(): Promise<void> {

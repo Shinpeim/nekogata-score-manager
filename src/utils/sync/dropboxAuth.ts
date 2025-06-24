@@ -224,6 +224,10 @@ export class DropboxAuthProvider {
     return !!(this.tokens && this.isTokenValid());
   }
 
+  hasValidRefreshToken(): boolean {
+    return !!(this.tokens?.refreshToken);
+  }
+
   private isTokenValid(): boolean {
     if (!this.tokens) {
       return false;
