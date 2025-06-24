@@ -153,6 +153,7 @@ describe('SortableChordItem', () => {
     it('should display current duration', () => {
       renderWithDndContext();
       
+      // 初期値は内部データから設定される
       const durationInput = screen.getByDisplayValue('4');
       expect(durationInput).toBeInTheDocument();
     });

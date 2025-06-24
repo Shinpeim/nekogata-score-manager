@@ -45,11 +45,54 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
   // バリデーション結果は保存時のみ実行（リアルタイムバリデーションを無効化）
 
   const handleSave = () => {
-    // 保存前に最終バリデーション
+    // 保存前に最終バリデーション（フォームの値も考慮）
+    const formErrors: string[] = [];
+    
+    // DOMから現在のフォーム値を取得してバリデーション
+    editedChart.sections?.forEach((section) => {
+      section.chords.forEach((chord, chordIndex) => {
+        if (chord.isLineBreak) return; // 改行マーカーはスキップ
+        
+        // コード名フィールドの値を取得
+        const chordInput = document.querySelector(
+          `[data-chord-item="${section.id}-${chordIndex}"] input[placeholder="コード名"]`
+        ) as HTMLInputElement;
+        
+        if (chordInput) {
+          const formValue = chordInput.value.trim();
+          if (!formValue) {
+            formErrors.push(`セクション「${section.name}」の${chordIndex + 1}番目のコード名「」が無効です`);
+          }
+        }
+        
+        // 拍数フィールドの値を取得
+        const durationInput = document.querySelector(
+          `[data-chord-item="${section.id}-${chordIndex}"] input[placeholder="拍数"]`
+        ) as HTMLInputElement;
+        
+        if (durationInput) {
+          const durationValue = durationInput.value.trim();
+          if (!durationValue) {
+            formErrors.push(`セクション「${section.name}」の${chordIndex + 1}番目の拍数が入力されていません`);
+          } else {
+            const duration = parseFloat(durationValue);
+            if (isNaN(duration) || duration < 0.5 || duration > 16) {
+              formErrors.push(`セクション「${section.name}」の${chordIndex + 1}番目の拍数「${durationValue}」が無効です（0.5〜16の範囲で入力してください）`);
+            } else if ((duration * 2) % 1 !== 0) {
+              formErrors.push(`セクション「${section.name}」の${chordIndex + 1}番目の拍数「${durationValue}」は0.5刻みで入力してください`);
+            }
+          }
+        }
+      });
+    });
+    
+    // 内部データのバリデーションも実行
     const result = validateChartInputs(editedChart);
-    if (!result.isValid) {
+    const allErrors = [...formErrors, ...result.errors];
+    
+    if (allErrors.length > 0) {
       // バリデーションエラーがある場合は保存しない
-      setValidationResult(result);
+      setValidationResult({ isValid: false, errors: allErrors });
       return;
     }
 
@@ -78,13 +121,7 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
             </button>
             <button
               onClick={handleSave}
-              disabled={!validationResult.isValid}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
-                validationResult.isValid
-                  ? 'bg-[#85B0B7] hover:bg-[#6B9CA5] text-white'
-                  : 'bg-slate-300 text-slate-500 cursor-not-allowed'
-              }`}
-              title={!validationResult.isValid ? '無効な入力値があるため保存できません' : ''}
+              className="px-4 py-2 rounded-md text-sm font-medium bg-[#85B0B7] hover:bg-[#6B9CA5] text-white"
               data-testid="editor-save-button"
             >
               保存
