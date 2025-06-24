@@ -232,16 +232,6 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
         <>
           <input
             type="text"
-            value={memoDisplayValue}
-            onChange={(e) => handleMemoChange(e.target.value)}
-            onFocus={handleMemoFocus}
-            onBlur={handleMemoBlur}
-            onKeyDown={handleMemoKeyDown}
-            className="w-full mb-1 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 border-slate-300 focus:ring-[#85B0B7] bg-slate-50"
-            placeholder="メモ（歌詞・演奏記号等）"
-          />
-          <input
-            type="text"
             value={displayValue}
             onChange={(e) => handleInputChange(e.target.value)}
             onFocus={handleInputFocus}
@@ -253,6 +243,16 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
                 : 'border-red-300 focus:ring-red-400 bg-red-50'
             }`}
             placeholder="コード名"
+          />
+          <input
+            type="text"
+            value={memoDisplayValue}
+            onChange={(e) => handleMemoChange(e.target.value)}
+            onFocus={handleMemoFocus}
+            onBlur={handleMemoBlur}
+            onKeyDown={handleMemoKeyDown}
+            className="w-full mb-1 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 border-slate-300 focus:ring-[#85B0B7] bg-slate-50"
+            placeholder="メモ（歌詞・演奏記号等）"
           />
           <input
             type="number"

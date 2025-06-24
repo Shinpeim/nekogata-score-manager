@@ -159,15 +159,15 @@ describe('SortableChordItem', () => {
   });
 
   describe('Component layout', () => {
-    it('should render memo input above chord name input', () => {
+    it('should render chord name input above memo input', () => {
       renderWithDndContext();
       
       const memoInput = screen.getByPlaceholderText('メモ（歌詞・演奏記号等）');
       const chordInput = screen.getByPlaceholderText('コード名');
       
-      // メモ入力フィールドがコード名入力フィールドより前に存在することを確認
+      // コード名入力フィールドがメモ入力フィールドより前に存在することを確認
       const inputs = screen.getAllByRole('textbox');
-      expect(inputs.indexOf(memoInput)).toBeLessThan(inputs.indexOf(chordInput));
+      expect(inputs.indexOf(chordInput)).toBeLessThan(inputs.indexOf(memoInput));
     });
 
     it('should apply correct styling to memo input', () => {

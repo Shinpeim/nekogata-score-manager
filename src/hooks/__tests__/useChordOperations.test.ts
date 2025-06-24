@@ -79,7 +79,7 @@ describe('useChordOperations', () => {
           ...mockChart.sections![0],
           chords: [
             ...mockChart.sections![0].chords,
-            { name: 'C', root: 'C', duration: 4, memo: '' }
+            { name: '', root: '', duration: undefined, memo: '' }
           ]
         }
       ]
