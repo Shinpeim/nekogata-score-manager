@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import type { Chord } from '../types';
-import { isValidFullChordName, isValidDuration } from '../utils/chordValidation';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -160,9 +159,9 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
     }
   };
 
-  // バリデーション状態
-  const isChordNameValid = isEditing ? isValidFullChordName(displayValue) : true;
-  const isDurationValid = isDurationEditing ? isValidDuration(durationDisplayValue) : true;
+  // バリデーション状態（リアルタイムバリデーションを無効化、保存時のみチェック）
+  const isChordNameValid = true;
+  const isDurationValid = true;
 
   return (
     <div

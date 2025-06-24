@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import type { ChordChart } from '../types';
 import BasicInfoEditor from './BasicInfoEditor';
 import SectionEditor from './SectionEditor';
@@ -42,11 +42,7 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
     setEditedChart(transposedChart);
   };
 
-  // チャートが変更されるたびにバリデーション実行
-  useEffect(() => {
-    const result = validateChartInputs(editedChart);
-    setValidationResult(result);
-  }, [editedChart]);
+  // バリデーション結果は保存時のみ実行（リアルタイムバリデーションを無効化）
 
   const handleSave = () => {
     // 保存前に最終バリデーション
@@ -57,6 +53,9 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
       return;
     }
 
+    // バリデーション成功時はエラーメッセージをクリア
+    setValidationResult({ isValid: true, errors: [] });
+    
     onSave({
       ...editedChart,
       updatedAt: new Date()
