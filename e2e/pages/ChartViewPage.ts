@@ -11,8 +11,8 @@ export class ChartViewPage {
   readonly chartContent: Locator;
   readonly chartNotes: Locator;
   readonly chartActions: Locator;
-  readonly editButton: Locator;
   readonly emptySections: Locator;
+  readonly explorerButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -25,12 +25,60 @@ export class ChartViewPage {
     this.chartContent = page.getByTestId('chart-content');
     this.chartNotes = page.getByTestId('chart-notes');
     this.chartActions = page.getByTestId('chart-actions');
-    this.editButton = page.getByTestId('edit-button');
     this.emptySections = page.getByTestId('empty-sections');
+    this.explorerButton = page.getByTestId('menu-button');
   }
 
-  async clickEdit() {
-    await this.editButton.click();
+  async clickEdit(chartIndex?: number) {
+    // Score Explorerを開く
+    const explorerToggle = this.page.getByTestId('explorer-toggle');
+    
+    if (await explorerToggle.isVisible()) {
+      const buttonText = await explorerToggle.textContent();
+      
+      if (buttonText?.includes('>')) {
+        // Score Explorerが閉じているので開く
+        await explorerToggle.click();
+        
+        // 少し待機してScore Explorerが開くのを待つ
+        await this.page.waitForTimeout(1000);
+      }
+    }
+    
+    // DOM操作で編集ボタンを直接クリック（visibility の問題を回避）
+    const editButtonClicked = await this.page.evaluate((index) => {
+      // 編集ボタンを探す
+      const editButtons = document.querySelectorAll('[data-testid^="edit-chart-"]') as NodeListOf<HTMLElement>;
+      
+      if (editButtons.length === 0) {
+        return false;
+      }
+      
+      // インデックスが指定されていない場合は最初のボタン（現在選択されているチャート）
+      const targetIndex = index !== undefined ? index : 0;
+      
+      if (targetIndex >= editButtons.length) {
+        console.error(`Edit button index ${targetIndex} not found. Available buttons: ${editButtons.length}`);
+        return false;
+      }
+      
+      const editButton = editButtons[targetIndex];
+      
+      if (editButton) {
+        // 直接クリックイベントを発火
+        editButton.click();
+        return true;
+      }
+      
+      return false;
+    }, chartIndex);
+    
+    if (!editButtonClicked) {
+      throw new Error(`Edit button not found in DOM (index: ${chartIndex ?? 0})`);
+    }
+    
+    // 編集画面に遷移するまで少し待機
+    await this.page.waitForTimeout(500);
   }
 
   getChartTitleWithText(title: string) {

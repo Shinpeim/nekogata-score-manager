@@ -11,11 +11,15 @@ interface ChordChartProps {
   onCreateNew?: () => void;
   onOpenImport?: () => void;
   onOpenExplorer?: () => void;
+  isEditing?: boolean;
+  onEditingComplete?: () => void;
 }
 
-const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew, onOpenImport, onOpenExplorer }) => {
-  const [isEditing, setIsEditing] = useState(false);
+const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew, onOpenImport, onOpenExplorer, isEditing: propIsEditing, onEditingComplete }) => {
+  const [localIsEditing, setLocalIsEditing] = useState(false);
   const { charts, currentChartId, updateChart } = useChartManagement();
+  
+  const isEditing = propIsEditing !== undefined ? propIsEditing : localIsEditing;
   
   const currentChart = currentChartId ? charts[currentChartId] : null;
   const displayChart = chartData || currentChart;
@@ -25,9 +29,19 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew, onOpenI
       if (currentChartId) {
         await updateChart(currentChartId, updatedChart);
       }
-      setIsEditing(false);
+      setLocalIsEditing(false);
+      if (onEditingComplete) {
+        onEditingComplete();
+      }
     } catch (error) {
       console.error('Failed to save chart:', error);
+    }
+  };
+
+  const handleCancel = () => {
+    setLocalIsEditing(false);
+    if (onEditingComplete) {
+      onEditingComplete();
     }
   };
 
@@ -46,7 +60,7 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew, onOpenI
       <ChordChartEditor
         chart={displayChart}
         onSave={handleSave}
-        onCancel={() => setIsEditing(false)}
+        onCancel={handleCancel}
       />
     );
   }
@@ -54,7 +68,7 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew, onOpenI
     <ChordChartViewer 
       chart={displayChart} 
       currentChartId={currentChartId} 
-      onEdit={() => setIsEditing(true)} 
+      onEdit={() => setLocalIsEditing(true)} 
     />
   );
 };

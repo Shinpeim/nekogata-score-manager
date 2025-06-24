@@ -38,7 +38,6 @@ test.describe('Nekogata Score Manager - コア機能テスト', () => {
     await expect(chartViewPage.chartNotes).toContainText('コア機能のテストです');
     
     // Step 3: 編集モードに切り替え
-    await expect(chartViewPage.editButton).toBeVisible();
     await chartViewPage.clickEdit();
     
     // Step 4: エディター表示確認
@@ -53,7 +52,6 @@ test.describe('Nekogata Score Manager - コア機能テスト', () => {
     // Step 6: ビューモードに戻ることを確認
     await chartViewPage.waitForChartToLoad();
     await expect(chartViewPage.chartTitle).toContainText('コア機能テスト');
-    await expect(chartViewPage.editButton).toBeVisible();
   });
 
   test('チャートの複製機能が動作する（Score Explorer経由）', async ({ page }) => {

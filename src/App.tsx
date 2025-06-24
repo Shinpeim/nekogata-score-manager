@@ -11,6 +11,7 @@ function App() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [explorerOpen, setExplorerOpen] = useState(false);
+  const [isEditingChart, setIsEditingChart] = useState(false);
   
   const {
     loadInitialData,
@@ -18,7 +19,8 @@ function App() {
     isLoading,
     error,
     clearError,
-    createNewChart
+    createNewChart,
+    currentChartId
   } = useChartManagement();
 
   // 同期機能を有効化（自動的に初期化される）
@@ -29,6 +31,11 @@ function App() {
       console.error('Failed to load initial data:', error);
     });
   }, [loadInitialData]);
+
+  // currentChartIdが変更されたら編集状態をリセット
+  useEffect(() => {
+    setIsEditingChart(false);
+  }, [currentChartId]);
 
   const handleCreateChart = async (chartData: ChordChartType) => {
     try {
@@ -56,6 +63,10 @@ function App() {
     setExplorerOpen(true);
   };
 
+  const handleEditChart = () => {
+    setIsEditingChart(true);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -69,7 +80,7 @@ function App() {
 
   return (
     <>
-      <MainLayout explorerOpen={explorerOpen} setExplorerOpen={setExplorerOpen}>
+      <MainLayout explorerOpen={explorerOpen} setExplorerOpen={setExplorerOpen} onEditChart={handleEditChart}>
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-md p-4 m-4">
             <div className="flex">
@@ -100,6 +111,8 @@ function App() {
           onCreateNew={handleShowCreateForm}
           onOpenImport={handleShowImportDialog}
           onOpenExplorer={handleOpenExplorer}
+          isEditing={isEditingChart}
+          onEditingComplete={() => setIsEditingChart(false)}
         />
       </MainLayout>
 

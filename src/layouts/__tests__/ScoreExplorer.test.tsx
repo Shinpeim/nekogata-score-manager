@@ -41,6 +41,7 @@ describe('ScoreExplorer', () => {
   const mockOnExportSelected = vi.fn();
   const mockOnDeleteSelected = vi.fn();
   const mockOnDuplicateSelected = vi.fn();
+  const mockOnEditChart = vi.fn();
   const mockOnClose = vi.fn();
 
   beforeEach(() => {
@@ -61,6 +62,7 @@ describe('ScoreExplorer', () => {
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
         onDuplicateSelected={mockOnDuplicateSelected}
+        onEditChart={mockOnEditChart}
       />
     );
 
@@ -81,6 +83,7 @@ describe('ScoreExplorer', () => {
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
         onDuplicateSelected={mockOnDuplicateSelected}
+        onEditChart={mockOnEditChart}
       />
     );
 
@@ -102,6 +105,7 @@ describe('ScoreExplorer', () => {
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
         onDuplicateSelected={mockOnDuplicateSelected}
+        onEditChart={mockOnEditChart}
       />
     );
 
@@ -123,6 +127,7 @@ describe('ScoreExplorer', () => {
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
         onDuplicateSelected={mockOnDuplicateSelected}
+        onEditChart={mockOnEditChart}
       />
     );
 
@@ -144,6 +149,7 @@ describe('ScoreExplorer', () => {
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
         onDuplicateSelected={mockOnDuplicateSelected}
+        onEditChart={mockOnEditChart}
       />
     );
 
@@ -167,11 +173,12 @@ describe('ScoreExplorer', () => {
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
         onDuplicateSelected={mockOnDuplicateSelected}
+        onEditChart={mockOnEditChart}
       />
     );
 
-    const currentChart = screen.getByText('Test Chart 1').closest('div');
-    expect(currentChart).toHaveClass('bg-slate-100', 'border-[#85B0B7]', 'border');
+    const chartItem = screen.getByTestId('chart-item-0');
+    expect(chartItem).toHaveClass('bg-slate-100', 'border-[#85B0B7]', 'border');
   });
 
   it('should call onSetCurrentChart when chart is clicked', () => {
@@ -188,6 +195,7 @@ describe('ScoreExplorer', () => {
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
         onDuplicateSelected={mockOnDuplicateSelected}
+        onEditChart={mockOnEditChart}
       />
     );
 
@@ -209,6 +217,7 @@ describe('ScoreExplorer', () => {
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
         onDuplicateSelected={mockOnDuplicateSelected}
+        onEditChart={mockOnEditChart}
       />
     );
 
@@ -230,6 +239,7 @@ describe('ScoreExplorer', () => {
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
         onDuplicateSelected={mockOnDuplicateSelected}
+        onEditChart={mockOnEditChart}
       />
     );
 
@@ -252,6 +262,7 @@ describe('ScoreExplorer', () => {
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
         onDuplicateSelected={mockOnDuplicateSelected}
+        onEditChart={mockOnEditChart}
       />
     );
 
@@ -275,6 +286,7 @@ describe('ScoreExplorer', () => {
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
         onDuplicateSelected={mockOnDuplicateSelected}
+        onEditChart={mockOnEditChart}
       />
     );
 
@@ -295,6 +307,7 @@ describe('ScoreExplorer', () => {
         onExportSelected={mockOnExportSelected}
         onDeleteSelected={mockOnDeleteSelected}
         onDuplicateSelected={mockOnDuplicateSelected}
+        onEditChart={mockOnEditChart}
       />
     );
 
@@ -317,7 +330,7 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-        />
+        onEditChart={mockOnEditChart}        />
       );
 
       const bulkCheckbox = screen.getByTitle('全て選択') as HTMLInputElement;
@@ -340,7 +353,7 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-        />
+        onEditChart={mockOnEditChart}        />
       );
 
       expect(bulkCheckbox.checked).toBe(false);
@@ -360,7 +373,7 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-        />
+        onEditChart={mockOnEditChart}        />
       );
 
       expect(bulkCheckbox.checked).toBe(true);
@@ -381,7 +394,7 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-        />
+        onEditChart={mockOnEditChart}        />
       );
 
       // 未選択時は「全て選択」
@@ -401,7 +414,7 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-        />
+        onEditChart={mockOnEditChart}        />
       );
 
       expect(screen.getByTitle('全て解除')).toBeInTheDocument();
@@ -421,7 +434,7 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-        />
+        onEditChart={mockOnEditChart}        />
       );
 
       const checkboxes = screen.getAllByRole('checkbox') as HTMLInputElement[];
@@ -450,7 +463,7 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-        />
+        onEditChart={mockOnEditChart}        />
       );
 
       // ActionDropdownが存在し、有効状態であることを確認
@@ -480,7 +493,7 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-        />
+        onEditChart={mockOnEditChart}        />
       );
 
       // 一括選択コントロールが表示されない
@@ -517,7 +530,7 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-        />
+        onEditChart={mockOnEditChart}        />
       );
 
       expect(screen.getByText('Very Long Chart Title That Might Overflow The Container Width')).toBeInTheDocument();
@@ -545,7 +558,7 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-          isMobile={true}
+        onEditChart={mockOnEditChart}          isMobile={true}
           onClose={mockOnClose}
         />
       );
@@ -572,7 +585,7 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-          isMobile={true}
+        onEditChart={mockOnEditChart}          isMobile={true}
           onClose={mockOnClose}
         />
       );
@@ -596,7 +609,7 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-          isMobile={true}
+        onEditChart={mockOnEditChart}          isMobile={true}
           onClose={mockOnClose}
         />
       );
@@ -622,7 +635,7 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-          isMobile={true}
+        onEditChart={mockOnEditChart}          isMobile={true}
           onClose={mockOnClose}
         />
       );
@@ -646,7 +659,7 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-          isMobile={false}
+        onEditChart={mockOnEditChart}          isMobile={false}
         />
       );
 
@@ -669,7 +682,7 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-          isMobile={false}
+        onEditChart={mockOnEditChart}          isMobile={false}
         />
       );
 
@@ -695,7 +708,7 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-          isMobile={false}
+        onEditChart={mockOnEditChart}          isMobile={false}
         />
       );
 
@@ -716,7 +729,7 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-          isMobile={true}
+        onEditChart={mockOnEditChart}          isMobile={true}
           onClose={mockOnClose}
         />
       );

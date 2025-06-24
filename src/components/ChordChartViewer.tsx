@@ -2,16 +2,15 @@ import React from 'react';
 import type { ChordChart as ChordChartType } from '../types';
 import BpmIndicator from './BpmIndicator';
 import ChordGridRenderer from './ChordGridRenderer';
-import ChordChartActions from './ChordChartActions';
 import { KEY_DISPLAY_NAMES } from '../utils/musicConstants';
 
 interface ChordChartViewerProps {
   chart: ChordChartType;
   currentChartId: string | null;
-  onEdit: () => void;
+  onEdit?: () => void;
 }
 
-const ChordChartViewer: React.FC<ChordChartViewerProps> = ({ chart, currentChartId, onEdit }) => {
+const ChordChartViewer: React.FC<ChordChartViewerProps> = ({ chart }) => {
   return (
     <div className="h-full bg-white overflow-y-auto" data-testid="chart-viewer">
       <div className="p-2">
@@ -62,12 +61,6 @@ const ChordChartViewer: React.FC<ChordChartViewerProps> = ({ chart, currentChart
             <p className="text-sm text-slate-700">{chart.notes}</p>
           </div>
         )}
-
-        <ChordChartActions 
-          chart={chart} 
-          currentChartId={currentChartId} 
-          onEdit={onEdit} 
-        />
       </div>
     </div>
   );
