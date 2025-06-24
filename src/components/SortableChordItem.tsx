@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import type { Chord } from '../types';
-import { isValidFullChordName, isValidDuration } from '../utils/chordValidation';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -31,9 +30,7 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
 }) => {
   // 入力表示用の状態
   const [displayValue, setDisplayValue] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
   const [durationDisplayValue, setDurationDisplayValue] = useState('');
-  const [isDurationEditing, setIsDurationEditing] = useState(false);
   const [memoDisplayValue, setMemoDisplayValue] = useState('');
   const [isMemoEditing, setIsMemoEditing] = useState(false);
 
@@ -52,20 +49,15 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  // chordが変更された時に表示値を更新
+  // 初期値設定（マウント時のみ）
   useEffect(() => {
-    if (!isEditing) {
-      const fullChordName = chord.name + (chord.base ? `/${chord.base}` : '');
-      setDisplayValue(fullChordName);
-    }
-  }, [chord.name, chord.base, isEditing]);
+    const fullChordName = chord.name + (chord.base ? `/${chord.base}` : '');
+    setDisplayValue(fullChordName);
+    setDurationDisplayValue(chord.duration ? String(chord.duration) : '');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // 空の依存配列で初回のみ実行
 
-  // 拍数が変更された時に表示値を更新
-  useEffect(() => {
-    if (!isDurationEditing) {
-      setDurationDisplayValue(String(chord.duration || 4));
-    }
-  }, [chord.duration, isDurationEditing]);
+  // 拍数は一方通行（フォーム→内部データ）のため書き戻し処理なし
 
   // メモが変更された時に表示値を更新
   useEffect(() => {
@@ -75,10 +67,7 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
   }, [chord.memo, isMemoEditing]);
 
   const handleInputFocus = () => {
-    setIsEditing(true);
-    // フォーカス時に完全な表記（オンコード含む）を表示
-    const fullChordName = chord.name + (chord.base ? `/${chord.base}` : '');
-    setDisplayValue(fullChordName);
+    // フォーム値はそのまま保持（内部データから書き戻さない）
   };
 
   const handleInputChange = (value: string) => {
@@ -87,15 +76,12 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
   };
 
   const handleInputBlur = () => {
-    setIsEditing(false);
-    // フォーカスアウト時にパースして確定
-    if (displayValue.trim()) {
-      onFinalizeChordName(sectionId, chordIndex, displayValue.trim());
-    } else {
-      // 空文字列の場合は元の値に戻す
-      const fullChordName = chord.name + (chord.base ? `/${chord.base}` : '');
-      setDisplayValue(fullChordName);
+    // フォーカスアウト時にパースして確定（フォーム→内部データの一方通行）
+    const trimmedValue = displayValue.trim();
+    if (trimmedValue) {
+      onFinalizeChordName(sectionId, chordIndex, trimmedValue);
     }
+    // 空文字列の場合はフォームの値をそのまま残す（バリデーションで検出）
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -106,8 +92,7 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
 
   // 拍数入力用のイベントハンドラー
   const handleDurationFocus = () => {
-    setIsDurationEditing(true);
-    setDurationDisplayValue(String(chord.duration || 4));
+    // フォーム値はそのまま保持（内部データから書き戻さない）
   };
 
   const handleDurationChange = (value: string) => {
@@ -116,15 +101,19 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
   };
 
   const handleDurationBlur = () => {
-    setIsDurationEditing(false);
-    // フォーカスアウト時にパースして確定
-    const parsedValue = parseFloat(durationDisplayValue);
-    if (!isNaN(parsedValue) && parsedValue >= 0.5 && parsedValue <= 16) {
-      onUpdateChord(sectionId, chordIndex, 'duration', parsedValue);
-    } else {
-      // 無効な値の場合は元の値に戻す
-      setDurationDisplayValue(String(chord.duration || 4));
+    // フォーカスアウト時に値を確定（フォーム→内部データの一方通行）
+    const trimmedValue = durationDisplayValue.trim();
+    if (trimmedValue === '') {
+      // 空文字列の場合、フォームの値はそのまま残す
+      return;
     }
+    
+    // 有効な数値の場合のみ更新
+    const parsedValue = parseFloat(trimmedValue);
+    if (!isNaN(parsedValue) && parsedValue >= 0.5 && parsedValue <= 16 && (parsedValue * 2) % 1 === 0) {
+      onUpdateChord(sectionId, chordIndex, 'duration', parsedValue);
+    }
+    // 無効な値の場合はフォームの値をそのまま残す（内部データに戻さない）
   };
 
   const handleDurationKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -160,9 +149,9 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
     }
   };
 
-  // バリデーション状態
-  const isChordNameValid = isEditing ? isValidFullChordName(displayValue) : true;
-  const isDurationValid = isDurationEditing ? isValidDuration(durationDisplayValue) : true;
+  // バリデーション状態（リアルタイムバリデーションを無効化、保存時のみチェック）
+  const isChordNameValid = true;
+  const isDurationValid = true;
 
   return (
     <div
@@ -232,16 +221,6 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
         <>
           <input
             type="text"
-            value={memoDisplayValue}
-            onChange={(e) => handleMemoChange(e.target.value)}
-            onFocus={handleMemoFocus}
-            onBlur={handleMemoBlur}
-            onKeyDown={handleMemoKeyDown}
-            className="w-full mb-1 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 border-slate-300 focus:ring-[#85B0B7] bg-slate-50"
-            placeholder="メモ（歌詞・演奏記号等）"
-          />
-          <input
-            type="text"
             value={displayValue}
             onChange={(e) => handleInputChange(e.target.value)}
             onFocus={handleInputFocus}
@@ -253,6 +232,16 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
                 : 'border-red-300 focus:ring-red-400 bg-red-50'
             }`}
             placeholder="コード名"
+          />
+          <input
+            type="text"
+            value={memoDisplayValue}
+            onChange={(e) => handleMemoChange(e.target.value)}
+            onFocus={handleMemoFocus}
+            onBlur={handleMemoBlur}
+            onKeyDown={handleMemoKeyDown}
+            className="w-full mb-1 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 border-slate-300 focus:ring-[#85B0B7] bg-slate-50"
+            placeholder="メモ（歌詞・演奏記号等）"
           />
           <input
             type="number"

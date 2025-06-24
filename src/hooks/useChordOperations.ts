@@ -22,9 +22,9 @@ export const useChordOperations = ({
 
   const addChordToSection = (sectionId: string) => {
     const newChord: Chord = {
-      name: 'C',
-      root: 'C',
-      duration: 4,
+      name: '',
+      root: '',
+      duration: undefined,
       memo: ''
     };
     
