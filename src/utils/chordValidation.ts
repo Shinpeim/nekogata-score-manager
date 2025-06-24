@@ -54,7 +54,7 @@ export const isValidChordName = (chordName: string): boolean => {
  */
 export const isValidDuration = (duration: string | number): boolean => {
   if (typeof duration === 'number') {
-    return !isNaN(duration) && duration >= 0.5 && duration <= 16;
+    return !isNaN(duration) && duration >= 0.5 && duration <= 16 && (duration * 2) % 1 === 0;
   }
   
   if (typeof duration === 'string') {
@@ -64,7 +64,7 @@ export const isValidDuration = (duration: string | number): boolean => {
     }
     
     const parsed = parseFloat(trimmed);
-    return !isNaN(parsed) && parsed >= 0.5 && parsed <= 16;
+    return !isNaN(parsed) && parsed >= 0.5 && parsed <= 16 && (parsed * 2) % 1 === 0;
   }
   
   return false;

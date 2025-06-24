@@ -54,6 +54,7 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
     const fullChordName = chord.name + (chord.base ? `/${chord.base}` : '');
     setDisplayValue(fullChordName);
     setDurationDisplayValue(chord.duration ? String(chord.duration) : '');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // 空の依存配列で初回のみ実行
 
   // 拍数は一方通行（フォーム→内部データ）のため書き戻し処理なし

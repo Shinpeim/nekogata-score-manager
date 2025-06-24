@@ -205,4 +205,170 @@ describe('ChordChartEditor', () => {
     
     expect(notesTextarea).toHaveValue('Updated notes');
   });
+
+  describe('バリデーション機能', () => {
+    it('空のコード名でバリデーションエラーを表示する', () => {
+      render(
+        <ChordChartEditor
+          chart={mockChart}
+          onSave={mockOnSave}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      // コード名を空にする
+      const chordInput = screen.getAllByPlaceholderText('コード名')[0];
+      fireEvent.change(chordInput, { target: { value: '' } });
+      fireEvent.blur(chordInput);
+
+      // 保存ボタンをクリック
+      const saveButton = screen.getByTestId('editor-save-button');
+      fireEvent.click(saveButton);
+
+      // エラーメッセージが表示されることを確認
+      expect(screen.getByText('入力エラーがあります')).toBeInTheDocument();
+      expect(screen.getByText(/1番目のコード名「」が無効です/)).toBeInTheDocument();
+      
+      // onSaveが呼ばれないことを確認
+      expect(mockOnSave).not.toHaveBeenCalled();
+    });
+
+    it('空の拍数でバリデーションエラーを表示する', () => {
+      render(
+        <ChordChartEditor
+          chart={mockChart}
+          onSave={mockOnSave}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      // 拍数を空にする
+      const durationInput = screen.getAllByPlaceholderText('拍数')[0];
+      fireEvent.change(durationInput, { target: { value: '' } });
+
+      // 保存ボタンをクリック
+      const saveButton = screen.getByTestId('editor-save-button');
+      fireEvent.click(saveButton);
+
+      // エラーメッセージが表示されることを確認
+      expect(screen.getByText('入力エラーがあります')).toBeInTheDocument();
+      expect(screen.getByText(/1番目の拍数が入力されていません/)).toBeInTheDocument();
+      
+      // onSaveが呼ばれないことを確認
+      expect(mockOnSave).not.toHaveBeenCalled();
+    });
+
+    it('無効な拍数（0.5刻みでない）でバリデーションエラーを表示する', () => {
+      render(
+        <ChordChartEditor
+          chart={mockChart}
+          onSave={mockOnSave}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      // 無効な拍数を入力
+      const durationInput = screen.getAllByPlaceholderText('拍数')[0];
+      fireEvent.change(durationInput, { target: { value: '1.3' } });
+
+      // 保存ボタンをクリック
+      const saveButton = screen.getByTestId('editor-save-button');
+      fireEvent.click(saveButton);
+
+      // エラーメッセージが表示されることを確認
+      expect(screen.getByText('入力エラーがあります')).toBeInTheDocument();
+      expect(screen.getByText(/0.5刻みで入力してください/)).toBeInTheDocument();
+      
+      // onSaveが呼ばれないことを確認
+      expect(mockOnSave).not.toHaveBeenCalled();
+    });
+
+    it('複数のバリデーションエラーを同時に表示する', () => {
+      render(
+        <ChordChartEditor
+          chart={mockChart}
+          onSave={mockOnSave}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      // コード名を空にする
+      const chordInput = screen.getAllByPlaceholderText('コード名')[0];
+      fireEvent.change(chordInput, { target: { value: '' } });
+      fireEvent.blur(chordInput);
+
+      // 拍数も空にする
+      const durationInput = screen.getAllByPlaceholderText('拍数')[0];
+      fireEvent.change(durationInput, { target: { value: '' } });
+
+      // 保存ボタンをクリック
+      const saveButton = screen.getByTestId('editor-save-button');
+      fireEvent.click(saveButton);
+
+      // 複数のエラーメッセージが表示されることを確認
+      expect(screen.getByText('入力エラーがあります')).toBeInTheDocument();
+      expect(screen.getByText(/1番目のコード名「」が無効です/)).toBeInTheDocument();
+      expect(screen.getByText(/1番目の拍数が入力されていません/)).toBeInTheDocument();
+      
+      // onSaveが呼ばれないことを確認
+      expect(mockOnSave).not.toHaveBeenCalled();
+    });
+
+    it('バリデーション成功後にエラーメッセージがクリアされる', () => {
+      render(
+        <ChordChartEditor
+          chart={mockChart}
+          onSave={mockOnSave}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      // 最初にエラーを発生させる
+      const chordInput = screen.getAllByPlaceholderText('コード名')[0];
+      fireEvent.change(chordInput, { target: { value: '' } });
+      fireEvent.blur(chordInput);
+
+      const saveButton = screen.getByTestId('editor-save-button');
+      fireEvent.click(saveButton);
+
+      // エラーメッセージが表示されることを確認
+      expect(screen.getByText('入力エラーがあります')).toBeInTheDocument();
+
+      // 有効な値に修正
+      fireEvent.change(chordInput, { target: { value: 'D' } });
+      fireEvent.blur(chordInput);
+
+      // 再度保存
+      fireEvent.click(saveButton);
+
+      // エラーメッセージが消えることを確認
+      expect(screen.queryByText('入力エラーがあります')).not.toBeInTheDocument();
+      
+      // onSaveが呼ばれることを確認
+      expect(mockOnSave).toHaveBeenCalled();
+    });
+
+    it('保存ボタンは常に有効である', () => {
+      render(
+        <ChordChartEditor
+          chart={mockChart}
+          onSave={mockOnSave}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      const saveButton = screen.getByTestId('editor-save-button');
+      
+      // 初期状態で有効
+      expect(saveButton).not.toBeDisabled();
+
+      // エラー状態でも有効
+      const chordInput = screen.getAllByPlaceholderText('コード名')[0];
+      fireEvent.change(chordInput, { target: { value: '' } });
+      fireEvent.blur(chordInput);
+      fireEvent.click(saveButton);
+      
+      expect(saveButton).not.toBeDisabled();
+    });
+  });
 });
