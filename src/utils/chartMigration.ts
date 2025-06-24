@@ -41,6 +41,20 @@ const migrateChartDataV2 = (chart: ChordChart): ChordChart => {
 };
 
 /**
+ * v3.0.0のマイグレーション: tagsフィールド削除
+ */
+const migrateChartDataV3 = (chart: ChordChart): ChordChart => {
+  // tagsフィールドを削除
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { tags, ...chartWithoutTags } = chart as ChordChart & { tags?: string[] };
+  return {
+    ...chartWithoutTags,
+    // version情報を3.0.0に設定
+    version: '3.0.0'
+  };
+};
+
+/**
  * セマンティックバージョンを解析
  */
 const parseVersion = (version: string): { major: number; minor: number; patch: number } => {
@@ -72,6 +86,7 @@ interface Migration {
 const migrations: Migration[] = [
   { version: '1.0.0', migrate: migrateChartDataV1 },
   { version: '2.0.0', migrate: migrateChartDataV2 },
+  { version: '3.0.0', migrate: migrateChartDataV3 },
 ];
 
 /**

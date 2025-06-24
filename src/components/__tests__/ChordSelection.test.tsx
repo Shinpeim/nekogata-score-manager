@@ -72,7 +72,6 @@ const sampleChart: ChordChart = {
   ],
   createdAt: new Date(),
   updatedAt: new Date(),
-  tags: ['test'],
 };
 
 describe('ChordSelection', () => {

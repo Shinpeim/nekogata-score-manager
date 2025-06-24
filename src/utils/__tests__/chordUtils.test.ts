@@ -17,7 +17,6 @@ describe('chordUtils', () => {
       expect(chart.timeSignature).toBe('4/4');
       expect(chart.sections).toHaveLength(1);
       expect(chart.sections[0].name).toBe('イントロ');
-      expect(chart.tags).toEqual([]);
       expect(chart.notes).toBe('');
     });
 

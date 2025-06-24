@@ -233,7 +233,6 @@ describe('syncStore', () => {
         key: 'C',
         timeSignature: '4/4',
         sections: [],
-        tags: [],
         notes: '',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -245,7 +244,6 @@ describe('syncStore', () => {
         key: 'G',
         timeSignature: '4/4',
         sections: [],
-        tags: [],
         notes: '',
         createdAt: new Date(),
         updatedAt: new Date()

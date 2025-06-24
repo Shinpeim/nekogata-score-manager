@@ -23,7 +23,6 @@ describe('chartMigration', () => {
     ],
     createdAt: new Date('2023-01-01'),
     updatedAt: new Date('2023-01-01'),
-    tags: ['test'],
     notes: undefined as unknown as string, // 古いデータではnotesが未定義
     version
   });
@@ -41,7 +40,7 @@ describe('chartMigration', () => {
       
       // v2マイグレーション: memo追加
       expect(result.sections[0].chords[0].memo).toBe('');
-      expect(result.version).toBe('2.0.0');
+      expect(result.version).toBe('3.0.0');
     });
 
     it('version 0.x.xの場合、v1とv2両方のマイグレーションを実行', () => {
@@ -53,7 +52,7 @@ describe('chartMigration', () => {
       expect(result.sections[0].beatsPerBar).toBe(3);
       expect(result.notes).toBe('');
       expect(result.sections[0].chords[0].memo).toBe('');
-      expect(result.version).toBe('2.0.0');
+      expect(result.version).toBe('3.0.0');
     });
 
     it('version 1.x.xの場合、v2マイグレーションのみ実行', () => {
@@ -67,7 +66,7 @@ describe('chartMigration', () => {
       
       // v2マイグレーション: memo追加
       expect(result.sections[0].chords[0].memo).toBe('');
-      expect(result.version).toBe('2.0.0');
+      expect(result.version).toBe('3.0.0');
     });
 
     it('version 2.x.xの場合、マイグレーション不要', () => {
@@ -78,7 +77,7 @@ describe('chartMigration', () => {
       // 何も変更されない
       expect(result.sections[0].beatsPerBar).toBe(4);
       expect(result.sections[0].chords[0].memo).toBe('');
-      expect(result.version).toBe('2.0.0');
+      expect(result.version).toBe('3.0.0');
     });
   });
 
@@ -156,7 +155,7 @@ describe('chartMigration', () => {
       
       const result = migrateChartData(chart);
       
-      expect(result.version).toBe('2.0.0');
+      expect(result.version).toBe('3.0.0');
     });
   });
 

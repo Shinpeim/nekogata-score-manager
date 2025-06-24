@@ -13,7 +13,6 @@ const sampleChart: ChordChart = {
   sections: [],
   createdAt: new Date(),
   updatedAt: new Date(),
-  tags: ['test'],
 };
 
 describe('BasicInfoEditor', () => {

@@ -24,7 +24,6 @@ test.describe('Nekogata Score Manager - 包括的なチャート作成フロー'
       key: 'G',
       tempo: 140,
       timeSignature: '3/4',
-      tags: 'ロック, アップテンポ',
       notes: 'イントロはアルペジオで開始'
     });
     
@@ -86,8 +85,6 @@ test.describe('Nekogata Score Manager - 包括的なチャート作成フロー'
     await chartFormPage.selectTimeSignature('6/8');
     await expect(chartFormPage.timeSignatureSelect).toHaveValue('6/8');
     
-    await chartFormPage.fillTags('テスト, ジャンル');
-    await expect(chartFormPage.tagsInput).toHaveValue('テスト, ジャンル');
     
     await chartFormPage.fillNotes('テスト用のメモです');
     await expect(chartFormPage.notesTextarea).toHaveValue('テスト用のメモです');

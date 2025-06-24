@@ -45,7 +45,6 @@ describe('ChordChartViewer', () => {
     ],
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
-    tags: ['pop', 'test'],
     notes: 'Test notes for this chart'
   };
 
@@ -62,12 +61,6 @@ describe('ChordChartViewer', () => {
       expect(screen.getByText('拍子: 4/4')).toBeInTheDocument();
     });
 
-    it('should render tags correctly', () => {
-      render(<ChordChartViewer chart={mockChartData} currentChartId="test-chart-1" onEdit={mockOnEdit} />);
-
-      expect(screen.getByText('pop')).toBeInTheDocument();
-      expect(screen.getByText('test')).toBeInTheDocument();
-    });
 
     it('should render notes section when notes exist', () => {
       render(<ChordChartViewer chart={mockChartData} currentChartId="test-chart-1" onEdit={mockOnEdit} />);
@@ -83,21 +76,7 @@ describe('ChordChartViewer', () => {
       expect(screen.queryByText('メモ')).not.toBeInTheDocument();
     });
 
-    it('should not render tags section when tags are empty', () => {
-      const chartWithoutTags = { ...mockChartData, tags: [] };
-      render(<ChordChartViewer chart={chartWithoutTags} currentChartId="test-chart-1" onEdit={mockOnEdit} />);
 
-      expect(screen.queryByText('pop')).not.toBeInTheDocument();
-      expect(screen.queryByText('test')).not.toBeInTheDocument();
-    });
-
-    it('should not render tags section when tags are undefined', () => {
-      const chartWithoutTags = { ...mockChartData, tags: undefined };
-      render(<ChordChartViewer chart={chartWithoutTags} currentChartId="test-chart-1" onEdit={mockOnEdit} />);
-
-      expect(screen.queryByText('pop')).not.toBeInTheDocument();
-      expect(screen.queryByText('test')).not.toBeInTheDocument();
-    });
 
     it('should handle missing optional fields gracefully', () => {
       const minimalChart: ChordChartType = {

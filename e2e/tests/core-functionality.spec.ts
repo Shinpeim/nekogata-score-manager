@@ -23,7 +23,6 @@ test.describe('Nekogata Score Manager - コア機能テスト', () => {
       key: 'D',
       tempo: 120,
       timeSignature: '4/4',
-      tags: 'テスト',
       notes: 'コア機能のテストです'
     });
     await chartFormPage.clickSave();

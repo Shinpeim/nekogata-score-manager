@@ -21,7 +21,6 @@ vi.mock('../../hooks/useChartManagement', () => ({
           timeSignature: '4/4',
           sections: [],
           notes: '',
-          tags: [],
           createdAt: new Date('2023-01-01T00:00:00.000Z'),
           updatedAt: new Date('2023-01-01T00:00:00.000Z'),
         },
