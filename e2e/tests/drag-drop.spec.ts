@@ -28,155 +28,77 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
     const chartFormPage = new ChordChartFormPage(page);
     const chartViewPage = new ChartViewPage(page);
     const chartEditorPage = new ChartEditorPage(page);
-    
-
-    // 基本チャート作成
-    await homePage.goto();
-    // Score Explorerを開いて新規作成
     const scoreExplorerPage = new ScoreExplorerPage(page, false);
+
+    // 1. チャート新規作成
+    await homePage.goto();
     await homePage.setDesktopViewport();
     await homePage.ensureExplorerOpen();
     await scoreExplorerPage.clickCreateNew();
+    
     await chartFormPage.fillBasicInfo({
-      title: 'D&Dコード順序テスト',
+      title: 'ドラッグ&ドロップテスト',
       artist: 'テストアーティスト'
     });
     await chartFormPage.clickSave();
-
-    // 新規作成後は直接編集画面に遷移
     await chartEditorPage.waitForEditorToLoad();
 
-    // 最初のセクションに4つのコードを追加: C - Am - F - G
+    // 2. 4つのコードを追加: C - Am - F - G
     const sectionIndex = 0;
+    const chords = ['C', 'Am', 'F', 'G'];
     
-    // セクション名を設定（必須項目の可能性）
+    // セクション名を設定
     await chartEditorPage.setSectionName(sectionIndex, 'Intro');
     
-    await chartEditorPage.addChordToSection(sectionIndex);
-    await chartEditorPage.waitForChordToAppear(sectionIndex, 1);
-    await chartEditorPage.setChordName(sectionIndex, 0, 'C');
-    await chartEditorPage.setChordDuration(sectionIndex, 0, '4');
-    
-    await chartEditorPage.addChordToSection(sectionIndex);
-    await chartEditorPage.waitForChordToAppear(sectionIndex, 2);
-    await chartEditorPage.setChordName(sectionIndex, 1, 'Am');
-    await chartEditorPage.setChordDuration(sectionIndex, 1, '4');
-    
-    await chartEditorPage.addChordToSection(sectionIndex);
-    await chartEditorPage.waitForChordToAppear(sectionIndex, 3);
-    await chartEditorPage.setChordName(sectionIndex, 2, 'F');
-    await chartEditorPage.setChordDuration(sectionIndex, 2, '4');
-    
-    await chartEditorPage.addChordToSection(sectionIndex);
-    await chartEditorPage.waitForChordToAppear(sectionIndex, 4);
-    await chartEditorPage.setChordName(sectionIndex, 3, 'G');
-    await chartEditorPage.setChordDuration(sectionIndex, 3, '4');
+    // コードを順番に追加
+    for (let i = 0; i < chords.length; i++) {
+      await chartEditorPage.addChordToSection(sectionIndex);
+      await chartEditorPage.waitForChordToAppear(sectionIndex, i + 1);
+      await chartEditorPage.setChordName(sectionIndex, i, chords[i]);
+      await chartEditorPage.setChordDuration(sectionIndex, i, '4');
+    }
 
-    // 初期順序確認: C - Am - F - G
-    let chordOrder = await chartEditorPage.getChordOrderInSection(sectionIndex);
-    expect(chordOrder).toEqual(['C', 'Am', 'F', 'G']);
+    // 3. 初期順序を確認
+    const initialOrder = await chartEditorPage.getChordOrderInSection(sectionIndex);
+    expect(initialOrder).toEqual(['C', 'Am', 'F', 'G']);
 
-    // ドラッグ&ドロップ: Am を F の後に移動
-    const beforeOrder = await chartEditorPage.getChordOrderInSection(sectionIndex);
+    // 4. ドラッグ&ドロップ: Am(index:1) を F(index:2) の後に移動
+    // 移動後の期待順序: C - F - Am - G
+    await chartEditorPage.dragChordToPosition(sectionIndex, 1, sectionIndex, 2);
     
-    const amIndex = beforeOrder.indexOf('Am');
-    const fIndex = beforeOrder.indexOf('F');
-    
-    // AmをFの後に移動
-    await chartEditorPage.dragChordToPosition(sectionIndex, amIndex, sectionIndex, fIndex);
+    // ドラッグ操作の完了を待つ
+    await page.waitForTimeout(1000);
 
-    // 順序変更後の確認
-    chordOrder = await chartEditorPage.getChordOrderInSection(sectionIndex);
-    
-    // 正確な順序変更を期待
-    expect(chordOrder).toEqual(['C', 'F', 'Am', 'G']);
+    // 5. 順序変更後の確認
+    const afterDragOrder = await chartEditorPage.getChordOrderInSection(sectionIndex);
+    expect(afterDragOrder).toEqual(['C', 'F', 'Am', 'G']);
 
-    // Wait for drag and drop operation to complete
-    await page.waitForFunction(() => {
-      const chordElements = document.querySelectorAll('[data-section-card] [data-chord-item] input[placeholder*="コード名"]');
-      const chords: string[] = [];
-      chordElements.forEach(el => {
-        const input = el as HTMLInputElement;
-        if (input.value && input.value.trim()) {
-          chords.push(input.value.trim());
-        }
-      });
-      return chords.length === 4 && chords[1] === 'F'; // Check if F is now at position 1
-    }, { timeout: 5000 });
-    
-    // DOM要素が安定していることを確認
-    await page.waitForFunction(() => {
-      const sections = document.querySelectorAll('[data-section-card]');
-      return sections.length > 0;
-    }, { timeout: 5000 });
-    
-    // 最終的なコード順序が期待通りになるまで待機
-    await page.waitForFunction(() => {
-      const chordElements = document.querySelectorAll('[data-section-card] [data-chord-item] input[placeholder*="コード名"]');
-      const chords: string[] = [];
-      chordElements.forEach(el => {
-        const input = el as HTMLInputElement;
-        if (input.value && input.value.trim()) {
-          chords.push(input.value.trim());
-        }
-      });
-      console.log('現在のコード順序:', chords);
-      return chords.length === 4 && chords.join(',') === 'C,F,Am,G';
-    }, { timeout: 10000 });
-
-    // 保存して永続化確認
+    // 6. 保存して永続化
     await chartEditorPage.clickSave();
+    await chartViewPage.waitForChartToLoad();
     
-    // バリデーションエラーのチェック（削除ボタンを除外）
-    const validationError = page.locator('.text-red-500:not(button), [role="alert"]').first();
-    if (await validationError.isVisible({ timeout: 2000 })) {
-      const errorText = await validationError.textContent();
-      console.error('バリデーションエラー:', errorText);
-      
-      // エラーメッセージの詳細を取得
-      const allErrors = await page.locator('.text-red-500:not(button)').allTextContents();
-      console.error('全てのエラー:', allErrors);
-    }
-    
-    // 保存が成功してビューアーモードに遷移するのを待つ
-    try {
-      await page.waitForSelector('[data-testid="chart-viewer"]', { state: 'visible', timeout: 5000 });
-      console.log('保存成功：ビューアーモードに遷移');
-    } catch (e) {
-      console.error('保存失敗：ビューアーモードに遷移しませんでした');
-      
-      // エディターの状態を詳しく確認
-      const hasEditor = await page.locator('[data-testid="chart-editor"]').isVisible();
-      console.log('エディターモードのまま:', hasEditor);
-      
-      // スクリーンショットを撮る
-      await page.screenshot({ path: 'drag-drop-save-error.png' });
-    }
-    
-    // Wait for save operation to complete fully
-    await page.waitForLoadState('networkidle');
-    
-    // 永続化確認のため、ページをリロードして再読み込み
+    // ビューアーモードでの順序確認
+    const viewerChords = await chartViewPage.getAllDisplayedChords();
+    expect(viewerChords).toEqual(['C', 'F', 'Am', 'G']);
+
+    // 7. ページリロードして永続化を確認
     await page.reload();
-    // Wait for page reload and data loading to complete
     await page.waitForLoadState('networkidle');
     
-    // リロード後、同じチャートが表示されているかチェック
-    const hasEditorAfterReload = await page.locator('[data-testid="chart-editor"]').isVisible({ timeout: 10000 });
-    const hasViewerAfterReload = await page.locator('[data-testid="chart-viewer"]').isVisible({ timeout: 5000 });
+    // リロード後の表示確認
+    const hasViewer = await page.locator('[data-testid="chart-viewer"]').isVisible({ timeout: 5000 });
+    const hasEditor = await page.locator('[data-testid="chart-editor"]').isVisible({ timeout: 5000 });
     
-    if (hasViewerAfterReload) {
-      // 表示モードの場合
+    if (hasViewer) {
       await chartViewPage.waitForChartToLoad();
-      const displayedChords = await chartViewPage.getAllDisplayedChords();
-      expect(displayedChords).toEqual(['C', 'F', 'Am', 'G']);
-    } else if (hasEditorAfterReload) {
-      // エディターモードの場合
+      const reloadedChords = await chartViewPage.getAllDisplayedChords();
+      expect(reloadedChords).toEqual(['C', 'F', 'Am', 'G']);
+    } else if (hasEditor) {
       await chartEditorPage.waitForEditorToLoad();
-      const editorChords = await chartEditorPage.getChordOrderInSection(sectionIndex);
-      expect(editorChords).toEqual(['C', 'F', 'Am', 'G']);
+      const reloadedChords = await chartEditorPage.getChordOrderInSection(sectionIndex);
+      expect(reloadedChords).toEqual(['C', 'F', 'Am', 'G']);
     } else {
-      throw new Error('エディターもビューアーも表示されていません');
+      throw new Error('リロード後にチャートが表示されませんでした');
     }
   });
 
