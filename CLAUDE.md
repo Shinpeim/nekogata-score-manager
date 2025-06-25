@@ -117,7 +117,7 @@ npm run knip                    # 未使用コード検出を実行
 分離されたZustandストアによる責務別アーキテクチャ：
 - **chartDataStore**: データのみ管理（charts, currentChartId）
 - **chartCrudStore**: CRUD操作とLocalForage永続化 
-- **syncStore**: Google Drive同期機能専用
+- **syncStore**: Dropbox同期機能専用
 - **統合フック**: `useChartManagement`で既存コンポーネントとの互換性維持
 - **サービス層**: 依存性注入によるビジネスロジック分離（chartCrudService）
 
@@ -137,13 +137,13 @@ MainLayout (orchestrates layout)
 - **Validation**: `chordValidation.ts`
 - **Chart Operations**: `chordCreation.ts`, `export.ts`, `importFunctions.ts`
 - **UI Helpers**: `lineBreakHelpers.ts`, `chordCopyPaste.ts`
-- **Sync System**: `utils/sync/` (Google Drive同期、認証、デバイス管理)
+- **Sync System**: `utils/sync/` (Dropbox同期、認証、デバイス管理)
 
 ### Data Models
 ```typescript
-ChordChart: { id, title, artist, key, tempo, timeSignature, sections[], tags[], notes, version? }
-ChordSection: { id, name, chords[], beatsPerBar, barsCount }
-Chord: { name, root, base?, duration?, isLineBreak? }
+ChordChart: { id, title, artist, key, tempo, timeSignature, sections[], createdAt, updatedAt, notes?, version? }
+ChordSection: { id, name?, chords[], beatsPerBar, barsCount }
+Chord: { name, root, base?, duration?, isLineBreak?, memo? }
 ```
 
 ### Custom Hooks Pattern
@@ -289,3 +289,8 @@ npm run test:coverage:html   # HTMLレポート生成
 ### E2E Testing
 
 - **E2E Tests Location**: e2eディレクトリにE2Eテストがある
+
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
