@@ -35,14 +35,3 @@ export interface StoredSetListData {
   currentSetListId: string | null;
 }
 
-/**
- * Dropbox同期用のセットリストデータ構造
- */
-export interface SyncSetListData {
-  /** データ構造のバージョン */
-  version: string;
-  /** セットリストの辞書 */
-  setLists: SetListLibrary;
-  /** 同期日時（ISO 8601形式） */
-  syncedAt: string;
-}
