@@ -167,12 +167,14 @@ describe('useSetListStore', () => {
           name: 'SetList 1',
           chartIds: ['chart1', 'chart2'],
           createdAt: new Date(),
+          updatedAt: new Date(),
         },
         'setlist2': {
           id: 'setlist2',
           name: 'SetList 2',
           chartIds: ['chart3'],
           createdAt: new Date(),
+          updatedAt: new Date(),
         },
       };
       

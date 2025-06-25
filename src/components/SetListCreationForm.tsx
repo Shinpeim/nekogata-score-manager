@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useSetListStore } from '../stores/setListStore';
+import { useSetListManagement } from '../hooks/useSetListManagement';
 
 interface SetListCreationFormProps {
   chartIds: string[];
@@ -14,7 +14,7 @@ const SetListCreationForm: React.FC<SetListCreationFormProps> = ({
 }) => {
   const [name, setName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
-  const { createSetList } = useSetListStore();
+  const { createNewSetList } = useSetListManagement();
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -32,7 +32,10 @@ const SetListCreationForm: React.FC<SetListCreationFormProps> = ({
 
     setIsCreating(true);
     try {
-      await createSetList(name.trim(), chartIds);
+      await createNewSetList({
+        name: name.trim(),
+        chartIds: chartIds
+      });
       onSuccess();
     } catch (error) {
       console.error('Failed to create setlist:', error);

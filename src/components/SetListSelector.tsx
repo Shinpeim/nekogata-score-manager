@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { useSetListStore } from '../stores/setListStore';
+import { useSetListManagement } from '../hooks/useSetListManagement';
 
 const SetListSelector: React.FC = () => {
-  const { setLists, currentSetListId, setCurrentSetList, deleteSetList } = useSetListStore();
+  const { setLists, currentSetListId, setCurrentSetList, deleteSetList } = useSetListManagement();
   const [showDropdown, setShowDropdown] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
 

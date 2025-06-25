@@ -1,12 +1,12 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import SetListSelector from '../SetListSelector';
-import { useSetListStore } from '../../stores/setListStore';
+import { useSetListManagement } from '../../hooks/useSetListManagement';
 
-// Mock the store
-vi.mock('../../stores/setListStore');
+// Mock the hook
+vi.mock('../../hooks/useSetListManagement');
 
-const mockUseSetListStore = vi.mocked(useSetListStore);
+const mockUseSetListManagement = vi.mocked(useSetListManagement);
 
 describe('SetListSelector', () => {
   const mockSetCurrentSetList = vi.fn();
@@ -18,47 +18,71 @@ describe('SetListSelector', () => {
       name: 'Live Set 2024',
       chartIds: ['chart1', 'chart2'],
       createdAt: new Date('2024-01-01'),
+      updatedAt: new Date('2024-01-01'),
     },
     'setlist2': {
       id: 'setlist2',
       name: 'Acoustic Session',
       chartIds: ['chart3'],
       createdAt: new Date('2024-01-02'),
+      updatedAt: new Date('2024-01-02'),
     },
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockDeleteSetList.mockResolvedValue(undefined);
+    
+    mockUseSetListManagement.mockReturnValue({
+      setLists: mockSetLists,
+      currentSetListId: null,
+      setCurrentSetList: mockSetCurrentSetList,
+      deleteSetList: mockDeleteSetList,
+      createNewSetList: vi.fn(),
+      addSetList: vi.fn(),
+      updateSetList: vi.fn(),
+      deleteMultipleSetLists: vi.fn(),
+      getCurrentSetList: vi.fn(),
+      getSetListById: vi.fn(),
+      getSetListsArray: vi.fn(),
+      hasSetLists: vi.fn(),
+      getSetListsCount: vi.fn(),
+      loadInitialData: vi.fn(),
+      loadFromStorage: vi.fn(),
+      applySyncedSetLists: vi.fn(),
+      isLoading: false,
+      error: null,
+      clearError: vi.fn()
+    });
   });
 
   it('セットリストが選択されていない場合、選択を促すテキストを表示', () => {
-    mockUseSetListStore.mockReturnValue({
-      setLists: mockSetLists,
-      currentSetListId: null,
-      createSetList: vi.fn(),
-      deleteSetList: mockDeleteSetList,
-      updateSetListOrder: vi.fn(),
-      setCurrentSetList: mockSetCurrentSetList,
-      setSetLists: vi.fn(),
-      clearSetLists: vi.fn(),
-    });
-
     render(<SetListSelector />);
 
     expect(screen.getByText('セットリストを選択')).toBeInTheDocument();
   });
 
   it('セットリストが選択されている場合、名前と曲数を表示', () => {
-    mockUseSetListStore.mockReturnValue({
+    mockUseSetListManagement.mockReturnValue({
       setLists: mockSetLists,
       currentSetListId: 'setlist1',
-      createSetList: vi.fn(),
-      deleteSetList: mockDeleteSetList,
-      updateSetListOrder: vi.fn(),
       setCurrentSetList: mockSetCurrentSetList,
-      setSetLists: vi.fn(),
-      clearSetLists: vi.fn(),
+      deleteSetList: mockDeleteSetList,
+      createNewSetList: vi.fn(),
+      addSetList: vi.fn(),
+      updateSetList: vi.fn(),
+      deleteMultipleSetLists: vi.fn(),
+      getCurrentSetList: vi.fn(),
+      getSetListById: vi.fn(),
+      getSetListsArray: vi.fn(),
+      hasSetLists: vi.fn(),
+      getSetListsCount: vi.fn(),
+      loadInitialData: vi.fn(),
+      loadFromStorage: vi.fn(),
+      applySyncedSetLists: vi.fn(),
+      isLoading: false,
+      error: null,
+      clearError: vi.fn()
     });
 
     render(<SetListSelector />);
@@ -68,17 +92,6 @@ describe('SetListSelector', () => {
   });
 
   it('ドロップダウンボタンをクリックするとオプションが表示される', () => {
-    mockUseSetListStore.mockReturnValue({
-      setLists: mockSetLists,
-      currentSetListId: null,
-      createSetList: vi.fn(),
-      deleteSetList: mockDeleteSetList,
-      updateSetListOrder: vi.fn(),
-      setCurrentSetList: mockSetCurrentSetList,
-      setSetLists: vi.fn(),
-      clearSetLists: vi.fn(),
-    });
-
     render(<SetListSelector />);
 
     const button = screen.getByTestId('setlist-selector-button');
@@ -90,17 +103,6 @@ describe('SetListSelector', () => {
   });
 
   it('セットリストオプションをクリックすると選択される', () => {
-    mockUseSetListStore.mockReturnValue({
-      setLists: mockSetLists,
-      currentSetListId: null,
-      createSetList: vi.fn(),
-      deleteSetList: mockDeleteSetList,
-      updateSetListOrder: vi.fn(),
-      setCurrentSetList: mockSetCurrentSetList,
-      setSetLists: vi.fn(),
-      clearSetLists: vi.fn(),
-    });
-
     render(<SetListSelector />);
 
     const button = screen.getByTestId('setlist-selector-button');
@@ -113,15 +115,26 @@ describe('SetListSelector', () => {
   });
 
   it('(セットリストなし)をクリックすると選択がクリアされる', () => {
-    mockUseSetListStore.mockReturnValue({
+    mockUseSetListManagement.mockReturnValue({
       setLists: mockSetLists,
       currentSetListId: 'setlist1',
-      createSetList: vi.fn(),
-      deleteSetList: mockDeleteSetList,
-      updateSetListOrder: vi.fn(),
       setCurrentSetList: mockSetCurrentSetList,
-      setSetLists: vi.fn(),
-      clearSetLists: vi.fn(),
+      deleteSetList: mockDeleteSetList,
+      createNewSetList: vi.fn(),
+      addSetList: vi.fn(),
+      updateSetList: vi.fn(),
+      deleteMultipleSetLists: vi.fn(),
+      getCurrentSetList: vi.fn(),
+      getSetListById: vi.fn(),
+      getSetListsArray: vi.fn(),
+      hasSetLists: vi.fn(),
+      getSetListsCount: vi.fn(),
+      loadInitialData: vi.fn(),
+      loadFromStorage: vi.fn(),
+      applySyncedSetLists: vi.fn(),
+      isLoading: false,
+      error: null,
+      clearError: vi.fn()
     });
 
     render(<SetListSelector />);
@@ -136,17 +149,6 @@ describe('SetListSelector', () => {
   });
 
   it('削除ボタンをクリックすると確認ダイアログが表示される', () => {
-    mockUseSetListStore.mockReturnValue({
-      setLists: mockSetLists,
-      currentSetListId: null,
-      createSetList: vi.fn(),
-      deleteSetList: mockDeleteSetList,
-      updateSetListOrder: vi.fn(),
-      setCurrentSetList: mockSetCurrentSetList,
-      setSetLists: vi.fn(),
-      clearSetLists: vi.fn(),
-    });
-
     render(<SetListSelector />);
 
     const button = screen.getByTestId('setlist-selector-button');
@@ -160,17 +162,6 @@ describe('SetListSelector', () => {
   });
 
   it('削除確認ダイアログで削除を実行できる', async () => {
-    mockUseSetListStore.mockReturnValue({
-      setLists: mockSetLists,
-      currentSetListId: null,
-      createSetList: vi.fn(),
-      deleteSetList: mockDeleteSetList,
-      updateSetListOrder: vi.fn(),
-      setCurrentSetList: mockSetCurrentSetList,
-      setSetLists: vi.fn(),
-      clearSetLists: vi.fn(),
-    });
-
     render(<SetListSelector />);
 
     const button = screen.getByTestId('setlist-selector-button');
@@ -188,17 +179,6 @@ describe('SetListSelector', () => {
   });
 
   it('削除確認ダイアログでキャンセルできる', () => {
-    mockUseSetListStore.mockReturnValue({
-      setLists: mockSetLists,
-      currentSetListId: null,
-      createSetList: vi.fn(),
-      deleteSetList: mockDeleteSetList,
-      updateSetListOrder: vi.fn(),
-      setCurrentSetList: mockSetCurrentSetList,
-      setSetLists: vi.fn(),
-      clearSetLists: vi.fn(),
-    });
-
     render(<SetListSelector />);
 
     const button = screen.getByTestId('setlist-selector-button');
@@ -215,15 +195,26 @@ describe('SetListSelector', () => {
   });
 
   it('現在選択中のセットリストにチェックマークが表示される', () => {
-    mockUseSetListStore.mockReturnValue({
+    mockUseSetListManagement.mockReturnValue({
       setLists: mockSetLists,
       currentSetListId: 'setlist1',
-      createSetList: vi.fn(),
-      deleteSetList: mockDeleteSetList,
-      updateSetListOrder: vi.fn(),
       setCurrentSetList: mockSetCurrentSetList,
-      setSetLists: vi.fn(),
-      clearSetLists: vi.fn(),
+      deleteSetList: mockDeleteSetList,
+      createNewSetList: vi.fn(),
+      addSetList: vi.fn(),
+      updateSetList: vi.fn(),
+      deleteMultipleSetLists: vi.fn(),
+      getCurrentSetList: vi.fn(),
+      getSetListById: vi.fn(),
+      getSetListsArray: vi.fn(),
+      hasSetLists: vi.fn(),
+      getSetListsCount: vi.fn(),
+      loadInitialData: vi.fn(),
+      loadFromStorage: vi.fn(),
+      applySyncedSetLists: vi.fn(),
+      isLoading: false,
+      error: null,
+      clearError: vi.fn()
     });
 
     render(<SetListSelector />);
@@ -236,15 +227,26 @@ describe('SetListSelector', () => {
   });
 
   it('セットリストが存在しない場合、適切なメッセージを表示', () => {
-    mockUseSetListStore.mockReturnValue({
+    mockUseSetListManagement.mockReturnValue({
       setLists: {},
       currentSetListId: null,
-      createSetList: vi.fn(),
-      deleteSetList: mockDeleteSetList,
-      updateSetListOrder: vi.fn(),
       setCurrentSetList: mockSetCurrentSetList,
-      setSetLists: vi.fn(),
-      clearSetLists: vi.fn(),
+      deleteSetList: mockDeleteSetList,
+      createNewSetList: vi.fn(),
+      addSetList: vi.fn(),
+      updateSetList: vi.fn(),
+      deleteMultipleSetLists: vi.fn(),
+      getCurrentSetList: vi.fn(),
+      getSetListById: vi.fn(),
+      getSetListsArray: vi.fn(),
+      hasSetLists: vi.fn(),
+      getSetListsCount: vi.fn(),
+      loadInitialData: vi.fn(),
+      loadFromStorage: vi.fn(),
+      applySyncedSetLists: vi.fn(),
+      isLoading: false,
+      error: null,
+      clearError: vi.fn()
     });
 
     render(<SetListSelector />);

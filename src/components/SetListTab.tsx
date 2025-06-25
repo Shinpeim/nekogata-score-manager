@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSetListStore } from '../stores/setListStore';
+import { useSetListManagement } from '../hooks/useSetListManagement';
 import { useChartDataStore } from '../stores/chartDataStore';
 import SetListSelector from './SetListSelector';
 
@@ -14,7 +14,7 @@ const SetListTab: React.FC<SetListTabProps> = ({
   isMobile = false,
   onClose,
 }) => {
-  const { setLists, currentSetListId } = useSetListStore();
+  const { setLists, currentSetListId } = useSetListManagement();
   const { charts } = useChartDataStore();
 
   const currentSetList = currentSetListId ? setLists[currentSetListId] : null;

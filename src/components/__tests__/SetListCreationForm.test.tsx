@@ -1,33 +1,50 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import SetListCreationForm from '../SetListCreationForm';
-import { useSetListStore } from '../../stores/setListStore';
+import { useSetListManagement } from '../../hooks/useSetListManagement';
 
-// Mock the store
-vi.mock('../../stores/setListStore');
+// Mock the hook
+vi.mock('../../hooks/useSetListManagement');
 
-const mockUseSetListStore = vi.mocked(useSetListStore);
+const mockUseSetListManagement = vi.mocked(useSetListManagement);
 
 describe('SetListCreationForm', () => {
   const mockOnSuccess = vi.fn();
   const mockOnCancel = vi.fn();
-  const mockCreateSetList = vi.fn();
+  const mockCreateNewSetList = vi.fn();
 
   const chartIds = ['chart1', 'chart2', 'chart3'];
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockCreateSetList.mockResolvedValue('new-setlist-id');
+    mockCreateNewSetList.mockResolvedValue({
+      id: 'new-setlist-id',
+      name: 'Test SetList',
+      chartIds: [],
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
     
-    mockUseSetListStore.mockReturnValue({
+    mockUseSetListManagement.mockReturnValue({
       setLists: {},
       currentSetListId: null,
-      createSetList: mockCreateSetList,
+      createNewSetList: mockCreateNewSetList,
+      addSetList: vi.fn(),
+      updateSetList: vi.fn(),
       deleteSetList: vi.fn(),
-      updateSetListOrder: vi.fn(),
+      deleteMultipleSetLists: vi.fn(),
       setCurrentSetList: vi.fn(),
-      setSetLists: vi.fn(),
-      clearSetLists: vi.fn(),
+      getCurrentSetList: vi.fn(),
+      getSetListById: vi.fn(),
+      getSetListsArray: vi.fn(),
+      hasSetLists: vi.fn(),
+      getSetListsCount: vi.fn(),
+      loadInitialData: vi.fn(),
+      loadFromStorage: vi.fn(),
+      applySyncedSetLists: vi.fn(),
+      isLoading: false,
+      error: null,
+      clearError: vi.fn()
     });
   });
 
@@ -75,7 +92,10 @@ describe('SetListCreationForm', () => {
     fireEvent.click(createButton);
 
     await waitFor(() => {
-      expect(mockCreateSetList).toHaveBeenCalledWith('My New Setlist', chartIds);
+      expect(mockCreateNewSetList).toHaveBeenCalledWith({
+        name: 'My New Setlist',
+        chartIds: chartIds
+      });
       expect(mockOnSuccess).toHaveBeenCalled();
     });
   });
@@ -95,7 +115,10 @@ describe('SetListCreationForm', () => {
     fireEvent.submit(input.closest('form')!);
 
     await waitFor(() => {
-      expect(mockCreateSetList).toHaveBeenCalledWith('Form Submit Test', chartIds);
+      expect(mockCreateNewSetList).toHaveBeenCalledWith({
+        name: 'Form Submit Test',
+        chartIds: chartIds
+      });
       expect(mockOnSuccess).toHaveBeenCalled();
     });
   });
@@ -164,7 +187,7 @@ describe('SetListCreationForm', () => {
     const createPromise = new Promise<string>((resolve) => {
       resolveCreate = resolve;
     });
-    mockCreateSetList.mockReturnValue(createPromise);
+    mockCreateNewSetList.mockReturnValue(createPromise);
 
     render(
       <SetListCreationForm
@@ -196,7 +219,7 @@ describe('SetListCreationForm', () => {
 
   it('作成エラー時は適切にハンドリングされる', async () => {
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
-    mockCreateSetList.mockRejectedValue(new Error('Creation failed'));
+    mockCreateNewSetList.mockRejectedValue(new Error('Creation failed'));
 
     render(
       <SetListCreationForm
