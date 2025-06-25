@@ -79,11 +79,12 @@ export class ScoreExplorerPage {
   }
 
   getSelectionStatus() {
+    // シンプルにテキストで検索（両方のモードで動作）
     return this.page.locator('text=件選択中');
   }
 
   async openActionDropdown() {
-    const actionButton = this.page.locator('[title="アクション"]');
+    const actionButton = this.page.getByTestId(`action-dropdown-button-${this.isMobile ? 'mobile' : 'desktop'}`);
     await expect(actionButton).toBeVisible();
     await actionButton.click();
   }
@@ -119,11 +120,6 @@ export class ScoreExplorerPage {
     await this.page.getByTestId(testId).click({ force: true });
   }
 
-  async clickActionDropdown() {
-    const actionButton = this.page.locator('[title="アクション"]');
-    await expect(actionButton).toBeVisible();
-    await actionButton.click();
-  }
 
   async clickDuplicateSelected() {
     const duplicateButton = this.page.locator('button:has-text("複製")');

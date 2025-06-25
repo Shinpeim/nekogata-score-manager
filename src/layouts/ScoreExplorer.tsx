@@ -111,6 +111,7 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
             onDeleteSelected={onDeleteSelected}
             onDuplicateSelected={onDuplicateSelected}
             onCreateSetList={handleCreateSetList}
+            isMobile={isMobile}
           />
           <span className="text-xs text-slate-500">
             {selectedChartIds.length > 0 ? `${selectedChartIds.length}件選択中` : '未選択'}

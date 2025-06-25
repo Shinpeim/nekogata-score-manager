@@ -80,7 +80,7 @@ test.describe('Nekogata Score Manager - コア機能テスト', () => {
     await chartViewPage.waitForChartToLoad();
     
     // Score Explorerを開く
-    await homePage.clickOpenExplorer();
+    await homePage.ensureExplorerOpen();
     
     // 複製前のチャート数を記録（デスクトップScore Explorerのみ）
     const initialItemCount = await scoreExplorerPage.getChartItemCount();
@@ -93,7 +93,7 @@ test.describe('Nekogata Score Manager - コア機能テスト', () => {
     console.log('Selection status:', selectionStatus);
     
     // Score Explorerから複製を実行
-    await scoreExplorerPage.clickActionDropdown();
+    await scoreExplorerPage.openActionDropdown();
     await scoreExplorerPage.clickDuplicateSelected();
     
     // Wait for duplication to complete by checking the item count increases

@@ -55,14 +55,35 @@ export class HomePage {
       // フォールバック: explorer-toggleを使用
       await this.explorerToggle.click();
     }
+    
+    // Score Explorerが開くのを待つ
+    await this.page.waitForTimeout(300); // CSS遷移を待つ
   }
 
   async toggleExplorer() {
     await this.explorerToggle.click();
   }
+  
+  async ensureExplorerOpen() {
+    // ビューポートサイズに基づいて適切なセレクタを選択
+    const viewportSize = this.page.viewportSize();
+    const isDesktop = viewportSize && viewportSize.width >= 768;
+    const chartsTabSelector = isDesktop ? '[data-testid="charts-tab-desktop"]' : '[data-testid="charts-tab-mobile"]';
+    
+    // Score Explorerが開いているか確認
+    const isOpen = await this.page.locator(chartsTabSelector).isVisible({ timeout: 1000 }).catch(() => false);
+    
+    if (!isOpen) {
+      await this.explorerToggle.click();
+      // Wait for Score Explorer to open
+      await this.page.locator(chartsTabSelector).waitFor({ state: 'visible', timeout: 5000 });
+    }
+  }
 
   async setDesktopViewport() {
     await this.page.setViewportSize({ width: 1280, height: 720 });
+    // Wait for viewport change to take effect
+    await this.page.waitForTimeout(100);
   }
 
   getEmptyStateMessage() {
