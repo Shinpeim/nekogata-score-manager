@@ -36,7 +36,7 @@ const SetListSelector: React.FC = () => {
     <div className="relative">
       <button
         onClick={() => setShowDropdown(!showDropdown)}
-        className="w-full p-3 bg-slate-50 hover:bg-slate-100 rounded-md border border-slate-200 text-left flex items-center justify-between"
+        className="w-full px-3 py-2 bg-white hover:bg-slate-50 rounded-md border border-slate-300 hover:border-slate-400 text-left flex items-center justify-between transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-[#85B0B7] focus:border-[#85B0B7]"
         data-testid="setlist-selector-button"
       >
         <div className="flex-1">
@@ -50,19 +50,21 @@ const SetListSelector: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="text-sm text-slate-500">
+            <div className="text-sm text-slate-600">
               セットリストを選択
             </div>
           )}
         </div>
-        <svg 
-          className={`w-4 h-4 text-slate-500 transition-transform ${showDropdown ? 'rotate-180' : ''}`}
-          fill="none" 
-          viewBox="0 0 24 24" 
-          stroke="currentColor"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        <div className="pointer-events-none">
+          <svg 
+            className={`w-5 h-5 text-slate-400 transition-transform ${showDropdown ? 'rotate-180' : ''}`}
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
       </button>
 
       {showDropdown && (
