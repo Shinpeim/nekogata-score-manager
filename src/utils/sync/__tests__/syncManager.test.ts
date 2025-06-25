@@ -10,7 +10,8 @@ vi.mock('../deviceId', () => ({
 }));
 vi.mock('../../storage', () => ({
   storageService: {
-    loadDeletedCharts: vi.fn().mockResolvedValue([])
+    loadDeletedCharts: vi.fn().mockResolvedValue([]),
+    loadDeletedSetLists: vi.fn().mockResolvedValue([])
   }
 }));
 
@@ -87,13 +88,16 @@ describe('SyncManager', () => {
       (mockAdapter.pull as ReturnType<typeof vi.fn>).mockResolvedValue({
         charts: mockRemoteCharts,
         metadata: mockRemoteMetadata,
-        deletedCharts: []
+        deletedCharts: [],
+        setLists: [],
+        setListMetadata: {},
+        deletedSetLists: []
       });
       (mockAdapter.push as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
     });
 
     it('should sync successfully without conflicts', async () => {
-      const result = await syncManager.sync(mockLocalCharts);
+      const result = await syncManager.sync(mockLocalCharts, []);
       
       expect(result.success).toBe(true);
       expect(result.conflicts).toHaveLength(0);
@@ -118,11 +122,14 @@ describe('SyncManager', () => {
             deviceId: 'other-device'
           }
         },
-        deletedCharts: []
+        deletedCharts: [],
+        setLists: [],
+        setListMetadata: {},
+        deletedSetLists: []
       });
 
       const onConflict = vi.fn().mockResolvedValue('overwrite');
-      const result = await syncManager.sync(mockLocalCharts, onConflict);
+      const result = await syncManager.sync(mockLocalCharts, [], onConflict);
       
       expect(result.conflicts).toHaveLength(1);
       expect(onConflict).toHaveBeenCalledWith(expect.arrayContaining([
@@ -130,7 +137,7 @@ describe('SyncManager', () => {
           localChart: mockLocalCharts[0],
           remoteChart
         })
-      ]));
+      ]), []);
     });
 
     it('should handle sync cancellation on conflict', async () => {
@@ -144,11 +151,14 @@ describe('SyncManager', () => {
             deviceId: 'other-device'
           }
         },
-        deletedCharts: []
+        deletedCharts: [],
+        setLists: [],
+        setListMetadata: {},
+        deletedSetLists: []
       });
 
       const onConflict = vi.fn().mockResolvedValue('cancel');
-      const result = await syncManager.sync(mockLocalCharts, onConflict);
+      const result = await syncManager.sync(mockLocalCharts, [], onConflict);
       
       expect(result.success).toBe(false);
       expect(mockAdapter.push).not.toHaveBeenCalled();
@@ -157,7 +167,7 @@ describe('SyncManager', () => {
     it('should handle sync errors', async () => {
       (mockAdapter.pull as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Failed to fetch'));
       
-      const result = await syncManager.sync(mockLocalCharts);
+      const result = await syncManager.sync(mockLocalCharts, []);
       
       expect(result.success).toBe(false);
       expect(result.errors).toHaveLength(1);
@@ -166,10 +176,10 @@ describe('SyncManager', () => {
 
     it('should prevent concurrent sync operations', async () => {
       // 最初の同期を開始（完了しない）
-      const firstSync = syncManager.sync(mockLocalCharts);
+      const firstSync = syncManager.sync(mockLocalCharts, []);
       
       // 2回目の同期を試みる
-      await expect(syncManager.sync(mockLocalCharts)).rejects.toThrow('Sync already in progress');
+      await expect(syncManager.sync(mockLocalCharts, [])).rejects.toThrow('Sync already in progress');
       
       // 最初の同期を完了させる
       await firstSync;
@@ -238,10 +248,13 @@ describe('SyncManager', () => {
       (mockAdapter.pull as ReturnType<typeof vi.fn>).mockResolvedValue({
         charts: mockRemoteCharts,
         metadata: {},
-        deletedCharts
+        deletedCharts,
+        setLists: [],
+        setListMetadata: {},
+        deletedSetLists: []
       });
 
-      const result = await syncManager.sync(mockLocalCharts);
+      const result = await syncManager.sync(mockLocalCharts, []);
 
       expect(result.success).toBe(true);
       expect(result.mergedCharts).toHaveLength(1);
@@ -262,10 +275,13 @@ describe('SyncManager', () => {
       (mockAdapter.pull as ReturnType<typeof vi.fn>).mockResolvedValue({
         charts: [],
         metadata: {},
-        deletedCharts: remoteDeletedCharts
+        deletedCharts: remoteDeletedCharts,
+        setLists: [],
+        setListMetadata: {},
+        deletedSetLists: []
       });
 
-      await syncManager.sync([]);
+      await syncManager.sync([], []);
 
       expect(mockAdapter.push).toHaveBeenCalledWith(
         expect.any(Array),
@@ -273,7 +289,10 @@ describe('SyncManager', () => {
         expect.arrayContaining([
           expect.objectContaining({ id: 'chart-3' }),
           expect.objectContaining({ id: 'chart-4' })
-        ])
+        ]),
+        expect.any(Array),
+        expect.any(Object),
+        expect.any(Array)
       );
     });
 
@@ -286,10 +305,13 @@ describe('SyncManager', () => {
       (mockAdapter.pull as ReturnType<typeof vi.fn>).mockResolvedValue({
         charts: [],
         metadata: {},
-        deletedCharts: [newerDeletedChart]
+        deletedCharts: [newerDeletedChart],
+        setLists: [],
+        setListMetadata: {},
+        deletedSetLists: []
       });
 
-      await syncManager.sync([]);
+      await syncManager.sync([], []);
 
       expect(mockAdapter.push).toHaveBeenCalledWith(
         expect.any(Array),
@@ -300,7 +322,10 @@ describe('SyncManager', () => {
             deletedAt: '2024-01-02T00:00:00.000Z',
             deviceId: 'device-2'
           })
-        ])
+        ]),
+        expect.any(Array),
+        expect.any(Object),
+        expect.any(Array)
       );
     });
 
@@ -336,10 +361,13 @@ describe('SyncManager', () => {
             deviceId: 'remote-device'
           }
         },
-        deletedCharts: []
+        deletedCharts: [],
+        setLists: [],
+        setListMetadata: {},
+        deletedSetLists: []
       });
 
-      const result = await syncManager.sync([]);
+      const result = await syncManager.sync([], []);
 
       // 削除が優先されるため、チャートは同期結果に含まれない
       expect(result.success).toBe(true);
@@ -351,7 +379,10 @@ describe('SyncManager', () => {
         expect.any(Object),
         expect.arrayContaining([
           expect.objectContaining({ id: 'conflicted-chart' })
-        ])
+        ]),
+        expect.any(Array),
+        expect.any(Object),
+        expect.any(Array)
       );
     });
 
@@ -374,10 +405,13 @@ describe('SyncManager', () => {
       (mockAdapter.pull as ReturnType<typeof vi.fn>).mockResolvedValue({
         charts: remoteCharts,
         metadata: {},
-        deletedCharts: remoteDeletedCharts
+        deletedCharts: remoteDeletedCharts,
+        setLists: [],
+        setListMetadata: {},
+        deletedSetLists: []
       });
 
-      const result = await syncManager.sync([]);
+      const result = await syncManager.sync([], []);
 
       expect(result.success).toBe(true);
       expect(result.mergedCharts).toHaveLength(1);

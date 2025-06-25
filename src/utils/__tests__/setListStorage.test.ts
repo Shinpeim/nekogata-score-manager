@@ -12,6 +12,7 @@ import { logger } from '../logger';
 // localForageをモック化
 vi.mock('localforage', () => ({
   default: {
+    config: vi.fn(),
     getItem: vi.fn(),
     setItem: vi.fn(),
     removeItem: vi.fn(),

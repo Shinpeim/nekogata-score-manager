@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { useSyncStore } from '../syncStore';
 import { SyncManager } from '../../utils/sync/syncManager';
+import { createMockSyncResult } from '../../hooks/__tests__/testHelpers';
 import type { ChordChart } from '../../types';
-import type { SyncResult } from '../../types/sync';
+import type { SetList } from '../../types/setList';
 
 // SyncManagerのモック
 vi.mock('../../utils/sync/syncManager', () => ({
@@ -262,20 +263,19 @@ describe('syncStore', () => {
     });
 
     it('正常に同期される', async () => {
-      const mockResult: SyncResult = {
+      const mockResult = createMockSyncResult({
         success: true,
-        conflicts: [],
-        syncedCharts: ['chart1', 'chart2'],
-        errors: []
-      };
+        syncedCharts: ['chart1', 'chart2']
+      });
       const mockLastSyncTime = new Date('2023-01-01T12:00:00Z');
 
       mockSyncManager.sync.mockResolvedValue(mockResult);
       mockSyncManager.getLastSyncTimeAsDate.mockReturnValue(mockLastSyncTime);
 
-      const result = await useSyncStore.getState().sync(mockCharts);
+      const mockSetLists: SetList[] = [];
+      const result = await useSyncStore.getState().sync(mockCharts, mockSetLists);
 
-      expect(mockSyncManager.sync).toHaveBeenCalledWith(mockCharts, undefined);
+      expect(mockSyncManager.sync).toHaveBeenCalledWith(mockCharts, mockSetLists, undefined);
       expect(result).toEqual(mockResult);
 
       const state = useSyncStore.getState();
@@ -285,26 +285,24 @@ describe('syncStore', () => {
     });
 
     it('コンフリクトコールバック付きで同期される', async () => {
-      const mockResult: SyncResult = {
+      const mockResult = createMockSyncResult({
         success: true,
-        conflicts: [],
-        syncedCharts: ['chart1'],
-        errors: []
-      };
+        syncedCharts: ['chart1']
+      });
       const onConflict = vi.fn().mockResolvedValue('overwrite' as const);
 
       mockSyncManager.sync.mockResolvedValue(mockResult);
       mockSyncManager.getLastSyncTimeAsDate.mockReturnValue(new Date());
 
-      await useSyncStore.getState().sync(mockCharts, onConflict);
+      const mockSetLists: SetList[] = [];
+      await useSyncStore.getState().sync(mockCharts, mockSetLists, onConflict);
 
-      expect(mockSyncManager.sync).toHaveBeenCalledWith(mockCharts, onConflict);
+      expect(mockSyncManager.sync).toHaveBeenCalledWith(mockCharts, mockSetLists, onConflict);
     });
 
     it('同期失敗時にエラー状態が設定される', async () => {
-      const mockResult: SyncResult = {
+      const mockResult = createMockSyncResult({
         success: false,
-        conflicts: [],
         syncedCharts: [],
         errors: [
           {
@@ -313,11 +311,12 @@ describe('syncStore', () => {
             type: 'network'
           }
         ]
-      };
+      });
 
       mockSyncManager.sync.mockResolvedValue(mockResult);
 
-      const result = await useSyncStore.getState().sync(mockCharts);
+      const mockSetLists: SetList[] = [];
+      const result = await useSyncStore.getState().sync(mockCharts, mockSetLists);
 
       expect(result).toEqual(mockResult);
 
@@ -329,7 +328,8 @@ describe('syncStore', () => {
     it('syncManagerが未初期化の場合エラーが発生する', async () => {
       useSyncStore.setState({ syncManager: null });
 
-      await expect(useSyncStore.getState().sync(mockCharts)).rejects.toThrow('同期機能が初期化されていません');
+      const mockSetLists: SetList[] = [];
+      await expect(useSyncStore.getState().sync(mockCharts, mockSetLists)).rejects.toThrow('同期機能が初期化されていません');
     });
   });
 

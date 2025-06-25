@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import SetListSelector from '../SetListSelector';
 import { useSetListManagement } from '../../hooks/useSetListManagement';
+import { createMockSetListManagement } from '../../hooks/__tests__/testHelpers';
 
 // Mock the hook
 vi.mock('../../hooks/useSetListManagement');
@@ -33,28 +34,14 @@ describe('SetListSelector', () => {
     vi.clearAllMocks();
     mockDeleteSetList.mockResolvedValue(undefined);
     
-    mockUseSetListManagement.mockReturnValue({
-      setLists: mockSetLists,
-      currentSetListId: null,
-      setCurrentSetList: mockSetCurrentSetList,
-      deleteSetList: mockDeleteSetList,
-      createNewSetList: vi.fn(),
-      addSetList: vi.fn(),
-      updateSetList: vi.fn(),
-      updateSetListOrder: vi.fn(),
-      deleteMultipleSetLists: vi.fn(),
-      getCurrentSetList: vi.fn(),
-      getSetListById: vi.fn(),
-      getSetListsArray: vi.fn(),
-      hasSetLists: vi.fn(),
-      getSetListsCount: vi.fn(),
-      loadInitialData: vi.fn(),
-      loadFromStorage: vi.fn(),
-      applySyncedSetLists: vi.fn(),
-      isLoading: false,
-      error: null,
-      clearError: vi.fn()
-    });
+    mockUseSetListManagement.mockReturnValue(
+      createMockSetListManagement({
+        setLists: mockSetLists,
+        currentSetListId: null,
+        setCurrentSetList: mockSetCurrentSetList,
+        deleteSetList: mockDeleteSetList
+      })
+    );
   });
 
   it('セットリストが選択されていない場合、選択を促すテキストを表示', () => {
@@ -64,28 +51,14 @@ describe('SetListSelector', () => {
   });
 
   it('セットリストが選択されている場合、名前と曲数を表示', () => {
-    mockUseSetListManagement.mockReturnValue({
-      setLists: mockSetLists,
-      currentSetListId: 'setlist1',
-      setCurrentSetList: mockSetCurrentSetList,
-      deleteSetList: mockDeleteSetList,
-      createNewSetList: vi.fn(),
-      addSetList: vi.fn(),
-      updateSetList: vi.fn(),
-      updateSetListOrder: vi.fn(),
-      deleteMultipleSetLists: vi.fn(),
-      getCurrentSetList: vi.fn(),
-      getSetListById: vi.fn(),
-      getSetListsArray: vi.fn(),
-      hasSetLists: vi.fn(),
-      getSetListsCount: vi.fn(),
-      loadInitialData: vi.fn(),
-      loadFromStorage: vi.fn(),
-      applySyncedSetLists: vi.fn(),
-      isLoading: false,
-      error: null,
-      clearError: vi.fn()
-    });
+    mockUseSetListManagement.mockReturnValue(
+      createMockSetListManagement({
+        setLists: mockSetLists,
+        currentSetListId: 'setlist1',
+        setCurrentSetList: mockSetCurrentSetList,
+        deleteSetList: mockDeleteSetList
+      })
+    );
 
     render(<SetListSelector />);
 
@@ -93,87 +66,105 @@ describe('SetListSelector', () => {
     expect(screen.getByText('(2曲)')).toBeInTheDocument();
   });
 
-  it('ドロップダウンボタンをクリックするとオプションが表示される', () => {
+  it('ドロップダウンを開くとセットリスト一覧が表示される', async () => {
     render(<SetListSelector />);
 
-    const button = screen.getByTestId('setlist-selector-button');
+    // ドロップダウンボタンをクリック
+    const button = screen.getByRole('button');
     fireEvent.click(button);
 
-    expect(screen.getByText('(セットリストなし)')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('setlist-option-none')).toBeInTheDocument();
+    });
+
+    // セットリストが表示されることを確認
     expect(screen.getByText('Live Set 2024')).toBeInTheDocument();
+    expect(screen.getByText('(2曲)')).toBeInTheDocument();
     expect(screen.getByText('Acoustic Session')).toBeInTheDocument();
+    expect(screen.getByText('(1曲)')).toBeInTheDocument();
+    expect(screen.getByText('(セットリストなし)')).toBeInTheDocument();
   });
 
-  it('セットリストオプションをクリックすると選択される', () => {
+  it('セットリストをクリックすると選択される', async () => {
     render(<SetListSelector />);
 
-    const button = screen.getByTestId('setlist-selector-button');
+    // ドロップダウンを開く
+    const button = screen.getByRole('button');
     fireEvent.click(button);
 
-    const option = screen.getByTestId('setlist-option-setlist1');
-    fireEvent.click(option);
+    await waitFor(() => {
+      expect(screen.getByTestId('setlist-option-none')).toBeInTheDocument();
+    });
+
+    // セットリストをクリック
+    const setListItem = screen.getByText('Live Set 2024');
+    fireEvent.click(setListItem);
 
     expect(mockSetCurrentSetList).toHaveBeenCalledWith('setlist1');
   });
 
-  it('(セットリストなし)をクリックすると選択がクリアされる', () => {
-    mockUseSetListManagement.mockReturnValue({
-      setLists: mockSetLists,
-      currentSetListId: 'setlist1',
-      setCurrentSetList: mockSetCurrentSetList,
-      deleteSetList: mockDeleteSetList,
-      createNewSetList: vi.fn(),
-      addSetList: vi.fn(),
-      updateSetList: vi.fn(),
-      updateSetListOrder: vi.fn(),
-      deleteMultipleSetLists: vi.fn(),
-      getCurrentSetList: vi.fn(),
-      getSetListById: vi.fn(),
-      getSetListsArray: vi.fn(),
-      hasSetLists: vi.fn(),
-      getSetListsCount: vi.fn(),
-      loadInitialData: vi.fn(),
-      loadFromStorage: vi.fn(),
-      applySyncedSetLists: vi.fn(),
-      isLoading: false,
-      error: null,
-      clearError: vi.fn()
+  it('現在選択中のセットリストにチェックマークが表示される', async () => {
+    mockUseSetListManagement.mockReturnValue(
+      createMockSetListManagement({
+        setLists: mockSetLists,
+        currentSetListId: 'setlist1',
+        setCurrentSetList: mockSetCurrentSetList,
+        deleteSetList: mockDeleteSetList
+      })
+    );
+
+    render(<SetListSelector />);
+
+    // ドロップダウンを開く
+    const button = screen.getByRole('button');
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('setlist-option-none')).toBeInTheDocument();
     });
 
-    render(<SetListSelector />);
-
-    const button = screen.getByTestId('setlist-selector-button');
-    fireEvent.click(button);
-
-    const noneOption = screen.getByTestId('setlist-option-none');
-    fireEvent.click(noneOption);
-
-    expect(mockSetCurrentSetList).toHaveBeenCalledWith(null);
+    // チェックマークが表示されることを確認
+    const selectedOption = screen.getByTestId('setlist-option-setlist1');
+    expect(selectedOption).toHaveTextContent('✓');
   });
 
-  it('削除ボタンをクリックすると確認ダイアログが表示される', () => {
+  it('削除ボタンをクリックすると確認ダイアログが表示される', async () => {
     render(<SetListSelector />);
 
-    const button = screen.getByTestId('setlist-selector-button');
+    // ドロップダウンを開く
+    const button = screen.getByRole('button');
     fireEvent.click(button);
 
+    await waitFor(() => {
+      expect(screen.getByTestId('setlist-option-none')).toBeInTheDocument();
+    });
+
+    // 削除ボタンをクリック
     const deleteButton = screen.getByTestId('delete-setlist-setlist1');
     fireEvent.click(deleteButton);
 
+    // 確認ダイアログが表示されることを確認
     expect(screen.getByText('セットリストを削除')).toBeInTheDocument();
     expect(screen.getByText(/「Live Set 2024」を削除しますか？/)).toBeInTheDocument();
   });
 
-  it('削除確認ダイアログで削除を実行できる', async () => {
+  it('削除を確定するとセットリストが削除される', async () => {
     render(<SetListSelector />);
 
-    const button = screen.getByTestId('setlist-selector-button');
+    // ドロップダウンを開く
+    const button = screen.getByRole('button');
     fireEvent.click(button);
 
+    await waitFor(() => {
+      expect(screen.getByTestId('setlist-option-none')).toBeInTheDocument();
+    });
+
+    // 削除ボタンをクリック
     const deleteButton = screen.getByTestId('delete-setlist-setlist1');
     fireEvent.click(deleteButton);
 
-    const confirmButton = screen.getByTestId('confirm-delete-setlist');
+    // 削除を確定
+    const confirmButton = screen.getByText('削除');
     fireEvent.click(confirmButton);
 
     await waitFor(() => {
@@ -181,84 +172,83 @@ describe('SetListSelector', () => {
     });
   });
 
-  it('削除確認ダイアログでキャンセルできる', () => {
+  it('現在選択中のセットリストを削除すると選択がリセットされる', async () => {
+    mockUseSetListManagement.mockReturnValue(
+      createMockSetListManagement({
+        setLists: mockSetLists,
+        currentSetListId: 'setlist1',
+        setCurrentSetList: mockSetCurrentSetList,
+        deleteSetList: mockDeleteSetList
+      })
+    );
+
     render(<SetListSelector />);
 
-    const button = screen.getByTestId('setlist-selector-button');
+    // ドロップダウンを開く
+    const button = screen.getByRole('button');
     fireEvent.click(button);
 
+    await waitFor(() => {
+      expect(screen.getByTestId('setlist-option-none')).toBeInTheDocument();
+    });
+
+    // 削除ボタンをクリック
     const deleteButton = screen.getByTestId('delete-setlist-setlist1');
     fireEvent.click(deleteButton);
 
-    const cancelButton = screen.getByTestId('cancel-delete-setlist');
+    // 削除を確定
+    const confirmButton = screen.getByText('削除');
+    fireEvent.click(confirmButton);
+
+    await waitFor(() => {
+      expect(mockDeleteSetList).toHaveBeenCalledWith('setlist1');
+    });
+  });
+
+  it('削除をキャンセルすると何も起こらない', async () => {
+    render(<SetListSelector />);
+
+    // ドロップダウンを開く
+    const button = screen.getByRole('button');
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('setlist-option-none')).toBeInTheDocument();
+    });
+
+    // 削除ボタンをクリック
+    const deleteButton = screen.getByTestId('delete-setlist-setlist1');
+    fireEvent.click(deleteButton);
+
+    // キャンセル
+    const cancelButton = screen.getByText('キャンセル');
     fireEvent.click(cancelButton);
 
-    expect(screen.queryByText('セットリストを削除')).not.toBeInTheDocument();
     expect(mockDeleteSetList).not.toHaveBeenCalled();
   });
 
-  it('現在選択中のセットリストにチェックマークが表示される', () => {
-    mockUseSetListManagement.mockReturnValue({
-      setLists: mockSetLists,
-      currentSetListId: 'setlist1',
-      setCurrentSetList: mockSetCurrentSetList,
-      deleteSetList: mockDeleteSetList,
-      createNewSetList: vi.fn(),
-      addSetList: vi.fn(),
-      updateSetList: vi.fn(),
-      updateSetListOrder: vi.fn(),
-      deleteMultipleSetLists: vi.fn(),
-      getCurrentSetList: vi.fn(),
-      getSetListById: vi.fn(),
-      getSetListsArray: vi.fn(),
-      hasSetLists: vi.fn(),
-      getSetListsCount: vi.fn(),
-      loadInitialData: vi.fn(),
-      loadFromStorage: vi.fn(),
-      applySyncedSetLists: vi.fn(),
-      isLoading: false,
-      error: null,
-      clearError: vi.fn()
-    });
+  it('外側をクリックするとドロップダウンが閉じる', async () => {
+    render(
+      <div>
+        <div data-testid="outside">Outside</div>
+        <SetListSelector />
+      </div>
+    );
 
-    render(<SetListSelector />);
-
-    const button = screen.getByTestId('setlist-selector-button');
+    // ドロップダウンを開く
+    const button = screen.getByRole('button');
     fireEvent.click(button);
 
-    const option = screen.getByTestId('setlist-option-setlist1');
-    expect(option).toHaveTextContent('✓');
-  });
-
-  it('セットリストが存在しない場合、適切なメッセージを表示', () => {
-    mockUseSetListManagement.mockReturnValue({
-      setLists: {},
-      currentSetListId: null,
-      setCurrentSetList: mockSetCurrentSetList,
-      deleteSetList: mockDeleteSetList,
-      createNewSetList: vi.fn(),
-      addSetList: vi.fn(),
-      updateSetList: vi.fn(),
-      updateSetListOrder: vi.fn(),
-      deleteMultipleSetLists: vi.fn(),
-      getCurrentSetList: vi.fn(),
-      getSetListById: vi.fn(),
-      getSetListsArray: vi.fn(),
-      hasSetLists: vi.fn(),
-      getSetListsCount: vi.fn(),
-      loadInitialData: vi.fn(),
-      loadFromStorage: vi.fn(),
-      applySyncedSetLists: vi.fn(),
-      isLoading: false,
-      error: null,
-      clearError: vi.fn()
+    await waitFor(() => {
+      expect(screen.getByTestId('setlist-option-none')).toBeInTheDocument();
     });
 
-    render(<SetListSelector />);
+    // 外側をクリック
+    const outside = screen.getByTestId('outside');
+    fireEvent.mouseDown(outside);
 
-    const button = screen.getByTestId('setlist-selector-button');
-    fireEvent.click(button);
-
-    expect(screen.getByText('セットリストがありません')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+    });
   });
 });

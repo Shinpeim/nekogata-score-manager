@@ -1,4 +1,5 @@
 import type { ChordChart } from './chord';
+import type { SetList } from './setList';
 
 export interface SyncMetadata {
   lastSyncedAt: string;
@@ -13,6 +14,12 @@ export interface DeletedChartRecord {
   deviceId: string;
 }
 
+export interface DeletedSetListRecord {
+  id: string;
+  deletedAt: string;
+  deviceId: string;
+}
+
 export interface SyncConflict {
   localChart: ChordChart;
   remoteChart: ChordChart;
@@ -20,11 +27,21 @@ export interface SyncConflict {
   remoteMetadata: SyncMetadata;
 }
 
+export interface SetListSyncConflict {
+  localSetList: SetList;
+  remoteSetList: SetList;
+  localMetadata: SyncMetadata;
+  remoteMetadata: SyncMetadata;
+}
+
 export interface SyncResult {
   success: boolean;
   conflicts: SyncConflict[];
+  setListConflicts: SetListSyncConflict[];
   syncedCharts: string[];
+  syncedSetLists: string[];
   mergedCharts?: ChordChart[];
+  mergedSetLists?: SetList[];
   errors: SyncError[];
 }
 
@@ -41,8 +58,22 @@ export interface ISyncAdapter {
   signOut(): Promise<void>;
   
   // 同期操作
-  pull(): Promise<{ charts: ChordChart[]; metadata: Record<string, SyncMetadata>; deletedCharts: DeletedChartRecord[] }>;
-  push(charts: ChordChart[], metadata: Record<string, SyncMetadata>, deletedCharts: DeletedChartRecord[]): Promise<void>;
+  pull(): Promise<{ 
+    charts: ChordChart[]; 
+    metadata: Record<string, SyncMetadata>; 
+    deletedCharts: DeletedChartRecord[];
+    setLists: SetList[];
+    setListMetadata: Record<string, SyncMetadata>;
+    deletedSetLists: DeletedSetListRecord[];
+  }>;
+  push(
+    charts: ChordChart[], 
+    metadata: Record<string, SyncMetadata>, 
+    deletedCharts: DeletedChartRecord[],
+    setLists: SetList[],
+    setListMetadata: Record<string, SyncMetadata>,
+    deletedSetLists: DeletedSetListRecord[]
+  ): Promise<void>;
   
   // メタデータ操作
   getRemoteMetadata(): Promise<Record<string, SyncMetadata>>;

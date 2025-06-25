@@ -1,11 +1,12 @@
 import localforage from 'localforage';
 import type { ChordChart, ChordLibrary } from '../types';
-import type { DeletedChartRecord } from '../types/sync';
+import type { DeletedChartRecord, DeletedSetListRecord } from '../types/sync';
 import { migrateData, getMigrationStats } from './migration';
 import { logger } from './logger';
 
 const STORAGE_KEY = 'chord-charts';
 const DELETED_CHARTS_KEY = 'deleted-charts';
+const DELETED_SETLISTS_KEY = 'deleted-setlists';
 const LAST_OPENED_CHART_KEY = 'last-opened-chart-id';
 
 // localforage設定
@@ -276,6 +277,87 @@ export const storageService = {
     } catch (error) {
       console.error('Failed to clear deleted charts:', error);
       throw new Error('削除記録のクリアに失敗しました');
+    }
+  },
+
+  // セットリスト削除記録の管理
+  async saveDeletedSetLists(deletedSetLists: DeletedSetListRecord[]): Promise<void> {
+    try {
+      await localforage.setItem(DELETED_SETLISTS_KEY, deletedSetLists);
+    } catch (error) {
+      console.error('Failed to save deleted setlists:', error);
+      throw new Error('セットリスト削除記録の保存に失敗しました');
+    }
+  },
+
+  async loadDeletedSetLists(): Promise<DeletedSetListRecord[]> {
+    try {
+      const deletedSetLists = await localforage.getItem<DeletedSetListRecord[]>(DELETED_SETLISTS_KEY);
+      return deletedSetLists || [];
+    } catch (error) {
+      console.error('Failed to load deleted setlists:', error);
+      return [];
+    }
+  },
+
+  async addDeletedSetList(setListId: string, deviceId: string): Promise<void> {
+    try {
+      const deletedSetLists = await this.loadDeletedSetLists();
+      const deletedRecord: DeletedSetListRecord = {
+        id: setListId,
+        deletedAt: new Date().toISOString(),
+        deviceId
+      };
+      
+      // 既に存在する場合は更新、存在しない場合は追加
+      const existingIndex = deletedSetLists.findIndex(record => record.id === setListId);
+      if (existingIndex >= 0) {
+        deletedSetLists[existingIndex] = deletedRecord;
+      } else {
+        deletedSetLists.push(deletedRecord);
+      }
+      
+      await this.saveDeletedSetLists(deletedSetLists);
+    } catch (error) {
+      console.error('Failed to add deleted setlist:', error);
+      throw new Error('セットリスト削除記録の追加に失敗しました');
+    }
+  },
+
+  async addMultipleDeletedSetLists(setListIds: string[], deviceId: string): Promise<void> {
+    try {
+      const deletedSetLists = await this.loadDeletedSetLists();
+      const deletedAt = new Date().toISOString();
+      
+      setListIds.forEach(setListId => {
+        const deletedRecord: DeletedSetListRecord = {
+          id: setListId,
+          deletedAt,
+          deviceId
+        };
+        
+        // 既に存在する場合は更新、存在しない場合は追加
+        const existingIndex = deletedSetLists.findIndex(record => record.id === setListId);
+        if (existingIndex >= 0) {
+          deletedSetLists[existingIndex] = deletedRecord;
+        } else {
+          deletedSetLists.push(deletedRecord);
+        }
+      });
+      
+      await this.saveDeletedSetLists(deletedSetLists);
+    } catch (error) {
+      console.error('Failed to add multiple deleted setlists:', error);
+      throw new Error('複数セットリスト削除記録の追加に失敗しました');
+    }
+  },
+
+  async clearDeletedSetLists(): Promise<void> {
+    try {
+      await localforage.removeItem(DELETED_SETLISTS_KEY);
+    } catch (error) {
+      console.error('Failed to clear deleted setlists:', error);
+      throw new Error('セットリスト削除記録のクリアに失敗しました');
     }
   }
 };

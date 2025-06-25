@@ -24,13 +24,20 @@ interface SetListCrudState {
   loadFromStorage: () => Promise<void>;
   applySyncedSetLists: (mergedSetLists: SetList[]) => Promise<void>;
   
+  // 同期通知
+  subscribeSyncNotification: (callback: (setLists: SetList[]) => void) => () => void;
+  notifySync: () => void;
+  
   // ユーティリティ
   clearError: () => void;
 }
 
+// 同期通知用のサブスクライバー管理
+const syncSubscribers = new Set<(setLists: SetList[]) => void>();
+
 export const useSetListCrudStore = create<SetListCrudState>()(
   devtools(
-    (set) => ({
+    (set, get) => ({
       // 初期状態
       isLoading: false,
       error: null,
@@ -47,6 +54,9 @@ export const useSetListCrudStore = create<SetListCrudState>()(
           useSetListStore.getState().addSetList(setList);
           
           set({ isLoading: false });
+          
+          // 同期通知
+          get().notifySync();
         } catch (error) {
           set({ 
             isLoading: false, 
@@ -74,6 +84,9 @@ export const useSetListCrudStore = create<SetListCrudState>()(
           dataStore.updateSetList(id, updatedSetList);
           
           set({ isLoading: false });
+          
+          // 同期通知
+          get().notifySync();
         } catch (error) {
           set({ 
             isLoading: false, 
@@ -107,6 +120,9 @@ export const useSetListCrudStore = create<SetListCrudState>()(
           setListCrudService.updateSetList(existingSetList, {
             chartIds: newChartIds,
             updatedAt: optimisticSetList.updatedAt
+          }).then(() => {
+            // 同期通知
+            get().notifySync();
           }).catch((error) => {
             // 永続化に失敗した場合、元の状態に戻す
             dataStore.updateSetList(id, existingSetList);
@@ -134,6 +150,9 @@ export const useSetListCrudStore = create<SetListCrudState>()(
           useSetListStore.getState().deleteSetList(id);
           
           set({ isLoading: false });
+          
+          // 同期通知
+          get().notifySync();
         } catch (error) {
           set({ 
             isLoading: false, 
@@ -157,6 +176,9 @@ export const useSetListCrudStore = create<SetListCrudState>()(
           });
           
           set({ isLoading: false });
+          
+          // 同期通知
+          get().notifySync();
         } catch (error) {
           set({ 
             isLoading: false, 
@@ -179,6 +201,10 @@ export const useSetListCrudStore = create<SetListCrudState>()(
           dataStore.setCurrentSetList(newSetList.id);
           
           set({ isLoading: false });
+          
+          // 同期通知
+          get().notifySync();
+          
           return newSetList;
         } catch (error) {
           set({ 
@@ -307,6 +333,22 @@ export const useSetListCrudStore = create<SetListCrudState>()(
           });
           throw error;
         }
+      },
+      
+      // 同期通知
+      subscribeSyncNotification: (callback: (setLists: SetList[]) => void) => {
+        syncSubscribers.add(callback);
+        return () => {
+          syncSubscribers.delete(callback);
+        };
+      },
+      
+      notifySync: () => {
+        const setLists = Object.values(useSetListStore.getState().setLists);
+        logger.debug(`Notifying sync with ${setLists.length} setlists`);
+        syncSubscribers.forEach(callback => {
+          callback(setLists);
+        });
       },
       
       // ユーティリティ

@@ -162,6 +162,9 @@ describe('DropboxSyncAdapter', () => {
       const chartsJson = JSON.parse(JSON.stringify(mockCharts));
       const metadataJson = JSON.parse(JSON.stringify(mockMetadata));
       const deletedChartsJson = JSON.parse(JSON.stringify(mockDeletedCharts));
+      const setListsJson: unknown[] = [];
+      const setListMetadataJson = {};
+      const deletedSetListsJson: unknown[] = [];
       
       (global.fetch as Mock)
         .mockResolvedValueOnce({
@@ -175,6 +178,18 @@ describe('DropboxSyncAdapter', () => {
         .mockResolvedValueOnce({
           ok: true,
           text: () => Promise.resolve(JSON.stringify(deletedChartsJson))
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          text: () => Promise.resolve(JSON.stringify(setListsJson))
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          text: () => Promise.resolve(JSON.stringify(setListMetadataJson))
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          text: () => Promise.resolve(JSON.stringify(deletedSetListsJson))
         });
 
       const result = await adapter.pull();
@@ -182,9 +197,12 @@ describe('DropboxSyncAdapter', () => {
       expect(result).toEqual({
         charts: chartsJson,
         metadata: metadataJson,
-        deletedCharts: deletedChartsJson
+        deletedCharts: deletedChartsJson,
+        setLists: setListsJson,
+        setListMetadata: setListMetadataJson,
+        deletedSetLists: deletedSetListsJson
       });
-      expect(global.fetch).toHaveBeenCalledTimes(3);
+      expect(global.fetch).toHaveBeenCalledTimes(6);
     });
 
     it('should return empty data when files do not exist', async () => {
@@ -198,7 +216,10 @@ describe('DropboxSyncAdapter', () => {
       expect(result).toEqual({
         charts: [],
         metadata: {},
-        deletedCharts: []
+        deletedCharts: [],
+        setLists: [],
+        setListMetadata: {},
+        deletedSetLists: []
       });
     });
 
@@ -238,21 +259,24 @@ describe('DropboxSyncAdapter', () => {
         .mockResolvedValueOnce({ ok: true }) // フォルダ存在確認
         .mockResolvedValueOnce({ ok: true }) // charts.json upload
         .mockResolvedValueOnce({ ok: true }) // metadata.json upload
-        .mockResolvedValueOnce({ ok: true }); // deleted-charts.json upload
+        .mockResolvedValueOnce({ ok: true }) // deleted-charts.json upload
+        .mockResolvedValueOnce({ ok: true }) // setlists.json upload
+        .mockResolvedValueOnce({ ok: true }) // setlist-metadata.json upload
+        .mockResolvedValueOnce({ ok: true }); // deleted-setlists.json upload
 
-      await adapter.push(mockCharts, mockMetadata, mockDeletedCharts);
+      await adapter.push(mockCharts, mockMetadata, mockDeletedCharts, [], {}, []);
       
-      // アップロードAPIが3回呼ばれることを確認
+      // アップロードAPIが6回呼ばれることを確認
       const uploadCalls = (global.fetch as Mock).mock.calls.filter(
         call => call[0].includes('files/upload')
       );
-      expect(uploadCalls).toHaveLength(3);
+      expect(uploadCalls).toHaveLength(6);
     });
 
     it('should throw error when not authenticated', async () => {
       mockAuthProvider.getAccessToken.mockReturnValue(null);
       
-      await expect(adapter.push([], {}, [])).rejects.toThrow('Not authenticated');
+      await expect(adapter.push([], {}, [], [], {}, [])).rejects.toThrow('Not authenticated');
     });
 
     it('should throw error when upload fails', async () => {
@@ -265,7 +289,7 @@ describe('DropboxSyncAdapter', () => {
         })
         .mockResolvedValue({ ok: true }); // 残りのリクエストは成功
 
-      await expect(adapter.push([], {}, [])).rejects.toThrow('Failed to upload file: 500 - Server error');
+      await expect(adapter.push([], {}, [], [], {}, [])).rejects.toThrow('Failed to upload file: 500 - Server error');
     });
   });
 
