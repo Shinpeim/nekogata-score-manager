@@ -176,7 +176,7 @@ describe('ScoreExplorer', () => {
       />
     );
 
-    const chartItem = screen.getByTestId('chart-item-0');
+    const chartItem = screen.getByTestId('chart-item-0-desktop');
     expect(chartItem).toHaveClass('bg-slate-100', 'border-[#85B0B7]', 'border');
   });
 
