@@ -1,7 +1,23 @@
-import React from 'react';
+import React, { useRef } from 'react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import type { DragEndEvent } from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import { useSetListManagement } from '../hooks/useSetListManagement';
 import { useChartDataStore } from '../stores/chartDataStore';
 import SetListSelector from './SetListSelector';
+import SetListChartItem from './SetListChartItem';
 
 interface SetListTabProps {
   onChartSelect: (chartId: string) => void;
@@ -14,8 +30,16 @@ const SetListTab: React.FC<SetListTabProps> = ({
   isMobile = false,
   onClose,
 }) => {
-  const { setLists, currentSetListId } = useSetListManagement();
+  const { setLists, currentSetListId, updateSetListOrder } = useSetListManagement();
   const { charts } = useChartDataStore();
+  const isDraggingRef = useRef(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const currentSetList = currentSetListId ? setLists[currentSetListId] : null;
 
@@ -28,6 +52,29 @@ const SetListTab: React.FC<SetListTabProps> = ({
 
   const getChartById = (chartId: string) => charts[chartId];
 
+  const handleDragStart = () => {
+    isDraggingRef.current = true;
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    isDraggingRef.current = false;
+
+    if (!currentSetList || !over || active.id === over.id) {
+      return;
+    }
+
+    const oldIndex = currentSetList.chartIds.indexOf(active.id as string);
+    const newIndex = currentSetList.chartIds.indexOf(over.id as string);
+
+    if (oldIndex !== -1 && newIndex !== -1) {
+      const newChartIds = arrayMove(currentSetList.chartIds, oldIndex, newIndex);
+      
+      // 楽観的更新（即座にUI更新、バックグラウンドで永続化）
+      updateSetListOrder(currentSetList.id, newChartIds);
+    }
+  };
+
   return (
     <div className={isMobile ? "px-4" : "p-4"}>
       <div className="mb-4">
@@ -39,54 +86,30 @@ const SetListTab: React.FC<SetListTabProps> = ({
           <div className="text-xs text-slate-500 mb-3">
             {currentSetList.chartIds.length}曲
           </div>
-          {currentSetList.chartIds.map((chartId, index) => {
-            const chart = getChartById(chartId);
-            if (!chart) {
-              return (
-                <div key={chartId} className="p-3 bg-slate-50 rounded-md">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-400 min-w-[24px]">
-                      {index + 1}.
-                    </span>
-                    <div className="text-sm text-slate-400">
-                      (削除された楽譜)
-                    </div>
-                  </div>
-                </div>
-              );
-            }
-
-            return (
-              <div 
-                key={chartId}
-                className="p-3 bg-slate-50 hover:bg-slate-100 rounded-md transition-colors cursor-pointer"
-                onClick={() => handleChartClick(chartId)}
-                data-testid={`setlist-chart-item-${index}`}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-500 min-w-[24px] font-medium">
-                    {index + 1}.
-                  </span>
-                  <div className="flex-1">
-                    <h3 className="text-sm font-medium text-slate-900">
-                      {chart.title}
-                      {chart.key && (
-                        <span className="ml-2 text-xs text-slate-500">
-                          (Key: {chart.key})
-                        </span>
-                      )}
-                    </h3>
-                    <p className="text-xs text-slate-500 mt-1">
-                      Artist: {chart.artist}
-                    </p>
-                  </div>
-                  <div className="text-xs text-slate-400">
-                    ⋮⋮
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={currentSetList.chartIds}
+              strategy={verticalListSortingStrategy}
+            >
+              {currentSetList.chartIds.map((chartId, index) => {
+                const chart = getChartById(chartId);
+                return (
+                  <SetListChartItem
+                    key={chartId}
+                    index={index}
+                    chart={chart}
+                    chartId={chartId}
+                    onChartClick={handleChartClick}
+                  />
+                );
+              })}
+            </SortableContext>
+          </DndContext>
         </div>
       ) : (
         <div className="text-center py-8">
