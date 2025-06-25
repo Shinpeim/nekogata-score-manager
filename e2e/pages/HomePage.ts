@@ -65,18 +65,36 @@ export class HomePage {
   }
   
   async ensureExplorerOpen() {
-    // ビューポートサイズに基づいて適切なセレクタを選択
-    const viewportSize = this.page.viewportSize();
-    const isDesktop = viewportSize && viewportSize.width >= 768;
-    const chartsTabSelector = isDesktop ? '[data-testid="charts-tab-desktop"]' : '[data-testid="charts-tab-mobile"]';
+    // サイドバーの幅で判定する方法に変更
+    const sidebar = this.page.locator('aside');
     
-    // Score Explorerが開いているか確認
-    const isOpen = await this.page.locator(chartsTabSelector).isVisible({ timeout: 1000 }).catch(() => false);
+    // Score Explorerが開いているか確認（幅が0でないことを確認）
+    const isOpen = await sidebar.evaluate((el) => {
+      const styles = window.getComputedStyle(el);
+      const width = parseInt(styles.width, 10);
+      return width > 0;
+    });
     
     if (!isOpen) {
       await this.explorerToggle.click();
-      // Wait for Score Explorer to open
-      await this.page.locator(chartsTabSelector).waitFor({ state: 'visible', timeout: 5000 });
+      
+      // Wait for Score Explorer to open (幅が0より大きくなるのを待つ)
+      await sidebar.evaluate((el) => {
+        return new Promise((resolve) => {
+          const checkWidth = () => {
+            const width = parseInt(window.getComputedStyle(el).width, 10);
+            if (width > 0) {
+              resolve(true);
+            } else {
+              setTimeout(checkWidth, 100);
+            }
+          };
+          checkWidth();
+        });
+      });
+      
+      // CSS遷移が完了するのを待つ
+      await this.page.waitForTimeout(300);
     }
   }
 

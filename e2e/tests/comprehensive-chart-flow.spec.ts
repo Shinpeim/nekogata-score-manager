@@ -7,7 +7,7 @@ import { ChartEditorPage } from '../pages/ChartEditorPage';
 test.describe('Nekogata Score Manager - 包括的なチャート作成フロー', () => {
   test('完全なチャート情報を入力して作成する', async ({ page }) => {
     const homePage = new HomePage(page);
-    const scoreExplorerPage = new ScoreExplorerPage(page, true);
+    const scoreExplorerPage = new ScoreExplorerPage(page);
     const chartFormPage = new ChordChartFormPage(page);
     const chartEditorPage = new ChartEditorPage(page);
     
@@ -52,7 +52,7 @@ test.describe('Nekogata Score Manager - 包括的なチャート作成フロー'
 
   test('必須項目のバリデーションが動作する', async ({ page }) => {
     const homePage = new HomePage(page);
-    const scoreExplorerPage = new ScoreExplorerPage(page, false);
+    const scoreExplorerPage = new ScoreExplorerPage(page);
     const chartFormPage = new ChordChartFormPage(page);
     
     await homePage.goto();
@@ -84,7 +84,7 @@ test.describe('Nekogata Score Manager - 包括的なチャート作成フロー'
 
   test('フォームの各入力フィールドが正常に動作する', async ({ page }) => {
     const homePage = new HomePage(page);
-    const scoreExplorerPage = new ScoreExplorerPage(page, false);
+    const scoreExplorerPage = new ScoreExplorerPage(page);
     const chartFormPage = new ChordChartFormPage(page);
     
     await homePage.goto();

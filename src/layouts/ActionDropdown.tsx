@@ -8,7 +8,6 @@ interface ActionDropdownProps {
   onDeleteSelected: () => void;
   onDuplicateSelected: () => void;
   onCreateSetList?: () => void;
-  isMobile?: boolean;
 }
 
 const ActionDropdown: React.FC<ActionDropdownProps> = ({
@@ -19,7 +18,6 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
   onDeleteSelected,
   onDuplicateSelected,
   onCreateSetList,
-  isMobile = false,
 }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -54,7 +52,7 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
             : 'bg-slate-300 text-slate-500 cursor-not-allowed'
         }`}
         title="アクション"
-        data-testid={`action-dropdown-button-${isMobile ? 'mobile' : 'desktop'}`}
+        data-testid="action-dropdown-button"
       >
         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

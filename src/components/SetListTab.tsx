@@ -21,13 +21,11 @@ import SetListChartItem from './SetListChartItem';
 
 interface SetListTabProps {
   onChartSelect: (chartId: string) => void;
-  isMobile?: boolean;
   onClose?: () => void;
 }
 
 const SetListTab: React.FC<SetListTabProps> = ({
   onChartSelect,
-  isMobile = false,
   onClose,
 }) => {
   const { setLists, currentSetListId, updateSetListOrder } = useSetListManagement();
@@ -45,7 +43,8 @@ const SetListTab: React.FC<SetListTabProps> = ({
 
   const handleChartClick = (chartId: string) => {
     onChartSelect(chartId);
-    if (isMobile && onClose) {
+    // モバイルでは自動的に閉じる
+    if (onClose && window.matchMedia('(max-width: 767px)').matches) {
       onClose();
     }
   };
@@ -76,7 +75,7 @@ const SetListTab: React.FC<SetListTabProps> = ({
   };
 
   return (
-    <div className={isMobile ? "px-4" : "p-4"}>
+    <div className="p-4">
       <div className="mb-4">
         <SetListSelector />
       </div>

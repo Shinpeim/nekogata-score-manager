@@ -144,6 +144,21 @@ describe('SetListTab', () => {
   });
 
   it('モバイル表示で楽譜をクリックすると閉じるハンドラーが呼ばれる', () => {
+    // Mock window.matchMedia to return true for mobile
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      value: vi.fn().mockImplementation(query => ({
+        matches: query === '(max-width: 767px)',
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
+
     mockUseSetListStore.mockReturnValue({
       setLists: mockSetLists,
       currentSetListId: 'setlist1',
@@ -158,7 +173,6 @@ describe('SetListTab', () => {
     render(
       <SetListTab 
         onChartSelect={mockOnChartSelect} 
-        isMobile={true}
         onClose={mockOnClose}
       />
     );
