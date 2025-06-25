@@ -43,7 +43,8 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       
       await expect(chartFormPage.form).not.toBeVisible();
       // 新規作成後は直接編集画面に遷移しているので、保存して表示モードに戻る
-      await page.waitForTimeout(2000); // 画面遷移を待機
+      // Wait for navigation to complete and chart title to be visible
+      await page.waitForLoadState('networkidle');
       await expect(chartViewPage.getChartTitleWithText(testChartTitle)).toBeVisible();
       
       // 2. Score Explorerはopen済みなので確認のみ
@@ -71,7 +72,8 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       await chartFormPage.fillTitle('エクスポートテストチャート');
       await chartFormPage.fillArtist('テストアーティスト');
       await chartFormPage.clickSave();
-      await page.waitForTimeout(1000); // 画面遷移を待機
+      // Wait for chart to be created
+      await page.waitForLoadState('networkidle');
       
       // 2. Score Explorerはopen済み
       
@@ -80,15 +82,18 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       
       // 4. 選択状態を確認（要素の存在とテキスト内容で判定）
       await expect(scoreExplorerPage.getSelectionStatus()).toContainText('1件選択中');
-      await page.waitForTimeout(500); // 選択状態の反映を待機
+      // Wait for selection to be reflected
+      await expect(scoreExplorerPage.getSelectionStatus()).toBeVisible();
       
       // 5. アクションドロップダウンを開く
       await scoreExplorerPage.openActionDropdown();
-      await page.waitForTimeout(500); // ドロップダウンの表示を待機
+      // Wait for dropdown to be visible
+      await expect(page.locator('[role="menu"]')).toBeVisible();
       
       // 6. エクスポートオプションをクリック
       await scoreExplorerPage.clickExportOption();
-      await page.waitForTimeout(1000); // ダイアログの表示を待機
+      // Wait for export dialog to be visible
+      await expect(scoreExplorerPage.getFilenameInput()).toBeVisible();
       
       // 7. エクスポートダイアログが表示されることを確認
       await expect(scoreExplorerPage.getFilenameInput()).toBeVisible();
@@ -160,7 +165,8 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       await scoreExplorerPage.clickImportButton();
       
       // 3. エラーが発生してもダイアログが閉じることを確認
-      await page.waitForTimeout(1000);
+      // Wait for dialog to process
+      await page.waitForLoadState('networkidle');
       
       // クリーンアップ
       if (fs.existsSync(testFilePath)) {
@@ -201,7 +207,8 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       await scoreExplorerPage.clickImportButton();
       
       // 3. エラーが発生してもダイアログが閉じることを確認
-      await page.waitForTimeout(1000);
+      // Wait for dialog to process
+      await page.waitForLoadState('networkidle');
       
       // クリーンアップ
       if (fs.existsSync(testFilePath)) {
@@ -238,7 +245,8 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       await scoreExplorerPage.clickImportButton();
       
       // 3. エラーが発生してもダイアログが閉じることを確認
-      await page.waitForTimeout(1000);
+      // Wait for dialog to process
+      await page.waitForLoadState('networkidle');
       
       // クリーンアップ
       if (fs.existsSync(testFilePath)) {

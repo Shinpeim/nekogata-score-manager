@@ -85,8 +85,18 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
     // 正確な順序変更を期待
     expect(chordOrder).toEqual(['C', 'F', 'Am', 'G']);
 
-    // ドラッグ&ドロップ後の状態安定化を待つ
-    await page.waitForTimeout(3000);
+    // Wait for drag and drop operation to complete
+    await page.waitForFunction(() => {
+      const chordElements = document.querySelectorAll('[data-section-card] [data-chord-item] input[placeholder*="コード名"]');
+      const chords: string[] = [];
+      chordElements.forEach(el => {
+        const input = el as HTMLInputElement;
+        if (input.value && input.value.trim()) {
+          chords.push(input.value.trim());
+        }
+      });
+      return chords.length === 4 && chords[1] === 'F'; // Check if F is now at position 1
+    }, { timeout: 5000 });
     
     // DOM要素が安定していることを確認
     await page.waitForFunction(() => {
@@ -111,8 +121,8 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
     // 保存して永続化確認
     await chartEditorPage.clickSave();
     
-    // 保存処理中の待機
-    await page.waitForTimeout(2000);
+    // Wait for save operation to complete
+    await page.waitForLoadState('networkidle');
     
     // 現在の画面状態をログ出力
     const hasEditor = await page.locator('[data-testid="chart-editor"]').isVisible();
@@ -126,12 +136,13 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
       console.error('保存エラー:', errorText);
     }
     
-    // 保存処理が完了するまで待機
-    await page.waitForTimeout(2000);
+    // Wait for save operation to complete fully
+    await page.waitForLoadState('networkidle');
     
     // 永続化確認のため、ページをリロードして再読み込み
     await page.reload();
-    await page.waitForTimeout(2000);
+    // Wait for page reload to complete
+    await page.waitForLoadState('domcontentloaded');
     
     // リロード後、同じチャートが表示されているかチェック
     const hasEditorAfterReload = await page.locator('[data-testid="chart-editor"]').isVisible({ timeout: 10000 });

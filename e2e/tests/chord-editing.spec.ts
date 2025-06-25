@@ -60,7 +60,8 @@ test.describe('Nekogata Score Manager - コード編集機能テスト', () => {
 
     // 保存
     await chartEditorPage.clickSave();
-    await page.waitForTimeout(2000); // 画面遷移を待機
+    // Wait for navigation to view mode
+    await page.waitForLoadState('networkidle');
     await chartViewPage.waitForChartToLoad();
 
     // セクション名が表示されていることを確認
@@ -186,7 +187,8 @@ test.describe('Nekogata Score Manager - コード編集機能テスト', () => {
 
     // 保存
     await chartEditorPage.clickSave();
-    await page.waitForTimeout(2000); // 画面遷移を待機
+    // Wait for navigation to view mode
+    await page.waitForLoadState('networkidle');
     await chartViewPage.waitForChartToLoad();
 
     // 保存後の表示確認
@@ -251,7 +253,8 @@ test.describe('Nekogata Score Manager - コード編集機能テスト', () => {
 
     // 保存して確認
     await chartEditorPage.clickSave();
-    await page.waitForTimeout(2000); // 画面遷移を待機
+    // Wait for navigation to view mode
+    await page.waitForLoadState('networkidle');
     await chartViewPage.waitForChartToLoad();
 
     await expect(page.locator('text=【イントロ】')).toBeVisible();
@@ -309,7 +312,8 @@ test.describe('Nekogata Score Manager - コード編集機能テスト', () => {
 
     // 保存して確認
     await chartEditorPage.clickSave();
-    await page.waitForTimeout(2000); // 画面遷移を待機
+    // Wait for navigation to view mode
+    await page.waitForLoadState('networkidle');
     await chartViewPage.waitForChartToLoad();
 
     // 保存後のビューモードで正しく表示されていることを確認
@@ -356,7 +360,8 @@ test.describe('Nekogata Score Manager - コード編集機能テスト', () => {
 
     // 保存
     await chartEditorPage.clickSave();
-    await page.waitForTimeout(2000); // 画面遷移を待機
+    // Wait for navigation to view mode
+    await page.waitForLoadState('networkidle');
     await chartViewPage.waitForChartToLoad();
 
     // 保存後にメモが表示されていることを確認
