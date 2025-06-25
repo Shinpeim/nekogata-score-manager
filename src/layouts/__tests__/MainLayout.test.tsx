@@ -46,11 +46,13 @@ vi.mock('../Header', () => ({
 }));
 
 vi.mock('../ScoreExplorer', () => ({
-  default: ({ onCreateNew, onImport, onClose, isMobile }: { onCreateNew: () => void; onImport: () => void; onClose?: () => void; isMobile?: boolean }) => (
-    <div data-testid={isMobile ? "mobile-score-explorer" : "desktop-score-explorer"}>
+  default: ({ onCreateNew, onImport, onClose }: { onCreateNew: () => void; onImport: () => void; onClose?: () => void }) => (
+    <div data-testid="score-explorer">
       <button onClick={onCreateNew}>新規作成</button>
       <button onClick={onImport}>インポート</button>
-      {isMobile && onClose && <button onClick={onClose}>閉じる</button>}
+      <button aria-label="サイドバーを閉じる" onClick={onClose}>閉じる</button>
+      <button data-testid="charts-tab">楽譜</button>
+      <button data-testid="setlists-tab">セットリスト</button>
     </div>
   ),
 }));
@@ -127,25 +129,28 @@ describe('MainLayout', () => {
     expect(screen.getByText('Close Explorer')).toBeInTheDocument();
   });
 
-  it('should show desktop score explorer when explorer is open', () => {
+  it('should show score explorer when explorer is open', () => {
     render(
       <MainLayout explorerOpen={true}>
         <div>Content</div>
       </MainLayout>
     );
 
-    expect(screen.getByTestId('desktop-score-explorer')).toBeInTheDocument();
+    // ScoreExplorerが表示されていることを確認
+    expect(screen.getByText('楽譜')).toBeInTheDocument();
+    expect(screen.getByText('セットリスト')).toBeInTheDocument();
   });
 
-  it('should show mobile score explorer when explorer is open on mobile', () => {
-    // モバイルビューをシミュレート（実際のテストではviewportを変更するが、ここではコンポーネントの存在を確認）
+  it('should show close button on mobile when explorer is open', () => {
+    // モバイル表示の場合、閉じるボタンが表示されることを確認
     render(
       <MainLayout explorerOpen={true}>
         <div>Content</div>
       </MainLayout>
     );
 
-    expect(screen.getByTestId('mobile-score-explorer')).toBeInTheDocument();
+    // モバイル用の閉じるボタンが存在することを確認（aria-labelで検索）
+    expect(screen.getByLabelText('サイドバーを閉じる')).toBeInTheDocument();
   });
 
   it('should open create form when create new is clicked', () => {
@@ -339,8 +344,7 @@ describe('MainLayout', () => {
       // エクスポートダイアログが開かれた状態をシミュレート
       // （これは内部状態なので直接テストが困難だが、構造的に正しいことを確認）
       
-      expect(screen.getByTestId('desktop-score-explorer')).toBeInTheDocument();
-      expect(screen.getByTestId('mobile-score-explorer')).toBeInTheDocument();
+      expect(screen.getByTestId('score-explorer')).toBeInTheDocument();
     });
 
     it('should handle import charts with basic flow', async () => {
@@ -412,8 +416,7 @@ describe('MainLayout', () => {
       // （実際のアプリではチャート選択→エクスポートの流れで発生）
       
       // ここでは構造的な正しさを確認
-      expect(screen.getByTestId('desktop-score-explorer')).toBeInTheDocument();
-      expect(screen.getByTestId('mobile-score-explorer')).toBeInTheDocument();
+      expect(screen.getByTestId('score-explorer')).toBeInTheDocument();
       
       // MainLayoutの基本構造が正しく保持されていることを確認
       expect(screen.getByText('Content')).toBeInTheDocument();
@@ -427,14 +430,14 @@ describe('MainLayout', () => {
       );
 
       // コンポーネントがマウントされていることを確認
-      expect(screen.getByTestId('desktop-score-explorer')).toBeInTheDocument();
+      expect(screen.getByTestId('score-explorer')).toBeInTheDocument();
 
       // アンマウント
       unmount();
 
       // メモリリークがないことを確認（参照が残っていないこと）
       // これは主にuseEffectのクリーンアップが適切に行われることを想定
-      expect(screen.queryByTestId('desktop-score-explorer')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('score-explorer')).not.toBeInTheDocument();
     });
   });
 });

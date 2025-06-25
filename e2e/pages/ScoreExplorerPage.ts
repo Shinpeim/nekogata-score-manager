@@ -2,43 +2,30 @@ import { type Locator, type Page, expect } from '@playwright/test';
 
 export class ScoreExplorerPage {
   readonly page: Page;
-  readonly isMobile: boolean;
-  readonly title: Locator;
-  readonly titleMobile: Locator;
-  readonly titleDesktop: Locator;
   readonly chartsTab: Locator;
   readonly setlistsTab: Locator;
   readonly selectAllCheckbox: Locator;
   readonly createNewButton: Locator;
-  readonly createNewButtonMobile: Locator;
-  readonly createNewButtonDesktop: Locator;
   readonly importButton: Locator;
-  readonly importButtonMobile: Locator;
-  readonly importButtonDesktop: Locator;
+  readonly titleDesktop: Locator;
 
-  constructor(page: Page, isMobile: boolean = false) {
+  constructor(page: Page) {
     this.page = page;
-    this.isMobile = isMobile;
-    this.titleMobile = page.getByTestId('score-explorer-title-mobile');
-    this.titleDesktop = page.getByTestId('score-explorer-title-desktop');
-    this.title = isMobile ? this.titleMobile : this.titleDesktop;
     
-    this.chartsTab = page.getByTestId(`charts-tab-${isMobile ? 'mobile' : 'desktop'}`);
-    this.setlistsTab = page.getByTestId(`setlists-tab-${isMobile ? 'mobile' : 'desktop'}`);
+    this.chartsTab = page.getByTestId('charts-tab');
+    this.setlistsTab = page.getByTestId('setlists-tab');
     
-    this.selectAllCheckbox = page.getByTestId(`select-all-checkbox-${isMobile ? 'mobile' : 'desktop'}`);
+    this.selectAllCheckbox = page.getByTestId('select-all-checkbox');
     
-    this.createNewButtonMobile = page.getByTestId('explorer-create-new-button-mobile');
-    this.createNewButtonDesktop = page.getByTestId('explorer-create-new-button-desktop');
-    this.createNewButton = isMobile ? this.createNewButtonMobile : this.createNewButtonDesktop;
+    this.createNewButton = page.getByTestId('explorer-create-new-button');
+    this.importButton = page.getByTestId('explorer-import-button');
     
-    this.importButtonMobile = page.getByTestId('explorer-import-button-mobile');
-    this.importButtonDesktop = page.getByTestId('explorer-import-button-desktop');
-    this.importButton = isMobile ? this.importButtonMobile : this.importButtonDesktop;
+    // サイドバーのタイトル領域（楽譜タブ）を確認
+    this.titleDesktop = page.locator('aside').getByText('楽譜');
   }
 
   async clickCreateNew() {
-    // 条件付きレンダリングになったため、可視性を確認してから通常クリック
+    // 可視性を確認してから通常クリック
     await expect(this.createNewButton).toBeVisible({ timeout: 10000 });
     await expect(this.createNewButton).toBeEnabled();
     await this.createNewButton.click();
@@ -58,13 +45,11 @@ export class ScoreExplorerPage {
   }
 
   getChartCheckbox(index: number) {
-    // デバイス別のdata-testidで一意に取得
-    return this.page.getByTestId(`chart-checkbox-${index}-${this.isMobile ? 'mobile' : 'desktop'}`);
+    return this.page.getByTestId(`chart-checkbox-${index}`);
   }
 
   getChartItem(index: number) {
-    // デバイス別のdata-testidで一意に取得
-    return this.page.getByTestId(`chart-item-${index}-${this.isMobile ? 'mobile' : 'desktop'}`);
+    return this.page.getByTestId(`chart-item-${index}`);
   }
 
   async selectChart(index: number) {
@@ -79,16 +64,12 @@ export class ScoreExplorerPage {
   }
 
   getSelectionStatus() {
-    // デバイスに応じて適切な要素を選択
-    if (this.isMobile) {
-      return this.page.locator('.md\\:hidden >> text=件選択中');
-    } else {
-      return this.page.locator('.hidden.md\\:block >> text=件選択中');
-    }
+    // サイドバー内のテキストを直接探す
+    return this.page.locator('aside >> text=件選択中');
   }
 
   async openActionDropdown() {
-    const actionButton = this.page.getByTestId(`action-dropdown-button-${this.isMobile ? 'mobile' : 'desktop'}`);
+    const actionButton = this.page.getByTestId('action-dropdown-button');
     await expect(actionButton).toBeVisible();
     await actionButton.click();
   }
@@ -120,8 +101,7 @@ export class ScoreExplorerPage {
   }
 
   async clickImportButton() {
-    const testId = this.isMobile ? 'explorer-import-button-mobile' : 'explorer-import-button-desktop';
-    await this.page.getByTestId(testId).click({ force: true });
+    await this.page.getByTestId('explorer-import-button').click({ force: true });
   }
 
 
@@ -138,16 +118,12 @@ export class ScoreExplorerPage {
   }
 
   async getChartItemCount() {
-    const chartItems = this.page.locator(`[data-testid^="chart-item-"][data-testid$="-${this.isMobile ? 'mobile' : 'desktop'}"]`);
+    const chartItems = this.page.locator('[data-testid^="chart-item-"]');
     return await chartItems.count();
   }
 
   getSpecificTitleLocator(title: string) {
-    // デバイスに応じて適切な要素内で検索
-    if (this.isMobile) {
-      return this.page.locator('.md\\:hidden').locator(`text=${title}`);
-    } else {
-      return this.page.locator('.hidden.md\\:block').locator(`text=${title}`);
-    }
+    // サイドバー内で検索
+    return this.page.locator('aside').locator(`text=${title}`);
   }
 }

@@ -176,7 +176,7 @@ describe('ScoreExplorer', () => {
       />
     );
 
-    const chartItem = screen.getByTestId('chart-item-0-desktop');
+    const chartItem = screen.getByTestId('chart-item-0');
     expect(chartItem).toHaveClass('bg-slate-100', 'border-[#85B0B7]', 'border');
   });
 
@@ -308,7 +308,8 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-        onEditChart={mockOnEditChart}        />
+          onEditChart={mockOnEditChart}
+        />
       );
 
       const bulkCheckbox = screen.getByTitle('全て選択') as HTMLInputElement;
@@ -331,7 +332,8 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-        onEditChart={mockOnEditChart}        />
+          onEditChart={mockOnEditChart}
+        />
       );
 
       expect(bulkCheckbox.checked).toBe(false);
@@ -351,7 +353,8 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-        onEditChart={mockOnEditChart}        />
+          onEditChart={mockOnEditChart}
+        />
       );
 
       expect(bulkCheckbox.checked).toBe(true);
@@ -372,7 +375,8 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-        onEditChart={mockOnEditChart}        />
+          onEditChart={mockOnEditChart}
+        />
       );
 
       // 未選択時は「全て選択」
@@ -392,7 +396,8 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-        onEditChart={mockOnEditChart}        />
+          onEditChart={mockOnEditChart}
+        />
       );
 
       expect(screen.getByTitle('全て解除')).toBeInTheDocument();
@@ -412,7 +417,8 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-        onEditChart={mockOnEditChart}        />
+          onEditChart={mockOnEditChart}
+        />
       );
 
       const checkboxes = screen.getAllByRole('checkbox') as HTMLInputElement[];
@@ -441,7 +447,8 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-        onEditChart={mockOnEditChart}        />
+          onEditChart={mockOnEditChart}
+        />
       );
 
       // ActionDropdownが存在し、有効状態であることを確認
@@ -471,7 +478,8 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-        onEditChart={mockOnEditChart}        />
+          onEditChart={mockOnEditChart}
+        />
       );
 
       // 一括選択コントロールが表示されない
@@ -507,7 +515,8 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-        onEditChart={mockOnEditChart}        />
+          onEditChart={mockOnEditChart}
+        />
       );
 
       expect(screen.getByText('Very Long Chart Title That Might Overflow The Container Width')).toBeInTheDocument();
@@ -519,8 +528,23 @@ describe('ScoreExplorer', () => {
     });
   });
 
-  describe('Mobile Version', () => {
-    it('should render mobile overlay when isMobile is true', () => {
+  describe('Responsive Behavior', () => {
+    it('should render close button for mobile', () => {
+      // window.matchMediaのモック
+      Object.defineProperty(window, 'matchMedia', {
+        writable: true,
+        value: vi.fn().mockImplementation(query => ({
+          matches: query === '(max-width: 767px)',
+          media: query,
+          onchange: null,
+          addListener: vi.fn(),
+          removeListener: vi.fn(),
+          addEventListener: vi.fn(),
+          removeEventListener: vi.fn(),
+          dispatchEvent: vi.fn(),
+        })),
+      });
+
       render(
         <ScoreExplorer
           charts={mockCharts}
@@ -534,20 +558,16 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-        onEditChart={mockOnEditChart}          isMobile={true}
+          onEditChart={mockOnEditChart}
           onClose={mockOnClose}
         />
       );
 
-      // モバイル固有のオーバーレイクラスを確認
-      const overlay = document.querySelector('.fixed.inset-0.flex.z-40.md\\:hidden');
-      expect(overlay).toBeInTheDocument();
-      
       // 閉じるボタンの存在を確認
-      expect(screen.getByRole('button', { name: /score explorerを閉じる/i })).toBeInTheDocument();
+      expect(screen.getByLabelText('サイドバーを閉じる')).toBeInTheDocument();
     });
 
-    it('should call onClose when close button is clicked in mobile mode', () => {
+    it('should call onClose when close button is clicked', () => {
       render(
         <ScoreExplorer
           charts={mockCharts}
@@ -561,17 +581,32 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-        onEditChart={mockOnEditChart}          isMobile={true}
+          onEditChart={mockOnEditChart}
           onClose={mockOnClose}
         />
       );
 
-      const closeButton = screen.getByRole('button', { name: /score explorerを閉じる/i });
+      const closeButton = screen.getByLabelText('サイドバーを閉じる');
       fireEvent.click(closeButton);
       expect(mockOnClose).toHaveBeenCalled();
     });
 
-    it('should call onClose when overlay background is clicked in mobile mode', () => {
+    it('should call onSetCurrentChart and onClose on mobile when chart is clicked', () => {
+      // window.matchMediaのモック（モバイル）
+      Object.defineProperty(window, 'matchMedia', {
+        writable: true,
+        value: vi.fn().mockImplementation(query => ({
+          matches: query === '(max-width: 767px)',
+          media: query,
+          onchange: null,
+          addListener: vi.fn(),
+          removeListener: vi.fn(),
+          addEventListener: vi.fn(),
+          removeEventListener: vi.fn(),
+          dispatchEvent: vi.fn(),
+        })),
+      });
+
       render(
         <ScoreExplorer
           charts={mockCharts}
@@ -585,33 +620,7 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-        onEditChart={mockOnEditChart}          isMobile={true}
-          onClose={mockOnClose}
-        />
-      );
-
-      const overlay = document.querySelector('.fixed.inset-0.bg-slate-600.bg-opacity-75');
-      if (overlay) {
-        fireEvent.click(overlay);
-        expect(mockOnClose).toHaveBeenCalled();
-      }
-    });
-
-    it('should call onSetCurrentChart and onClose when chart is clicked in mobile mode', () => {
-      render(
-        <ScoreExplorer
-          charts={mockCharts}
-          currentChartId={null}
-          selectedChartIds={[]}
-          onChartSelect={mockOnChartSelect}
-          onSelectAll={mockOnSelectAll}
-          onSetCurrentChart={mockOnSetCurrentChart}
-          onCreateNew={mockOnCreateNew}
-          onImport={mockOnImport}
-          onExportSelected={mockOnExportSelected}
-          onDeleteSelected={mockOnDeleteSelected}
-          onDuplicateSelected={mockOnDuplicateSelected}
-        onEditChart={mockOnEditChart}          isMobile={true}
+          onEditChart={mockOnEditChart}
           onClose={mockOnClose}
         />
       );
@@ -621,7 +630,22 @@ describe('ScoreExplorer', () => {
       expect(mockOnClose).toHaveBeenCalled();
     });
 
-    it('should not call onClose when chart is clicked in desktop mode', () => {
+    it('should not call onClose on desktop when chart is clicked', () => {
+      // window.matchMediaのモック（デスクトップ）
+      Object.defineProperty(window, 'matchMedia', {
+        writable: true,
+        value: vi.fn().mockImplementation(query => ({
+          matches: false,
+          media: query,
+          onchange: null,
+          addListener: vi.fn(),
+          removeListener: vi.fn(),
+          addEventListener: vi.fn(),
+          removeEventListener: vi.fn(),
+          dispatchEvent: vi.fn(),
+        })),
+      });
+
       render(
         <ScoreExplorer
           charts={mockCharts}
@@ -635,84 +659,14 @@ describe('ScoreExplorer', () => {
           onExportSelected={mockOnExportSelected}
           onDeleteSelected={mockOnDeleteSelected}
           onDuplicateSelected={mockOnDuplicateSelected}
-        onEditChart={mockOnEditChart}          isMobile={false}
+          onEditChart={mockOnEditChart}
+          onClose={mockOnClose}
         />
       );
 
       fireEvent.click(screen.getByText('Test Chart 1'));
       expect(mockOnSetCurrentChart).toHaveBeenCalledWith('chart1');
       expect(mockOnClose).not.toHaveBeenCalled();
-    });
-
-    it('should render desktop version when isMobile is false', () => {
-      render(
-        <ScoreExplorer
-          charts={mockCharts}
-          currentChartId={null}
-          selectedChartIds={[]}
-          onChartSelect={mockOnChartSelect}
-          onSelectAll={mockOnSelectAll}
-          onSetCurrentChart={mockOnSetCurrentChart}
-          onCreateNew={mockOnCreateNew}
-          onImport={mockOnImport}
-          onExportSelected={mockOnExportSelected}
-          onDeleteSelected={mockOnDeleteSelected}
-          onDuplicateSelected={mockOnDuplicateSelected}
-        onEditChart={mockOnEditChart}          isMobile={false}
-        />
-      );
-
-      // モバイル固有のオーバーレイクラスがないことを確認
-      const overlay = document.querySelector('.fixed.inset-0.flex.z-40.md\\:hidden');
-      expect(overlay).not.toBeInTheDocument();
-      
-      // 閉じるボタンが存在しないことを確認
-      expect(screen.queryByRole('button', { name: /score explorerを閉じる/i })).not.toBeInTheDocument();
-    });
-
-    it('should have different padding for mobile vs desktop', () => {
-      const { rerender } = render(
-        <ScoreExplorer
-          charts={mockCharts}
-          currentChartId={null}
-          selectedChartIds={[]}
-          onChartSelect={mockOnChartSelect}
-          onSelectAll={mockOnSelectAll}
-          onSetCurrentChart={mockOnSetCurrentChart}
-          onCreateNew={mockOnCreateNew}
-          onImport={mockOnImport}
-          onExportSelected={mockOnExportSelected}
-          onDeleteSelected={mockOnDeleteSelected}
-          onDuplicateSelected={mockOnDuplicateSelected}
-        onEditChart={mockOnEditChart}          isMobile={false}
-        />
-      );
-
-      // デスクトップ版のパディングを確認
-      let contentDiv = document.querySelector('.p-4');
-      expect(contentDiv).toBeInTheDocument();
-
-      rerender(
-        <ScoreExplorer
-          charts={mockCharts}
-          currentChartId={null}
-          selectedChartIds={[]}
-          onChartSelect={mockOnChartSelect}
-          onSelectAll={mockOnSelectAll}
-          onSetCurrentChart={mockOnSetCurrentChart}
-          onCreateNew={mockOnCreateNew}
-          onImport={mockOnImport}
-          onExportSelected={mockOnExportSelected}
-          onDeleteSelected={mockOnDeleteSelected}
-          onDuplicateSelected={mockOnDuplicateSelected}
-        onEditChart={mockOnEditChart}          isMobile={true}
-          onClose={mockOnClose}
-        />
-      );
-
-      // モバイル版のパディングを確認
-      contentDiv = document.querySelector('.px-4');
-      expect(contentDiv).toBeInTheDocument();
     });
   });
 });

@@ -31,7 +31,7 @@ test.describe('Nekogata Score Manager - 移調機能テスト (音楽アプリ�
     // チャート作成（Cキー）
     await homePage.goto();
     // Score Explorerを開いて新規作成
-    const scoreExplorerPage = new ScoreExplorerPage(page, false);
+    const scoreExplorerPage = new ScoreExplorerPage(page);
     await homePage.setDesktopViewport();
     await homePage.clickOpenExplorer();
     await scoreExplorerPage.clickCreateNew();
@@ -136,7 +136,7 @@ test.describe('Nekogata Score Manager - 移調機能テスト (音楽アプリ�
     // チャート作成（Cキー）
     await homePage.goto();
     // Score Explorerを開いて新規作成
-    const scoreExplorerPage = new ScoreExplorerPage(page, false);
+    const scoreExplorerPage = new ScoreExplorerPage(page);
     await homePage.setDesktopViewport();
     await homePage.clickOpenExplorer();
     await scoreExplorerPage.clickCreateNew();
@@ -221,7 +221,7 @@ test.describe('Nekogata Score Manager - 移調機能テスト (音楽アプリ�
     // チャート作成
     await homePage.goto();
     // Score Explorerを開いて新規作成
-    const scoreExplorerPage = new ScoreExplorerPage(page, false);
+    const scoreExplorerPage = new ScoreExplorerPage(page);
     await homePage.setDesktopViewport();
     await homePage.clickOpenExplorer();
     await scoreExplorerPage.clickCreateNew();
@@ -308,7 +308,7 @@ test.describe('Nekogata Score Manager - 移調機能テスト (音楽アプリ�
     // チャート作成
     await homePage.goto();
     // Score Explorerを開いて新規作成
-    const scoreExplorerPage = new ScoreExplorerPage(page, false);
+    const scoreExplorerPage = new ScoreExplorerPage(page);
     await homePage.setDesktopViewport();
     await homePage.clickOpenExplorer();
     await scoreExplorerPage.clickCreateNew();

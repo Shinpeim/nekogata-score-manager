@@ -20,7 +20,6 @@ interface ScoreExplorerProps {
   onDuplicateSelected: () => void;
   onEditChart: (chartId: string) => void;
   onCreateSetList?: (chartIds: string[]) => void;
-  isMobile?: boolean;
   onClose?: () => void;
 }
 
@@ -38,7 +37,6 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
   onDuplicateSelected,
   onEditChart,
   onCreateSetList,
-  isMobile = false,
   onClose,
 }) => {
   // タブ状態をlocalStorageで永続化
@@ -64,7 +62,8 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
   
   const handleChartClick = (chartId: string) => {
     onSetCurrentChart(chartId);
-    if (isMobile && onClose) {
+    // モバイルでは自動的に閉じる（モバイルビューの判定はCSSのメディアクエリに任せる）
+    if (onClose && window.matchMedia('(max-width: 767px)').matches) {
       onClose();
     }
   };
@@ -100,7 +99,7 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
             onChange={onSelectAll}
             className="text-[#85B0B7] focus:ring-[#85B0B7]"
             title={selectedChartIds.length === charts.length ? '全て解除' : '全て選択'}
-            data-testid={`select-all-checkbox-${isMobile ? 'mobile' : 'desktop'}`}
+            data-testid="select-all-checkbox"
           />
           <span className="text-xs text-slate-600">一括選択</span>
           <ActionDropdown
@@ -111,7 +110,6 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
             onDeleteSelected={onDeleteSelected}
             onDuplicateSelected={onDuplicateSelected}
             onCreateSetList={handleCreateSetList}
-            isMobile={isMobile}
           />
           <span className="text-xs text-slate-500">
             {selectedChartIds.length > 0 ? `${selectedChartIds.length}件選択中` : '未選択'}
@@ -129,7 +127,7 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
               checked={selectedChartIds.includes(chart.id)}
               onChange={() => onChartSelect(chart.id)}
               className="text-[#85B0B7] focus:ring-[#85B0B7]"
-              data-testid={`chart-checkbox-${index}-${isMobile ? 'mobile' : 'desktop'}`}
+              data-testid={`chart-checkbox-${index}`}
             />
             <div 
               className={`flex-1 p-3 rounded-md transition-colors cursor-pointer ${
@@ -138,7 +136,7 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
                   : 'bg-slate-50 hover:bg-slate-100'
               }`}
               onClick={() => handleChartClick(chart.id)}
-              data-testid={`chart-item-${index}-${isMobile ? 'mobile' : 'desktop'}`}
+              data-testid={`chart-item-${index}`}
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -149,12 +147,13 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
                   onClick={(e) => {
                     e.stopPropagation();
                     onEditChart(chart.id);
-                    if (isMobile && onClose) {
+                    // モバイルでは自動的に閉じる
+                    if (onClose && window.matchMedia('(max-width: 767px)').matches) {
                       onClose();
                     }
                   }}
                   className="ml-2 p-1.5 text-slate-500 hover:text-[#85B0B7] hover:bg-slate-100 rounded transition-colors"
-                  data-testid={`edit-chart-${index}-${isMobile ? 'mobile' : 'desktop'}`}
+                  data-testid={`edit-chart-${index}`}
                   title="編集"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
@@ -172,14 +171,14 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
         <button 
           onClick={onCreateNew}
           className="w-full bg-[#85B0B7] hover:bg-[#6B9CA5] text-white px-3 py-2 rounded text-sm font-medium"
-          data-testid={`explorer-create-new-button-${isMobile ? 'mobile' : 'desktop'}`}
+          data-testid="explorer-create-new-button"
         >
           新規作成
         </button>
         <button 
           onClick={onImport}
           className="w-full bg-[#BDD0CA] hover:bg-[#A4C2B5] text-slate-800 px-3 py-2 rounded text-sm font-medium"
-          data-testid={`explorer-import-button-${isMobile ? 'mobile' : 'desktop'}`}
+          data-testid="explorer-import-button"
         >
           インポート
         </button>
@@ -188,7 +187,7 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
   );
 
   const content = (
-    <div className={isMobile ? "px-4" : "p-4"}>
+    <div className="p-4">
       {/* タブヘッダー */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex bg-slate-100 rounded-md p-1">
@@ -199,7 +198,7 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
                 ? 'bg-white text-slate-900 shadow-sm'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
-            data-testid={`charts-tab-${isMobile ? 'mobile' : 'desktop'}`}
+            data-testid="charts-tab"
           >
             楽譜
           </button>
@@ -210,7 +209,7 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
                 ? 'bg-white text-slate-900 shadow-sm'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
-            data-testid={`setlists-tab-${isMobile ? 'mobile' : 'desktop'}`}
+            data-testid="setlists-tab"
           >
             セットリスト
           </button>
@@ -221,40 +220,31 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
       {activeTab === 'charts' ? renderChartsTab() : (
         <SetListTab
           onChartSelect={handleChartClick}
-          isMobile={isMobile}
           onClose={onClose}
         />
       )}
     </div>
   );
 
-  if (isMobile) {
-    return (
-      <div className="fixed inset-0 flex z-40 md:hidden">
-        <div className="fixed inset-0 bg-slate-600 bg-opacity-75" onClick={onClose}></div>
-        <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white">
-          <div className="absolute top-0 right-0 -mr-12 pt-2">
-            <button
-              onClick={onClose}
-              className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
-            >
-              <span className="sr-only">Score Explorerを閉じる</span>
-              <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
-            {content}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <>
-      {content}
+    <div className="h-full flex flex-col">
+      {/* モバイル用閉じるボタン */}
+      <div className="md:hidden flex justify-end p-2 border-b border-slate-200">
+        <button
+          onClick={onClose}
+          className="p-2 text-slate-500 hover:text-slate-700"
+          aria-label="サイドバーを閉じる"
+        >
+          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      
+      <div className="flex-1 overflow-y-auto">
+        {content}
+      </div>
+      
       {showCreateSetListForm && (
         <SetListCreationForm
           chartIds={selectedChartIds}
@@ -262,7 +252,7 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
           onCancel={handleCreateSetListCancel}
         />
       )}
-    </>
+    </div>
   );
 };
 

@@ -11,7 +11,7 @@ test.describe('Nekogata Score Manager - チャート管理機能テスト', () =
     const chartFormPage = new ChordChartFormPage(page);
     const chartViewPage = new ChartViewPage(page);
     const chartEditorPage = new ChartEditorPage(page);
-    const scoreExplorerPage = new ScoreExplorerPage(page, false);
+    const scoreExplorerPage = new ScoreExplorerPage(page);
     
     // チャート作成
     await homePage.goto();
@@ -34,7 +34,7 @@ test.describe('Nekogata Score Manager - チャート管理機能テスト', () =
     // 編集を保存してビューモードに戻る
     await chartEditorPage.clickSave();
     await chartViewPage.waitForChartToLoad();
-    
+  
     // Score Explorerを開く
     await homePage.ensureExplorerOpen();
     
@@ -42,7 +42,7 @@ test.describe('Nekogata Score Manager - チャート管理機能テスト', () =
     await scoreExplorerPage.selectChart(0);
     
     // 確認ダイアログで削除を承認（ブラウザのconfirmダイアログ）
-    page.on('dialog', async dialog => {
+    page.once('dialog', async dialog => {
       expect(dialog.message()).toContain('削除しますか');
       await dialog.accept();
     });
@@ -64,7 +64,7 @@ test.describe('Nekogata Score Manager - チャート管理機能テスト', () =
     await homePage.goto();
     
     // デスクトップ環境としてテスト
-    const scoreExplorerPage = new ScoreExplorerPage(page, false);
+    const scoreExplorerPage = new ScoreExplorerPage(page);
     await homePage.setDesktopViewport();
     
     // Score Explorerを開いて1つ目のチャート作成
@@ -115,7 +115,7 @@ test.describe('Nekogata Score Manager - チャート管理機能テスト', () =
 
   test('チャート情報の表示と作成が正常に動作する', async ({ page }) => {
     const homePage = new HomePage(page);
-    const scoreExplorerPage = new ScoreExplorerPage(page, false);
+    const scoreExplorerPage = new ScoreExplorerPage(page);
     const chartFormPage = new ChordChartFormPage(page);
     const chartViewPage = new ChartViewPage(page);
     const chartEditorPage = new ChartEditorPage(page);
@@ -148,7 +148,7 @@ test.describe('Nekogata Score Manager - チャート管理機能テスト', () =
 
   test('チャート情報の編集と更新が正しく反映される', async ({ page }) => {
     const homePage = new HomePage(page);
-    const scoreExplorerPage = new ScoreExplorerPage(page, false);
+    const scoreExplorerPage = new ScoreExplorerPage(page);
     const chartFormPage = new ChordChartFormPage(page);
     const chartViewPage = new ChartViewPage(page);
     const chartEditorPage = new ChartEditorPage(page);

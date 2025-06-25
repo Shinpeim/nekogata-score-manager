@@ -8,7 +8,7 @@ import { ScoreExplorerPage } from '../pages/ScoreExplorerPage';
 test.describe('Nekogata Score Manager - コア機能テスト', () => {
   test('チャート作成→表示→編集→保存の基本フローが動作する', async ({ page }) => {
     const homePage = new HomePage(page);
-    const scoreExplorerPage = new ScoreExplorerPage(page, false);
+    const scoreExplorerPage = new ScoreExplorerPage(page);
     const chartFormPage = new ChordChartFormPage(page);
     const chartViewPage = new ChartViewPage(page);
     const chartEditorPage = new ChartEditorPage(page);
@@ -55,7 +55,7 @@ test.describe('Nekogata Score Manager - コア機能テスト', () => {
     const chartFormPage = new ChordChartFormPage(page);
     const chartViewPage = new ChartViewPage(page);
     const chartEditorPage = new ChartEditorPage(page);
-    const scoreExplorerPage = new ScoreExplorerPage(page, false);
+    const scoreExplorerPage = new ScoreExplorerPage(page);
     
     // デスクトップビューポートに設定（モバイル環境での問題を回避）
     await homePage.goto();
@@ -98,7 +98,7 @@ test.describe('Nekogata Score Manager - コア機能テスト', () => {
     
     // Wait for duplication to complete by checking the item count increases
     await page.waitForFunction((initialCount) => {
-      const items = document.querySelectorAll('[data-testid^="chart-item-"][data-testid$="-desktop"]');
+      const items = document.querySelectorAll('[data-testid^="chart-item-"]');
       return items.length > initialCount;
     }, initialItemCount, { timeout: 5000 });
     
@@ -115,7 +115,7 @@ test.describe('Nekogata Score Manager - コア機能テスト', () => {
 
   test('編集キャンセル機能が動作する', async ({ page }) => {
     const homePage = new HomePage(page);
-    const scoreExplorerPage = new ScoreExplorerPage(page, false);
+    const scoreExplorerPage = new ScoreExplorerPage(page);
     const chartFormPage = new ChordChartFormPage(page);
     const chartViewPage = new ChartViewPage(page);
     const chartEditorPage = new ChartEditorPage(page);
@@ -150,7 +150,7 @@ test.describe('Nekogata Score Manager - コア機能テスト', () => {
 
   test('デフォルトセクションを持つチャートの表示が正しく動作する', async ({ page }) => {
     const homePage = new HomePage(page);
-    const scoreExplorerPage = new ScoreExplorerPage(page, false);
+    const scoreExplorerPage = new ScoreExplorerPage(page);
     const chartFormPage = new ChordChartFormPage(page);
     const chartViewPage = new ChartViewPage(page);
     const chartEditorPage = new ChartEditorPage(page);

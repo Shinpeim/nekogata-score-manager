@@ -34,7 +34,7 @@ test.describe('Nekogata Score Manager - 基本動作テスト', () => {
 
   test('Score Explorerの開閉が動作する', async ({ page }) => {
     const homePage = new HomePage(page);
-    const scoreExplorerPage = new ScoreExplorerPage(page, false);
+    const scoreExplorerPage = new ScoreExplorerPage(page);
     
     await homePage.goto();
     
@@ -50,7 +50,12 @@ test.describe('Nekogata Score Manager - 基本動作テスト', () => {
     // ヘッダーのトグルボタンをクリックして閉じる
     await homePage.toggleExplorer();
     
-    // Score Explorerが非表示になることを確認（デスクトップビューの場合）
-    await expect(scoreExplorerPage.titleDesktop).not.toBeVisible();
+    // CSS遷移の完了を待つ
+    await page.waitForTimeout(500);
+    
+    // Score Explorerが非表示になることを確認
+    // サイドバーの幅が0になり、overflow-hiddenが適用されることを確認
+    const sidebar = page.locator('aside');
+    await expect(sidebar).toHaveClass(/overflow-hidden/);
   });
 });

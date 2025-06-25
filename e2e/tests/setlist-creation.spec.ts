@@ -13,7 +13,7 @@ test.describe('セットリスト作成機能', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     
     homePage = new HomePage(page);
-    scoreExplorerPage = new ScoreExplorerPage(page, true); // モバイルモードに設定
+    scoreExplorerPage = new ScoreExplorerPage(page); // モバイルモードに設定
     chartFormPage = new ChordChartFormPage(page);
     
     await homePage.goto();

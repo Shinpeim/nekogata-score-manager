@@ -22,7 +22,7 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
   test.describe('エクスポート機能', () => {
     test('エクスポートUIテスト：チャート作成後にScore Explorerでチャートが表示される', async ({ page }) => {
       const homePage = new HomePage(page);
-      const scoreExplorerPage = new ScoreExplorerPage(page, false);
+      const scoreExplorerPage = new ScoreExplorerPage(page);
       const chartFormPage = new ChordChartFormPage(page);
       const chartViewPage = new ChartViewPage(page);
       
@@ -60,7 +60,7 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
 
     test('エクスポートUIテスト：チャート選択後にエクスポートダイアログが表示される', async ({ page }) => {
       const homePage = new HomePage(page);
-      const scoreExplorerPage = new ScoreExplorerPage(page, false);
+      const scoreExplorerPage = new ScoreExplorerPage(page);
       const chartFormPage = new ChordChartFormPage(page);
       
       await homePage.goto();
@@ -111,7 +111,7 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
   test.describe('インポート機能', () => {
     test('インポートUIテスト：インポートボタンからダイアログが表示される', async ({ page }) => {
       const homePage = new HomePage(page);
-      const scoreExplorerPage = new ScoreExplorerPage(page, false);
+      const scoreExplorerPage = new ScoreExplorerPage(page);
       
       await homePage.goto();
       await homePage.setDesktopViewport();
@@ -138,7 +138,7 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
   test.describe('エラーハンドリング', () => {
     test('JSONインポート：不正なJSONファイルでエラーメッセージが表示される', async ({ page }) => {
       const homePage = new HomePage(page);
-      const scoreExplorerPage = new ScoreExplorerPage(page, false);
+      const scoreExplorerPage = new ScoreExplorerPage(page);
       
       await homePage.goto();
       await homePage.setDesktopViewport();
@@ -176,7 +176,7 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
 
     test('JSONインポート：無効なデータ形式でエラーメッセージが表示される', async ({ page }) => {
       const homePage = new HomePage(page);
-      const scoreExplorerPage = new ScoreExplorerPage(page, false);
+      const scoreExplorerPage = new ScoreExplorerPage(page);
       
       await homePage.goto();
       await homePage.setDesktopViewport();
@@ -218,7 +218,7 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
 
     test('JSONインポート：空ファイルでエラーメッセージが表示される', async ({ page }) => {
       const homePage = new HomePage(page);
-      const scoreExplorerPage = new ScoreExplorerPage(page, false);
+      const scoreExplorerPage = new ScoreExplorerPage(page);
       
       await homePage.goto();
       await homePage.setDesktopViewport();

@@ -7,7 +7,7 @@ import { ChartEditorPage } from '../pages/ChartEditorPage';
 test.describe('Nekogata Score Manager - チャート作成機能', () => {
   test('新規チャートの作成フローが動作する', async ({ page }) => {
     const homePage = new HomePage(page);
-    const scoreExplorerPage = new ScoreExplorerPage(page, true);
+    const scoreExplorerPage = new ScoreExplorerPage(page);
     const chartFormPage = new ChordChartFormPage(page);
     const chartEditorPage = new ChartEditorPage(page);
     
@@ -46,7 +46,7 @@ test.describe('Nekogata Score Manager - チャート作成機能', () => {
 
   test('フォームのキャンセルが動作する', async ({ page }) => {
     const homePage = new HomePage(page);
-    const scoreExplorerPage = new ScoreExplorerPage(page, true);
+    const scoreExplorerPage = new ScoreExplorerPage(page);
     const chartFormPage = new ChordChartFormPage(page);
     
     // モバイルビューポートに設定
@@ -75,7 +75,7 @@ test.describe('Nekogata Score Manager - チャート作成機能', () => {
 
   test('Score Explorerからのチャート作成が動作する', async ({ page }) => {
     const homePage = new HomePage(page);
-    const scoreExplorerPage = new ScoreExplorerPage(page, false);
+    const scoreExplorerPage = new ScoreExplorerPage(page);
     const chartFormPage = new ChordChartFormPage(page);
     const chartEditorPage = new ChartEditorPage(page);
     

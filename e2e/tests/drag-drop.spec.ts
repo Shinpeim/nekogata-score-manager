@@ -28,7 +28,7 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
     const chartFormPage = new ChordChartFormPage(page);
     const chartViewPage = new ChartViewPage(page);
     const chartEditorPage = new ChartEditorPage(page);
-    const scoreExplorerPage = new ScoreExplorerPage(page, false);
+    const scoreExplorerPage = new ScoreExplorerPage(page);
 
     // 1. チャート新規作成
     await homePage.goto();
@@ -111,7 +111,7 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
     // 基本チャート作成
     await homePage.goto();
     // Score Explorerを開いて新規作成
-    const scoreExplorerPage = new ScoreExplorerPage(page, false);
+    const scoreExplorerPage = new ScoreExplorerPage(page);
     await homePage.setDesktopViewport();
     await homePage.ensureExplorerOpen();
     await scoreExplorerPage.clickCreateNew();
@@ -161,7 +161,7 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
     // 基本チャート作成
     await homePage.goto();
     // Score Explorerを開いて新規作成
-    const scoreExplorerPage = new ScoreExplorerPage(page, false);
+    const scoreExplorerPage = new ScoreExplorerPage(page);
     await homePage.setDesktopViewport();
     await homePage.ensureExplorerOpen();
     await scoreExplorerPage.clickCreateNew();
