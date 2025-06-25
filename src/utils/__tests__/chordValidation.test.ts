@@ -172,7 +172,7 @@ describe('chordValidation', () => {
           id: 'section-1',
           name: 'イントロ',
           chords: [
-            { name: 'C', root: 'C', duration: 4, memo: '' }
+            { id: 'chord-1', name: 'C', root: 'C', duration: 4, memo: '' }
           ],
           beatsPerBar: 4,
           barsCount: 1
@@ -196,7 +196,7 @@ describe('chordValidation', () => {
           {
             ...validChart.sections![0],
             chords: [
-              { name: '', root: '', duration: 4, memo: '' }
+              { id: 'chord-2', name: '', root: '', duration: 4, memo: '' }
             ]
           }
         ]
@@ -213,7 +213,7 @@ describe('chordValidation', () => {
           {
             ...validChart.sections![0],
             chords: [
-              { name: 'C', root: 'C', duration: 0.25, memo: '' } // 無効な拍数
+              { id: 'chord-3', name: 'C', root: 'C', duration: 0.25, memo: '' } // 無効な拍数
             ]
           }
         ]
@@ -230,8 +230,8 @@ describe('chordValidation', () => {
           {
             ...validChart.sections![0],
             chords: [
-              { name: 'C', root: 'C', duration: 4, memo: '' },
-              { name: '', root: '', duration: undefined, memo: '', isLineBreak: true }
+              { id: 'chord-4', name: 'C', root: 'C', duration: 4, memo: '' },
+              { id: 'chord-5', name: '', root: '', duration: undefined, memo: '', isLineBreak: true }
             ]
           }
         ]

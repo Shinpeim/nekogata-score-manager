@@ -1,14 +1,11 @@
 import { useEffect, useState } from 'react';
 import MainLayout from './layouts/MainLayout';
 import ChordChart from './components/ChordChart';
-import ChordChartForm from './components/ChordChartForm';
 import ImportDialog from './components/ImportDialog';
 import { useChartManagement } from './hooks/useChartManagement';
 import { useChartSync } from './hooks/useChartSync';
-import type { ChordChart as ChordChartType } from './types';
 
 function App() {
-  const [showCreateForm, setShowCreateForm] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [explorerOpen, setExplorerOpen] = useState(false);
   const [isEditingChart, setIsEditingChart] = useState(false);
@@ -19,8 +16,8 @@ function App() {
     isLoading,
     error,
     clearError,
-    createNewChart,
-    currentChartId
+    currentChartId,
+    setCurrentChart
   } = useChartManagement();
 
   // 同期機能を有効化（自動的に初期化される）
@@ -34,36 +31,34 @@ function App() {
 
   // currentChartIdが変更されたら編集状態をリセット
   useEffect(() => {
-    setIsEditingChart(false);
+    if (currentChartId) {
+      setIsEditingChart(false);
+    }
   }, [currentChartId]);
 
-  const handleCreateChart = async (chartData: ChordChartType) => {
-    try {
-      await createNewChart(chartData);
-      setShowCreateForm(false);
-    } catch (error) {
-      console.error('Failed to create chart:', error);
-    }
-  };
 
   const handleImportComplete = async () => {
     // Storage-first方式: インポート後にStorageから再読み込み
     await loadFromStorage();
   };
 
-  const handleShowCreateForm = () => {
-    setShowCreateForm(true);
-  };
 
-  const handleShowImportDialog = () => {
-    setShowImportDialog(true);
-  };
 
   const handleOpenExplorer = () => {
     setExplorerOpen(true);
   };
 
-  const handleEditChart = () => {
+  const handleEditChart = (chartId: string) => {
+    // 指定されたチャートに切り替えてから編集開始
+    setCurrentChart(chartId);
+    // setCurrentChartの後に編集モードを有効にする
+    // useEffectでfalseにリセットされる前に次のレンダーで有効化
+    setTimeout(() => {
+      setIsEditingChart(true);
+    }, 0);
+  };
+
+  const handleStartEdit = () => {
     setIsEditingChart(true);
   };
 
@@ -80,7 +75,7 @@ function App() {
 
   return (
     <>
-      <MainLayout explorerOpen={explorerOpen} setExplorerOpen={setExplorerOpen} onEditChart={handleEditChart}>
+      <MainLayout explorerOpen={explorerOpen} setExplorerOpen={setExplorerOpen} onEditChart={handleEditChart} onStartEdit={handleStartEdit}>
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-md p-4 m-4">
             <div className="flex">
@@ -108,20 +103,12 @@ function App() {
           </div>
         )}
         <ChordChart 
-          onCreateNew={handleShowCreateForm}
-          onOpenImport={handleShowImportDialog}
           onOpenExplorer={handleOpenExplorer}
           isEditing={isEditingChart}
           onEditingComplete={() => setIsEditingChart(false)}
         />
       </MainLayout>
 
-      {showCreateForm && (
-        <ChordChartForm
-          onSave={handleCreateChart}
-          onCancel={() => setShowCreateForm(false)}
-        />
-      )}
 
       {showImportDialog && (
         <ImportDialog 

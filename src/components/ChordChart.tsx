@@ -2,20 +2,17 @@ import React, { useState } from 'react';
 import type { ChordChart as ChordChartType } from '../types';
 import { useChartManagement } from '../hooks/useChartManagement';
 import ChordChartEditor from './ChordChartEditor';
-import ChordChartForm from './ChordChartForm';
 import ChordChartViewer from './ChordChartViewer';
 import EmptyChartPlaceholder from './EmptyChartPlaceholder';
 
 interface ChordChartProps {
   chartData?: ChordChartType;
-  onCreateNew?: () => void;
-  onOpenImport?: () => void;
   onOpenExplorer?: () => void;
   isEditing?: boolean;
   onEditingComplete?: () => void;
 }
 
-const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew, onOpenImport, onOpenExplorer, isEditing: propIsEditing, onEditingComplete }) => {
+const ChordChart: React.FC<ChordChartProps> = ({ chartData, onOpenExplorer, isEditing: propIsEditing, onEditingComplete }) => {
   const [localIsEditing, setLocalIsEditing] = useState(false);
   const { charts, currentChartId, updateChart } = useChartManagement();
   
@@ -48,8 +45,6 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew, onOpenI
   if (!displayChart) {
     return (
       <EmptyChartPlaceholder 
-        onCreateNew={onCreateNew}
-        onOpenImport={onOpenImport}
         onOpenExplorer={onOpenExplorer}
       />
     );
@@ -73,48 +68,4 @@ const ChordChart: React.FC<ChordChartProps> = ({ chartData, onCreateNew, onOpenI
   );
 };
 
-// 新規作成フォームの追加（ChordChartコンポーネントの外で）
-const ChordChartWithForm: React.FC<ChordChartProps> = (props) => {
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const { createNewChart } = useChartManagement();
-
-  const handleCreateNew = () => {
-    if (props.onCreateNew) {
-      props.onCreateNew();
-    } else {
-      setShowCreateForm(true);
-    }
-  };
-
-  const handleCreateChart = async (chartData: ChordChartType) => {
-    try {
-      await createNewChart(chartData);
-      setShowCreateForm(false);
-    } catch (error) {
-      console.error('Failed to create chart:', error);
-    }
-  };
-
-  const handleCancelCreate = () => {
-    setShowCreateForm(false);
-  };
-
-  return (
-    <>
-      <ChordChart 
-        {...props} 
-        onCreateNew={handleCreateNew}
-        onOpenImport={props.onOpenImport}
-        onOpenExplorer={props.onOpenExplorer}
-      />
-      {showCreateForm && (
-        <ChordChartForm
-          onSave={handleCreateChart}
-          onCancel={handleCancelCreate}
-        />
-      )}
-    </>
-  );
-};
-
-export default ChordChartWithForm;
+export default ChordChart;

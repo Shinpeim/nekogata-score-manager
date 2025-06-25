@@ -2,19 +2,26 @@ import { test, expect } from '@playwright/test';
 import { HomePage } from '../pages/HomePage';
 import { ScoreExplorerPage } from '../pages/ScoreExplorerPage';
 import { ChordChartFormPage } from '../pages/ChordChartFormPage';
-import { ChartViewPage } from '../pages/ChartViewPage';
+import { ChartEditorPage } from '../pages/ChartEditorPage';
 
 test.describe('Nekogata Score Manager - チャート作成機能', () => {
   test('新規チャートの作成フローが動作する', async ({ page }) => {
     const homePage = new HomePage(page);
+    const scoreExplorerPage = new ScoreExplorerPage(page, true);
     const chartFormPage = new ChordChartFormPage(page);
-    const chartViewPage = new ChartViewPage(page);
+    const chartEditorPage = new ChartEditorPage(page);
+    
+    // モバイルビューポートに設定
+    await page.setViewportSize({ width: 375, height: 667 });
     
     // アプリケーションにアクセス
     await homePage.goto();
     
-    // 新規作成ボタンをクリック
-    await homePage.clickCreateNew();
+    // Score Explorerを開くボタンをクリック
+    await homePage.clickOpenExplorer();
+    
+    // Score Explorer内の新規作成ボタンをクリック
+    await scoreExplorerPage.clickCreateNew();
     
     // チャート作成フォームが表示されることを確認
     await expect(chartFormPage.form).toBeVisible();
@@ -28,18 +35,29 @@ test.describe('Nekogata Score Manager - チャート作成機能', () => {
     // フォームが閉じられることを確認
     await expect(chartFormPage.form).not.toBeVisible();
     
-    // タイトルが表示されていることを確認（チャートが作成された）
-    await expect(chartViewPage.getChartTitleWithText('テストチャート')).toBeVisible();
+    // 編集画面に遷移することを確認（新機能）
+    await page.waitForTimeout(2000); // 画面遷移を待機（非同期処理のため長めに設定）
+    await expect(chartEditorPage.chartEditor).toBeVisible({ timeout: 10000 });
+    
+    // エディターのタイトルが正しく表示されることを確認
+    await expect(chartEditorPage.editorTitle).toContainText('テストチャート');
   });
 
   test('フォームのキャンセルが動作する', async ({ page }) => {
     const homePage = new HomePage(page);
+    const scoreExplorerPage = new ScoreExplorerPage(page, true);
     const chartFormPage = new ChordChartFormPage(page);
+    
+    // モバイルビューポートに設定
+    await page.setViewportSize({ width: 375, height: 667 });
     
     await homePage.goto();
     
-    // 新規作成ボタンをクリック
-    await homePage.clickCreateNew();
+    // Score Explorerを開くボタンをクリック
+    await homePage.clickOpenExplorer();
+    
+    // Score Explorer内の新規作成ボタンをクリック
+    await scoreExplorerPage.clickCreateNew();
     
     // チャート作成フォームが表示されることを確認
     await expect(chartFormPage.form).toBeVisible();
@@ -58,7 +76,7 @@ test.describe('Nekogata Score Manager - チャート作成機能', () => {
     const homePage = new HomePage(page);
     const scoreExplorerPage = new ScoreExplorerPage(page, false);
     const chartFormPage = new ChordChartFormPage(page);
-    const chartViewPage = new ChartViewPage(page);
+    const chartEditorPage = new ChartEditorPage(page);
     
     await homePage.goto();
     
@@ -83,7 +101,11 @@ test.describe('Nekogata Score Manager - チャート作成機能', () => {
     // フォームが閉じられることを確認
     await expect(chartFormPage.form).not.toBeVisible();
     
-    // 作成されたチャートが表示されていることを確認
-    await expect(chartViewPage.getChartTitleWithText('Explorer テストチャート')).toBeVisible();
+    // 編集画面に遷移することを確認（新機能）
+    await page.waitForTimeout(2000); // 画面遷移を待機（非同期処理のため長めに設定）
+    await expect(chartEditorPage.chartEditor).toBeVisible({ timeout: 10000 });
+    
+    // エディターのタイトルが正しく表示されることを確認
+    await expect(chartEditorPage.editorTitle).toContainText('Explorer テストチャート');
   });
 });

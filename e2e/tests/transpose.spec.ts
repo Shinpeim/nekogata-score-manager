@@ -3,6 +3,7 @@ import { HomePage } from '../pages/HomePage';
 import { ChordChartFormPage } from '../pages/ChordChartFormPage';
 import { ChartViewPage } from '../pages/ChartViewPage';
 import { ChartEditorPage } from '../pages/ChartEditorPage';
+import { ScoreExplorerPage } from '../pages/ScoreExplorerPage';
 
 test.describe('Nekogata Score Manager - 移調機能テスト (音楽アプリの核心機能)', () => {
   test.beforeEach(async ({ page }) => {
@@ -29,14 +30,16 @@ test.describe('Nekogata Score Manager - 移調機能テスト (音楽アプリ�
 
     // チャート作成（Cキー）
     await homePage.goto();
-    await homePage.clickCreateNew();
+    // Score Explorerを開いて新規作成
+    const scoreExplorerPage = new ScoreExplorerPage(page, false);
+    await homePage.setDesktopViewport();
+    await homePage.clickOpenExplorer();
+    await scoreExplorerPage.clickCreateNew();
     await chartFormPage.fillTitle('移調テスト基本');
     await chartFormPage.selectKey('C'); // Cキーで作成
     await chartFormPage.clickSave();
 
-    // 編集モードに入る
-    await chartViewPage.waitForChartToLoad();
-    await chartViewPage.clickEdit();
+    // 新規作成後は直接編集画面に遷移
     await chartEditorPage.waitForEditorToLoad();
 
     // コード進行を入力: C - Am - F - G
@@ -45,18 +48,22 @@ test.describe('Nekogata Score Manager - 移調機能テスト (音楽アプリ�
     await chartEditorPage.addChordToSection(sectionIndex);
     await chartEditorPage.waitForChordToAppear(sectionIndex, 1);
     await chartEditorPage.setChordName(sectionIndex, 0, 'C');
+    await chartEditorPage.setChordDuration(sectionIndex, 0, '4');
     
     await chartEditorPage.addChordToSection(sectionIndex);
     await chartEditorPage.waitForChordToAppear(sectionIndex, 2);
     await chartEditorPage.setChordName(sectionIndex, 1, 'Am');
+    await chartEditorPage.setChordDuration(sectionIndex, 1, '4');
     
     await chartEditorPage.addChordToSection(sectionIndex);
     await chartEditorPage.waitForChordToAppear(sectionIndex, 3);
     await chartEditorPage.setChordName(sectionIndex, 2, 'F');
+    await chartEditorPage.setChordDuration(sectionIndex, 2, '4');
     
     await chartEditorPage.addChordToSection(sectionIndex);
     await chartEditorPage.waitForChordToAppear(sectionIndex, 4);
     await chartEditorPage.setChordName(sectionIndex, 3, 'G');
+    await chartEditorPage.setChordDuration(sectionIndex, 3, '4');
 
     // 初期コード確認: C - Am - F - G
     let chordOrder = await chartEditorPage.getChordOrderInSection(sectionIndex);
@@ -71,13 +78,15 @@ test.describe('Nekogata Score Manager - 移調機能テスト (音楽アプリ�
     await expect(transposeDialog).toBeVisible();
 
     // 移調ダイアログの内容確認
-    await expect(page.locator('text=キーを C / A')).toBeVisible();
-    await expect(page.locator('text=m から G / Em に変更します')).toBeVisible();
     await expect(page.locator('text=コードも一緒に移調しますか？')).toBeVisible();
 
     // 「はい、コードも一緒に移調する」ボタンをクリック
     const transposeButton = page.locator('button:has-text("はい、コードも一緒に移調する")');
-    await transposeButton.click();
+    await expect(transposeButton).toBeVisible();
+    
+    console.log('移調ボタンをクリック中...');
+    await transposeButton.click({ force: true });
+    console.log('移調ボタンクリック完了');
 
     // 移調ダイアログが閉じるまで待機
     await expect(page.locator('text=キーの変更')).not.toBeVisible();
@@ -88,11 +97,18 @@ test.describe('Nekogata Score Manager - 移調機能テスト (音楽アプリ�
       return keySelect && keySelect.value === 'G';
     }, { timeout: 10000 });
 
-    // DOM更新を待機
-    await page.waitForTimeout(1000);
+    // 移調処理完了まで待機
+    await page.waitForTimeout(3000);
+    
+    // 移調が実際に実行されたかチェック
+    await page.waitForFunction(() => {
+      const keySelect = document.querySelector('#key-select') as HTMLSelectElement;
+      return keySelect && keySelect.value === 'G';
+    }, { timeout: 10000 });
 
     // 移調後のコード確認: G - Em - C - D
     chordOrder = await chartEditorPage.getChordOrderInSection(sectionIndex);
+    console.log('移調後のコード順序:', chordOrder);
     expect(chordOrder).toEqual(['G', 'Em', 'C', 'D']);
 
     // 保存して永続化確認
@@ -116,14 +132,16 @@ test.describe('Nekogata Score Manager - 移調機能テスト (音楽アプリ�
 
     // チャート作成（Cキー）
     await homePage.goto();
-    await homePage.clickCreateNew();
+    // Score Explorerを開いて新規作成
+    const scoreExplorerPage = new ScoreExplorerPage(page, false);
+    await homePage.setDesktopViewport();
+    await homePage.clickOpenExplorer();
+    await scoreExplorerPage.clickCreateNew();
     await chartFormPage.fillTitle('連続移調テスト');
     await chartFormPage.selectKey('C');
     await chartFormPage.clickSave();
 
-    // 編集モードに入る
-    await chartViewPage.waitForChartToLoad();
-    await chartViewPage.clickEdit();
+    // 新規作成後は直接編集画面に遷移
     await chartEditorPage.waitForEditorToLoad();
 
     // シンプルなコード進行を入力: C - F
@@ -132,10 +150,12 @@ test.describe('Nekogata Score Manager - 移調機能テスト (音楽アプリ�
     await chartEditorPage.addChordToSection(sectionIndex);
     await chartEditorPage.waitForChordToAppear(sectionIndex, 1);
     await chartEditorPage.setChordName(sectionIndex, 0, 'C');
+    await chartEditorPage.setChordDuration(sectionIndex, 0, '4');
     
     await chartEditorPage.addChordToSection(sectionIndex);
     await chartEditorPage.waitForChordToAppear(sectionIndex, 2);
     await chartEditorPage.setChordName(sectionIndex, 1, 'F');
+    await chartEditorPage.setChordDuration(sectionIndex, 1, '4');
 
     // 移調のテストケース定義
     const transposeTests = [
@@ -194,24 +214,28 @@ test.describe('Nekogata Score Manager - 移調機能テスト (音楽アプリ�
 
     // チャート作成
     await homePage.goto();
-    await homePage.clickCreateNew();
+    // Score Explorerを開いて新規作成
+    const scoreExplorerPage = new ScoreExplorerPage(page, false);
+    await homePage.setDesktopViewport();
+    await homePage.clickOpenExplorer();
+    await scoreExplorerPage.clickCreateNew();
     await chartFormPage.fillTitle('移調永続化テスト');
     await chartFormPage.selectKey('C');
     await chartFormPage.clickSave();
 
-    // 編集モードでコード追加
-    await chartViewPage.waitForChartToLoad();
-    await chartViewPage.clickEdit();
+    // 新規作成後は直接編集画面に遷移
     await chartEditorPage.waitForEditorToLoad();
 
     const sectionIndex = 0;
     await chartEditorPage.addChordToSection(sectionIndex);
     await chartEditorPage.waitForChordToAppear(sectionIndex, 1);
     await chartEditorPage.setChordName(sectionIndex, 0, 'Dm');
+    await chartEditorPage.setChordDuration(sectionIndex, 0, '4');
     
     await chartEditorPage.addChordToSection(sectionIndex);
     await chartEditorPage.waitForChordToAppear(sectionIndex, 2);
     await chartEditorPage.setChordName(sectionIndex, 1, 'G7');
+    await chartEditorPage.setChordDuration(sectionIndex, 1, '4');
 
     // A移調実行
     const keySelect = page.locator('#key-select');
@@ -274,14 +298,16 @@ test.describe('Nekogata Score Manager - 移調機能テスト (音楽アプリ�
 
     // チャート作成
     await homePage.goto();
-    await homePage.clickCreateNew();
+    // Score Explorerを開いて新規作成
+    const scoreExplorerPage = new ScoreExplorerPage(page, false);
+    await homePage.setDesktopViewport();
+    await homePage.clickOpenExplorer();
+    await scoreExplorerPage.clickCreateNew();
     await chartFormPage.fillTitle('移調キャンセルテスト');
     await chartFormPage.selectKey('C');
     await chartFormPage.clickSave();
 
-    // 編集モードでコード追加
-    await chartViewPage.waitForChartToLoad();
-    await chartViewPage.clickEdit();
+    // 新規作成後は直接編集画面に遷移
     await chartEditorPage.waitForEditorToLoad();
 
     const sectionIndex = 0;

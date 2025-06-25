@@ -65,69 +65,73 @@ describe('chordParsing', () => {
     describe('duration syntax [n]', () => {
       it('should parse chords with integer duration', () => {
         const result = parseChordInput('C[2]');
-        expect(result).toEqual({
+        expect(result).toMatchObject({
           name: 'C',
           root: 'C',
           duration: 2,
           memo: ''
         });
+        expect(result).toHaveProperty('id');
       });
 
       it('should parse chords with decimal duration', () => {
         const result = parseChordInput('Am[1.5]');
-        expect(result).toEqual({
+        expect(result).toMatchObject({
           name: 'Am',
           root: 'A',
           duration: 1.5,
           memo: ''
         });
+        expect(result).toHaveProperty('id');
       });
 
       it('should parse complex chords with duration', () => {
         const result = parseChordInput('E7(#9)[2]');
-        expect(result).toEqual({
+        expect(result).toMatchObject({
           name: 'E7(#9)',
           root: 'E',
           duration: 2,
           memo: ''
         });
+        expect(result).toHaveProperty('id');
       });
 
       it('should parse on-chords with duration', () => {
         const result = parseChordInput('C/E[4]');
-        expect(result).toEqual({
+        expect(result).toMatchObject({
           name: 'C',
           root: 'C',
           base: 'E',
           duration: 4,
           memo: ''
         });
+        expect(result).toHaveProperty('id');
       });
 
       it('should handle invalid durations gracefully', () => {
         // 無効な拍数の場合、デフォルト拍数で受け入れる
-        expect(parseChordInput('C[0]')).toEqual({
+        expect(parseChordInput('C[0]')).toMatchObject({
           name: 'C',
           root: 'C',
           base: undefined,
           duration: 4,
           memo: ''
         });
-        expect(parseChordInput('C[-1]')).toEqual({
+        expect(parseChordInput('C[-1]')).toMatchObject({
           name: 'C',
           root: 'C',
           base: undefined,
           duration: 4,
           memo: ''
         });
-        expect(parseChordInput('C[17]')).toEqual({
+        expect(parseChordInput('C[17]')).toMatchObject({
           name: 'C',
           root: 'C',
           base: undefined,
           duration: 4,
           memo: ''
         });
-        expect(parseChordInput('C[abc]')).toEqual({
+        expect(parseChordInput('C[abc]')).toMatchObject({
           name: 'C[abc]',
           root: 'C',
           base: undefined,
@@ -140,22 +144,24 @@ describe('chordParsing', () => {
     describe('default duration', () => {
       it('should use default duration when no duration specified', () => {
         const result = parseChordInput('C', 8);
-        expect(result).toEqual({
+        expect(result).toMatchObject({
           name: 'C',
           root: 'C',
           duration: 8,
           memo: ''
         });
+        expect(result).toHaveProperty('id');
       });
 
       it('should use default duration of 4 when not specified', () => {
         const result = parseChordInput('Am');
-        expect(result).toEqual({
+        expect(result).toMatchObject({
           name: 'Am',
           root: 'A',
           duration: 4,
           memo: ''
         });
+        expect(result).toHaveProperty('id');
       });
     });
 
@@ -183,12 +189,13 @@ describe('chordParsing', () => {
 
       it('should parse tension chords', () => {
         const result = parseChordInput('C7(b5)');
-        expect(result).toEqual({
+        expect(result).toMatchObject({
           name: 'C7(b5)',
           root: 'C',
           duration: 4,
           memo: ''
         });
+        expect(result).toHaveProperty('id');
       });
     });
 
@@ -199,13 +206,13 @@ describe('chordParsing', () => {
       });
 
       it('should accept any non-empty text', () => {
-        expect(parseChordInput('invalid')).toEqual({
+        expect(parseChordInput('invalid')).toMatchObject({
           name: 'invalid',
           root: 'C',
           duration: 4,
           memo: ''
         });
-        expect(parseChordInput('123')).toEqual({
+        expect(parseChordInput('123')).toMatchObject({
           name: '123',
           root: 'C',
           duration: 4,
@@ -215,13 +222,14 @@ describe('chordParsing', () => {
 
       it('should normalize flat symbols', () => {
         const result = parseChordInput('Bb/Db[2]');
-        expect(result).toEqual({
+        expect(result).toMatchObject({
           name: 'Bb',
           root: 'B♭',
           base: 'D♭',
           duration: 2,
           memo: ''
         });
+        expect(result).toHaveProperty('id');
       });
     });
 

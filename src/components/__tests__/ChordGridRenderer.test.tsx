@@ -22,10 +22,10 @@ describe('ChordGridRenderer', () => {
     id: 'section-1',
     name: 'Test Section',
     chords: [
-      { name: 'C', root: 'C', duration: 4, memo: '' },
-      { name: 'Am', root: 'A', duration: 4, memo: '' },
-      { name: 'F', root: 'F', duration: 4, memo: '' },
-      { name: 'G', root: 'G', duration: 4, memo: '' }
+      { id: 'chord-1', name: 'C', root: 'C', duration: 4, memo: '' },
+      { id: 'chord-2', name: 'Am', root: 'A', duration: 4, memo: '' },
+      { id: 'chord-3', name: 'F', root: 'F', duration: 4, memo: '' },
+      { id: 'chord-4', name: 'G', root: 'G', duration: 4, memo: '' }
     ],
     beatsPerBar: 4,
     barsCount: 4
@@ -46,8 +46,8 @@ describe('ChordGridRenderer', () => {
       const sectionWithBaseChords: ChordSection = {
         ...mockSection,
         chords: [
-          { name: 'C', root: 'C', base: 'E', duration: 4, memo: '' },
-          { name: 'F', root: 'F', base: 'A', duration: 4, memo: '' }
+          { id: 'chord-5', name: 'C', root: 'C', base: 'E', duration: 4, memo: '' },
+          { id: 'chord-6', name: 'F', root: 'F', base: 'A', duration: 4, memo: '' }
         ]
       };
 
@@ -63,9 +63,9 @@ describe('ChordGridRenderer', () => {
       const sectionWithDurations: ChordSection = {
         ...mockSection,
         chords: [
-          { name: 'C', root: 'C', duration: 2, memo: '' },
-          { name: 'G', root: 'G', duration: 1, memo: '' },
-          { name: 'Am', root: 'A', duration: 1, memo: '' }
+          { id: 'chord-7', name: 'C', root: 'C', duration: 2, memo: '' },
+          { id: 'chord-8', name: 'G', root: 'G', duration: 1, memo: '' },
+          { id: 'chord-9', name: 'Am', root: 'A', duration: 1, memo: '' }
         ]
       };
 
@@ -81,8 +81,8 @@ describe('ChordGridRenderer', () => {
       const sectionWithoutDurations: ChordSection = {
         ...mockSection,
         chords: [
-          { name: 'C', root: 'C', memo: '' },
-          { name: 'G', root: 'G', memo: '' }
+          { id: 'chord-10', name: 'C', root: 'C', memo: '' },
+          { id: 'chord-11', name: 'G', root: 'G', memo: '' }
         ]
       };
 
@@ -96,10 +96,10 @@ describe('ChordGridRenderer', () => {
       const sectionWithMemos: ChordSection = {
         ...mockSection,
         chords: [
-          { name: 'C', root: 'C', duration: 4, memo: '愛を込めて' },
-          { name: 'Am', root: 'A', duration: 4, memo: 'cresc.' },
-          { name: 'F', root: 'F', duration: 4, memo: '' },
-          { name: 'G', root: 'G', duration: 4, memo: 'forte' }
+          { id: 'chord-12', name: 'C', root: 'C', duration: 4, memo: '愛を込めて' },
+          { id: 'chord-13', name: 'Am', root: 'A', duration: 4, memo: 'cresc.' },
+          { id: 'chord-14', name: 'F', root: 'F', duration: 4, memo: '' },
+          { id: 'chord-15', name: 'G', root: 'G', duration: 4, memo: 'forte' }
         ]
       };
 
@@ -117,8 +117,8 @@ describe('ChordGridRenderer', () => {
       const sectionWithoutMemos: ChordSection = {
         ...mockSection,
         chords: [
-          { name: 'C', root: 'C', duration: 4, memo: '' },
-          { name: 'Am', root: 'A', duration: 4, memo: '' }
+          { id: 'chord-16', name: 'C', root: 'C', duration: 4, memo: '' },
+          { id: 'chord-17', name: 'Am', root: 'A', duration: 4, memo: '' }
         ]
       };
 

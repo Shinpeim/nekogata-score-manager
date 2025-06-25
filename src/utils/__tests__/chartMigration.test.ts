@@ -15,7 +15,7 @@ describe('chartMigration', () => {
         id: 'section-1',
         name: 'Test Section',
         chords: [
-          { name: 'C', root: 'C', duration: 4, memo: '' }
+          { id: 'chord-1', name: 'C', root: 'C', duration: 4, memo: '' }
         ],
         beatsPerBar: 4, // 問題のある設定（3/4拍子なのに4拍）
         barsCount: 4
@@ -167,8 +167,8 @@ describe('chartMigration', () => {
           id: 'section-1',
           name: 'Verse',
           chords: [
-            { name: 'C', root: 'C', duration: 4, memo: '' },
-            { name: 'Am', root: 'A', duration: 2, memo: '' }
+            { id: 'chord-2', name: 'C', root: 'C', duration: 4, memo: '' },
+            { id: 'chord-3', name: 'Am', root: 'A', duration: 2, memo: '' }
           ],
           beatsPerBar: 4,
           barsCount: 4
@@ -177,7 +177,7 @@ describe('chartMigration', () => {
           id: 'section-2',
           name: 'Chorus',
           chords: [
-            { name: 'F', root: 'F', duration: 4, memo: '' }
+            { id: 'chord-4', name: 'F', root: 'F', duration: 4, memo: '' }
           ],
           beatsPerBar: 4,
           barsCount: 2
@@ -202,6 +202,7 @@ describe('chartMigration', () => {
     it('改行マーカーコードも正常処理', () => {
       const chart = createMockChart('1.0.0');
       chart.sections[0].chords.push({
+        id: 'chord-5',
         name: '',
         root: '',
         isLineBreak: true,

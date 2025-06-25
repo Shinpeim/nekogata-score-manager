@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { ChordChart } from '../types';
 import BasicInfoEditor from './BasicInfoEditor';
 import SectionEditor from './SectionEditor';
 import { validateChartInputs } from '../utils/chordValidation';
+import { toDisplayChord } from '../utils/chordConversion';
 
 interface ChordChartEditorProps {
   chart: ChordChart;
@@ -12,7 +13,24 @@ interface ChordChartEditorProps {
 
 
 const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCancel }) => {
-  const [editedChart, setEditedChart] = useState<ChordChart>({ ...chart });
+  // チャート読み込み時にコードにidを追加（idがない場合のみ）
+  const chartWithIds = useMemo(() => {
+    return {
+      ...chart,
+      sections: chart.sections?.map(section => ({
+        ...section,
+        chords: section.chords.map(chord => {
+          // 既にidがある場合はそのまま、ない場合は追加
+          if ('id' in chord && chord.id) {
+            return chord;
+          }
+          return toDisplayChord(chord);
+        })
+      })) || []
+    };
+  }, [chart]);
+
+  const [editedChart, setEditedChart] = useState<ChordChart>(chartWithIds);
   const [selectedChords, setSelectedChords] = useState<Set<string>>(new Set());
   const [lastSelectedChord, setLastSelectedChord] = useState<string | null>(null);
   const [validationResult, setValidationResult] = useState<{ isValid: boolean; errors: string[] }>({ 
@@ -110,7 +128,7 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
       <div className="p-6">
         {/* Header */}
         <div className="mb-6 flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-slate-900" data-testid="editor-title">コード譜を編集</h2>
+          <h2 className="text-2xl font-bold text-slate-900" data-testid="editor-title">{chart.title || '無題のコード譜'} - 編集</h2>
           <div className="flex gap-3" data-testid="editor-actions">
             <button
               onClick={onCancel}

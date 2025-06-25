@@ -1,6 +1,7 @@
 import type { ChordChart, Chord } from '../types';
 import { parseChordInput } from '../utils/chordParsing';
 import { createLineBreakMarker } from '../utils/lineBreakHelpers';
+import { toDisplayChord } from '../utils/chordConversion';
 
 interface UseChordOperationsProps {
   chart: ChordChart;
@@ -21,12 +22,12 @@ export const useChordOperations = ({
 }: UseChordOperationsProps) => {
 
   const addChordToSection = (sectionId: string) => {
-    const newChord: Chord = {
+    const newChord: Chord = toDisplayChord({
       name: '',
       root: '',
       duration: undefined,
       memo: ''
-    };
+    });
     
     const updatedChart = {
       ...chart,

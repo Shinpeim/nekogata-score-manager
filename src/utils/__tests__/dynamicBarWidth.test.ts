@@ -6,6 +6,7 @@ import {
   DYNAMIC_BAR_WIDTH_CONFIG 
 } from '../dynamicBarWidth';
 import type { Chord } from '../../types';
+import { createTestChords } from '../../test-utils/chord-test-helpers';
 
 describe('dynamicBarWidth', () => {
   describe('analyzeBarContent', () => {
@@ -20,12 +21,12 @@ describe('dynamicBarWidth', () => {
     });
 
     test('基本的なコードを分析する', () => {
-      const chords: Chord[] = [
-        { name: 'C', root: 'C', memo: '' },
-        { name: 'F', root: 'F', memo: '' },
-        { name: 'G', root: 'G', memo: '' },
-        { name: 'C', root: 'C', memo: '' },
-      ];
+      const chords: Chord[] = createTestChords([
+        { name: 'C', root: 'C' },
+        { name: 'F', root: 'F' },
+        { name: 'G', root: 'G' },
+        { name: 'C', root: 'C' },
+      ]);
       
       const result = analyzeBarContent(chords);
       expect(result).toEqual({
@@ -37,10 +38,10 @@ describe('dynamicBarWidth', () => {
     });
 
     test('メモ付きコードを分析する', () => {
-      const chords: Chord[] = [
+      const chords: Chord[] = createTestChords([
         { name: 'C', root: 'C', memo: '短いメモ' },
         { name: 'F', root: 'F', memo: 'これは長いメモです' },
-      ];
+      ]);
       
       const result = analyzeBarContent(chords);
       expect(result).toEqual({
@@ -52,10 +53,10 @@ describe('dynamicBarWidth', () => {
     });
 
     test('ベース音付きコードを分析する', () => {
-      const chords: Chord[] = [
-        { name: 'C', root: 'C', base: 'E', memo: '' },
-        { name: 'F7', root: 'F', base: 'A', memo: '' },
-      ];
+      const chords: Chord[] = createTestChords([
+        { name: 'C', root: 'C', base: 'E' },
+        { name: 'F7', root: 'F', base: 'A' },
+      ]);
       
       const result = analyzeBarContent(chords);
       expect(result).toEqual({
@@ -67,11 +68,11 @@ describe('dynamicBarWidth', () => {
     });
 
     test('複雑なコードとメモの組み合わせを分析する', () => {
-      const chords: Chord[] = [
+      const chords: Chord[] = createTestChords([
         { name: 'Cmaj7', root: 'C', memo: '普通のメモ' },
         { name: 'Am7', root: 'A', base: 'C', memo: 'とても長いメモテキストです' },
-        { name: 'F', root: 'F', memo: '' },
-      ];
+        { name: 'F', root: 'F' },
+      ]);
       
       const result = analyzeBarContent(chords);
       expect(result).toEqual({
@@ -156,12 +157,12 @@ describe('dynamicBarWidth', () => {
 
   describe('calculateBarWidth', () => {
     test('実際のコード配列から幅を計算する', () => {
-      const chords: Chord[] = [
-        { name: 'C', root: 'C', memo: '' },
+      const chords: Chord[] = createTestChords([
+        { name: 'C', root: 'C' },
         { name: 'Am', root: 'A', memo: '短いメモ' },
-        { name: 'F', root: 'F', memo: '' },
-        { name: 'G', root: 'G', memo: '' },
-      ];
+        { name: 'F', root: 'F' },
+        { name: 'G', root: 'G' },
+      ]);
       
       const width = calculateBarWidth(chords, 4);
       
@@ -183,12 +184,12 @@ describe('dynamicBarWidth', () => {
     });
 
     test('短いコードが多い場合は必要幅が採用される', () => {
-      const chords: Chord[] = [
-        { name: 'C', root: 'C', memo: '', duration: 0.5 },
-        { name: 'F', root: 'F', memo: '', duration: 0.5 },
-        { name: 'G', root: 'G', memo: '', duration: 0.5 },
-        { name: 'C', root: 'C', memo: '', duration: 2.5 },
-      ];
+      const chords: Chord[] = createTestChords([
+        { name: 'C', root: 'C', duration: 0.5 },
+        { name: 'F', root: 'F', duration: 0.5 },
+        { name: 'G', root: 'G', duration: 0.5 },
+        { name: 'C', root: 'C', duration: 2.5 },
+      ]);
       
       const width = calculateBarWidth(chords, 4);
       

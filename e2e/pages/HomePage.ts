@@ -63,6 +63,6 @@ export class HomePage {
   }
 
   getWelcomeMessage() {
-    return this.page.locator('text=まずは新しいコード譜を作成するか、既存のファイルをインポートしてみましょう');
+    return this.page.locator('text=Score Explorerを開いて、新しいコード譜を作成したり既存のファイルをインポートしてみましょう');
   }
 }

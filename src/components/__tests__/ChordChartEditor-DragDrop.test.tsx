@@ -58,10 +58,10 @@ describe('ChordChartEditor - Drag & Drop', () => {
         beatsPerBar: 4,
         barsCount: 4,
         chords: [
-          { name: 'C', root: 'C', duration: 4, memo: '' },
-          { name: 'Am', root: 'A', duration: 4, memo: '' },
-          { name: 'F', root: 'F', duration: 4, memo: '' },
-          { name: 'G', root: 'G', duration: 4, memo: '' }
+          { id: 'chord-1', name: 'C', root: 'C', duration: 4, memo: '' },
+          { id: 'chord-2', name: 'Am', root: 'A', duration: 4, memo: '' },
+          { id: 'chord-3', name: 'F', root: 'F', duration: 4, memo: '' },
+          { id: 'chord-4', name: 'G', root: 'G', duration: 4, memo: '' }
         ]
       }
     ],
@@ -155,9 +155,9 @@ describe('ChordChartEditor - Drag & Drop', () => {
         {
           ...mockChart.sections[0],
           chords: [
-            { name: 'C', root: 'C', duration: 4, memo: '' },
-            { name: '改行', root: '', isLineBreak: true, duration: 0, memo: '' },
-            { name: 'Am', root: 'A', duration: 4, memo: '' }
+            { id: 'chord-1', name: 'C', root: 'C', duration: 4, memo: '' },
+            { id: 'chord-2', name: '改行', root: '', isLineBreak: true, duration: 0, memo: '' },
+            { id: 'chord-3', name: 'Am', root: 'A', duration: 4, memo: '' }
           ]
         }
       ]
@@ -187,8 +187,8 @@ describe('ChordChartEditor - Drag & Drop', () => {
           beatsPerBar: 4,
           barsCount: 2,
           chords: [
-            { name: 'Dm', root: 'D', duration: 4, memo: '' },
-            { name: 'G', root: 'G', duration: 4, memo: '' }
+            { id: 'chord-5', name: 'Dm', root: 'D', duration: 4, memo: '' },
+            { id: 'chord-6', name: 'G', root: 'G', duration: 4, memo: '' }
           ]
         }
       ]

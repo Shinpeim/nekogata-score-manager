@@ -28,12 +28,6 @@ test.describe('Nekogata Score Manager - 基本動作テスト', () => {
     await expect(homePage.getEmptyStateMessage()).toBeVisible();
     await expect(homePage.getWelcomeMessage()).toBeVisible();
     
-    // 「新規作成」ボタンが表示されていることを確認
-    await expect(homePage.createNewButton).toBeVisible();
-    
-    // 「インポート」ボタンが表示されていることを確認
-    await expect(homePage.importButton).toBeVisible();
-    
     // 「Score Explorerを開く」ボタンが表示されていることを確認
     await expect(homePage.openExplorerButton).toBeVisible();
   });

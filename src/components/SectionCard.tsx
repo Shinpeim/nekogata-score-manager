@@ -183,7 +183,7 @@ const SectionCard: React.FC<SectionCardProps> = ({
                 const itemId = `${section.id}-${chordIndex}`;
                 return (
                   <SortableChordItem
-                    key={`${section.id}-${chordIndex}`}
+                    key={chord.id}
                     chord={chord}
                     chordIndex={chordIndex}
                     sectionId={section.id}

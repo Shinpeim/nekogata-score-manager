@@ -41,15 +41,11 @@ vi.mock('../ChordChartViewer', () => ({
 }));
 
 vi.mock('../EmptyChartPlaceholder', () => ({
-  default: ({ onCreateNew, onOpenImport, onOpenExplorer }: { 
-    onCreateNew?: () => void; 
-    onOpenImport?: () => void; 
+  default: ({ onOpenExplorer }: { 
     onOpenExplorer?: () => void; 
   }) => (
     <div data-testid="empty-chart-placeholder">
       <div>コード譜がありません</div>
-      <button onClick={onCreateNew}>新規作成</button>
-      <button onClick={onOpenImport}>インポート</button>
       <button onClick={onOpenExplorer}>Score Explorerを開く</button>
     </div>
   )
@@ -157,24 +153,16 @@ describe('ChordChart Integration', () => {
     it('should pass callbacks to EmptyChartPlaceholder', () => {
       mockCharts = {};
       mockCurrentChartId = null;
-      const mockOnCreateNew = vi.fn();
-      const mockOnOpenImport = vi.fn();
       const mockOnOpenExplorer = vi.fn();
 
       render(
         <ChordChart 
-          onCreateNew={mockOnCreateNew}
-          onOpenImport={mockOnOpenImport}
           onOpenExplorer={mockOnOpenExplorer}
         />
       );
 
-      fireEvent.click(screen.getByText('新規作成'));
-      fireEvent.click(screen.getByText('インポート'));
       fireEvent.click(screen.getByText('Score Explorerを開く'));
 
-      expect(mockOnCreateNew).toHaveBeenCalledOnce();
-      expect(mockOnOpenImport).toHaveBeenCalledOnce();
       expect(mockOnOpenExplorer).toHaveBeenCalledOnce();
     });
   });

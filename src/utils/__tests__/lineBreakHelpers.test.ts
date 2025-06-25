@@ -5,6 +5,7 @@ import {
   splitChordsIntoRows 
 } from '../lineBreakHelpers';
 import type { Chord } from '../../types';
+import { createTestChord, createTestChords } from '../../test-utils/chord-test-helpers';
 
 describe('lineBreakHelpers', () => {
   describe('createLineBreakMarker', () => {
@@ -21,14 +22,14 @@ describe('lineBreakHelpers', () => {
   describe('isLineBreakMarker', () => {
     it('改行マーカーを正しく判定する', () => {
       const lineBreak = createLineBreakMarker();
-      const normalChord: Chord = { name: 'C', root: 'C', duration: 4, memo: '' };
+      const normalChord: Chord = createTestChord({ name: 'C', root: 'C', duration: 4 });
       
       expect(lineBreak.isLineBreak === true).toBe(true);
       expect(normalChord.isLineBreak === true).toBe(false);
     });
 
     it('isLineBreakが未定義のコードを通常コードとして判定する', () => {
-      const chord: Chord = { name: 'Am', root: 'A', duration: 2, memo: '' };
+      const chord: Chord = createTestChord({ name: 'Am', root: 'A', duration: 2 });
       
       expect(chord.isLineBreak === true).toBe(false);
     });
@@ -37,12 +38,12 @@ describe('lineBreakHelpers', () => {
   describe('filterNormalChords', () => {
     it('改行マーカーを除外して通常のコードのみを返す', () => {
       const chords: Chord[] = [
-        { name: 'C', root: 'C', duration: 4, memo: '' },
+        createTestChord({ name: 'C', root: 'C', duration: 4 }),
         createLineBreakMarker(),
-        { name: 'F', root: 'F', duration: 4, memo: '' },
-        { name: 'G', root: 'G', duration: 4, memo: '' },
+        createTestChord({ name: 'F', root: 'F', duration: 4 }),
+        createTestChord({ name: 'G', root: 'G', duration: 4 }),
         createLineBreakMarker(),
-        { name: 'Am', root: 'A', duration: 4, memo: '' }
+        createTestChord({ name: 'Am', root: 'A', duration: 4 })
       ];
 
       const normalChords = filterNormalChords(chords);
@@ -52,10 +53,10 @@ describe('lineBreakHelpers', () => {
     });
 
     it('改行マーカーがない場合はそのまま返す', () => {
-      const chords: Chord[] = [
-        { name: 'C', root: 'C', duration: 4, memo: '' },
-        { name: 'F', root: 'F', duration: 4, memo: '' }
-      ];
+      const chords: Chord[] = createTestChords([
+        { name: 'C', root: 'C', duration: 4 },
+        { name: 'F', root: 'F', duration: 4 }
+      ]);
 
       const result = filterNormalChords(chords);
       
@@ -66,11 +67,11 @@ describe('lineBreakHelpers', () => {
   describe('splitChordsIntoRows', () => {
     it('改行マーカーで行を分割する', () => {
       const chords: Chord[] = [
-        { name: 'C', root: 'C', duration: 4, memo: '' },
-        { name: 'F', root: 'F', duration: 4, memo: '' },
+        createTestChord({ name: 'C', root: 'C', duration: 4 }),
+        createTestChord({ name: 'F', root: 'F', duration: 4 }),
         createLineBreakMarker(),
-        { name: 'G', root: 'G', duration: 4, memo: '' },
-        { name: 'Am', root: 'A', duration: 4, memo: '' }
+        createTestChord({ name: 'G', root: 'G', duration: 4 }),
+        createTestChord({ name: 'Am', root: 'A', duration: 4 })
       ];
 
       const rows = splitChordsIntoRows(chords, 8, 4);
@@ -81,12 +82,12 @@ describe('lineBreakHelpers', () => {
     });
 
     it('改行マーカーがない場合は小節数制限で分割', () => {
-      const chords: Chord[] = [
-        { name: 'C', root: 'C', duration: 4, memo: '' }, // 1小節
-        { name: 'F', root: 'F', duration: 4, memo: '' }, // 1小節
-        { name: 'G', root: 'G', duration: 4, memo: '' }, // 1小節
-        { name: 'Am', root: 'A', duration: 4, memo: '' } // 1小節
-      ];
+      const chords: Chord[] = createTestChords([
+        { name: 'C', root: 'C', duration: 4 }, // 1小節
+        { name: 'F', root: 'F', duration: 4 }, // 1小節
+        { name: 'G', root: 'G', duration: 4 }, // 1小節
+        { name: 'Am', root: 'A', duration: 4 } // 1小節
+      ]);
 
       const rows = splitChordsIntoRows(chords, 2, 4); // 2小節/行
 
@@ -96,12 +97,12 @@ describe('lineBreakHelpers', () => {
     });
 
     it('複数の拍数のコードを正しく処理する', () => {
-      const chords: Chord[] = [
-        { name: 'C', root: 'C', duration: 2, memo: '' }, // 2拍
-        { name: 'F', root: 'F', duration: 2, memo: '' }, // 2拍 = 1小節完了
-        { name: 'G', root: 'G', duration: 1, memo: '' }, // 1拍
-        { name: 'Am', root: 'A', duration: 3, memo: '' } // 3拍 = 1小節完了
-      ];
+      const chords: Chord[] = createTestChords([
+        { name: 'C', root: 'C', duration: 2 }, // 2拍
+        { name: 'F', root: 'F', duration: 2 }, // 2拍 = 1小節完了
+        { name: 'G', root: 'G', duration: 1 }, // 1拍
+        { name: 'Am', root: 'A', duration: 3 } // 3拍 = 1小節完了
+      ]);
 
       const rows = splitChordsIntoRows(chords, 2, 4); // 2小節/行
 
@@ -111,10 +112,10 @@ describe('lineBreakHelpers', () => {
 
     it('改行マーカーが連続している場合を正しく処理する', () => {
       const chords: Chord[] = [
-        { name: 'C', root: 'C', duration: 4, memo: '' },
+        createTestChord({ name: 'C', root: 'C', duration: 4 }),
         createLineBreakMarker(),
         createLineBreakMarker(),
-        { name: 'F', root: 'F', duration: 4, memo: '' }
+        createTestChord({ name: 'F', root: 'F', duration: 4 })
       ];
 
       const rows = splitChordsIntoRows(chords, 8, 4);
@@ -126,9 +127,9 @@ describe('lineBreakHelpers', () => {
 
     it('小節の途中で改行マーカーがある場合を正しく処理する', () => {
       const chords: Chord[] = [
-        { name: 'C', root: 'C', duration: 2, memo: '' }, // 2拍
+        createTestChord({ name: 'C', root: 'C', duration: 2 }), // 2拍
         createLineBreakMarker(),
-        { name: 'F', root: 'F', duration: 4, memo: '' } // 新しい行の4拍
+        createTestChord({ name: 'F', root: 'F', duration: 4 }) // 新しい行の4拍
       ];
 
       const rows = splitChordsIntoRows(chords, 8, 4);

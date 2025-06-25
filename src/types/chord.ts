@@ -1,4 +1,5 @@
-export interface Chord {
+// 保存用のChord（永続化データ）
+export interface StoredChord {
   name: string;
   root: string;
   base?: string; // オンコードのベース音
@@ -6,6 +7,14 @@ export interface Chord {
   isLineBreak?: boolean; // 改行マーカーフラグ
   memo: string; // コードに付加するメモ（歌詞、演奏記号等）
 }
+
+// 表示用のChord（UI専用、idを含む）
+export interface DisplayChord extends StoredChord {
+  id: string; // UI専用のユニークID
+}
+
+// 後方互換性のため
+export type Chord = DisplayChord;
 
 export interface ChordSection {
   id: string;

@@ -525,9 +525,9 @@ describe('chordUtils', () => {
             id: 'section1',
             name: 'テストセクション',
             chords: [
-              { name: 'C', root: 'C', duration: 4, memo: '' },
-              { name: 'Am', root: 'A', duration: 2, memo: '' },
-              { name: 'F', root: 'F', duration: 2, memo: '' }
+              { id: 'chord-1', name: 'C', root: 'C', duration: 4, memo: '' },
+              { id: 'chord-2', name: 'Am', root: 'A', duration: 2, memo: '' },
+              { id: 'chord-3', name: 'F', root: 'F', duration: 2, memo: '' }
             ],
             beatsPerBar: 4,
             barsCount: 4
@@ -594,6 +594,7 @@ describe('chordUtils', () => {
 
     it('should skip line break markers', () => {
       validChart.sections![0].chords.push({
+        id: 'chord-4',
         name: '__LINE_BREAK__',
         root: '',
         isLineBreak: true,
@@ -613,7 +614,7 @@ describe('chordUtils', () => {
     });
 
     it('should validate on chords', () => {
-      validChart.sections![0].chords[0] = { name: 'C', root: 'C', base: 'E', duration: 4, memo: '' };
+      validChart.sections![0].chords[0] = { id: 'chord-5', name: 'C', root: 'C', base: 'E', duration: 4, memo: '' };
       const result = validateChartInputs(validChart);
       expect(result.isValid).toBe(true);
       expect(result.errors).toEqual([]);

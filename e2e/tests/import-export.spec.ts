@@ -30,7 +30,8 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       await homePage.setDesktopViewport();
       
       // 1. テスト用チャートを作成
-      await homePage.clickCreateNew();
+      await homePage.clickOpenExplorer();
+      await scoreExplorerPage.clickCreateNew();
       await expect(chartFormPage.form).toBeVisible();
       
       const testChartTitle = 'エクスポートテストチャート';
@@ -41,10 +42,11 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       await chartFormPage.clickSave();
       
       await expect(chartFormPage.form).not.toBeVisible();
+      // 新規作成後は直接編集画面に遷移しているので、保存して表示モードに戻る
+      await page.waitForTimeout(2000); // 画面遷移を待機
       await expect(chartViewPage.getChartTitleWithText(testChartTitle)).toBeVisible();
       
-      // 2. Score Explorerを開く
-      await homePage.clickOpenExplorer();
+      // 2. Score Explorerはopen済みなので確認のみ
       
       // 3. Score Explorerが開いていることを確認（インポートボタンの存在で確認）
       
@@ -64,13 +66,14 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       await homePage.setDesktopViewport();
       
       // 1. テスト用チャートを作成
-      await homePage.clickCreateNew();
+      await homePage.clickOpenExplorer();
+      await scoreExplorerPage.clickCreateNew();
       await chartFormPage.fillTitle('エクスポートテストチャート');
       await chartFormPage.fillArtist('テストアーティスト');
       await chartFormPage.clickSave();
+      await page.waitForTimeout(1000); // 画面遷移を待機
       
-      // 2. Score Explorerを開く
-      await homePage.clickOpenExplorer();
+      // 2. Score Explorerはopen済み
       
       // 3. 最初のチャートのチェックボックスを選択（インデックス0）
       await scoreExplorerPage.selectChart(0);
@@ -90,7 +93,7 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       // 7. エクスポートダイアログが表示されることを確認
       await expect(scoreExplorerPage.getFilenameInput()).toBeVisible();
       await expect(page.locator('button:has-text("エクスポート")').first()).toBeVisible();
-      await expect(page.locator('button:has-text("キャンセル")')).toBeVisible();
+      await expect(page.locator('button:has-text("キャンセル")').first()).toBeVisible();
       
       // 8. ファイル名が自動的に設定されていることを確認
       const filenameInput = scoreExplorerPage.getFilenameInput();

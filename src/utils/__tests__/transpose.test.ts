@@ -73,10 +73,10 @@ describe('移調機能のテスト', () => {
           id: 'section-1',
           name: 'Aメロ',
           chords: [
-            { name: 'C', root: 'C', duration: 2, memo: '' },
-            { name: 'Am', root: 'A', duration: 2, memo: '' },
-            { name: 'F/A', root: 'F', base: 'A', duration: 2, memo: '' },
-            { name: 'G7', root: 'G', duration: 2, memo: '' }
+            { id: 'chord-1', name: 'C', root: 'C', duration: 2, memo: '' },
+            { id: 'chord-2', name: 'Am', root: 'A', duration: 2, memo: '' },
+            { id: 'chord-3', name: 'F/A', root: 'F', base: 'A', duration: 2, memo: '' },
+            { id: 'chord-4', name: 'G7', root: 'G', duration: 2, memo: '' }
           ],
           beatsPerBar: 4,
           barsCount: 4
@@ -127,6 +127,7 @@ describe('移調機能のテスト', () => {
     test('改行マーカーの処理', () => {
       const chart = createTestChart();
       chart.sections[0].chords.push({ 
+        id: 'chord-5',
         name: '', 
         root: '', 
         isLineBreak: true,
