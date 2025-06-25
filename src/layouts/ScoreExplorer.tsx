@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import type { ChordChart } from '../types';
 import ActionDropdown from './ActionDropdown';
+import SetListTab from '../components/SetListTab';
+import SetListCreationForm from '../components/SetListCreationForm';
+
+type TabType = 'charts' | 'setlists';
 
 interface ScoreExplorerProps {
   charts: ChordChart[];
@@ -15,6 +19,7 @@ interface ScoreExplorerProps {
   onDeleteSelected: () => void;
   onDuplicateSelected: () => void;
   onEditChart: (chartId: string) => void;
+  onCreateSetList?: (chartIds: string[]) => void;
   isMobile?: boolean;
   onClose?: () => void;
 }
@@ -32,10 +37,13 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
   onDeleteSelected,
   onDuplicateSelected,
   onEditChart,
+  onCreateSetList,
   isMobile = false,
   onClose,
 }) => {
+  const [activeTab, setActiveTab] = useState<TabType>('charts');
   const [showActionsDropdown, setShowActionsDropdown] = useState(false);
+  const [showCreateSetListForm, setShowCreateSetListForm] = useState(false);
   
   const handleChartClick = (chartId: string) => {
     onSetCurrentChart(chartId);
@@ -44,11 +52,24 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
     }
   };
 
-  const content = (
-    <div className={isMobile ? "px-4" : "p-4"}>
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-medium text-slate-900" data-testid={`score-explorer-title-${isMobile ? 'mobile' : 'desktop'}`}>Score Explorer</h2>
-      </div>
+  const handleCreateSetList = () => {
+    setShowCreateSetListForm(true);
+  };
+
+  const handleCreateSetListSuccess = () => {
+    setShowCreateSetListForm(false);
+    setActiveTab('setlists');
+    if (onCreateSetList) {
+      onCreateSetList(selectedChartIds);
+    }
+  };
+
+  const handleCreateSetListCancel = () => {
+    setShowCreateSetListForm(false);
+  };
+
+  const renderChartsTab = () => (
+    <>
       {charts.length > 0 && (
         <div className="mb-3 flex items-center gap-2">
           <input
@@ -72,6 +93,7 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
             onExportSelected={onExportSelected}
             onDeleteSelected={onDeleteSelected}
             onDuplicateSelected={onDuplicateSelected}
+            onCreateSetList={handleCreateSetList}
           />
           <span className="text-xs text-slate-500">
             {selectedChartIds.length > 0 ? `${selectedChartIds.length}件選択中` : '未選択'}
@@ -144,6 +166,47 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
           インポート
         </button>
       </div>
+    </>
+  );
+
+  const content = (
+    <div className={isMobile ? "px-4" : "p-4"}>
+      {/* タブヘッダー */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex bg-slate-100 rounded-md p-1">
+          <button
+            onClick={() => setActiveTab('charts')}
+            className={`px-3 py-1 text-sm font-medium rounded transition-colors ${
+              activeTab === 'charts'
+                ? 'bg-white text-slate-900 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+            data-testid="charts-tab"
+          >
+            楽譜
+          </button>
+          <button
+            onClick={() => setActiveTab('setlists')}
+            className={`px-3 py-1 text-sm font-medium rounded transition-colors ${
+              activeTab === 'setlists'
+                ? 'bg-white text-slate-900 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+            data-testid="setlists-tab"
+          >
+            セットリスト
+          </button>
+        </div>
+      </div>
+
+      {/* タブコンテンツ */}
+      {activeTab === 'charts' ? renderChartsTab() : (
+        <SetListTab
+          onChartSelect={handleChartClick}
+          isMobile={isMobile}
+          onClose={onClose}
+        />
+      )}
     </div>
   );
 
@@ -171,7 +234,18 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
     );
   }
 
-  return content;
+  return (
+    <>
+      {content}
+      {showCreateSetListForm && (
+        <SetListCreationForm
+          chartIds={selectedChartIds}
+          onSuccess={handleCreateSetListSuccess}
+          onCancel={handleCreateSetListCancel}
+        />
+      )}
+    </>
+  );
 };
 
 export default ScoreExplorer;

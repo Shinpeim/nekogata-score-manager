@@ -27,6 +27,13 @@ export class HomePage {
     });
   }
 
+  async waitForInitialLoad() {
+    // ページの初期読み込み完了を待つ
+    await this.page.waitForLoadState('networkidle');
+    // ヘッダーが表示されるまで待つ（app-titleは非表示なのでヘッダーで判定）
+    await this.header.waitFor({ state: 'visible', timeout: 5000 });
+  }
+
   async clickCreateNew() {
     await this.createNewButton.click();
   }

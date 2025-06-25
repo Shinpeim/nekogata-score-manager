@@ -69,6 +69,7 @@ test.describe('Nekogata Score Manager - チャート管理機能テスト', () =
     
     // Score Explorerを開いて1つ目のチャート作成
     await homePage.clickOpenExplorer();
+    await page.waitForLoadState('networkidle'); // 固定待機から条件待機へ変更
     await scoreExplorerPage.clickCreateNew();
     await chartFormPage.fillBasicInfo({
       title: 'チャート1',
@@ -87,6 +88,7 @@ test.describe('Nekogata Score Manager - チャート管理機能テスト', () =
     
     // 2つ目のチャート作成
     await homePage.clickOpenExplorer();
+    await page.waitForLoadState('networkidle'); // 固定待機から条件待機へ変更
     await scoreExplorerPage.clickCreateNew();
     
     await chartFormPage.fillBasicInfo({

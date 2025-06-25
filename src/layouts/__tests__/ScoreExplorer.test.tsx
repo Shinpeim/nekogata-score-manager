@@ -46,7 +46,7 @@ describe('ScoreExplorer', () => {
     vi.clearAllMocks();
   });
 
-  it('should render Score Explorer title', () => {
+  it('should render tabs (楽譜 and セットリスト)', () => {
     render(
       <ScoreExplorer
         charts={[]}
@@ -64,7 +64,8 @@ describe('ScoreExplorer', () => {
       />
     );
 
-    expect(screen.getByText('Score Explorer')).toBeInTheDocument();
+    expect(screen.getByText('楽譜')).toBeInTheDocument();
+    expect(screen.getByText('セットリスト')).toBeInTheDocument();
   });
 
   it('should render action buttons', () => {

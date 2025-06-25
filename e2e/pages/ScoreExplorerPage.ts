@@ -6,6 +6,8 @@ export class ScoreExplorerPage {
   readonly title: Locator;
   readonly titleMobile: Locator;
   readonly titleDesktop: Locator;
+  readonly chartsTab: Locator;
+  readonly setlistsTab: Locator;
   readonly selectAllCheckbox: Locator;
   readonly createNewButton: Locator;
   readonly createNewButtonMobile: Locator;
@@ -21,6 +23,9 @@ export class ScoreExplorerPage {
     this.titleDesktop = page.getByTestId('score-explorer-title-desktop');
     this.title = isMobile ? this.titleMobile : this.titleDesktop;
     
+    this.chartsTab = page.getByTestId('charts-tab').first();
+    this.setlistsTab = page.getByTestId('setlists-tab').first();
+    
     this.selectAllCheckbox = page.getByTestId('select-all-checkbox').first();
     
     this.createNewButtonMobile = page.getByTestId('explorer-create-new-button-mobile');
@@ -33,9 +38,18 @@ export class ScoreExplorerPage {
   }
 
   async clickCreateNew() {
-    // DOM上にボタンが存在することを確認してからJavaScriptでクリック
+    // デスクトップ版は常にDOMに存在するがCSS hiddenの可能性があるため
+    // JavaScriptでの直接クリックを使用（ドキュメントの問題対応）
     await expect(this.createNewButton).toBeAttached({ timeout: 10000 });
-    await this.createNewButton.evaluate(el => (el as HTMLElement).click());
+    
+    if (this.isMobile) {
+      // モバイル版は通常のクリック
+      await expect(this.createNewButton).toBeVisible({ timeout: 5000 });
+      await this.createNewButton.click();
+    } else {
+      // デスクトップ版はJavaScriptクリック（CSS hiddenでも動作）
+      await this.createNewButton.evaluate(el => (el as HTMLElement).click());
+    }
   }
 
   async clickImport() {
