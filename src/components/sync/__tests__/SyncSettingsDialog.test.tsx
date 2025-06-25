@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { SyncSettingsDialog } from '../SyncSettingsDialog';
 import { SyncManager } from '../../../utils/sync/syncManager';
+import { createMockChartSync } from '../../../hooks/__tests__/testHelpers';
 
 vi.mock('../../../utils/sync/syncManager');
 vi.mock('../../../hooks/useChartSync');
@@ -38,6 +39,8 @@ const mockUseChartSync = {
   // チャート関連（useChartSyncの要求プロパティ）
   charts: {},
   currentChartId: null as string | null,
+  setLists: {},
+  currentSetListId: null as string | null,
   isLoading: false,
   error: null as string | null,
 };
@@ -47,7 +50,8 @@ describe('SyncSettingsDialog', () => {
     vi.mocked(SyncManager.getInstance).mockReturnValue(mockSyncManager as unknown as SyncManager);
     
     const { useChartSync } = await import('../../../hooks/useChartSync');
-    vi.mocked(useChartSync).mockReturnValue(mockUseChartSync);
+    const { createMockChartSync } = await import('../../../hooks/__tests__/testHelpers');
+    vi.mocked(useChartSync).mockReturnValue(createMockChartSync(mockUseChartSync));
     
     mockSyncManager.getConfig.mockReturnValue({
       autoSync: false,
@@ -90,7 +94,11 @@ describe('SyncSettingsDialog', () => {
   });
 
   it('認証済み状態で正しい表示がされる', async () => {
-    mockUseChartSync.isAuthenticated = true;
+    const { useChartSync } = await import('../../../hooks/useChartSync');
+    vi.mocked(useChartSync).mockReturnValue(createMockChartSync({
+      ...mockUseChartSync,
+      isAuthenticated: true
+    }));
     
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
@@ -101,6 +109,13 @@ describe('SyncSettingsDialog', () => {
   });
 
   it('サインインボタンをクリックすると認証処理が実行される', async () => {
+    const { useChartSync } = await import('../../../hooks/useChartSync');
+    const mockAuth = vi.fn();
+    vi.mocked(useChartSync).mockReturnValue(createMockChartSync({
+      ...mockUseChartSync,
+      authenticate: mockAuth
+    }));
+    
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
     await waitFor(() => {
@@ -108,11 +123,17 @@ describe('SyncSettingsDialog', () => {
       fireEvent.click(signInButton);
     });
     
-    expect(mockUseChartSync.authenticate).toHaveBeenCalled();
+    expect(mockAuth).toHaveBeenCalled();
   });
 
   it('サインアウトボタンをクリックするとサインアウト処理が実行される', async () => {
-    mockUseChartSync.isAuthenticated = true;
+    const { useChartSync } = await import('../../../hooks/useChartSync');
+    const mockSignOut = vi.fn();
+    vi.mocked(useChartSync).mockReturnValue(createMockChartSync({
+      ...mockUseChartSync,
+      isAuthenticated: true,
+      signOut: mockSignOut
+    }));
     
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
@@ -121,11 +142,19 @@ describe('SyncSettingsDialog', () => {
       fireEvent.click(signOutButton);
     });
     
-    expect(mockUseChartSync.signOut).toHaveBeenCalled();
+    expect(mockSignOut).toHaveBeenCalled();
   });
 
   it('手動同期ボタンをクリックすると同期処理が実行される', async () => {
-    mockUseChartSync.isAuthenticated = true;
+    const { useChartSync } = await import('../../../hooks/useChartSync');
+    const mockClearError = vi.fn();
+    const mockSyncCharts = vi.fn();
+    vi.mocked(useChartSync).mockReturnValue(createMockChartSync({
+      ...mockUseChartSync,
+      isAuthenticated: true,
+      clearSyncError: mockClearError,
+      syncCharts: mockSyncCharts
+    }));
     
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
@@ -134,12 +163,18 @@ describe('SyncSettingsDialog', () => {
       fireEvent.click(syncButton);
     });
     
-    expect(mockUseChartSync.clearSyncError).toHaveBeenCalled();
-    expect(mockUseChartSync.syncCharts).toHaveBeenCalled();
+    expect(mockClearError).toHaveBeenCalled();
+    expect(mockSyncCharts).toHaveBeenCalled();
   });
 
   it('自動同期の設定を変更できる', async () => {
-    mockUseChartSync.isAuthenticated = true;
+    const { useChartSync } = await import('../../../hooks/useChartSync');
+    const mockUpdateConfig = vi.fn();
+    vi.mocked(useChartSync).mockReturnValue(createMockChartSync({
+      ...mockUseChartSync,
+      isAuthenticated: true,
+      updateSyncConfig: mockUpdateConfig
+    }));
     
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
@@ -151,7 +186,7 @@ describe('SyncSettingsDialog', () => {
       fireEvent.click(autoSyncToggle!);
     });
     
-    expect(mockUseChartSync.updateSyncConfig).toHaveBeenCalled();
+    expect(mockUpdateConfig).toHaveBeenCalled();
   });
 
 
@@ -170,7 +205,11 @@ describe('SyncSettingsDialog', () => {
   });
 
   it('最終同期時刻が正しくフォーマットされて表示される', async () => {
-    mockUseChartSync.lastSyncTime = new Date('2024-01-01T00:00:00Z');
+    const { useChartSync } = await import('../../../hooks/useChartSync');
+    vi.mocked(useChartSync).mockReturnValue(createMockChartSync({
+      ...mockUseChartSync,
+      lastSyncTime: new Date('2024-01-01T00:00:00Z')
+    }));
     
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
@@ -203,7 +242,11 @@ describe('SyncSettingsDialog', () => {
   });
 
   it('同期エラーが表示される', async () => {
-    mockUseChartSync.syncError = 'ネットワークエラーが発生しました';
+    const { useChartSync } = await import('../../../hooks/useChartSync');
+    vi.mocked(useChartSync).mockReturnValue(createMockChartSync({
+      ...mockUseChartSync,
+      syncError: 'ネットワークエラーが発生しました'
+    }));
     
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     
@@ -213,7 +256,11 @@ describe('SyncSettingsDialog', () => {
   });
 
   it('同期中の状態が表示される', async () => {
-    mockUseChartSync.isSyncing = true;
+    const { useChartSync } = await import('../../../hooks/useChartSync');
+    vi.mocked(useChartSync).mockReturnValue(createMockChartSync({
+      ...mockUseChartSync,
+      isSyncing: true
+    }));
     
     render(<SyncSettingsDialog isOpen={true} onClose={() => {}} />);
     

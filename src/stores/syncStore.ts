@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type { ChordChart } from '../types';
-import type { SyncResult, SyncConflict, SyncConfig } from '../types/sync';
+import type { SetList } from '../types/setList';
+import type { SyncResult, SyncConflict, SyncConfig, SetListSyncConflict } from '../types/sync';
 import { SyncManager } from '../utils/sync/syncManager';
 import { logger } from '../utils/logger';
 
@@ -18,7 +19,11 @@ interface SyncState {
   initializeSync: () => Promise<void>;
   authenticate: () => Promise<void>;
   signOut: () => Promise<void>;
-  sync: (charts: ChordChart[], onConflict?: (conflicts: SyncConflict[]) => Promise<'overwrite' | 'cancel'>) => Promise<SyncResult>;
+  sync: (
+    charts: ChordChart[], 
+    setLists: SetList[],
+    onConflict?: (conflicts: SyncConflict[], setListConflicts: SetListSyncConflict[]) => Promise<'overwrite' | 'cancel'>
+  ) => Promise<SyncResult>;
   updateSyncConfig: (config: Partial<SyncConfig>) => void;
   clearSyncError: () => void;
 }
@@ -102,9 +107,9 @@ export const useSyncStore = create<SyncState>()(
         }
       },
 
-      sync: async (charts, onConflict) => {
+      sync: async (charts, setLists, onConflict) => {
         try {
-          logger.debug(`SyncStore.sync called with ${charts.length} charts`);
+          logger.debug(`SyncStore.sync called with ${charts.length} charts and ${setLists.length} setlists`);
           const { syncManager } = get();
           if (!syncManager) {
             throw new Error('同期機能が初期化されていません');
@@ -112,8 +117,14 @@ export const useSyncStore = create<SyncState>()(
           
           set({ isSyncing: true, syncError: null }, false, 'syncStart');
           
-          const result = await syncManager.sync(charts, onConflict);
-          logger.debug(`SyncStore.sync got result:`, { success: result.success, hasCharts: !!result.mergedCharts, chartCount: result.mergedCharts?.length });
+          const result = await syncManager.sync(charts, setLists, onConflict);
+          logger.debug(`SyncStore.sync got result:`, { 
+            success: result.success, 
+            hasCharts: !!result.mergedCharts, 
+            chartCount: result.mergedCharts?.length,
+            hasSetLists: !!result.mergedSetLists,
+            setListCount: result.mergedSetLists?.length
+          });
           
           if (result.success) {
             const lastSyncTime = syncManager.getLastSyncTimeAsDate();

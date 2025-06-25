@@ -1,5 +1,6 @@
 import type { ChordChart } from '../../types/chord';
-import type { ISyncAdapter, SyncMetadata, DeletedChartRecord } from '../../types/sync';
+import type { SetList } from '../../types/setList';
+import type { ISyncAdapter, SyncMetadata, DeletedChartRecord, DeletedSetListRecord } from '../../types/sync';
 import { DropboxAuthProvider } from './dropboxAuth';
 
 export class DropboxSyncAdapter implements ISyncAdapter {
@@ -8,6 +9,9 @@ export class DropboxSyncAdapter implements ISyncAdapter {
   private readonly METADATA_FILE_PATH: string;
   private readonly CHARTS_FILE_PATH: string;
   private readonly DELETED_CHARTS_FILE_PATH: string;
+  private readonly SETLISTS_FILE_PATH: string;
+  private readonly SETLIST_METADATA_FILE_PATH: string;
+  private readonly DELETED_SETLISTS_FILE_PATH: string;
   
   constructor() {
     this.auth = DropboxAuthProvider.getInstance();
@@ -17,6 +21,9 @@ export class DropboxSyncAdapter implements ISyncAdapter {
     this.METADATA_FILE_PATH = `/${folderName}/sync-metadata.json`;
     this.CHARTS_FILE_PATH = `/${folderName}/charts.json`;
     this.DELETED_CHARTS_FILE_PATH = `/${folderName}/deleted-charts.json`;
+    this.SETLISTS_FILE_PATH = `/${folderName}/setlists.json`;
+    this.SETLIST_METADATA_FILE_PATH = `/${folderName}/setlist-metadata.json`;
+    this.DELETED_SETLISTS_FILE_PATH = `/${folderName}/deleted-setlists.json`;
   }
   
   async initialize(): Promise<void> {
@@ -42,25 +49,45 @@ export class DropboxSyncAdapter implements ISyncAdapter {
     this.auth.signOut();
   }
   
-  async pull(): Promise<{ charts: ChordChart[]; metadata: Record<string, SyncMetadata>; deletedCharts: DeletedChartRecord[] }> {
+  async pull(): Promise<{ 
+    charts: ChordChart[]; 
+    metadata: Record<string, SyncMetadata>; 
+    deletedCharts: DeletedChartRecord[];
+    setLists: SetList[];
+    setListMetadata: Record<string, SyncMetadata>;
+    deletedSetLists: DeletedSetListRecord[];
+  }> {
     const token = this.auth.getAccessToken();
     if (!token) throw new Error('Not authenticated');
     
     // ファイルが存在するかチェックしてからダウンロード
-    const [charts, metadata, deletedCharts] = await Promise.all([
+    const [charts, metadata, deletedCharts, setLists, setListMetadata, deletedSetLists] = await Promise.all([
       this.downloadFile<ChordChart[]>(this.CHARTS_FILE_PATH).catch(() => []),
       this.downloadFile<Record<string, SyncMetadata>>(this.METADATA_FILE_PATH).catch(() => ({})),
-      this.downloadFile<DeletedChartRecord[]>(this.DELETED_CHARTS_FILE_PATH).catch(() => [])
+      this.downloadFile<DeletedChartRecord[]>(this.DELETED_CHARTS_FILE_PATH).catch(() => []),
+      this.downloadFile<SetList[]>(this.SETLISTS_FILE_PATH).catch(() => []),
+      this.downloadFile<Record<string, SyncMetadata>>(this.SETLIST_METADATA_FILE_PATH).catch(() => ({})),
+      this.downloadFile<DeletedSetListRecord[]>(this.DELETED_SETLISTS_FILE_PATH).catch(() => [])
     ]);
     
     return { 
       charts: charts || [], 
       metadata: metadata || {},
-      deletedCharts: deletedCharts || []
+      deletedCharts: deletedCharts || [],
+      setLists: setLists || [],
+      setListMetadata: setListMetadata || {},
+      deletedSetLists: deletedSetLists || []
     };
   }
   
-  async push(charts: ChordChart[], metadata: Record<string, SyncMetadata>, deletedCharts: DeletedChartRecord[]): Promise<void> {
+  async push(
+    charts: ChordChart[], 
+    metadata: Record<string, SyncMetadata>, 
+    deletedCharts: DeletedChartRecord[],
+    setLists: SetList[],
+    setListMetadata: Record<string, SyncMetadata>,
+    deletedSetLists: DeletedSetListRecord[]
+  ): Promise<void> {
     const token = this.auth.getAccessToken();
     if (!token) throw new Error('Not authenticated');
     
@@ -70,7 +97,10 @@ export class DropboxSyncAdapter implements ISyncAdapter {
     await Promise.all([
       this.uploadFile(this.CHARTS_FILE_PATH, charts),
       this.uploadFile(this.METADATA_FILE_PATH, metadata),
-      this.uploadFile(this.DELETED_CHARTS_FILE_PATH, deletedCharts)
+      this.uploadFile(this.DELETED_CHARTS_FILE_PATH, deletedCharts),
+      this.uploadFile(this.SETLISTS_FILE_PATH, setLists),
+      this.uploadFile(this.SETLIST_METADATA_FILE_PATH, setListMetadata),
+      this.uploadFile(this.DELETED_SETLISTS_FILE_PATH, deletedSetLists)
     ]);
   }
   

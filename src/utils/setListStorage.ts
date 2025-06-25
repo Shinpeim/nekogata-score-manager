@@ -1,6 +1,7 @@
 import localForage from 'localforage';
 import type { SetList, SetListLibrary, StoredSetListData } from '../types/setList';
 import { logger } from './logger';
+import { storageService } from './storage';
 
 /** セットリストデータの保存キー */
 const SETLIST_STORAGE_KEY = 'nekogata-setlists';
@@ -157,7 +158,7 @@ class SetListStorageService {
    * 削除されたセットリスト記録を追加（同期用）
    */
   async addDeletedSetList(id: string, deviceId: string): Promise<void> {
-    // 将来的に同期機能で使用
+    await storageService.addDeletedSetList(id, deviceId);
     logger.debug('削除されたセットリスト記録を追加', { id, deviceId });
   }
 
@@ -165,7 +166,7 @@ class SetListStorageService {
    * 複数の削除されたセットリスト記録を追加（同期用）
    */
   async addMultipleDeletedSetLists(ids: string[], deviceId: string): Promise<void> {
-    // 将来的に同期機能で使用
+    await storageService.addMultipleDeletedSetLists(ids, deviceId);
     logger.debug('複数の削除されたセットリスト記録を追加', { ids, deviceId });
   }
 }

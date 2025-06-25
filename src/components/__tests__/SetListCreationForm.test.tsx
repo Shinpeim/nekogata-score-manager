@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import SetListCreationForm from '../SetListCreationForm';
 import { useSetListManagement } from '../../hooks/useSetListManagement';
+import { createMockSetListManagement } from '../../hooks/__tests__/testHelpers';
 
 // Mock the hook
 vi.mock('../../hooks/useSetListManagement');
@@ -25,28 +26,11 @@ describe('SetListCreationForm', () => {
       updatedAt: new Date()
     });
     
-    mockUseSetListManagement.mockReturnValue({
-      setLists: {},
-      currentSetListId: null,
-      createNewSetList: mockCreateNewSetList,
-      addSetList: vi.fn(),
-      updateSetList: vi.fn(),
-      updateSetListOrder: vi.fn(),
-      deleteSetList: vi.fn(),
-      deleteMultipleSetLists: vi.fn(),
-      setCurrentSetList: vi.fn(),
-      getCurrentSetList: vi.fn(),
-      getSetListById: vi.fn(),
-      getSetListsArray: vi.fn(),
-      hasSetLists: vi.fn(),
-      getSetListsCount: vi.fn(),
-      loadInitialData: vi.fn(),
-      loadFromStorage: vi.fn(),
-      applySyncedSetLists: vi.fn(),
-      isLoading: false,
-      error: null,
-      clearError: vi.fn()
-    });
+    mockUseSetListManagement.mockReturnValue(
+      createMockSetListManagement({
+        createNewSetList: mockCreateNewSetList
+      })
+    );
   });
 
   it('フォームが正しく表示される', () => {

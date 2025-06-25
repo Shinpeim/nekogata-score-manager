@@ -48,5 +48,7 @@ export const useSetListManagement = () => {
         throw error;
       }
     },
+    subscribeSyncNotification: crudStore.subscribeSyncNotification,
+    notifySync: crudStore.notifySync,
   };
 };

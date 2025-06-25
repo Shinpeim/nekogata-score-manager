@@ -2,13 +2,16 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useChartSync } from '../useChartSync';
 import { useChartManagement } from '../useChartManagement';
+import { useSetListManagement } from '../useSetListManagement';
 import { useSyncStore } from '../../stores/syncStore';
 import { createNewChordChart } from '../../utils/chordCreation';
-import type { SyncResult } from '../../types/sync';
+import { createMockSyncResult, createMockSetListManagement } from './testHelpers';
 import type { ChordChart } from '../../types';
+import type { SyncResult } from '../../types/sync';
 
 // Mock stores
 vi.mock('../useChartManagement');
+vi.mock('../useSetListManagement');
 vi.mock('../../stores/syncStore');
 
 // Mock localforage
@@ -137,6 +140,7 @@ describe('useChartSync', () => {
     
     vi.mocked(useChartManagement).mockReturnValue(mockChordChartStore);
     vi.mocked(useSyncStore).mockReturnValue(mockSyncStore as ReturnType<typeof useSyncStore>);
+    vi.mocked(useSetListManagement).mockReturnValue(createMockSetListManagement());
     
     // Mock useSyncStore.getState() to return the mock state
     vi.mocked(useSyncStore).getState = vi.fn().mockReturnValue(mockSyncStore);
@@ -173,13 +177,11 @@ describe('useChartSync', () => {
 
       mockChordChartStore.charts = { [chart1.id]: chart1 };
       
-      const syncResult: SyncResult = {
+      const syncResult = createMockSyncResult({
         success: true,
-        conflicts: [],
         syncedCharts: [chart1.id, chart2.id],
-        mergedCharts,
-        errors: []
-      };
+        mergedCharts
+      });
 
       mockSyncStore.sync.mockResolvedValue(syncResult);
 
@@ -190,7 +192,7 @@ describe('useChartSync', () => {
         resultValue = await result.current.syncCharts();
       });
 
-      expect(mockSyncStore.sync).toHaveBeenCalledWith([chart1], undefined);
+      expect(mockSyncStore.sync).toHaveBeenCalledWith([chart1], [], undefined);
       expect(mockChordChartStore.applySyncedCharts).toHaveBeenCalledWith(mergedCharts);
       expect(resultValue).toEqual(syncResult);
     });
@@ -207,19 +209,17 @@ describe('useChartSync', () => {
         await result.current.syncCharts(mockConflictHandler);
       });
 
-      expect(mockSyncStore.sync).toHaveBeenCalledWith([chart1], mockConflictHandler);
+      expect(mockSyncStore.sync).toHaveBeenCalledWith([chart1], [], mockConflictHandler);
     });
 
     it('should not apply charts if sync failed', async () => {
       const chart1 = createNewChordChart({ title: 'Chart 1' });
       mockChordChartStore.charts = { [chart1.id]: chart1 };
 
-      const syncResult: SyncResult = {
+      const syncResult = createMockSyncResult({
         success: false,
-        conflicts: [],
-        syncedCharts: [],
         errors: [{ chartId: '', error: new Error('Sync failed'), type: 'network' }]
-      };
+      });
 
       mockSyncStore.sync.mockResolvedValue(syncResult);
 
@@ -237,13 +237,10 @@ describe('useChartSync', () => {
       const chart1 = createNewChordChart({ title: 'Chart 1' });
       mockChordChartStore.charts = { [chart1.id]: chart1 };
 
-      const syncResult: SyncResult = {
-        success: true,
-        conflicts: [],
-        syncedCharts: [],
-        errors: []
+      const syncResult = createMockSyncResult({
+        success: true
         // mergedCharts is undefined
-      };
+      });
 
       mockSyncStore.sync.mockResolvedValue(syncResult);
 
@@ -288,9 +285,14 @@ describe('useChartSync', () => {
       mockSyncStore.syncConfig.autoSync = true;
       mockSyncStore.isAuthenticated = true;
 
+      const mockSetListManagement = createMockSetListManagement();
+      mockSetListManagement.subscribeSyncNotification.mockReturnValue(() => {});
+      vi.mocked(useSetListManagement).mockReturnValue(mockSetListManagement);
+
       renderHook(() => useChartSync());
 
       expect(mockChordChartStore.subscribeSyncNotification).toHaveBeenCalled();
+      expect(mockSetListManagement.subscribeSyncNotification).toHaveBeenCalled();
     });
 
     it('should not subscribe when auto sync is disabled', () => {
@@ -312,8 +314,14 @@ describe('useChartSync', () => {
     });
 
     it('should unsubscribe on unmount', () => {
-      const unsubscribe = vi.fn();
-      mockChordChartStore.subscribeSyncNotification.mockReturnValue(unsubscribe);
+      const unsubscribeChart = vi.fn();
+      const unsubscribeSetList = vi.fn();
+      mockChordChartStore.subscribeSyncNotification.mockReturnValue(unsubscribeChart);
+      
+      const mockSetListManagement = createMockSetListManagement();
+      mockSetListManagement.subscribeSyncNotification.mockReturnValue(unsubscribeSetList);
+      vi.mocked(useSetListManagement).mockReturnValue(mockSetListManagement);
+      
       mockSyncStore.syncConfig.autoSync = true;
       mockSyncStore.isAuthenticated = true;
 
@@ -321,7 +329,8 @@ describe('useChartSync', () => {
 
       unmount();
 
-      expect(unsubscribe).toHaveBeenCalled();
+      expect(unsubscribeChart).toHaveBeenCalled();
+      expect(unsubscribeSetList).toHaveBeenCalled();
     });
 
     it('should trigger sync when charts change', async () => {
@@ -332,6 +341,10 @@ describe('useChartSync', () => {
         changeCallback = callback;
         return () => {};
       });
+
+      const mockSetListManagement = createMockSetListManagement();
+      mockSetListManagement.subscribeSyncNotification.mockReturnValue(() => {});
+      vi.mocked(useSetListManagement).mockReturnValue(mockSetListManagement);
 
       mockSyncStore.syncConfig.autoSync = true;
       mockSyncStore.isAuthenticated = true;
@@ -344,7 +357,7 @@ describe('useChartSync', () => {
         changeCallback([chart1]);
       });
 
-      expect(mockSyncStore.sync).toHaveBeenCalledWith([chart1]);
+      expect(mockSyncStore.sync).toHaveBeenCalledWith([chart1], []);
     });
 
     it('should not trigger sync when already syncing', async () => {
@@ -355,6 +368,10 @@ describe('useChartSync', () => {
         changeCallback = callback;
         return () => {};
       });
+
+      const mockSetListManagement = createMockSetListManagement();
+      mockSetListManagement.subscribeSyncNotification.mockReturnValue(() => {});
+      vi.mocked(useSetListManagement).mockReturnValue(mockSetListManagement);
 
       mockSyncStore.syncConfig.autoSync = true;
       mockSyncStore.isAuthenticated = true;
@@ -377,6 +394,10 @@ describe('useChartSync', () => {
         changeCallback = callback;
         return () => {};
       });
+
+      const mockSetListManagement = createMockSetListManagement();
+      mockSetListManagement.subscribeSyncNotification.mockReturnValue(() => {});
+      vi.mocked(useSetListManagement).mockReturnValue(mockSetListManagement);
 
       mockSyncStore.syncConfig.autoSync = true;
       mockSyncStore.isAuthenticated = true;

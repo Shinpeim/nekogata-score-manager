@@ -39,7 +39,8 @@ describe('SyncDropdown', () => {
     vi.clearAllMocks();
     
     const { useChartSync } = await import('../../../hooks/useChartSync');
-    vi.mocked(useChartSync).mockReturnValue(mockUseChartSync);
+    const { createMockChartSync } = await import('../../../hooks/__tests__/testHelpers');
+    vi.mocked(useChartSync).mockReturnValue(createMockChartSync(mockUseChartSync));
     
     // Reset mock state
     mockUseChartSync.isAuthenticated = false;
@@ -115,8 +116,13 @@ describe('SyncDropdown', () => {
     expect(syncButton).toHaveClass('text-slate-400', 'cursor-not-allowed');
   });
 
-  it('should enable sync button when authenticated', () => {
-    mockUseChartSync.isAuthenticated = true;
+  it('should enable sync button when authenticated', async () => {
+    const { useChartSync } = await import('../../../hooks/useChartSync');
+    const { createMockChartSync } = await import('../../../hooks/__tests__/testHelpers');
+    vi.mocked(useChartSync).mockReturnValue(createMockChartSync({
+      ...mockUseChartSync,
+      isAuthenticated: true
+    }));
 
     render(
       <SyncDropdown
@@ -132,7 +138,14 @@ describe('SyncDropdown', () => {
   });
 
   it('should execute sync when sync button is clicked and authenticated', async () => {
-    mockUseChartSync.isAuthenticated = true;
+    const { useChartSync } = await import('../../../hooks/useChartSync');
+    const { createMockChartSync } = await import('../../../hooks/__tests__/testHelpers');
+    const mockSyncCharts = vi.fn().mockResolvedValue({ success: true });
+    vi.mocked(useChartSync).mockReturnValue(createMockChartSync({
+      ...mockUseChartSync,
+      isAuthenticated: true,
+      syncCharts: mockSyncCharts
+    }));
 
     render(
       <SyncDropdown
@@ -145,7 +158,7 @@ describe('SyncDropdown', () => {
     fireEvent.click(screen.getByTestId('sync-execute-button'));
 
     await waitFor(() => {
-      expect(mockUseChartSync.syncCharts).toHaveBeenCalled();
+      expect(mockSyncCharts).toHaveBeenCalled();
     });
     expect(mockSetShowDropdown).toHaveBeenCalledWith(false);
   });
@@ -166,8 +179,13 @@ describe('SyncDropdown', () => {
     expect(mockUseChartSync.syncCharts).not.toHaveBeenCalled();
   });
 
-  it('should show "同期中..." when sync is in progress', () => {
-    mockUseChartSync.isSyncing = true;
+  it('should show "同期中..." when sync is in progress', async () => {
+    const { useChartSync } = await import('../../../hooks/useChartSync');
+    const { createMockChartSync } = await import('../../../hooks/__tests__/testHelpers');
+    vi.mocked(useChartSync).mockReturnValue(createMockChartSync({
+      ...mockUseChartSync,
+      isSyncing: true
+    }));
 
     render(
       <SyncDropdown
@@ -210,8 +228,13 @@ describe('SyncDropdown', () => {
     expect(screen.getByText('アカウント連携')).toBeInTheDocument();
   });
 
-  it('should show "詳細設定" when authenticated', () => {
-    mockUseChartSync.isAuthenticated = true;
+  it('should show "詳細設定" when authenticated', async () => {
+    const { useChartSync } = await import('../../../hooks/useChartSync');
+    const { createMockChartSync } = await import('../../../hooks/__tests__/testHelpers');
+    vi.mocked(useChartSync).mockReturnValue(createMockChartSync({
+      ...mockUseChartSync,
+      isAuthenticated: true
+    }));
 
     render(
       <SyncDropdown
@@ -225,8 +248,14 @@ describe('SyncDropdown', () => {
   });
 
   it('should handle sync errors gracefully', async () => {
-    mockUseChartSync.isAuthenticated = true;
-    mockUseChartSync.syncCharts.mockRejectedValue(new Error('Sync failed'));
+    const { useChartSync } = await import('../../../hooks/useChartSync');
+    const { createMockChartSync } = await import('../../../hooks/__tests__/testHelpers');
+    const mockSyncCharts = vi.fn().mockRejectedValue(new Error('Sync failed'));
+    vi.mocked(useChartSync).mockReturnValue(createMockChartSync({
+      ...mockUseChartSync,
+      isAuthenticated: true,
+      syncCharts: mockSyncCharts
+    }));
     
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
