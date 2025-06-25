@@ -14,6 +14,7 @@ interface SetListCrudState {
   // CRUD操作
   addSetList: (setList: SetList) => Promise<void>;
   updateSetList: (id: string, setListUpdate: Partial<SetList>) => Promise<void>;
+  updateSetListOrder: (id: string, newChartIds: string[]) => Promise<void>;
   deleteSetList: (id: string) => Promise<void>;
   deleteMultipleSetLists: (ids: string[]) => Promise<void>;
   createNewSetList: (setListData: Partial<SetList>) => Promise<SetList>;
@@ -77,6 +78,46 @@ export const useSetListCrudStore = create<SetListCrudState>()(
           set({ 
             isLoading: false, 
             error: error instanceof Error ? error.message : 'セットリストの更新に失敗しました' 
+          });
+          throw error;
+        }
+      },
+      
+      updateSetListOrder: async (id: string, newChartIds: string[]) => {
+        try {
+          // D&D操作では状態更新を最小限に抑制（エラーのクリアのみ）
+          set({ error: null });
+          
+          const dataStore = useSetListStore.getState();
+          const existingSetList = dataStore.setLists[id];
+          
+          if (!existingSetList) {
+            throw new Error('順序更新対象のセットリストが見つかりません');
+          }
+          
+          // 即座にUI状態を更新（楽観的更新）
+          const optimisticSetList = {
+            ...existingSetList,
+            chartIds: newChartIds,
+            updatedAt: new Date()
+          };
+          dataStore.updateSetList(id, optimisticSetList);
+          
+          // バックグラウンドで永続化処理
+          setListCrudService.updateSetList(existingSetList, {
+            chartIds: newChartIds,
+            updatedAt: optimisticSetList.updatedAt
+          }).catch((error) => {
+            // 永続化に失敗した場合、元の状態に戻す
+            dataStore.updateSetList(id, existingSetList);
+            set({ 
+              error: error instanceof Error ? error.message : 'セットリストの順序更新に失敗しました' 
+            });
+          });
+          
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'セットリストの順序更新に失敗しました' 
           });
           throw error;
         }

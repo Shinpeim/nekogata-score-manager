@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { ChordChart } from '../types';
 import ActionDropdown from './ActionDropdown';
 import SetListTab from '../components/SetListTab';
@@ -41,9 +41,26 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
   isMobile = false,
   onClose,
 }) => {
-  const [activeTab, setActiveTab] = useState<TabType>('charts');
+  // タブ状態をlocalStorageで永続化
+  const [activeTab, setActiveTab] = useState<TabType>(() => {
+    try {
+      const saved = localStorage.getItem('scoreExplorer-activeTab');
+      return (saved as TabType) || 'charts';
+    } catch {
+      return 'charts';
+    }
+  });
   const [showActionsDropdown, setShowActionsDropdown] = useState(false);
   const [showCreateSetListForm, setShowCreateSetListForm] = useState(false);
+  
+  // タブ変更時にlocalStorageに保存
+  useEffect(() => {
+    try {
+      localStorage.setItem('scoreExplorer-activeTab', activeTab);
+    } catch {
+      // localStorage が利用できない場合は何もしない
+    }
+  }, [activeTab]);
   
   const handleChartClick = (chartId: string) => {
     onSetCurrentChart(chartId);

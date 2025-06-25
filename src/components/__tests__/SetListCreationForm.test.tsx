@@ -31,6 +31,7 @@ describe('SetListCreationForm', () => {
       createNewSetList: mockCreateNewSetList,
       addSetList: vi.fn(),
       updateSetList: vi.fn(),
+      updateSetListOrder: vi.fn(),
       deleteSetList: vi.fn(),
       deleteMultipleSetLists: vi.fn(),
       setCurrentSetList: vi.fn(),

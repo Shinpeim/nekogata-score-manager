@@ -28,6 +28,7 @@ export const useSetListManagement = () => {
     error: crudStore.error,
     addSetList: crudStore.addSetList,
     updateSetList: crudStore.updateSetList,
+    updateSetListOrder: crudStore.updateSetListOrder,
     deleteSetList: crudStore.deleteSetList,
     deleteMultipleSetLists: crudStore.deleteMultipleSetLists,
     createNewSetList: crudStore.createNewSetList,

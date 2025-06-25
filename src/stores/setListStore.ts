@@ -147,12 +147,18 @@ export const useSetListStore = create<SetListState>()(
     },
 
     updateSetList: (id: string, setList: SetList) => {
-      set((state) => ({
-        setLists: {
-          ...state.setLists,
-          [id]: setList
+      set((state) => {
+        // 同じオブジェクトの場合は更新しない（D&D操作の最適化）
+        if (state.setLists[id] === setList) {
+          return state;
         }
-      }));
+        return {
+          setLists: {
+            ...state.setLists,
+            [id]: setList
+          }
+        };
+      });
       logger.debug(`セットリストを更新: ${setList.name}`);
     },
 
