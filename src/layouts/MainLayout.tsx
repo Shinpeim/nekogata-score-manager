@@ -143,44 +143,48 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
       />
 
       <div className="flex flex-1">
-        {/* Mobile Score Explorer overlay */}
+        {/* Mobile Score Explorer overlay - モバイルのみで表示 */}
         {explorerOpen && (
-          <ScoreExplorer
-            charts={charts}
-            currentChartId={currentChartId}
-            selectedChartIds={selectedChartIds}
-            onChartSelect={handleChartSelect}
-            onSelectAll={handleSelectAll}
-            onSetCurrentChart={setCurrentChart}
-            onCreateNew={() => setShowCreateForm(true)}
-            onImport={() => setShowImportDialog(true)}
-            onExportSelected={handleExportSelected}
-            onDeleteSelected={handleDeleteSelected}
-            onDuplicateSelected={handleDuplicateSelected}
-            onEditChart={handleEditChart}
-            isMobile={true}
-            onClose={() => setExplorerOpen(false)}
-          />
+          <div className="md:hidden">
+            <ScoreExplorer
+              charts={charts}
+              currentChartId={currentChartId}
+              selectedChartIds={selectedChartIds}
+              onChartSelect={handleChartSelect}
+              onSelectAll={handleSelectAll}
+              onSetCurrentChart={setCurrentChart}
+              onCreateNew={() => setShowCreateForm(true)}
+              onImport={() => setShowImportDialog(true)}
+              onExportSelected={handleExportSelected}
+              onDeleteSelected={handleDeleteSelected}
+              onDuplicateSelected={handleDuplicateSelected}
+              onEditChart={handleEditChart}
+              isMobile={true}
+              onClose={() => setExplorerOpen(false)}
+            />
+          </div>
         )}
 
-        {/* Desktop Score Explorer */}
-        <aside className={`${explorerOpen ? 'block' : 'hidden'} w-80 bg-white shadow-sm border-r border-slate-200 overflow-y-auto`}>
-          <ScoreExplorer
-            charts={charts}
-            currentChartId={currentChartId}
-            selectedChartIds={selectedChartIds}
-            onChartSelect={handleChartSelect}
-            onSelectAll={handleSelectAll}
-            onSetCurrentChart={setCurrentChart}
-            onCreateNew={() => setShowCreateForm(true)}
-            onImport={() => setShowImportDialog(true)}
-            onExportSelected={handleExportSelected}
-            onDeleteSelected={handleDeleteSelected}
-            onDuplicateSelected={handleDuplicateSelected}
-            onEditChart={handleEditChart}
-            isMobile={false}
-          />
-        </aside>
+        {/* Desktop Score Explorer - デスクトップのみで表示 */}
+        {explorerOpen && (
+          <aside className="hidden md:block w-80 bg-white shadow-sm border-r border-slate-200 overflow-y-auto">
+            <ScoreExplorer
+              charts={charts}
+              currentChartId={currentChartId}
+              selectedChartIds={selectedChartIds}
+              onChartSelect={handleChartSelect}
+              onSelectAll={handleSelectAll}
+              onSetCurrentChart={setCurrentChart}
+              onCreateNew={() => setShowCreateForm(true)}
+              onImport={() => setShowImportDialog(true)}
+              onExportSelected={handleExportSelected}
+              onDeleteSelected={handleDeleteSelected}
+              onDuplicateSelected={handleDuplicateSelected}
+              onEditChart={handleEditChart}
+              isMobile={false}
+            />
+          </aside>
+        )}
 
         {/* Main Content Area */}
         <main className="flex-1 overflow-hidden">

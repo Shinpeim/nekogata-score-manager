@@ -100,7 +100,7 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
             onChange={onSelectAll}
             className="text-[#85B0B7] focus:ring-[#85B0B7]"
             title={selectedChartIds.length === charts.length ? '全て解除' : '全て選択'}
-            data-testid="select-all-checkbox"
+            data-testid={`select-all-checkbox-${isMobile ? 'mobile' : 'desktop'}`}
           />
           <span className="text-xs text-slate-600">一括選択</span>
           <ActionDropdown
@@ -111,6 +111,7 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
             onDeleteSelected={onDeleteSelected}
             onDuplicateSelected={onDuplicateSelected}
             onCreateSetList={handleCreateSetList}
+            isMobile={isMobile}
           />
           <span className="text-xs text-slate-500">
             {selectedChartIds.length > 0 ? `${selectedChartIds.length}件選択中` : '未選択'}
@@ -128,7 +129,7 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
               checked={selectedChartIds.includes(chart.id)}
               onChange={() => onChartSelect(chart.id)}
               className="text-[#85B0B7] focus:ring-[#85B0B7]"
-              data-testid={`chart-checkbox-${index}`}
+              data-testid={`chart-checkbox-${index}-${isMobile ? 'mobile' : 'desktop'}`}
             />
             <div 
               className={`flex-1 p-3 rounded-md transition-colors cursor-pointer ${
@@ -137,7 +138,7 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
                   : 'bg-slate-50 hover:bg-slate-100'
               }`}
               onClick={() => handleChartClick(chart.id)}
-              data-testid={`chart-item-${index}`}
+              data-testid={`chart-item-${index}-${isMobile ? 'mobile' : 'desktop'}`}
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -153,7 +154,7 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
                     }
                   }}
                   className="ml-2 p-1.5 text-slate-500 hover:text-[#85B0B7] hover:bg-slate-100 rounded transition-colors"
-                  data-testid={`edit-chart-${index}`}
+                  data-testid={`edit-chart-${index}-${isMobile ? 'mobile' : 'desktop'}`}
                   title="編集"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
@@ -198,7 +199,7 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
                 ? 'bg-white text-slate-900 shadow-sm'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
-            data-testid="charts-tab"
+            data-testid={`charts-tab-${isMobile ? 'mobile' : 'desktop'}`}
           >
             楽譜
           </button>
@@ -209,7 +210,7 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
                 ? 'bg-white text-slate-900 shadow-sm'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
-            data-testid="setlists-tab"
+            data-testid={`setlists-tab-${isMobile ? 'mobile' : 'desktop'}`}
           >
             セットリスト
           </button>

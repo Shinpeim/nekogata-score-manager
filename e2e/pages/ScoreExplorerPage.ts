@@ -23,10 +23,10 @@ export class ScoreExplorerPage {
     this.titleDesktop = page.getByTestId('score-explorer-title-desktop');
     this.title = isMobile ? this.titleMobile : this.titleDesktop;
     
-    this.chartsTab = page.getByTestId('charts-tab').first();
-    this.setlistsTab = page.getByTestId('setlists-tab').first();
+    this.chartsTab = page.getByTestId(`charts-tab-${isMobile ? 'mobile' : 'desktop'}`);
+    this.setlistsTab = page.getByTestId(`setlists-tab-${isMobile ? 'mobile' : 'desktop'}`);
     
-    this.selectAllCheckbox = page.getByTestId('select-all-checkbox').first();
+    this.selectAllCheckbox = page.getByTestId(`select-all-checkbox-${isMobile ? 'mobile' : 'desktop'}`);
     
     this.createNewButtonMobile = page.getByTestId('explorer-create-new-button-mobile');
     this.createNewButtonDesktop = page.getByTestId('explorer-create-new-button-desktop');
@@ -38,52 +38,40 @@ export class ScoreExplorerPage {
   }
 
   async clickCreateNew() {
-    // デスクトップ版は常にDOMに存在するがCSS hiddenの可能性があるため
-    // JavaScriptでの直接クリックを使用（ドキュメントの問題対応）
-    await expect(this.createNewButton).toBeAttached({ timeout: 10000 });
-    
-    if (this.isMobile) {
-      // モバイル版は通常のクリック
-      await expect(this.createNewButton).toBeVisible({ timeout: 5000 });
-      await this.createNewButton.click();
-    } else {
-      // デスクトップ版はJavaScriptクリック（CSS hiddenでも動作）
-      await this.createNewButton.evaluate(el => (el as HTMLElement).click());
-    }
+    // 条件付きレンダリングになったため、可視性を確認してから通常クリック
+    await expect(this.createNewButton).toBeVisible({ timeout: 10000 });
+    await expect(this.createNewButton).toBeEnabled();
+    await this.createNewButton.click();
   }
 
   async clickImport() {
-    // DOM上にボタンが存在することを確認してからJavaScriptでクリック
-    await expect(this.importButton).toBeAttached({ timeout: 10000 });
-    await this.importButton.evaluate(el => (el as HTMLElement).click());
+    // 可視性と操作可能性を確認してから通常クリック
+    await expect(this.importButton).toBeVisible({ timeout: 10000 });
+    await expect(this.importButton).toBeEnabled();
+    await this.importButton.click();
   }
 
   async clickSelectAll() {
-    await expect(this.selectAllCheckbox).toBeAttached();
-    await this.selectAllCheckbox.evaluate(el => (el as HTMLElement).click());
+    await expect(this.selectAllCheckbox).toBeVisible();
+    await expect(this.selectAllCheckbox).toBeEnabled();
+    await this.selectAllCheckbox.click();
   }
 
   getChartCheckbox(index: number) {
-    // isMobileに応じて適切な要素を取得
-    const selector = `[data-testid="chart-checkbox-${index}"]`;
-    return this.isMobile 
-      ? this.page.locator('.fixed.inset-0.flex.z-40.md\\:hidden').locator(selector)
-      : this.page.locator('aside').locator(selector);
+    // デバイス別のdata-testidで一意に取得
+    return this.page.getByTestId(`chart-checkbox-${index}-${this.isMobile ? 'mobile' : 'desktop'}`);
   }
 
   getChartItem(index: number) {
-    // isMobileに応じて適切な要素を取得
-    const selector = `[data-testid="chart-item-${index}"]`;
-    return this.isMobile 
-      ? this.page.locator('.fixed.inset-0.flex.z-40.md\\:hidden').locator(selector)
-      : this.page.locator('aside').locator(selector);
+    // デバイス別のdata-testidで一意に取得
+    return this.page.getByTestId(`chart-item-${index}-${this.isMobile ? 'mobile' : 'desktop'}`);
   }
 
   async selectChart(index: number) {
-    // DOM要素の存在を確認してからJavaScript経由でクリック
+    // 可視性を確認してから通常クリック
     const checkbox = this.getChartCheckbox(index);
-    await expect(checkbox).toBeAttached();
-    await checkbox.evaluate(el => (el as HTMLElement).click());
+    await expect(checkbox).toBeVisible();
+    await checkbox.click();
   }
 
   async clickChart(index: number) {
@@ -91,19 +79,24 @@ export class ScoreExplorerPage {
   }
 
   getSelectionStatus() {
-    return this.page.locator('text=件選択中').first();
+    // デバイスに応じて適切な要素を選択
+    if (this.isMobile) {
+      return this.page.locator('.md\\:hidden >> text=件選択中');
+    } else {
+      return this.page.locator('.hidden.md\\:block >> text=件選択中');
+    }
   }
 
   async openActionDropdown() {
-    const actionButton = this.page.locator('[title="アクション"]').first();
-    await expect(actionButton).toBeAttached();
-    await actionButton.evaluate(el => (el as HTMLElement).click());
+    const actionButton = this.page.getByTestId(`action-dropdown-button-${this.isMobile ? 'mobile' : 'desktop'}`);
+    await expect(actionButton).toBeVisible();
+    await actionButton.click();
   }
 
   async clickExportOption() {
-    const exportButton = this.page.locator('button:has-text("エクスポート")').first();
-    await expect(exportButton).toBeAttached();
-    await exportButton.evaluate(el => (el as HTMLElement).click());
+    const exportButton = this.page.locator('button:has-text("エクスポート")');
+    await expect(exportButton).toBeVisible();
+    await exportButton.click();
   }
 
   getExportDialog() {
@@ -131,45 +124,30 @@ export class ScoreExplorerPage {
     await this.page.getByTestId(testId).click({ force: true });
   }
 
-  async clickActionDropdown() {
-    const container = this.isMobile 
-      ? this.page.locator('.fixed.inset-0.flex.z-40.md\\:hidden')
-      : this.page.locator('aside');
-    const actionButton = container.locator('[title="アクション"]');
-    await expect(actionButton).toBeAttached();
-    await actionButton.evaluate(el => (el as HTMLElement).click());
-  }
 
   async clickDuplicateSelected() {
-    const container = this.isMobile 
-      ? this.page.locator('.fixed.inset-0.flex.z-40.md\\:hidden')
-      : this.page.locator('aside');
-    const duplicateButton = container.locator('button:has-text("複製")');
-    await expect(duplicateButton).toBeAttached();
-    await duplicateButton.evaluate(el => (el as HTMLElement).click());
+    const duplicateButton = this.page.locator('button:has-text("複製")');
+    await expect(duplicateButton).toBeVisible();
+    await duplicateButton.click();
   }
 
   async clickDeleteSelected() {
-    const container = this.isMobile 
-      ? this.page.locator('.fixed.inset-0.flex.z-40.md\\:hidden')
-      : this.page.locator('aside');
-    const deleteButton = container.locator('button:has-text("削除")');
-    await expect(deleteButton).toBeAttached();
-    await deleteButton.evaluate(el => (el as HTMLElement).click());
+    const deleteButton = this.page.locator('button:has-text("削除")');
+    await expect(deleteButton).toBeVisible();
+    await deleteButton.click();
   }
 
   async getChartItemCount() {
-    const container = this.isMobile 
-      ? this.page.locator('.fixed.inset-0.flex.z-40.md\\:hidden')
-      : this.page.locator('aside');
-    const chartItems = container.locator('[data-testid^="chart-item-"]');
+    const chartItems = this.page.locator(`[data-testid^="chart-item-"][data-testid$="-${this.isMobile ? 'mobile' : 'desktop'}"]`);
     return await chartItems.count();
   }
 
   getSpecificTitleLocator(title: string) {
-    const container = this.isMobile 
-      ? this.page.locator('.fixed.inset-0.flex.z-40.md\\:hidden')
-      : this.page.locator('aside');
-    return container.locator(`text=${title}`);
+    // デバイスに応じて適切な要素内で検索
+    if (this.isMobile) {
+      return this.page.locator('.md\\:hidden').locator(`text=${title}`);
+    } else {
+      return this.page.locator('.hidden.md\\:block').locator(`text=${title}`);
+    }
   }
 }

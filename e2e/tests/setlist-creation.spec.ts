@@ -23,7 +23,8 @@ test.describe('セットリスト作成機能', () => {
   test('楽譜を選択してセットリストを作成できる', async ({ page }) => {
     // Score Explorerを開く
     await homePage.clickOpenExplorer();
-    await page.waitForTimeout(1000);
+    // Wait for Score Explorer to fully open
+    await expect(scoreExplorerPage.chartsTab).toBeVisible();
     
     // 楽譜タブが表示されていることを確認
     await expect(scoreExplorerPage.chartsTab).toBeAttached();
@@ -36,7 +37,8 @@ test.describe('セットリスト作成機能', () => {
     await chartFormPage.fillArtist('アーティスト1');
     await chartFormPage.clickSave();
     await expect(chartFormPage.form).not.toBeVisible();
-    await page.waitForTimeout(1000);
+    // Wait for chart to be created and appear in the list
+    await expect(page.locator('text=テスト楽曲1').first()).toBeVisible();
 
     await scoreExplorerPage.clickCreateNew();
     await expect(chartFormPage.form).toBeVisible();
@@ -45,11 +47,11 @@ test.describe('セットリスト作成機能', () => {
     await chartFormPage.fillArtist('アーティスト2');
     await chartFormPage.clickSave();
     await expect(chartFormPage.form).not.toBeVisible();
-    await page.waitForTimeout(1000);
+    // Wait for second chart to be created and appear in the list
+    await expect(page.locator('text=テスト楽曲2').first()).toBeVisible();
 
     // 楽譜タブが選択されていることを確認
-    const chartsTab = page.locator('[data-testid="charts-tab"]').first();
-    await expect(chartsTab).toHaveClass(/bg-white/);
+    await expect(scoreExplorerPage.chartsTab).toHaveClass(/bg-white/);
 
     // セットリストタブに切り替え
     await scoreExplorerPage.setlistsTab.click();
@@ -84,24 +86,21 @@ test.describe('セットリスト作成機能', () => {
     await homePage.clickOpenExplorer();
 
     // 初期状態では楽譜タブが選択されている
-    const chartsTab = page.locator('[data-testid="charts-tab"]').first();
-    const setlistsTab = page.locator('[data-testid="setlists-tab"]').first();
-    
-    await expect(chartsTab).toHaveClass(/bg-white/);
-    await expect(setlistsTab).not.toHaveClass(/bg-white/);
+    await expect(scoreExplorerPage.chartsTab).toHaveClass(/bg-white/);
+    await expect(scoreExplorerPage.setlistsTab).not.toHaveClass(/bg-white/);
 
     // セットリストタブをクリック
-    await setlistsTab.click();
-    await expect(setlistsTab).toHaveClass(/bg-white/);
-    await expect(chartsTab).not.toHaveClass(/bg-white/);
+    await scoreExplorerPage.setlistsTab.click();
+    await expect(scoreExplorerPage.setlistsTab).toHaveClass(/bg-white/);
+    await expect(scoreExplorerPage.chartsTab).not.toHaveClass(/bg-white/);
 
     // セットリストが選択されていない場合のメッセージを確認
     await expect(page.locator('text=セットリストを選択してください')).toBeVisible();
 
     // 楽譜タブに戻る
-    await chartsTab.click();
-    await expect(chartsTab).toHaveClass(/bg-white/);
-    await expect(setlistsTab).not.toHaveClass(/bg-white/);
+    await scoreExplorerPage.chartsTab.click();
+    await expect(scoreExplorerPage.chartsTab).toHaveClass(/bg-white/);
+    await expect(scoreExplorerPage.setlistsTab).not.toHaveClass(/bg-white/);
   });
 
   test('セットリスト作成フォームのキャンセル機能', async ({ page }) => {

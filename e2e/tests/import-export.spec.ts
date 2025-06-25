@@ -30,7 +30,7 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       await homePage.setDesktopViewport();
       
       // 1. テスト用チャートを作成
-      await homePage.clickOpenExplorer();
+      await homePage.ensureExplorerOpen();
       await scoreExplorerPage.clickCreateNew();
       await expect(chartFormPage.form).toBeVisible();
       
@@ -43,7 +43,8 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       
       await expect(chartFormPage.form).not.toBeVisible();
       // 新規作成後は直接編集画面に遷移しているので、保存して表示モードに戻る
-      await page.waitForTimeout(2000); // 画面遷移を待機
+      // Wait for navigation to complete and chart title to be visible
+      await page.waitForLoadState('networkidle');
       await expect(chartViewPage.getChartTitleWithText(testChartTitle)).toBeVisible();
       
       // 2. Score Explorerはopen済みなので確認のみ
@@ -66,29 +67,33 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       await homePage.setDesktopViewport();
       
       // 1. テスト用チャートを作成
-      await homePage.clickOpenExplorer();
+      await homePage.ensureExplorerOpen();
       await scoreExplorerPage.clickCreateNew();
       await chartFormPage.fillTitle('エクスポートテストチャート');
       await chartFormPage.fillArtist('テストアーティスト');
       await chartFormPage.clickSave();
-      await page.waitForTimeout(1000); // 画面遷移を待機
+      // Wait for chart to be created
+      await page.waitForLoadState('networkidle');
       
-      // 2. Score Explorerはopen済み
+      // 2. Score Explorerが確実に開いていることを確認
+      await homePage.ensureExplorerOpen();
       
       // 3. 最初のチャートのチェックボックスを選択（インデックス0）
       await scoreExplorerPage.selectChart(0);
       
       // 4. 選択状態を確認（要素の存在とテキスト内容で判定）
+      await expect(scoreExplorerPage.getSelectionStatus()).toBeVisible();
       await expect(scoreExplorerPage.getSelectionStatus()).toContainText('1件選択中');
-      await page.waitForTimeout(500); // 選択状態の反映を待機
       
       // 5. アクションドロップダウンを開く
       await scoreExplorerPage.openActionDropdown();
-      await page.waitForTimeout(500); // ドロップダウンの表示を待機
+      // Wait for dropdown to be visible (エクスポートボタンが見えるまで待つ)
+      await expect(page.locator('button:has-text("エクスポート")')).toBeVisible();
       
       // 6. エクスポートオプションをクリック
       await scoreExplorerPage.clickExportOption();
-      await page.waitForTimeout(1000); // ダイアログの表示を待機
+      // Wait for export dialog to be visible
+      await expect(scoreExplorerPage.getFilenameInput()).toBeVisible();
       
       // 7. エクスポートダイアログが表示されることを確認
       await expect(scoreExplorerPage.getFilenameInput()).toBeVisible();
@@ -112,7 +117,7 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       await homePage.setDesktopViewport();
       
       // 1. Score Explorerを開く
-      await homePage.clickOpenExplorer();
+      await homePage.ensureExplorerOpen();
       
       // 2. インポートボタンをクリック
       await scoreExplorerPage.clickImport();
@@ -144,7 +149,7 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       fs.writeFileSync(testFilePath, invalidJsonContent);
       
       // 2. インポート実行
-      await homePage.clickOpenExplorer();
+      await homePage.ensureExplorerOpen();
       await scoreExplorerPage.clickImport();
       
       const fileInput = scoreExplorerPage.getFileInput();
@@ -160,7 +165,8 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       await scoreExplorerPage.clickImportButton();
       
       // 3. エラーが発生してもダイアログが閉じることを確認
-      await page.waitForTimeout(1000);
+      // Wait for dialog to process
+      await page.waitForLoadState('networkidle');
       
       // クリーンアップ
       if (fs.existsSync(testFilePath)) {
@@ -185,7 +191,7 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       fs.writeFileSync(testFilePath, JSON.stringify(invalidFormatData, null, 2));
       
       // 2. インポート実行
-      await homePage.clickOpenExplorer();
+      await homePage.ensureExplorerOpen();
       await scoreExplorerPage.clickImport();
       
       const fileInput = scoreExplorerPage.getFileInput();
@@ -201,7 +207,8 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       await scoreExplorerPage.clickImportButton();
       
       // 3. エラーが発生してもダイアログが閉じることを確認
-      await page.waitForTimeout(1000);
+      // Wait for dialog to process
+      await page.waitForLoadState('networkidle');
       
       // クリーンアップ
       if (fs.existsSync(testFilePath)) {
@@ -221,7 +228,7 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       fs.writeFileSync(testFilePath, '');
       
       // 2. インポート実行
-      await homePage.clickOpenExplorer();
+      await homePage.ensureExplorerOpen();
       await scoreExplorerPage.clickImport();
       
       const fileInput = scoreExplorerPage.getFileInput();
@@ -238,7 +245,8 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       await scoreExplorerPage.clickImportButton();
       
       // 3. エラーが発生してもダイアログが閉じることを確認
-      await page.waitForTimeout(1000);
+      // Wait for dialog to process
+      await page.waitForLoadState('networkidle');
       
       // クリーンアップ
       if (fs.existsSync(testFilePath)) {

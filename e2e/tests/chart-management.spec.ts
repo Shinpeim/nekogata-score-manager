@@ -18,7 +18,7 @@ test.describe('Nekogata Score Manager - チャート管理機能テスト', () =
     await homePage.setDesktopViewport();
     
     // Score Explorerを開いて新規作成
-    await homePage.clickOpenExplorer();
+    await homePage.ensureExplorerOpen();
     await scoreExplorerPage.clickCreateNew();
     
     await chartFormPage.fillBasicInfo({
@@ -36,7 +36,7 @@ test.describe('Nekogata Score Manager - チャート管理機能テスト', () =
     await chartViewPage.waitForChartToLoad();
     
     // Score Explorerを開く
-    await homePage.clickOpenExplorer();
+    await homePage.ensureExplorerOpen();
     
     // チャートを選択
     await scoreExplorerPage.selectChart(0);
@@ -48,7 +48,7 @@ test.describe('Nekogata Score Manager - チャート管理機能テスト', () =
     });
     
     // Score Explorerから削除を実行
-    await scoreExplorerPage.clickActionDropdown();
+    await scoreExplorerPage.openActionDropdown();
     await scoreExplorerPage.clickDeleteSelected();
     
     // 削除後は空の状態に戻ることを確認
@@ -87,8 +87,7 @@ test.describe('Nekogata Score Manager - チャート管理機能テスト', () =
     await expect(chartViewPage.chartTitle).toContainText('チャート1');
     
     // 2つ目のチャート作成
-    await homePage.clickOpenExplorer();
-    await page.waitForLoadState('networkidle'); // 固定待機から条件待機へ変更
+    await homePage.ensureExplorerOpen();
     await scoreExplorerPage.clickCreateNew();
     
     await chartFormPage.fillBasicInfo({
@@ -159,7 +158,7 @@ test.describe('Nekogata Score Manager - チャート管理機能テスト', () =
     await homePage.setDesktopViewport();
     
     // Score Explorerを開いて新規作成
-    await homePage.clickOpenExplorer();
+    await homePage.ensureExplorerOpen();
     await scoreExplorerPage.clickCreateNew();
     
     await chartFormPage.fillBasicInfo({

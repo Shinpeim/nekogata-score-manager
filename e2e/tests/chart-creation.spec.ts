@@ -36,7 +36,8 @@ test.describe('Nekogata Score Manager - チャート作成機能', () => {
     await expect(chartFormPage.form).not.toBeVisible();
     
     // 編集画面に遷移することを確認（新機能）
-    await page.waitForTimeout(2000); // 画面遷移を待機（非同期処理のため長めに設定）
+    // Wait for navigation to editor
+    await page.waitForLoadState('networkidle');
     await expect(chartEditorPage.chartEditor).toBeVisible({ timeout: 10000 });
     
     // エディターのタイトルが正しく表示されることを確認
@@ -102,7 +103,8 @@ test.describe('Nekogata Score Manager - チャート作成機能', () => {
     await expect(chartFormPage.form).not.toBeVisible();
     
     // 編集画面に遷移することを確認（新機能）
-    await page.waitForTimeout(2000); // 画面遷移を待機（非同期処理のため長めに設定）
+    // Wait for navigation to editor
+    await page.waitForLoadState('networkidle');
     await expect(chartEditorPage.chartEditor).toBeVisible({ timeout: 10000 });
     
     // エディターのタイトルが正しく表示されることを確認

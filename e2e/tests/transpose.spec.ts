@@ -97,8 +97,11 @@ test.describe('Nekogata Score Manager - 移調機能テスト (音楽アプリ�
       return keySelect && keySelect.value === 'G';
     }, { timeout: 10000 });
 
-    // 移調処理完了まで待機
-    await page.waitForTimeout(3000);
+    // Wait for transpose operation to complete by checking the chord values
+    await page.waitForFunction(() => {
+      const firstChord = document.querySelector('[data-chord-item] input[placeholder*="コード名"]') as HTMLInputElement;
+      return firstChord && firstChord.value === 'G';
+    }, { timeout: 5000 });
     
     // 移調が実際に実行されたかチェック
     await page.waitForFunction(() => {
@@ -186,8 +189,11 @@ test.describe('Nekogata Score Manager - 移調機能テスト (音楽アプリ�
         return keySelect && keySelect.value === key;
       }, testCase.toKey, { timeout: 10000 });
 
-      // DOM更新を待機
-      await page.waitForTimeout(1000);
+      // Wait for DOM to update by checking the first chord changes
+      await page.waitForFunction((expectedFirstChord) => {
+        const firstChord = document.querySelector('[data-chord-item] input[placeholder*="コード名"]') as HTMLInputElement;
+        return firstChord && firstChord.value === expectedFirstChord;
+      }, testCase.expectedChords[0], { timeout: 5000 });
 
       // 移調後のコード確認
       const chordOrder = await chartEditorPage.getChordOrderInSection(sectionIndex);
@@ -253,8 +259,11 @@ test.describe('Nekogata Score Manager - 移調機能テスト (音楽アプリ�
       return keySelect && keySelect.value === 'A';
     }, { timeout: 10000 });
 
-    // DOM更新を待機
-    await page.waitForTimeout(1000);
+    // Wait for DOM to update by checking the first chord changes to Bm
+    await page.waitForFunction(() => {
+      const firstChord = document.querySelector('[data-chord-item] input[placeholder*="コード名"]') as HTMLInputElement;
+      return firstChord && firstChord.value === 'Bm';
+    }, { timeout: 5000 });
 
     // 移調後確認: Dm→Bm, G7→E7
     let chordOrder = await chartEditorPage.getChordOrderInSection(sectionIndex);
@@ -332,8 +341,11 @@ test.describe('Nekogata Score Manager - 移調機能テスト (音楽アプリ�
       return keySelect && keySelect.value === 'F';
     }, { timeout: 10000 });
 
-    // DOM更新を待機
-    await page.waitForTimeout(500);
+    // Wait for key selector to update
+    await page.waitForFunction(() => {
+      const keySelect = document.querySelector('#key-select') as HTMLSelectElement;
+      return keySelect && keySelect.value === 'F';
+    }, { timeout: 5000 });
 
     // コードは変更されていないことを確認
     const chordOrder = await chartEditorPage.getChordOrderInSection(sectionIndex);
