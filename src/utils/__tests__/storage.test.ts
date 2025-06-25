@@ -33,8 +33,8 @@ const mockChart: ChordChart = {
       beatsPerBar: 4,
       barsCount: 4,
       chords: [
-        { name: 'C', root: 'C', duration: 4, memo: '' },
-        { name: 'Am', root: 'A', duration: 4, memo: '' }
+        { id: 'chord-1', name: 'C', root: 'C', duration: 4, memo: '' },
+        { id: 'chord-2', name: 'Am', root: 'A', duration: 4, memo: '' }
       ]
     }
   ],

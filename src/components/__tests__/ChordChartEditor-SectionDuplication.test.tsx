@@ -20,10 +20,10 @@ const mockChart: ChordChart = {
       beatsPerBar: 4,
       barsCount: 4,
       chords: [
-        { name: 'C', root: 'C', duration: 4, memo: '' },
-        { name: 'Am', root: 'A', duration: 4, memo: '' },
-        { name: 'F', root: 'F', duration: 4, memo: '' },
-        { name: 'G', root: 'G', duration: 4, memo: '' }
+        { id: 'chord-1', name: 'C', root: 'C', duration: 4, memo: '' },
+        { id: 'chord-2', name: 'Am', root: 'A', duration: 4, memo: '' },
+        { id: 'chord-3', name: 'F', root: 'F', duration: 4, memo: '' },
+        { id: 'chord-4', name: 'G', root: 'G', duration: 4, memo: '' }
       ]
     },
     {
@@ -32,10 +32,10 @@ const mockChart: ChordChart = {
       beatsPerBar: 4,
       barsCount: 4,
       chords: [
-        { name: 'F', root: 'F', duration: 2, memo: '' },
-        { name: 'G', root: 'G', duration: 2, memo: '' },
-        { name: 'Em', root: 'E', duration: 4, memo: '' },
-        { name: 'Am', root: 'A', duration: 4, memo: '' }
+        { id: 'chord-5', name: 'F', root: 'F', duration: 2, memo: '' },
+        { id: 'chord-6', name: 'G', root: 'G', duration: 2, memo: '' },
+        { id: 'chord-7', name: 'Em', root: 'E', duration: 4, memo: '' },
+        { id: 'chord-8', name: 'Am', root: 'A', duration: 4, memo: '' }
       ]
     }
   ],

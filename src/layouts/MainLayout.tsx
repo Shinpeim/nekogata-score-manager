@@ -14,9 +14,10 @@ interface MainLayoutProps {
   explorerOpen?: boolean;
   setExplorerOpen?: (open: boolean) => void;
   onEditChart?: (chartId: string) => void;
+  onStartEdit?: () => void;
 }
 
-const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExplorerOpen, setExplorerOpen: propSetExplorerOpen, onEditChart }) => {
+const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExplorerOpen, setExplorerOpen: propSetExplorerOpen, onEditChart, onStartEdit }) => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [localExplorerOpen, setLocalExplorerOpen] = useState(false);
   
@@ -53,6 +54,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
     try {
       await createNewChart(chartData);
       setShowCreateForm(false);
+      
+      // 新規作成後は編集モードに遷移
+      if (onStartEdit) {
+        onStartEdit();
+      }
     } catch (error) {
       console.error('Failed to create chart:', error);
       // エラーはストアで管理されているため、ここでは何もしない

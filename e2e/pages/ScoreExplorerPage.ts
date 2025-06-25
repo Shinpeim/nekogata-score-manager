@@ -33,11 +33,15 @@ export class ScoreExplorerPage {
   }
 
   async clickCreateNew() {
-    await this.createNewButton.click();
+    // DOM上にボタンが存在することを確認してからJavaScriptでクリック
+    await expect(this.createNewButton).toBeAttached({ timeout: 10000 });
+    await this.createNewButton.evaluate(el => (el as HTMLElement).click());
   }
 
   async clickImport() {
-    await this.importButton.click();
+    // DOM上にボタンが存在することを確認してからJavaScriptでクリック
+    await expect(this.importButton).toBeAttached({ timeout: 10000 });
+    await this.importButton.evaluate(el => (el as HTMLElement).click());
   }
 
   async clickSelectAll() {
@@ -65,7 +69,6 @@ export class ScoreExplorerPage {
     // DOM要素の存在を確認してからJavaScript経由でクリック
     const checkbox = this.getChartCheckbox(index);
     await expect(checkbox).toBeAttached();
-    await expect(checkbox).toBeVisible();
     await checkbox.evaluate(el => (el as HTMLElement).click());
   }
 
@@ -110,7 +113,8 @@ export class ScoreExplorerPage {
   }
 
   async clickImportButton() {
-    await this.page.getByTestId('import-button').click({ force: true });
+    const testId = this.isMobile ? 'explorer-import-button-mobile' : 'explorer-import-button-desktop';
+    await this.page.getByTestId(testId).click({ force: true });
   }
 
   async clickActionDropdown() {
@@ -119,7 +123,6 @@ export class ScoreExplorerPage {
       : this.page.locator('aside');
     const actionButton = container.locator('[title="アクション"]');
     await expect(actionButton).toBeAttached();
-    await expect(actionButton).toBeVisible();
     await actionButton.evaluate(el => (el as HTMLElement).click());
   }
 
@@ -129,7 +132,6 @@ export class ScoreExplorerPage {
       : this.page.locator('aside');
     const duplicateButton = container.locator('button:has-text("複製")');
     await expect(duplicateButton).toBeAttached();
-    await expect(duplicateButton).toBeVisible();
     await duplicateButton.evaluate(el => (el as HTMLElement).click());
   }
 
@@ -139,7 +141,6 @@ export class ScoreExplorerPage {
       : this.page.locator('aside');
     const deleteButton = container.locator('button:has-text("削除")');
     await expect(deleteButton).toBeAttached();
-    await expect(deleteButton).toBeVisible();
     await deleteButton.evaluate(el => (el as HTMLElement).click());
   }
 

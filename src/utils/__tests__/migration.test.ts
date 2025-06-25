@@ -18,8 +18,8 @@ describe('Migration Utils', () => {
         id: 'section-1',
         name: 'Aメロ',
         chords: [
-          { name: 'C', root: 'C', duration: 4, memo: '' },
-          { name: 'Am', root: 'A', duration: 4, memo: '' }
+          { id: 'chord-1', name: 'C', root: 'C', duration: 4, memo: '' },
+          { id: 'chord-2', name: 'Am', root: 'A', duration: 4, memo: '' }
         ],
         beatsPerBar: 4, // ここが問題（3/4拍子なのに4拍） - v1マイグレーションで修正されない（version 1.0.0以降はスキップ）
         barsCount: 4

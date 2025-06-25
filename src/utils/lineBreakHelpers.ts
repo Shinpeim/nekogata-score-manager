@@ -1,10 +1,12 @@
 import type { Chord } from '../types';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * 改行マーカーを作成する
  */
 export function createLineBreakMarker(): Chord {
   return {
+    id: uuidv4(),
     name: '改行',
     root: '',
     isLineBreak: true,

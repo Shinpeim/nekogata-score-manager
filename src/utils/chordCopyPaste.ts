@@ -1,5 +1,6 @@
 import type { Chord } from '../types';
 import { parseChordInput } from './chordParsing';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * コード進行を文字列形式に変換する
@@ -53,6 +54,7 @@ export const textToChords = (text: string): Chord[] => {
     if (part === '|') {
       // 改行マーカー
       chords.push({
+        id: uuidv4(),
         name: '__LINE_BREAK__',
         root: '',
         isLineBreak: true,
@@ -77,7 +79,14 @@ export const textToChords = (text: string): Chord[] => {
  * @returns パースされたコード、またはnull
  */
 const parseChordText = (text: string): Chord | null => {
-  return parseChordInput(text, 4);
+  const parsedChord = parseChordInput(text, 4);
+  if (parsedChord) {
+    return {
+      ...parsedChord,
+      id: uuidv4()
+    };
+  }
+  return null;
 };
 
 /**

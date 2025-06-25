@@ -124,25 +124,27 @@ export const transposeChart = (chart: ChordChart, newKey: string): ChordChart =>
     };
   }
 
-  const transposedSections = chart.sections.map(section => ({
-    ...section,
-    chords: section.chords.map(chord => {
-      if (chord.isLineBreak) {
-        return chord; // 改行マーカーはそのまま
-      }
-      
-      const transposedName = transposeChordName(chord.name, semitones, newKey);
-      const transposedRoot = extractChordRoot(transposedName);
-      const transposedBase = chord.base ? transposeNoteName(chord.base, semitones, newKey) : undefined;
-      
-      return {
-        ...chord,
-        name: transposedName,
-        root: transposedRoot,
-        base: transposedBase
-      };
-    })
-  }));
+  const transposedSections = chart.sections.map((section) => {
+    return {
+      ...section,
+      chords: section.chords.map((chord) => {
+        if (chord.isLineBreak) {
+          return chord; // 改行マーカーはそのまま
+        }
+        
+        const transposedName = transposeChordName(chord.name, semitones, newKey);
+        const transposedRoot = extractChordRoot(transposedName);
+        const transposedBase = chord.base ? transposeNoteName(chord.base, semitones, newKey) : undefined;
+        
+        return {
+          ...chord,
+          name: transposedName,
+          root: transposedRoot,
+          base: transposedBase
+        };
+      })
+    };
+  });
 
   return {
     ...chart,

@@ -1,4 +1,5 @@
 import type { Chord } from '../types';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * コード名からルート音を抽出する
@@ -127,6 +128,7 @@ export const parseChordInput = (text: string, defaultDuration: number = 4): Chor
       const root = extractChordRoot(parsed.chord);
       
       return {
+        id: uuidv4(),
         name: parsed.chord,
         root,
         base: parsed.base,
@@ -140,6 +142,7 @@ export const parseChordInput = (text: string, defaultDuration: number = 4): Chor
     const root = extractChordRoot(parsed.chord);
     
     return {
+      id: uuidv4(),
       name: parsed.chord,
       root,
       base: parsed.base,
@@ -154,6 +157,7 @@ export const parseChordInput = (text: string, defaultDuration: number = 4): Chor
   const root = extractChordRoot(parsed.chord);
   
   return {
+    id: uuidv4(),
     name: parsed.chord,
     root,
     base: parsed.base,

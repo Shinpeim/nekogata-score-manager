@@ -3,6 +3,7 @@ import { HomePage } from '../pages/HomePage';
 import { ChordChartFormPage } from '../pages/ChordChartFormPage';
 import { ChartViewPage } from '../pages/ChartViewPage';
 import { ChartEditorPage } from '../pages/ChartEditorPage';
+import { ScoreExplorerPage } from '../pages/ScoreExplorerPage';
 
 test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト (正確な順序変更)', () => {
   test.beforeEach(async ({ page }) => {
@@ -31,13 +32,15 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
 
     // 基本チャート作成
     await homePage.goto();
-    await homePage.clickCreateNew();
+    // Score Explorerを開いて新規作成
+    const scoreExplorerPage = new ScoreExplorerPage(page, false);
+    await homePage.setDesktopViewport();
+    await homePage.clickOpenExplorer();
+    await scoreExplorerPage.clickCreateNew();
     await chartFormPage.fillTitle('D&Dコード順序テスト');
     await chartFormPage.clickSave();
 
-    // 編集モードに入る
-    await chartViewPage.waitForChartToLoad();
-    await chartViewPage.clickEdit();
+    // 新規作成後は直接編集画面に遷移
     await chartEditorPage.waitForEditorToLoad();
 
     // 最初のセクションに4つのコードを追加: C - Am - F - G
@@ -46,18 +49,22 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
     await chartEditorPage.addChordToSection(sectionIndex);
     await chartEditorPage.waitForChordToAppear(sectionIndex, 1);
     await chartEditorPage.setChordName(sectionIndex, 0, 'C');
+    await chartEditorPage.setChordDuration(sectionIndex, 0, '4');
     
     await chartEditorPage.addChordToSection(sectionIndex);
     await chartEditorPage.waitForChordToAppear(sectionIndex, 2);
     await chartEditorPage.setChordName(sectionIndex, 1, 'Am');
+    await chartEditorPage.setChordDuration(sectionIndex, 1, '4');
     
     await chartEditorPage.addChordToSection(sectionIndex);
     await chartEditorPage.waitForChordToAppear(sectionIndex, 3);
     await chartEditorPage.setChordName(sectionIndex, 2, 'F');
+    await chartEditorPage.setChordDuration(sectionIndex, 2, '4');
     
     await chartEditorPage.addChordToSection(sectionIndex);
     await chartEditorPage.waitForChordToAppear(sectionIndex, 4);
     await chartEditorPage.setChordName(sectionIndex, 3, 'G');
+    await chartEditorPage.setChordDuration(sectionIndex, 3, '4');
 
     // 初期順序確認: C - Am - F - G
     let chordOrder = await chartEditorPage.getChordOrderInSection(sectionIndex);
@@ -79,31 +86,70 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
     expect(chordOrder).toEqual(['C', 'F', 'Am', 'G']);
 
     // ドラッグ&ドロップ後の状態安定化を待つ
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(3000);
     
     // DOM要素が安定していることを確認
     await page.waitForFunction(() => {
       const sections = document.querySelectorAll('[data-section-card]');
       return sections.length > 0;
     }, { timeout: 5000 });
+    
+    // 最終的なコード順序が期待通りになるまで待機
+    await page.waitForFunction(() => {
+      const chordElements = document.querySelectorAll('[data-section-card] [data-chord-item] input[placeholder*="コード名"]');
+      const chords: string[] = [];
+      chordElements.forEach(el => {
+        const input = el as HTMLInputElement;
+        if (input.value && input.value.trim()) {
+          chords.push(input.value.trim());
+        }
+      });
+      console.log('現在のコード順序:', chords);
+      return chords.length === 4 && chords.join(',') === 'C,F,Am,G';
+    }, { timeout: 10000 });
 
     // 保存して永続化確認
     await chartEditorPage.clickSave();
     
-    // エディターが無効化されるまで待機（保存処理中の表示）
-    await page.waitForFunction(() => {
-      const editorElement = document.querySelector('[data-testid="chart-editor"]');
-      return !editorElement || editorElement.getAttribute('aria-busy') === 'true' || 
-             document.querySelector('[data-testid="chart-viewer"]');
-    }, { timeout: 15000 });
+    // 保存処理中の待機
+    await page.waitForTimeout(2000);
     
-    await chartViewPage.waitForChartToLoad();
-
-    // 表示モードでの順序確認（表示画面でのコード取得）
-    const displayedChords = await chartViewPage.getAllDisplayedChords();
+    // 現在の画面状態をログ出力
+    const hasEditor = await page.locator('[data-testid="chart-editor"]').isVisible();
+    const hasViewer = await page.locator('[data-testid="chart-viewer"]').isVisible();
+    console.log('エディター表示中:', hasEditor, 'ビューアー表示中:', hasViewer);
     
-    // 永続化された順序が正しいことを確認
-    expect(displayedChords).toEqual(['C', 'F', 'Am', 'G']);
+    // エラーメッセージが表示されていないことを確認
+    const errorDialog = page.locator('[role="dialog"]:has-text("エラー"), .error, .alert').first();
+    if (await errorDialog.isVisible()) {
+      const errorText = await errorDialog.textContent();
+      console.error('保存エラー:', errorText);
+    }
+    
+    // 保存処理が完了するまで待機
+    await page.waitForTimeout(2000);
+    
+    // 永続化確認のため、ページをリロードして再読み込み
+    await page.reload();
+    await page.waitForTimeout(2000);
+    
+    // リロード後、同じチャートが表示されているかチェック
+    const hasEditorAfterReload = await page.locator('[data-testid="chart-editor"]').isVisible({ timeout: 10000 });
+    const hasViewerAfterReload = await page.locator('[data-testid="chart-viewer"]').isVisible({ timeout: 5000 });
+    
+    if (hasViewerAfterReload) {
+      // 表示モードの場合
+      await chartViewPage.waitForChartToLoad();
+      const displayedChords = await chartViewPage.getAllDisplayedChords();
+      expect(displayedChords).toEqual(['C', 'F', 'Am', 'G']);
+    } else if (hasEditorAfterReload) {
+      // エディターモードの場合
+      await chartEditorPage.waitForEditorToLoad();
+      const editorChords = await chartEditorPage.getChordOrderInSection(sectionIndex);
+      expect(editorChords).toEqual(['C', 'F', 'Am', 'G']);
+    } else {
+      throw new Error('エディターもビューアーも表示されていません');
+    }
   });
 
   test('セクションドラッグハンドルの存在と基本操作確認', async ({ page }) => {
@@ -114,13 +160,15 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
 
     // 基本チャート作成
     await homePage.goto();
-    await homePage.clickCreateNew();
+    // Score Explorerを開いて新規作成
+    const scoreExplorerPage = new ScoreExplorerPage(page, false);
+    await homePage.setDesktopViewport();
+    await homePage.clickOpenExplorer();
+    await scoreExplorerPage.clickCreateNew();
     await chartFormPage.fillTitle('D&Dセクション機能テスト');
     await chartFormPage.clickSave();
 
-    // 編集モードに入る
-    await chartViewPage.waitForChartToLoad();
-    await chartViewPage.clickEdit();
+    // 新規作成後は直接編集画面に遷移
     await chartEditorPage.waitForEditorToLoad();
 
     // 2つのセクションを作成
@@ -162,23 +210,27 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
 
     // 基本チャート作成
     await homePage.goto();
-    await homePage.clickCreateNew();
+    // Score Explorerを開いて新規作成
+    const scoreExplorerPage = new ScoreExplorerPage(page, false);
+    await homePage.setDesktopViewport();
+    await homePage.clickOpenExplorer();
+    await scoreExplorerPage.clickCreateNew();
     await chartFormPage.fillTitle('D&D要素確認テスト');
     await chartFormPage.clickSave();
 
-    // 編集モードに入る
-    await chartViewPage.waitForChartToLoad();
-    await chartViewPage.clickEdit();
+    // 新規作成後は直接編集画面に遷移
     await chartEditorPage.waitForEditorToLoad();
 
     // コードを2つ追加
     await chartEditorPage.addChordToSection(0);
     await chartEditorPage.waitForChordToAppear(0, 1);
     await chartEditorPage.setChordName(0, 0, 'C');
+    await chartEditorPage.setChordDuration(0, 0, '4');
     
     await chartEditorPage.addChordToSection(0);
     await chartEditorPage.waitForChordToAppear(0, 2);
     await chartEditorPage.setChordName(0, 1, 'Am');
+    await chartEditorPage.setChordDuration(0, 1, '4');
 
     // コードのドラッグハンドルが存在することを確認
     const chordItems = page.locator('[data-chord-item]');

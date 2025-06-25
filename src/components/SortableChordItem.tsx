@@ -49,13 +49,12 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  // 初期値設定（マウント時のみ）
+  // 初期値設定および移調時の更新
   useEffect(() => {
     const fullChordName = chord.name + (chord.base ? `/${chord.base}` : '');
     setDisplayValue(fullChordName);
     setDurationDisplayValue(chord.duration ? String(chord.duration) : '');
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // 空の依存配列で初回のみ実行
+  }, [chord.name, chord.base, chord.duration]); // chordが変更されたときに更新
 
   // 拍数は一方通行（フォーム→内部データ）のため書き戻し処理なし
 

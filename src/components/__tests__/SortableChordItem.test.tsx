@@ -29,6 +29,7 @@ vi.mock('../../utils/lineBreakHelpers', () => ({
 
 describe('SortableChordItem', () => {
   const mockChord: Chord = {
+    id: 'chord-1',
     name: 'C',
     root: 'C',
     duration: 4,

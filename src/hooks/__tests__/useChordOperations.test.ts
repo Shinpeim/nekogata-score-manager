@@ -37,9 +37,9 @@ describe('useChordOperations', () => {
           beatsPerBar: 4,
           barsCount: 4,
           chords: [
-            { name: 'C', root: 'C', duration: 4, memo: '' },
-            { name: 'F', root: 'F', duration: 4, memo: '' },
-            { name: 'G', root: 'G', duration: 4, memo: '' }
+            { id: 'chord-1', name: 'C', root: 'C', duration: 4, memo: '' },
+            { id: 'chord-2', name: 'F', root: 'F', duration: 4, memo: '' },
+            { id: 'chord-3', name: 'G', root: 'G', duration: 4, memo: '' }
           ]
         }
       ],
@@ -72,18 +72,20 @@ describe('useChordOperations', () => {
       result.current.addChordToSection('section-1');
     });
 
-    expect(mockOnUpdateChart).toHaveBeenCalledWith({
-      ...mockChart,
-      sections: [
-        {
-          ...mockChart.sections![0],
-          chords: [
-            ...mockChart.sections![0].chords,
-            { name: '', root: '', duration: undefined, memo: '' }
-          ]
-        }
-      ]
-    });
+    // 呼び出されたコールをチェック
+    expect(mockOnUpdateChart).toHaveBeenCalled();
+    const calledWith = mockOnUpdateChart.mock.calls[0][0];
+    
+    // 新しいコードが追加されていることを確認
+    expect(calledWith.sections[0].chords).toHaveLength(4);
+    const newChord = calledWith.sections[0].chords[3];
+    
+    // 新しいコードの基本プロパティを確認（idは動的生成されるため除外）
+    expect(newChord.name).toBe('');
+    expect(newChord.root).toBe('');
+    expect(newChord.duration).toBeUndefined();
+    expect(newChord.memo).toBe('');
+    expect(newChord.id).toBeDefined(); // idが存在することを確認
   });
 
   it('updateChordInSectionがコードのフィールドを更新する', () => {
@@ -99,9 +101,9 @@ describe('useChordOperations', () => {
         {
           ...mockChart.sections![0],
           chords: [
-            { name: 'Am', root: 'C', duration: 4, memo: '' },
-            { name: 'F', root: 'F', duration: 4, memo: '' },
-            { name: 'G', root: 'G', duration: 4, memo: '' }
+            { id: 'chord-1', name: 'Am', root: 'C', duration: 4, memo: '' },
+            { id: 'chord-2', name: 'F', root: 'F', duration: 4, memo: '' },
+            { id: 'chord-3', name: 'G', root: 'G', duration: 4, memo: '' }
           ]
         }
       ]
@@ -113,6 +115,7 @@ describe('useChordOperations', () => {
     
     // parseChordInputが期待するオブジェクトを返すようにモック
     mockParseChordInput.mockReturnValue({
+      id: 'chord-new',
       name: 'Am',
       root: 'A',
       base: 'C',
@@ -133,9 +136,9 @@ describe('useChordOperations', () => {
         {
           ...mockChart.sections![0],
           chords: [
-            { name: 'Am', root: 'A', duration: 4, base: 'C', memo: '' },
-            { name: 'F', root: 'F', duration: 4, memo: '' },
-            { name: 'G', root: 'G', duration: 4, memo: '' }
+            { id: 'chord-1', name: 'Am', root: 'A', duration: 4, base: 'C', memo: '' },
+            { id: 'chord-2', name: 'F', root: 'F', duration: 4, memo: '' },
+            { id: 'chord-3', name: 'G', root: 'G', duration: 4, memo: '' }
           ]
         }
       ]
@@ -155,8 +158,8 @@ describe('useChordOperations', () => {
         {
           ...mockChart.sections![0],
           chords: [
-            { name: 'C', root: 'C', duration: 4, memo: '' },
-            { name: 'G', root: 'G', duration: 4, memo: '' }
+            { id: 'chord-1', name: 'C', root: 'C', duration: 4, memo: '' },
+            { id: 'chord-3', name: 'G', root: 'G', duration: 4, memo: '' }
           ]
         }
       ]
@@ -176,10 +179,10 @@ describe('useChordOperations', () => {
         {
           ...mockChart.sections![0],
           chords: [
-            { name: 'C', root: 'C', duration: 4, memo: '' },
+            { id: 'chord-1', name: 'C', root: 'C', duration: 4, memo: '' },
             { type: 'lineBreak' },
-            { name: 'F', root: 'F', duration: 4, memo: '' },
-            { name: 'G', root: 'G', duration: 4, memo: '' }
+            { id: 'chord-2', name: 'F', root: 'F', duration: 4, memo: '' },
+            { id: 'chord-3', name: 'G', root: 'G', duration: 4, memo: '' }
           ]
         }
       ]

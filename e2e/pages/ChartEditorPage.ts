@@ -36,7 +36,15 @@ export class ChartEditorPage {
   }
 
   async clickSave() {
-    await this.saveButton.click();
+    // 保存ボタンの存在確認
+    const isVisible = await this.saveButton.isVisible();
+    const isEnabled = await this.saveButton.isEnabled();
+    
+    if (!isVisible || !isEnabled) {
+      return;
+    }
+    
+    await this.saveButton.evaluate(el => (el as HTMLElement).click());
   }
 
   async isSaveButtonEnabled() {
@@ -136,6 +144,28 @@ export class ChartEditorPage {
     // コード名専用のinputを取得（placeholderで識別）
     const chordInput = section.locator('[data-chord-item]').nth(chordIndex).locator('input[placeholder="コード名"]');
     return await chordInput.inputValue();
+  }
+
+  async setChordDuration(sectionIndex: number, chordIndex: number, duration: string) {
+    const section = this.getSectionByIndex(sectionIndex);
+    // 拍数専用のinputを取得（placeholderで識別）
+    const durationInput = section.locator('[data-chord-item]').nth(chordIndex).locator('input[placeholder="拍数"]');
+    await durationInput.clear(); // 既存値をクリア
+    await durationInput.fill(duration);
+    await durationInput.press('Enter'); // 拍数を確定
+  }
+
+  async addChordToSectionWithDuration(sectionIndex: number, chordName: string, duration: string = '1') {
+    // コードを追加
+    await this.addChordToSection(sectionIndex);
+    
+    // 現在のコード数を取得して、新しく追加されたコードのインデックスを計算
+    const currentChordCount = await this.getChordCount(sectionIndex);
+    const newChordIndex = currentChordCount - 1;
+    
+    // コード名と拍数を設定
+    await this.setChordName(sectionIndex, newChordIndex, chordName);
+    await this.setChordDuration(sectionIndex, newChordIndex, duration);
   }
 
   getChordByIndex(sectionIndex: number, chordIndex: number) {

@@ -8,13 +8,20 @@ import { ScoreExplorerPage } from '../pages/ScoreExplorerPage';
 test.describe('Nekogata Score Manager - コア機能テスト', () => {
   test('チャート作成→表示→編集→保存の基本フローが動作する', async ({ page }) => {
     const homePage = new HomePage(page);
+    const scoreExplorerPage = new ScoreExplorerPage(page, false);
     const chartFormPage = new ChordChartFormPage(page);
     const chartViewPage = new ChartViewPage(page);
     const chartEditorPage = new ChartEditorPage(page);
     
     // Step 1: チャート作成
     await homePage.goto();
-    await homePage.clickCreateNew();
+    
+    // デスクトップビューポートでテスト
+    await homePage.setDesktopViewport();
+    
+    // Score Explorerを開いて新規作成
+    await homePage.clickOpenExplorer();
+    await scoreExplorerPage.clickCreateNew();
     
     await expect(chartFormPage.form).toBeVisible();
     await chartFormPage.fillBasicInfo({
@@ -27,21 +34,11 @@ test.describe('Nekogata Score Manager - コア機能テスト', () => {
     });
     await chartFormPage.clickSave();
     
-    // Step 2: チャート表示確認
-    await chartViewPage.waitForChartToLoad();
-    await expect(chartViewPage.chartTitle).toContainText('コア機能テスト');
-    await expect(chartViewPage.chartArtist).toContainText('テストアーティスト');
-    await expect(chartViewPage.chartKey).toContainText('キー: D');
-    await expect(chartViewPage.chartTimeSignature).toContainText('拍子: 4/4');
-    await expect(chartViewPage.chartNotes).toBeVisible();
-    await expect(chartViewPage.chartNotes).toContainText('コア機能のテストです');
-    
-    // Step 3: 編集モードに切り替え
-    await chartViewPage.clickEdit();
-    
-    // Step 4: エディター表示確認
+    // Step 2: 新規作成後は直接編集画面に遷移する
     await chartEditorPage.waitForEditorToLoad();
-    await expect(chartEditorPage.editorTitle).toContainText('コード譜を編集');
+    await expect(chartEditorPage.editorTitle).toContainText('コア機能テスト');
+    
+    // Step 4: エディター要素の確認
     await expect(chartEditorPage.saveButton).toBeVisible();
     await expect(chartEditorPage.cancelButton).toBeVisible();
     
@@ -57,14 +54,16 @@ test.describe('Nekogata Score Manager - コア機能テスト', () => {
     const homePage = new HomePage(page);
     const chartFormPage = new ChordChartFormPage(page);
     const chartViewPage = new ChartViewPage(page);
+    const chartEditorPage = new ChartEditorPage(page);
     const scoreExplorerPage = new ScoreExplorerPage(page, false);
     
     // デスクトップビューポートに設定（モバイル環境での問題を回避）
     await homePage.goto();
     await homePage.setDesktopViewport();
     
-    // チャート作成
-    await homePage.clickCreateNew();
+    // Score Explorerを開いて新規作成
+    await homePage.clickOpenExplorer();
+    await scoreExplorerPage.clickCreateNew();
     
     await chartFormPage.fillBasicInfo({
       title: '複製テスト',
@@ -72,9 +71,13 @@ test.describe('Nekogata Score Manager - コア機能テスト', () => {
     });
     await chartFormPage.clickSave();
     
-    // 複製実行
+    // 新規作成後は直接編集画面に遷移
+    await chartEditorPage.waitForEditorToLoad();
+    await expect(chartEditorPage.editorTitle).toContainText('複製テスト');
+    
+    // 編集を保存してビューモードに戻る
+    await chartEditorPage.clickSave();
     await chartViewPage.waitForChartToLoad();
-    await expect(chartViewPage.chartTitle).toContainText('複製テスト');
     
     // Score Explorerを開く
     await homePage.clickOpenExplorer();
@@ -109,13 +112,20 @@ test.describe('Nekogata Score Manager - コア機能テスト', () => {
 
   test('編集キャンセル機能が動作する', async ({ page }) => {
     const homePage = new HomePage(page);
+    const scoreExplorerPage = new ScoreExplorerPage(page, false);
     const chartFormPage = new ChordChartFormPage(page);
     const chartViewPage = new ChartViewPage(page);
     const chartEditorPage = new ChartEditorPage(page);
     
     // チャート作成
     await homePage.goto();
-    await homePage.clickCreateNew();
+    
+    // デスクトップビューポートでテスト
+    await homePage.setDesktopViewport();
+    
+    // Score Explorerを開いて新規作成
+    await homePage.clickOpenExplorer();
+    await scoreExplorerPage.clickCreateNew();
     
     await chartFormPage.fillBasicInfo({
       title: 'キャンセルテスト',
@@ -123,34 +133,47 @@ test.describe('Nekogata Score Manager - コア機能テスト', () => {
     });
     await chartFormPage.clickSave();
     
-    // 編集モードに入る
-    await chartViewPage.waitForChartToLoad();
-    const originalTitle = await chartViewPage.chartTitle.textContent();
-    await chartViewPage.clickEdit();
+    // 新規作成後は直接編集画面に遷移
+    await chartEditorPage.waitForEditorToLoad();
+    const originalTitle = 'キャンセルテスト';
     
     // エディターでキャンセル
-    await chartEditorPage.waitForEditorToLoad();
     await chartEditorPage.clickCancel();
     
     // ビューモードに戻り、変更が保存されていないことを確認
     await chartViewPage.waitForChartToLoad();
-    await expect(chartViewPage.chartTitle).toHaveText(originalTitle || '');
+    await expect(chartViewPage.chartTitle).toContainText(originalTitle);
   });
 
   test('デフォルトセクションを持つチャートの表示が正しく動作する', async ({ page }) => {
     const homePage = new HomePage(page);
+    const scoreExplorerPage = new ScoreExplorerPage(page, false);
     const chartFormPage = new ChordChartFormPage(page);
     const chartViewPage = new ChartViewPage(page);
+    const chartEditorPage = new ChartEditorPage(page);
     
     // 最小限の情報でチャート作成
     await homePage.goto();
-    await homePage.clickCreateNew();
+    
+    // デスクトップビューポートでテスト
+    await homePage.setDesktopViewport();
+    
+    // Score Explorerを開いて新規作成
+    await homePage.clickOpenExplorer();
+    await scoreExplorerPage.clickCreateNew();
     
     await chartFormPage.fillTitle('デフォルトチャート');
     await chartFormPage.clickSave();
     
-    // デフォルトセクションが表示されることを確認
+    // 新規作成後は直接編集画面に遷移
+    await chartEditorPage.waitForEditorToLoad();
+    await expect(chartEditorPage.editorTitle).toContainText('デフォルトチャート');
+    
+    // 編集を保存してビューモードに戻る
+    await chartEditorPage.clickSave();
     await chartViewPage.waitForChartToLoad();
+    
+    // デフォルトセクションが表示されることを確認
     await expect(chartViewPage.chartTitle).toContainText('デフォルトチャート');
     
     // デフォルトで「イントロ」セクションが作成されることを確認
