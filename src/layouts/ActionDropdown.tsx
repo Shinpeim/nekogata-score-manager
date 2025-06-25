@@ -7,6 +7,7 @@ interface ActionDropdownProps {
   onExportSelected: () => void;
   onDeleteSelected: () => void;
   onDuplicateSelected: () => void;
+  onCreateSetList?: () => void;
 }
 
 const ActionDropdown: React.FC<ActionDropdownProps> = ({
@@ -16,6 +17,7 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
   onExportSelected,
   onDeleteSelected,
   onDuplicateSelected,
+  onCreateSetList,
 }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -79,6 +81,20 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
           >
             エクスポート
           </button>
+          {onCreateSetList && (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowActionsDropdown(false);
+                setTimeout(() => onCreateSetList(), 0);
+              }}
+              className="block w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-100"
+              data-testid="create-setlist-action"
+            >
+              セットリスト作成
+            </button>
+          )}
           <button
             onClick={(e) => {
               e.preventDefault();

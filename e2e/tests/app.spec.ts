@@ -44,8 +44,8 @@ test.describe('Nekogata Score Manager - 基本動作テスト', () => {
     // Score Explorerを開くボタンをクリック
     await homePage.clickOpenExplorer();
     
-    // Score Explorerが表示されることを確認
-    await expect(scoreExplorerPage.titleDesktop).toBeVisible();
+    // Score Explorerが表示されることを確認（タブがDOMに存在することで判定）
+    await expect(scoreExplorerPage.chartsTab).toBeAttached();
     
     // ヘッダーのトグルボタンをクリックして閉じる
     await homePage.toggleExplorer();

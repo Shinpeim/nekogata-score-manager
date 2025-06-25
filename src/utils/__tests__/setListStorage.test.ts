@@ -63,6 +63,7 @@ describe('setListStorage', () => {
             name: 'Test SetList',
             chartIds: ['chart1', 'chart2'],
             createdAt: new Date('2024-01-01'),
+            updatedAt: new Date('2024-01-01'),
           },
         },
         currentSetListId: 'setlist1',
@@ -91,6 +92,7 @@ describe('setListStorage', () => {
             name: 'Test SetList',
             chartIds: ['chart1'],
             createdAt: new Date('2024-01-01'),
+            updatedAt: new Date('2024-01-01'),
           },
         },
         currentSetListId: 'setlist1',
@@ -136,6 +138,7 @@ describe('setListStorage', () => {
           name: 'Test SetList',
           chartIds: ['chart1', 'chart2'],
           createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
         },
       };
       const currentSetListId = 'setlist1';

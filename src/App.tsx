@@ -3,6 +3,7 @@ import MainLayout from './layouts/MainLayout';
 import ChordChart from './components/ChordChart';
 import ImportDialog from './components/ImportDialog';
 import { useChartManagement } from './hooks/useChartManagement';
+import { useSetListManagement } from './hooks/useSetListManagement';
 import { useChartSync } from './hooks/useChartSync';
 
 function App() {
@@ -20,14 +21,32 @@ function App() {
     setCurrentChart
   } = useChartManagement();
 
+  const {
+    loadInitialData: loadInitialSetListData,
+    loadFromStorage: loadSetListsFromStorage,
+    isLoading: isSetListLoading,
+    error: setListError,
+    clearError: clearSetListError
+  } = useSetListManagement();
+
   // 同期機能を有効化（自動的に初期化される）
   useChartSync();
 
   useEffect(() => {
-    loadInitialData().catch(error => {
-      console.error('Failed to load initial data:', error);
-    });
-  }, [loadInitialData]);
+    const loadInitialAppData = async () => {
+      try {
+        // チャートデータとセットリストデータを並行して読み込み
+        await Promise.all([
+          loadInitialData(),
+          loadInitialSetListData()
+        ]);
+      } catch (error) {
+        console.error('Failed to load initial data:', error);
+      }
+    };
+
+    loadInitialAppData();
+  }, [loadInitialData, loadInitialSetListData]);
 
   // currentChartIdが変更されたら編集状態をリセット
   useEffect(() => {
@@ -39,7 +58,10 @@ function App() {
 
   const handleImportComplete = async () => {
     // Storage-first方式: インポート後にStorageから再読み込み
-    await loadFromStorage();
+    await Promise.all([
+      loadFromStorage(),
+      loadSetListsFromStorage()
+    ]);
   };
 
 
@@ -62,7 +84,7 @@ function App() {
     setIsEditingChart(true);
   };
 
-  if (isLoading) {
+  if (isLoading || isSetListLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -76,7 +98,7 @@ function App() {
   return (
     <>
       <MainLayout explorerOpen={explorerOpen} setExplorerOpen={setExplorerOpen} onEditChart={handleEditChart} onStartEdit={handleStartEdit}>
-        {error && (
+        {(error || setListError) && (
           <div className="bg-red-50 border border-red-200 rounded-md p-4 m-4">
             <div className="flex">
               <div className="flex-shrink-0">
@@ -87,12 +109,16 @@ function App() {
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-red-800">エラーが発生しました</h3>
                 <div className="mt-2 text-sm text-red-700">
-                  <p>{error}</p>
+                  {error && <p>{error}</p>}
+                  {setListError && <p>{setListError}</p>}
                 </div>
                 <div className="mt-4">
                   <button
                     type="button"
-                    onClick={clearError}
+                    onClick={() => {
+                      clearError();
+                      clearSetListError();
+                    }}
                     className="bg-red-100 px-2 py-1 text-sm font-medium text-red-800 rounded-md hover:bg-red-200"
                   >
                     閉じる

@@ -23,6 +23,22 @@ interface SetListState {
   setSetLists: (setLists: SetListLibrary) => void;
   /** セットリストをクリア */
   clearSetLists: () => void;
+  
+  // 新しいCRUD操作インターフェース用の追加メソッド
+  /** セットリストを追加 */
+  addSetList: (setList: SetList) => void;
+  /** セットリストを更新 */
+  updateSetList: (id: string, setList: SetList) => void;
+  /** 現在のセットリストを取得 */
+  getCurrentSetList: () => SetList | null;
+  /** IDでセットリストを取得 */
+  getSetListById: (id: string) => SetList | undefined;
+  /** セットリストの配列を取得 */
+  getSetListsArray: () => SetList[];
+  /** セットリストが存在するかチェック */
+  hasSetLists: () => boolean;
+  /** セットリストの数を取得 */
+  getSetListsCount: () => number;
 }
 
 /**
@@ -49,6 +65,7 @@ export const useSetListStore = create<SetListState>()(
         name,
         chartIds,
         createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       set((state) => ({
@@ -116,6 +133,52 @@ export const useSetListStore = create<SetListState>()(
     clearSetLists: () => {
       set({ setLists: {}, currentSetListId: null });
       logger.debug('セットリストをクリアしました');
+    },
+
+    // 新しいCRUD操作インターフェース用の追加メソッド
+    addSetList: (setList: SetList) => {
+      set((state) => ({
+        setLists: {
+          ...state.setLists,
+          [setList.id]: setList
+        }
+      }));
+      logger.debug(`セットリストを追加: ${setList.name}`);
+    },
+
+    updateSetList: (id: string, setList: SetList) => {
+      set((state) => ({
+        setLists: {
+          ...state.setLists,
+          [id]: setList
+        }
+      }));
+      logger.debug(`セットリストを更新: ${setList.name}`);
+    },
+
+    getCurrentSetList: () => {
+      const { setLists, currentSetListId } = get();
+      return currentSetListId ? setLists[currentSetListId] || null : null;
+    },
+
+    getSetListById: (id: string) => {
+      const { setLists } = get();
+      return setLists[id];
+    },
+
+    getSetListsArray: () => {
+      const { setLists } = get();
+      return Object.values(setLists);
+    },
+
+    hasSetLists: () => {
+      const { setLists } = get();
+      return Object.keys(setLists).length > 0;
+    },
+
+    getSetListsCount: () => {
+      const { setLists } = get();
+      return Object.keys(setLists).length;
     },
   }), {
     name: 'setListStore',
