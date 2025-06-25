@@ -79,8 +79,12 @@ export class ScoreExplorerPage {
   }
 
   getSelectionStatus() {
-    // シンプルにテキストで検索（両方のモードで動作）
-    return this.page.locator('text=件選択中');
+    // デバイスに応じて適切な要素を選択
+    if (this.isMobile) {
+      return this.page.locator('.md\\:hidden >> text=件選択中');
+    } else {
+      return this.page.locator('.hidden.md\\:block >> text=件選択中');
+    }
   }
 
   async openActionDropdown() {
@@ -139,6 +143,11 @@ export class ScoreExplorerPage {
   }
 
   getSpecificTitleLocator(title: string) {
-    return this.page.locator(`text=${title}`);
+    // デバイスに応じて適切な要素内で検索
+    if (this.isMobile) {
+      return this.page.locator('.md\\:hidden').locator(`text=${title}`);
+    } else {
+      return this.page.locator('.hidden.md\\:block').locator(`text=${title}`);
+    }
   }
 }

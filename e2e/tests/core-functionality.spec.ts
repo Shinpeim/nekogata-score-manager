@@ -98,7 +98,7 @@ test.describe('Nekogata Score Manager - コア機能テスト', () => {
     
     // Wait for duplication to complete by checking the item count increases
     await page.waitForFunction((initialCount) => {
-      const items = document.querySelectorAll('[data-chart-item]');
+      const items = document.querySelectorAll('[data-testid^="chart-item-"][data-testid$="-desktop"]');
       return items.length > initialCount;
     }, initialItemCount, { timeout: 5000 });
     

@@ -87,8 +87,8 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       
       // 5. アクションドロップダウンを開く
       await scoreExplorerPage.openActionDropdown();
-      // Wait for dropdown to be visible
-      await expect(page.locator('[role="menu"]')).toBeVisible();
+      // Wait for dropdown to be visible (エクスポートボタンが見えるまで待つ)
+      await expect(page.locator('button:has-text("エクスポート")')).toBeVisible();
       
       // 6. エクスポートオプションをクリック
       await scoreExplorerPage.clickExportOption();

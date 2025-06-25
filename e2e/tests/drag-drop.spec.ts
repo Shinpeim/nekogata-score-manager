@@ -35,9 +35,12 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
     // Score Explorerを開いて新規作成
     const scoreExplorerPage = new ScoreExplorerPage(page, false);
     await homePage.setDesktopViewport();
-    await homePage.clickOpenExplorer();
+    await homePage.ensureExplorerOpen();
     await scoreExplorerPage.clickCreateNew();
-    await chartFormPage.fillTitle('D&Dコード順序テスト');
+    await chartFormPage.fillBasicInfo({
+      title: 'D&Dコード順序テスト',
+      artist: 'テストアーティスト'
+    });
     await chartFormPage.clickSave();
 
     // 新規作成後は直接編集画面に遷移
@@ -45,6 +48,9 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
 
     // 最初のセクションに4つのコードを追加: C - Am - F - G
     const sectionIndex = 0;
+    
+    // セクション名を設定（必須項目の可能性）
+    await chartEditorPage.setSectionName(sectionIndex, 'Intro');
     
     await chartEditorPage.addChordToSection(sectionIndex);
     await chartEditorPage.waitForChordToAppear(sectionIndex, 1);
@@ -121,19 +127,30 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
     // 保存して永続化確認
     await chartEditorPage.clickSave();
     
-    // Wait for save operation to complete
-    await page.waitForLoadState('networkidle');
+    // バリデーションエラーのチェック（削除ボタンを除外）
+    const validationError = page.locator('.text-red-500:not(button), [role="alert"]').first();
+    if (await validationError.isVisible({ timeout: 2000 })) {
+      const errorText = await validationError.textContent();
+      console.error('バリデーションエラー:', errorText);
+      
+      // エラーメッセージの詳細を取得
+      const allErrors = await page.locator('.text-red-500:not(button)').allTextContents();
+      console.error('全てのエラー:', allErrors);
+    }
     
-    // 現在の画面状態をログ出力
-    const hasEditor = await page.locator('[data-testid="chart-editor"]').isVisible();
-    const hasViewer = await page.locator('[data-testid="chart-viewer"]').isVisible();
-    console.log('エディター表示中:', hasEditor, 'ビューアー表示中:', hasViewer);
-    
-    // エラーメッセージが表示されていないことを確認
-    const errorDialog = page.locator('[role="dialog"]:has-text("エラー"), .error, .alert').first();
-    if (await errorDialog.isVisible()) {
-      const errorText = await errorDialog.textContent();
-      console.error('保存エラー:', errorText);
+    // 保存が成功してビューアーモードに遷移するのを待つ
+    try {
+      await page.waitForSelector('[data-testid="chart-viewer"]', { state: 'visible', timeout: 5000 });
+      console.log('保存成功：ビューアーモードに遷移');
+    } catch (e) {
+      console.error('保存失敗：ビューアーモードに遷移しませんでした');
+      
+      // エディターの状態を詳しく確認
+      const hasEditor = await page.locator('[data-testid="chart-editor"]').isVisible();
+      console.log('エディターモードのまま:', hasEditor);
+      
+      // スクリーンショットを撮る
+      await page.screenshot({ path: 'drag-drop-save-error.png' });
     }
     
     // Wait for save operation to complete fully
@@ -141,8 +158,8 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
     
     // 永続化確認のため、ページをリロードして再読み込み
     await page.reload();
-    // Wait for page reload to complete
-    await page.waitForLoadState('domcontentloaded');
+    // Wait for page reload and data loading to complete
+    await page.waitForLoadState('networkidle');
     
     // リロード後、同じチャートが表示されているかチェック
     const hasEditorAfterReload = await page.locator('[data-testid="chart-editor"]').isVisible({ timeout: 10000 });
@@ -174,7 +191,7 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
     // Score Explorerを開いて新規作成
     const scoreExplorerPage = new ScoreExplorerPage(page, false);
     await homePage.setDesktopViewport();
-    await homePage.clickOpenExplorer();
+    await homePage.ensureExplorerOpen();
     await scoreExplorerPage.clickCreateNew();
     await chartFormPage.fillTitle('D&Dセクション機能テスト');
     await chartFormPage.clickSave();
@@ -224,7 +241,7 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
     // Score Explorerを開いて新規作成
     const scoreExplorerPage = new ScoreExplorerPage(page, false);
     await homePage.setDesktopViewport();
-    await homePage.clickOpenExplorer();
+    await homePage.ensureExplorerOpen();
     await scoreExplorerPage.clickCreateNew();
     await chartFormPage.fillTitle('D&D要素確認テスト');
     await chartFormPage.clickSave();
