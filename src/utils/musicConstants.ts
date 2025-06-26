@@ -24,6 +24,14 @@ export const COMMON_SECTION_NAMES = [
 ];
 
 /**
+ * フォントサイズ設定
+ */
+export const DEFAULT_FONT_SIZE = 14; // デフォルトのフォントサイズ（ピクセル）
+export const MIN_FONT_SIZE = 10; // 最小フォントサイズ
+export const MAX_FONT_SIZE = 24; // 最大フォントサイズ
+export const FONT_SIZE_STEP = 2; // フォントサイズの増減ステップ
+
+/**
  * 12音階の音名マッピング（半音単位）
  */
 export const CHROMATIC_NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];

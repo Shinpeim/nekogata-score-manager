@@ -105,24 +105,33 @@ export class ChartViewPage {
     const chartContent = this.page.locator('[data-testid="chart-content"]');
     // コード要素を特定（コードクラスまたはflexコンテナ）
     const chordContainers = chartContent.locator('.flex.flex-col.justify-center, .flex.flex-col.justify-start').filter({
-      has: this.page.locator('.text-xs.font-medium')
+      has: this.page.locator('.font-medium.leading-none')
     });
     const chordCount = await chordContainers.count();
     
     const chords: string[] = [];
     for (let i = 0; i < chordCount; i++) {
       const chordContainer = chordContainers.nth(i);
-      const chordSpan = chordContainer.locator('.text-xs.font-medium');
+      const chordSpan = chordContainer.locator('.font-medium.leading-none');
       
       // 分離表示の場合、個別のspan要素を取得して結合
       const spanElements = chordSpan.locator('span');
       const spanCount = await spanElements.count();
       
       let chordName = '';
-      for (let j = 0; j < spanCount; j++) {
-        const spanText = await spanElements.nth(j).textContent();
-        if (spanText) {
-          chordName += spanText;
+      if (spanCount > 0) {
+        // span要素がある場合（ルート音とクオリティが分離）
+        for (let j = 0; j < spanCount; j++) {
+          const spanText = await spanElements.nth(j).textContent();
+          if (spanText && !spanText.startsWith('/')) {
+            chordName += spanText;
+          }
+        }
+      } else {
+        // span要素がない場合（単純なコード名）
+        const directText = await chordSpan.textContent();
+        if (directText) {
+          chordName = directText;
         }
       }
       

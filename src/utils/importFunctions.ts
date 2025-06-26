@@ -245,7 +245,8 @@ const validateSingleChart = (chart: unknown, exportVersion?: string): {
     updatedAt: new Date(), // インポート時に更新日時を現在に設定
     sections: validSections as unknown as ChordSection[],
     notes: typeof chartObj.notes === 'string' ? chartObj.notes : '',
-    version: typeof chartObj.version === 'string' ? chartObj.version : exportVersion
+    version: typeof chartObj.version === 'string' ? chartObj.version : exportVersion,
+    fontSize: typeof chartObj.fontSize === 'number' ? chartObj.fontSize : undefined
   };
 
   return { isValid: true, chart: validatedChart, errors: [], warnings };

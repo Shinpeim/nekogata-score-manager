@@ -182,5 +182,42 @@ describe('import', () => {
       expect(result.success).toBe(true);
       expect(result.charts[0].sections[0].beatsPerBar).toBe(3);
     });
+
+    it('should handle fontSize property correctly', () => {
+      const chartWithFontSize = {
+        ...mockChart,
+        fontSize: 18
+      };
+
+      const exportData: ExportData = {
+        version: '1.0.0',
+        exportDate: new Date().toISOString(),
+        charts: [chartWithFontSize]
+      };
+
+      const result = parseImportData(JSON.stringify(exportData));
+
+      expect(result.success).toBe(true);
+      expect(result.charts[0].fontSize).toBe(18);
+    });
+
+    it('should handle missing fontSize property', () => {
+      const chartWithoutFontSize = {
+        ...mockChart
+      };
+      // fontSizeを削除
+      delete (chartWithoutFontSize as Record<string, unknown>).fontSize;
+
+      const exportData: ExportData = {
+        version: '1.0.0',
+        exportDate: new Date().toISOString(),
+        charts: [chartWithoutFontSize]
+      };
+
+      const result = parseImportData(JSON.stringify(exportData));
+
+      expect(result.success).toBe(true);
+      expect(result.charts[0].fontSize).toBeUndefined();
+    });
   });
 });

@@ -36,6 +36,7 @@ export interface ChordChart {
   updatedAt: Date;
   notes?: string;
   version?: string;
+  fontSize?: number; // 文字サイズ設定（ピクセル単位）
 }
 
 export interface ChordLibrary {

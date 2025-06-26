@@ -78,34 +78,56 @@ export function calculateDynamicBarWidth(analysis: BarContentAnalysis): number {
 }
 
 /**
- * コードの実際の必要幅を計算（最低幅考慮）
+ * 小節のコード配列から直接幅を計算するヘルパー関数
+ * フォントサイズを考慮した動的幅計算
  */
-function calculateRequiredWidth(chords: Chord[], beatsPerBar: number): number {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function calculateBarWidth(chords: Chord[], _beatsPerBar = 4, fontSize: number = 14): number {
   if (chords.length === 0) return DYNAMIC_BAR_WIDTH_CONFIG.BASE_MIN_WIDTH;
   
-  const MIN_CHORD_WIDTH = 47; // ChordGridRendererの値と合わせる（36px * 1.3）
-  const PADDING = 8; // 左右パディング
-  
-  // 各コードの必要幅を計算
-  const totalRequiredWidth = chords.reduce((sum, chord) => {
-    const chordDuration = chord.duration || 4;
-    const proportionalWidth = (chordDuration / beatsPerBar) * 100; // 仮の基準幅
-    const requiredWidth = Math.max(proportionalWidth, MIN_CHORD_WIDTH);
-    return sum + requiredWidth;
+  // フォントサイズベースのコード幅を合計
+  const totalChordWidth = chords.reduce((sum, chord) => {
+    return sum + calculateChordWidthWithFontSize(chord, fontSize);
   }, 0);
   
-  return totalRequiredWidth + PADDING;
+  // パディングを追加
+  const PADDING = 8;
+  const calculatedWidth = totalChordWidth + PADDING;
+  
+  // 最小・最大幅で制限
+  return Math.max(
+    DYNAMIC_BAR_WIDTH_CONFIG.BASE_MIN_WIDTH,
+    Math.min(DYNAMIC_BAR_WIDTH_CONFIG.BASE_MAX_WIDTH, calculatedWidth)
+  );
 }
 
 /**
- * 小節のコード配列から直接幅を計算するヘルパー関数
- * 従来の動的幅と実際必要幅の大きい方を採用
+ * 文字列にマルチバイト文字が含まれているかチェック
  */
-export function calculateBarWidth(chords: Chord[], beatsPerBar: number = 4): number {
-  const analysis = analyzeBarContent(chords);
-  const baseWidth = calculateDynamicBarWidth(analysis);
-  const requiredWidth = calculateRequiredWidth(chords, beatsPerBar);
+function hasMultiByteCharacters(str: string): boolean {
+  // ASCII範囲外の文字があればマルチバイト文字とみなす
+  // eslint-disable-next-line no-control-regex
+  return /[^\x00-\x7F]/.test(str);
+}
+
+/**
+ * フォントサイズに基づいたコードごとの動的幅を計算
+ */
+export function calculateChordWidthWithFontSize(chord: Chord, fontSize: number = 14): number {
+  // ベースは14px時に47px、フォントサイズに比例して調整
+  const baseWidth = Math.round((fontSize / 14) * 47);
   
-  // 大きい方を採用して、横スクロールを回避
-  return Math.max(baseWidth, requiredWidth);
+  // コード名の長さに応じた追加幅
+  const chordNameLength = chord.name.length + (chord.base ? chord.base.length + 1 : 0);
+  const nameBonus = Math.round(Math.max(0, (chordNameLength - 3) * (fontSize / 14) * 5)); // 3文字超えたら追加
+  
+  // メモがある場合の追加幅
+  if (chord.memo) {
+    // マルチバイト文字（日本語など）の場合は幅を大きく取る
+    const multiplier = hasMultiByteCharacters(chord.memo) ? 12 : 5;
+    const memoBonus = Math.round(Math.max(20, chord.memo.length * (fontSize / 14) * multiplier));
+    return baseWidth + nameBonus + memoBonus;
+  }
+  
+  return baseWidth + nameBonus;
 }
