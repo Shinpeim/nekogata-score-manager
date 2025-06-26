@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { ChordChart as ChordChartType } from '../types';
 import BpmIndicator from './BpmIndicator';
 import ChordGridRenderer from './ChordGridRenderer';
@@ -11,6 +11,8 @@ interface ChordChartViewerProps {
 }
 
 const ChordChartViewer: React.FC<ChordChartViewerProps> = ({ chart }) => {
+  const [showDegreeNames, setShowDegreeNames] = useState(false);
+
   return (
     <div className="h-full bg-white overflow-y-auto" data-testid="chart-viewer">
       <div className="p-2">
@@ -22,6 +24,23 @@ const ChordChartViewer: React.FC<ChordChartViewerProps> = ({ chart }) => {
               <span data-testid="chart-key">キー: {KEY_DISPLAY_NAMES[chart.key] || chart.key}</span>
               {chart.tempo && <BpmIndicator bpm={chart.tempo} />}
               <span data-testid="chart-time-signature">拍子: {chart.timeSignature}</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm text-slate-700">ディグリー表示</span>
+                <div
+                  onClick={() => setShowDegreeNames(!showDegreeNames)}
+                  className={`flex items-center rounded-full p-0.5 w-11 relative cursor-pointer transition-all duration-150 ${
+                    showDegreeNames
+                      ? 'bg-[#85B0B7] hover:bg-[#6B9CA5]'
+                      : 'bg-slate-200 hover:bg-slate-300'
+                  }`}
+                  title={showDegreeNames ? 'ディグリー表示を無効にする' : 'ディグリー表示を有効にする'}
+                  data-testid="degree-names-toggle"
+                >
+                  <div className={`w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${
+                    showDegreeNames ? 'translate-x-5' : 'translate-x-0'
+                  }`}></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -35,7 +54,12 @@ const ChordChartViewer: React.FC<ChordChartViewerProps> = ({ chart }) => {
                     【{section.name}】
                   </h3>
                 )}
-                <ChordGridRenderer section={section} timeSignature={chart.timeSignature} />
+                <ChordGridRenderer 
+                  section={section} 
+                  timeSignature={chart.timeSignature} 
+                  chartKey={chart.key} 
+                  showDegreeNames={showDegreeNames} 
+                />
               </div>
             ))
           ) : (

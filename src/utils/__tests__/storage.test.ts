@@ -77,7 +77,7 @@ describe('storageService', () => {
       expect(result).toEqual({
         [mockChart.id]: {
           ...mockChart,
-          version: '3.0.0'
+          version: '4.0.0'
         }
       });
     });
@@ -157,7 +157,7 @@ describe('storageService', () => {
           id: 'other-chart',
           sections: [], // マイグレーションで追加される
           notes: '', // マイグレーションで追加される
-          version: '3.0.0' // 最新versionが追加される
+          version: '4.0.0' // 最新versionが追加される
         },
         [mockChart.id]: mockChart
       });
@@ -183,7 +183,7 @@ describe('storageService', () => {
           id: 'other-chart',
           sections: [], // マイグレーションで追加される
           notes: '', // マイグレーションで追加される
-          version: '3.0.0' // 最新versionが追加される
+          version: '4.0.0' // 最新versionが追加される
         }
       });
     });
