@@ -119,24 +119,6 @@ describe('ChordSelection', () => {
     expect(screen.queryByText('🗑️ 選択を削除')).not.toBeInTheDocument();
   });
 
-  it('should always show copy/paste buttons in sections', () => {
-    render(
-      <ChordChartEditor 
-        chart={sampleChart} 
-        onSave={mockOnSave} 
-        onCancel={mockOnCancel} 
-      />
-    );
-
-    // Copy/paste buttons should always be visible
-    expect(screen.getByTitle('コード進行をコピー')).toBeInTheDocument();
-    expect(screen.getByTitle('クリップボードから追加')).toBeInTheDocument();
-  });
-
-
-
-
-
   it('should show checkmark for selected chords', async () => {
     render(
       <ChordChartEditor 

@@ -117,11 +117,6 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
 
   return (
     <div className="mb-8">
-      {sectionOperations.copiedMessage && (
-        <div className="mb-4 p-3 bg-green-100 border border-green-300 text-green-700 rounded-md text-sm">
-          {sectionOperations.copiedMessage}
-        </div>
-      )}
 
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-slate-800">セクション</h3>
@@ -144,8 +139,6 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
               onSectionChange={sectionOperations.handleSectionChange}
               onDeleteSection={sectionOperations.deleteSection}
               onDuplicateSection={sectionOperations.duplicateSection}
-              onCopyChordProgression={sectionOperations.copyChordProgression}
-              onPasteChordProgression={sectionOperations.pasteChordProgression}
               onReplaceChordProgression={sectionOperations.replaceChordProgression}
               onToggleSelectAllInSection={sectionOperations.toggleSelectAllInSection}
               onChordDragEnd={handleChordDragEnd}

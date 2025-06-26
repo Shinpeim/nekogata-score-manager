@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import type { ChordChart, ChordSection } from '../types';
-import { copyChordProgressionToClipboard, pasteChordProgressionFromClipboard, textToChords } from '../utils/chordCopyPaste';
+import { textToChords } from '../utils/chordCopyPaste';
 
 interface UseSectionOperationsProps {
   chart: ChordChart;
@@ -17,7 +16,6 @@ export const useSectionOperations = ({
   setSelectedChords,
   setLastSelectedChord,
 }: UseSectionOperationsProps) => {
-  const [copiedMessage, setCopiedMessage] = useState<string>('');
 
   const handleSectionChange = (sectionId: string, field: keyof ChordSection, value: string | number) => {
     const updatedChart = {
@@ -84,34 +82,6 @@ export const useSectionOperations = ({
     onUpdateChart(updatedChart);
   };
 
-  const copyChordProgression = async (sectionId: string) => {
-    const section = chart.sections?.find(s => s.id === sectionId);
-    if (!section || section.chords.length === 0) return;
-
-    const success = await copyChordProgressionToClipboard(section.chords);
-    if (success) {
-      setCopiedMessage(`「${section.name}」のコード進行をコピーしました`);
-      setTimeout(() => setCopiedMessage(''), 3000);
-    }
-  };
-
-  const pasteChordProgression = async (sectionId: string) => {
-    const chords = await pasteChordProgressionFromClipboard();
-    if (!chords || chords.length === 0) return;
-
-    const updatedChart = {
-      ...chart,
-      sections: chart.sections?.map(section =>
-        section.id === sectionId
-          ? {
-              ...section,
-              chords: [...section.chords, ...chords]
-            }
-          : section
-      ) || []
-    };
-    onUpdateChart(updatedChart);
-  };
 
   const replaceChordProgression = (sectionId: string, text: string) => {
     if (!text.trim()) return;
@@ -160,13 +130,10 @@ export const useSectionOperations = ({
   };
 
   return {
-    copiedMessage,
     handleSectionChange,
     addSection,
     deleteSection,
     duplicateSection,
-    copyChordProgression,
-    pasteChordProgression,
     replaceChordProgression,
     toggleSelectAllInSection,
   };
