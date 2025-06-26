@@ -1,4 +1,5 @@
 import type { ChordChart } from '../types';
+import { extractChordRoot, parseOnChord } from './chordParsing';
 
 
 /**
@@ -55,6 +56,33 @@ const migrateChartDataV3 = (chart: ChordChart): ChordChart => {
 };
 
 /**
+ * v4.0.0のマイグレーション: root/baseの再計算
+ * 古いデータでnameとrootが不整合な場合に修正
+ */
+const migrateChartDataV4 = (chart: ChordChart): ChordChart => {
+  return {
+    ...chart,
+    sections: chart.sections?.map(section => ({
+      ...section,
+      chords: section.chords?.map(chord => {
+        // コード名からroot/baseを再計算
+        const parsed = parseOnChord(chord.name);
+        const root = extractChordRoot(parsed.chord);
+        
+        return {
+          ...chord,
+          name: parsed.chord,
+          root,
+          base: parsed.base
+        };
+      }) || []
+    })) || [],
+    // version情報を4.0.0に設定
+    version: '4.0.0'
+  };
+};
+
+/**
  * セマンティックバージョンを解析
  */
 const parseVersion = (version: string): { major: number; minor: number; patch: number } => {
@@ -80,13 +108,14 @@ interface Migration {
  * 新しいバージョンのマイグレーションはここに追加するだけ
  * 
  * 使用例:
- * 新しいv3.0.0マイグレーションを追加する場合:
- * { version: '3.0.0', migrate: migrateChartDataV3 },
+ * 新しいv4.0.0マイグレーションを追加する場合:
+ * { version: '4.0.0', migrate: migrateChartDataV4 },
  */
 const migrations: Migration[] = [
   { version: '1.0.0', migrate: migrateChartDataV1 },
   { version: '2.0.0', migrate: migrateChartDataV2 },
   { version: '3.0.0', migrate: migrateChartDataV3 },
+  { version: '4.0.0', migrate: migrateChartDataV4 },
 ];
 
 /**

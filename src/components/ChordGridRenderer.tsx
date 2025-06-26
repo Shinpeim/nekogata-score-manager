@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import type { ChordSection, Chord } from '../types';
 import { useResponsiveBars } from '../hooks/useResponsiveBars';
 import { splitChordsIntoRows } from '../utils/lineBreakHelpers';
+import { chordToDegreeWithQuality, isValidKey } from '../utils/degreeNames';
 
 // コード表示幅の設定
 const CHORD_WIDTH_CONFIG = {
@@ -11,12 +12,16 @@ const CHORD_WIDTH_CONFIG = {
 interface ChordGridRendererProps {
   section: ChordSection;
   timeSignature: string;
+  chartKey?: string; // 楽曲のキー（ディグリー表示用）
+  showDegreeNames?: boolean; // ディグリーネームを表示するか
   useDynamicWidth?: boolean; // 動的幅計算を使用するかのフラグ
 }
 
 const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({ 
   section, 
   timeSignature, 
+  chartKey,
+  showDegreeNames = false,
   useDynamicWidth = true // デフォルトで動的幅計算を使用
 }) => {
   const { barsPerRow, config, calculateDynamicLayout } = useResponsiveBars();
@@ -181,7 +186,12 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({
                               minWidth: `${chordWidthPx}px`
                             }}
                           >
-                            <div className={`text-left flex items-center ${chord.memo ? 'flex-1' : hasAnyMemoInRow ? '' : 'flex-1'}`}>
+                            <div className={`text-left flex flex-col ${chord.memo ? 'flex-1' : hasAnyMemoInRow ? '' : 'flex-1'}`}>
+                              {showDegreeNames && chartKey && isValidKey(chartKey) && (
+                                <div className="text-[9px] text-slate-400 leading-tight mb-0.5">
+                                  {chordToDegreeWithQuality(chord, chartKey)}
+                                </div>
+                              )}
                               <span className="text-xs font-medium leading-none">
                                 {(() => {
                                   // コード名をルート音とクオリティに分ける
