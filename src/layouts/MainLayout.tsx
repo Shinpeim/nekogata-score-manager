@@ -46,7 +46,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
   
   const charts = useMemo(() => 
     Object.values(chartsData).sort((a, b) => 
-      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+      a.title.localeCompare(b.title, 'ja')
     ), [chartsData]
   );
 
