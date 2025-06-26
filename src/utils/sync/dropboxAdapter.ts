@@ -62,12 +62,44 @@ export class DropboxSyncAdapter implements ISyncAdapter {
     
     // ファイルが存在するかチェックしてからダウンロード
     const [charts, metadata, deletedCharts, setLists, setListMetadata, deletedSetLists] = await Promise.all([
-      this.downloadFile<ChordChart[]>(this.CHARTS_FILE_PATH).catch(() => []),
-      this.downloadFile<Record<string, SyncMetadata>>(this.METADATA_FILE_PATH).catch(() => ({})),
-      this.downloadFile<DeletedChartRecord[]>(this.DELETED_CHARTS_FILE_PATH).catch(() => []),
-      this.downloadFile<SetList[]>(this.SETLISTS_FILE_PATH).catch(() => []),
-      this.downloadFile<Record<string, SyncMetadata>>(this.SETLIST_METADATA_FILE_PATH).catch(() => ({})),
-      this.downloadFile<DeletedSetListRecord[]>(this.DELETED_SETLISTS_FILE_PATH).catch(() => [])
+      this.downloadFile<ChordChart[]>(this.CHARTS_FILE_PATH).catch((error) => {
+        // ファイルが見つからない場合は空配列を返す
+        if (error.message === 'File not found') {
+          return [];
+        }
+        // それ以外のエラーは伝播させる
+        throw error;
+      }),
+      this.downloadFile<Record<string, SyncMetadata>>(this.METADATA_FILE_PATH).catch((error) => {
+        if (error.message === 'File not found') {
+          return {};
+        }
+        throw error;
+      }),
+      this.downloadFile<DeletedChartRecord[]>(this.DELETED_CHARTS_FILE_PATH).catch((error) => {
+        if (error.message === 'File not found') {
+          return [];
+        }
+        throw error;
+      }),
+      this.downloadFile<SetList[]>(this.SETLISTS_FILE_PATH).catch((error) => {
+        if (error.message === 'File not found') {
+          return [];
+        }
+        throw error;
+      }),
+      this.downloadFile<Record<string, SyncMetadata>>(this.SETLIST_METADATA_FILE_PATH).catch((error) => {
+        if (error.message === 'File not found') {
+          return {};
+        }
+        throw error;
+      }),
+      this.downloadFile<DeletedSetListRecord[]>(this.DELETED_SETLISTS_FILE_PATH).catch((error) => {
+        if (error.message === 'File not found') {
+          return [];
+        }
+        throw error;
+      })
     ]);
     
     return { 
@@ -116,7 +148,7 @@ export class DropboxSyncAdapter implements ISyncAdapter {
     await this.uploadFile(this.METADATA_FILE_PATH, currentMetadata);
   }
   
-  async getStorageInfo(): Promise<{ used: number; total: number }> {
+  async getStorageInfo(isRetry = false): Promise<{ used: number; total: number }> {
     const token = this.auth.getAccessToken();
     if (!token) throw new Error('Not authenticated');
     
@@ -129,7 +161,20 @@ export class DropboxSyncAdapter implements ISyncAdapter {
       body: JSON.stringify({})
     });
     
-    if (!response.ok) throw new Error('Failed to get storage info');
+    if (!response.ok) {
+      if (response.status === 401 && !isRetry) {
+        // アクセストークンが期限切れの場合、リフレッシュしてリトライ
+        console.log('Access token expired, attempting to refresh...');
+        try {
+          await this.auth.authenticate();
+          return this.getStorageInfo(true);
+        } catch (error) {
+          console.error('Failed to refresh token:', error);
+          throw new Error('Authentication failed');
+        }
+      }
+      throw new Error('Failed to get storage info');
+    }
     
     const data = await response.json();
     return {
@@ -145,13 +190,18 @@ export class DropboxSyncAdapter implements ISyncAdapter {
     try {
       // フォルダが存在するかチェック
       await this.getFolderMetadata(this.APP_FOLDER_PATH);
-    } catch {
+    } catch (error) {
       // フォルダが存在しない場合は作成
-      await this.createAppFolder();
+      if (error instanceof Error && error.message === 'Folder not found') {
+        await this.createAppFolder();
+      } else {
+        // その他のエラーは伝播させる
+        throw error;
+      }
     }
   }
   
-  private async getFolderMetadata(path: string): Promise<void> {
+  private async getFolderMetadata(path: string, isRetry = false): Promise<void> {
     const token = this.auth.getAccessToken();
     if (!token) throw new Error('Not authenticated');
     
@@ -171,11 +221,24 @@ export class DropboxSyncAdapter implements ISyncAdapter {
         // ファイル/フォルダが見つからない
         throw new Error('Folder not found');
       }
+      
+      if (response.status === 401 && !isRetry) {
+        // アクセストークンが期限切れの場合、リフレッシュしてリトライ
+        console.log('Access token expired, attempting to refresh...');
+        try {
+          await this.auth.authenticate();
+          return this.getFolderMetadata(path, true);
+        } catch (error) {
+          console.error('Failed to refresh token:', error);
+          throw new Error(`Authentication failed: ${response.status}`);
+        }
+      }
+      
       throw new Error('Failed to get folder metadata');
     }
   }
   
-  private async createAppFolder(): Promise<void> {
+  private async createAppFolder(isRetry = false): Promise<void> {
     const token = this.auth.getAccessToken();
     if (!token) throw new Error('Not authenticated');
     
@@ -196,13 +259,27 @@ export class DropboxSyncAdapter implements ISyncAdapter {
       if (response.status === 409) {
         return;
       }
+      
+      if (response.status === 401 && !isRetry) {
+        // アクセストークンが期限切れの場合、リフレッシュしてリトライ
+        console.log('Access token expired, attempting to refresh...');
+        try {
+          await this.auth.authenticate();
+          return this.createAppFolder(true);
+        } catch (error) {
+          console.error('Failed to refresh token:', error);
+          const errorText = await response.text();
+          throw new Error(`Authentication failed: ${response.status} - ${errorText}`);
+        }
+      }
+      
       const errorText = await response.text();
       console.error('Failed to create app folder:', response.status, errorText);
       throw new Error(`Failed to create app folder (${response.status})`);
     }
   }
   
-  private async downloadFile<T>(path: string): Promise<T | null> {
+  private async downloadFile<T>(path: string, isRetry = false): Promise<T | null> {
     const token = this.auth.getAccessToken();
     if (!token) throw new Error('Not authenticated');
     
@@ -219,9 +296,24 @@ export class DropboxSyncAdapter implements ISyncAdapter {
     if (!response.ok) {
       if (response.status === 409) {
         // ファイルが見つからない場合
-        return null;
+        throw new Error('File not found');
       }
-      throw new Error('Failed to download file');
+      
+      if (response.status === 401 && !isRetry) {
+        // アクセストークンが期限切れの場合、リフレッシュしてリトライ
+        console.log('Access token expired, attempting to refresh...');
+        try {
+          await this.auth.authenticate();
+          return this.downloadFile<T>(path, true);
+        } catch (error) {
+          console.error('Failed to refresh token:', error);
+          throw new Error(`Authentication failed: ${response.status}`);
+        }
+      }
+      
+      const errorText = await response.text();
+      console.error('Dropbox download error:', response.status, errorText);
+      throw new Error(`Failed to download file: ${response.status}`);
     }
     
     try {
@@ -232,7 +324,7 @@ export class DropboxSyncAdapter implements ISyncAdapter {
     }
   }
   
-  private async uploadFile(path: string, content: unknown): Promise<void> {
+  private async uploadFile(path: string, content: unknown, isRetry = false): Promise<void> {
     const token = this.auth.getAccessToken();
     if (!token) throw new Error('Not authenticated');
     
@@ -251,6 +343,19 @@ export class DropboxSyncAdapter implements ISyncAdapter {
     });
     
     if (!response.ok) {
+      if (response.status === 401 && !isRetry) {
+        // アクセストークンが期限切れの場合、リフレッシュしてリトライ
+        console.log('Access token expired, attempting to refresh...');
+        try {
+          await this.auth.authenticate();
+          return this.uploadFile(path, content, true);
+        } catch (error) {
+          console.error('Failed to refresh token:', error);
+          const errorText = await response.text();
+          throw new Error(`Authentication failed: ${response.status} - ${errorText}`);
+        }
+      }
+      
       const errorText = await response.text();
       console.error('Dropbox file upload error:', response.status, errorText);
       throw new Error(`Failed to upload file: ${response.status} - ${errorText}`);
