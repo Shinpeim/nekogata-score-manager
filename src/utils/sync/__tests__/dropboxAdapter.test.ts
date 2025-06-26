@@ -223,6 +223,67 @@ describe('DropboxSyncAdapter', () => {
       });
     });
 
+    it('should handle 401 error and retry with refreshed token', async () => {
+      // URLごとのカウンターを保持
+      const urlCallCounts = new Map<string, number>();
+      
+      (global.fetch as Mock).mockImplementation((url: string, options) => {
+        // Dropbox APIはヘッダーにパスを含む場合がある
+        const path = options?.headers?.['Dropbox-API-Arg'] 
+          ? JSON.parse(options.headers['Dropbox-API-Arg']).path 
+          : url;
+          
+        const currentCount = urlCallCounts.get(path) || 0;
+        urlCallCounts.set(path, currentCount + 1);
+        
+        // 各URLで最初の呼び出しは401エラー、2回目は成功
+        if (currentCount === 0) {
+          return Promise.resolve({ 
+            ok: false, 
+            status: 401, 
+            text: () => Promise.resolve('{"error":{"tag":"expired_access_token"}}')
+          });
+        } else {
+          // 適切なコンテンツを返す
+          const content = path.includes('metadata.json') ? '{}' : '[]';
+          return Promise.resolve({ 
+            ok: true, 
+            text: () => Promise.resolve(content) 
+          });
+        }
+      });
+
+      const result = await adapter.pull();
+      
+      expect(result).toEqual({
+        charts: [],
+        metadata: {},
+        deletedCharts: [],
+        setLists: [],
+        setListMetadata: {},
+        deletedSetLists: []
+      });
+      
+      // authenticate が各ファイルごとに呼ばれることを確認
+      expect(mockAuthProvider.authenticate).toHaveBeenCalledTimes(6);
+      expect(global.fetch).toHaveBeenCalledTimes(12); // 各ファイル2回ずつ（初回失敗+リトライ成功）
+    });
+
+    it('should throw error when 401 retry also fails', async () => {
+      // 両方とも401エラー
+      (global.fetch as Mock).mockResolvedValue({ 
+        ok: false, 
+        status: 401,
+        text: () => Promise.resolve('{"error":".tag":"expired_access_token"}')
+      });
+      
+      // authenticateも失敗させる
+      mockAuthProvider.authenticate.mockRejectedValue(new Error('Authentication failed'));
+
+      await expect(adapter.pull()).rejects.toThrow();
+      expect(mockAuthProvider.authenticate).toHaveBeenCalled();
+    });
+
     it('should throw error when not authenticated', async () => {
       mockAuthProvider.getAccessToken.mockReturnValue(null);
       
@@ -290,6 +351,38 @@ describe('DropboxSyncAdapter', () => {
         .mockResolvedValue({ ok: true }); // 残りのリクエストは成功
 
       await expect(adapter.push([], {}, [], [], {}, [])).rejects.toThrow('Failed to upload file: 500 - Server error');
+    });
+
+    it('should handle 401 error in push and retry with refreshed token', async () => {
+      (global.fetch as Mock)
+        .mockResolvedValueOnce({ ok: true }) // フォルダ確認
+        .mockResolvedValueOnce({ ok: false, status: 401, text: () => Promise.resolve('{"error":".tag":"expired_access_token"}') }) // 初回アップロード失敗
+        .mockResolvedValueOnce({ ok: true }) // リトライ成功
+        .mockResolvedValueOnce({ ok: true }) // 残りのアップロード
+        .mockResolvedValueOnce({ ok: true })
+        .mockResolvedValueOnce({ ok: true })
+        .mockResolvedValueOnce({ ok: true })
+        .mockResolvedValueOnce({ ok: true });
+
+      await adapter.push([], {}, [], [], {}, []);
+      
+      expect(mockAuthProvider.authenticate).toHaveBeenCalledTimes(1);
+      // フォルダ確認1回 + アップロード7回（最初の1つがリトライ）
+      expect(global.fetch).toHaveBeenCalledTimes(8);
+    });
+
+    it('should throw error when 401 retry also fails in push', async () => {
+      (global.fetch as Mock)
+        .mockResolvedValueOnce({ ok: true }) // フォルダ確認
+        .mockResolvedValue({ 
+          ok: false, 
+          status: 401,
+          text: () => Promise.resolve('{"error":".tag":"expired_access_token"}')
+        });
+      
+      mockAuthProvider.authenticate.mockRejectedValue(new Error('Authentication failed'));
+
+      await expect(adapter.push([], {}, [], [], {}, [])).rejects.toThrow('Authentication failed: 401');
     });
   });
 
@@ -399,6 +492,33 @@ describe('DropboxSyncAdapter', () => {
       
       await expect(adapter.getStorageInfo()).rejects.toThrow('Not authenticated');
     });
+
+    it('should handle 401 error and retry with refreshed token', async () => {
+      (global.fetch as Mock)
+        .mockResolvedValueOnce({ ok: false, status: 401, text: () => Promise.resolve('{"error":".tag":"expired_access_token"}') })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve({ used: 1000000, allocation: { allocated: 2000000000 } })
+        });
+
+      const result = await adapter.getStorageInfo();
+      
+      expect(result).toEqual({ used: 1000000, total: 2000000000 });
+      expect(mockAuthProvider.authenticate).toHaveBeenCalledTimes(1);
+      expect(global.fetch).toHaveBeenCalledTimes(2);
+    });
+
+    it('should throw error when 401 retry also fails', async () => {
+      (global.fetch as Mock).mockResolvedValue({ 
+        ok: false, 
+        status: 401,
+        text: () => Promise.resolve('{"error":".tag":"expired_access_token"}')
+      });
+      
+      mockAuthProvider.authenticate.mockRejectedValue(new Error('Authentication failed'));
+
+      await expect(adapter.getStorageInfo()).rejects.toThrow('Authentication failed');
+    });
   });
 
   describe('private methods', () => {
@@ -419,6 +539,31 @@ describe('DropboxSyncAdapter', () => {
         // コンストラクタ内でフォルダ名が生成されることを確認
         expect(newAdapter).toBeDefined();
       });
+    });
+  });
+
+  describe('ensureAppFolder with 401 error handling', () => {
+    it('should handle 401 error when checking folder and retry', async () => {
+      // getFolderMetadataが401エラー、リトライ後成功
+      (global.fetch as Mock)
+        .mockResolvedValueOnce({ ok: false, status: 401, text: () => Promise.resolve('{"error":".tag":"expired_access_token"}') })
+        .mockResolvedValueOnce({ ok: true }); // リトライ成功
+
+      await adapter.authenticate();
+      
+      expect(mockAuthProvider.authenticate).toHaveBeenCalledTimes(2); // 初回 + リトライ
+    });
+
+    it('should handle 401 error when creating folder and retry', async () => {
+      // getFolderMetadataが404、createAppFolderが401エラー
+      (global.fetch as Mock)
+        .mockResolvedValueOnce({ ok: false, status: 409 }) // フォルダが見つからない
+        .mockResolvedValueOnce({ ok: false, status: 401, text: () => Promise.resolve('{"error":".tag":"expired_access_token"}') })
+        .mockResolvedValueOnce({ ok: true }); // リトライ成功
+
+      await adapter.authenticate();
+      
+      expect(mockAuthProvider.authenticate).toHaveBeenCalledTimes(2); // 初回 + リトライ
     });
   });
 });
