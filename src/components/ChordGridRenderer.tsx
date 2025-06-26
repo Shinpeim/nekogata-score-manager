@@ -5,8 +5,9 @@ import { splitChordsIntoRows } from '../utils/lineBreakHelpers';
 import { chordToDegreeWithQuality, isValidKey } from '../utils/degreeNames';
 
 // コード表示幅の設定
-const CHORD_WIDTH_CONFIG = {
-  MIN_WIDTH_PX: 47, // コード1つの最低表示幅（px）- 36px * 1.3 ≈ 47px
+const getChordMinWidth = (fontSize: number): number => {
+  // フォントサイズに基づいた最低幅（14px時に47px）
+  return Math.round((fontSize / 14) * 47);
 };
 
 interface ChordGridRendererProps {
@@ -15,6 +16,7 @@ interface ChordGridRendererProps {
   chartKey?: string; // 楽曲のキー（ディグリー表示用）
   showDegreeNames?: boolean; // ディグリーネームを表示するか
   useDynamicWidth?: boolean; // 動的幅計算を使用するかのフラグ
+  fontSize?: number; // フォントサイズ（px）
 }
 
 const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({ 
@@ -22,9 +24,10 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({
   timeSignature, 
   chartKey,
   showDegreeNames = false,
-  useDynamicWidth = true // デフォルトで動的幅計算を使用
+  useDynamicWidth = true, // デフォルトで動的幅計算を使用
+  fontSize = 14 // デフォルトフォントサイズ
 }) => {
-  const { barsPerRow, config, calculateDynamicLayout } = useResponsiveBars();
+  const { barsPerRow, config, calculateDynamicLayout, getChordWidth } = useResponsiveBars();
 
   const timeSignatureBeats = timeSignature ? parseInt(timeSignature.split('/')[0]) : 4;
   const beatsPerBar = section.beatsPerBar && section.beatsPerBar !== 4 ? section.beatsPerBar : timeSignatureBeats;
@@ -79,7 +82,7 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({
   const processedRows = useMemo(() => {
     if (useDynamicWidth) {
       // 動的幅計算を使用した行分割
-      return calculateDynamicLayout(allBars);
+      return calculateDynamicLayout(allBars, fontSize);
     } else {
       // 従来の固定幅行分割
       const rows = splitChordsIntoRows(section.chords, barsPerRow, beatsPerBar);
@@ -118,7 +121,7 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({
         return bars;
       });
     }
-  }, [useDynamicWidth, allBars, calculateDynamicLayout, section.chords, barsPerRow, beatsPerBar]);
+  }, [useDynamicWidth, allBars, calculateDynamicLayout, section.chords, barsPerRow, beatsPerBar, fontSize]);
   
   return (
     <>
@@ -132,19 +135,8 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({
                 
                 // 各コードの必要幅を先に計算（コードファースト方式）
                 const chordWidthsPx = useDynamicWidth ? bar.map(chord => {
-                  const chordDuration = chord.duration || 4;
-                  
-                  // メモの文字数に応じて基本幅を動的に計算
-                  let baseWidth = CHORD_WIDTH_CONFIG.MIN_WIDTH_PX;
-                  if (chord.memo && chord.memo.trim() !== '') {
-                    // メモの文字数に基づいて幅を計算（1文字あたり約10pxとして概算）
-                    const memoWidth = chord.memo.length * 10 + 16; // パディング分を考慮
-                    baseWidth = Math.max(CHORD_WIDTH_CONFIG.MIN_WIDTH_PX, memoWidth);
-                  }
-                  
-                  // 拍数による調整（拍数が多ければより幅を取る）
-                  const durationMultiplier = chordDuration / 4; // 4拍を基準とした倍率
-                  return baseWidth * Math.max(durationMultiplier, 1);
+                  // フォントサイズに基づいた動的幅を計算
+                  return getChordWidth(chord, fontSize);
                 }) : undefined;
                 
                 // 小節の幅は全コード幅の合計 + パディング（動的幅計算の場合）
@@ -175,7 +167,7 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({
                         // 動的幅計算の場合は外側で計算済みの幅を使用、従来の場合は基本幅
                         const chordWidthPx = useDynamicWidth && chordWidthsPx 
                           ? chordWidthsPx[chordIndex] 
-                          : CHORD_WIDTH_CONFIG.MIN_WIDTH_PX;
+                          : getChordMinWidth(fontSize);
                         
                         return (
                           <div 
@@ -192,7 +184,7 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({
                                   {chordToDegreeWithQuality(chord, chartKey)}
                                 </div>
                               )}
-                              <span className="text-xs font-medium leading-none">
+                              <span className="font-medium leading-none" style={{ fontSize: `${fontSize}px` }}>
                                 {(() => {
                                   // コード名をルート音とクオリティに分ける
                                   const match = chord.name.match(/^([A-G][#b♭]?)(.*)/);
@@ -202,7 +194,7 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({
                                       <>
                                         <span>{root}</span>
                                         {quality && (
-                                          <span className="text-[10px]">{quality}</span>
+                                          <span style={{ fontSize: `${fontSize * 0.8}px` }}>{quality}</span>
                                         )}
                                       </>
                                     );
@@ -215,7 +207,7 @@ const ChordGridRenderer: React.FC<ChordGridRendererProps> = ({
                               </span>
                             </div>
                             {chord.memo && (
-                              <div className="text-left text-[10px] text-slate-600 leading-tight px-0.5 pb-1">
+                              <div className="text-left text-slate-600 leading-tight px-0.5 pb-1" style={{ fontSize: `${fontSize}px` }}>
                                 {chord.memo}
                               </div>
                             )}

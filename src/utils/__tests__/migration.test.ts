@@ -61,7 +61,7 @@ describe('Migration Utils', () => {
       expect(result['test-1']).toBeDefined();
       expect(result['test-1'].sections[0].beatsPerBar).toBe(3); // 3/4拍子に修正
       expect(result['test-1'].notes).toBe(''); // 空文字で初期化
-      expect(result['test-1'].version).toBe('4.0.0'); // 最新version追加
+      expect(result['test-1'].version).toBe('5.0.0'); // 最新version追加
     });
 
     it('旧バージョン情報付きデータを移行', () => {
@@ -75,21 +75,21 @@ describe('Migration Utils', () => {
       expect(result['test-1']).toBeDefined();
       expect(result['test-1'].sections[0].beatsPerBar).toBe(3);
       expect(result['test-1'].notes).toBe('');
-      expect(result['test-1'].version).toBe('4.0.0');
+      expect(result['test-1'].version).toBe('5.0.0');
     });
 
     it('v1データはv2にマイグレーションされる', () => {
       const result = migrateData(mockLibraryWithVersions);
       
-      expect(result['test-1'].version).toBe('4.0.0');
-      expect(result['test-2'].version).toBe('4.0.0');
+      expect(result['test-1'].version).toBe('5.0.0');
+      expect(result['test-2'].version).toBe('5.0.0');
     });
 
     it('v2データはマイグレーション不要', () => {
       const result = migrateData(mockLibraryV2);
       
-      expect(result['test-1'].version).toBe('4.0.0');
-      expect(result['test-2'].version).toBe('4.0.0');
+      expect(result['test-1'].version).toBe('5.0.0');
+      expect(result['test-2'].version).toBe('5.0.0');
     });
 
     it('空データの場合は空オブジェクトを返す', () => {
@@ -168,8 +168,8 @@ describe('Migration Utils', () => {
       expect(Object.keys(result)).toHaveLength(2);
       expect(result.chart1.sections[0].beatsPerBar).toBe(4); // 4/4拍子は4拍のまま
       expect(result.chart2.sections[0].beatsPerBar).toBe(6); // 6/8拍子は6拍に修正
-      expect(result.chart1.version).toBe('4.0.0');
-      expect(result.chart2.version).toBe('4.0.0');
+      expect(result.chart1.version).toBe('5.0.0');
+      expect(result.chart2.version).toBe('5.0.0');
     });
 
     it('エラーのあるデータの処理', () => {
@@ -217,7 +217,7 @@ describe('Migration Utils', () => {
       expect(migratedChart.sections[0].chords[2].name).toBe('Dm7');
       expect(migratedChart.sections[0].chords[2].root).toBe('D'); // 変更なし
 
-      expect(migratedChart.version).toBe('4.0.0');
+      expect(migratedChart.version).toBe('5.0.0');
     });
   });
 });

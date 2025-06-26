@@ -14,6 +14,7 @@ interface SortableChordItemProps {
   onInsertLineBreak: (sectionId: string, chordIndex: number) => void;
   isSelected?: boolean;
   onToggleSelection?: (sectionId: string, chordIndex: number, event?: React.MouseEvent) => void;
+  fontSize?: number;
 }
 
 const SortableChordItem: React.FC<SortableChordItemProps> = ({
@@ -27,6 +28,7 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
   onDeleteChord,
   onInsertLineBreak,
   onToggleSelection,
+  fontSize = 14,
 }) => {
   // 入力表示用の状態
   const [displayValue, setDisplayValue] = useState('');
@@ -225,11 +227,12 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
             onFocus={handleInputFocus}
             onBlur={handleInputBlur}
             onKeyDown={handleKeyDown}
-            className={`w-full mb-1 px-2 py-1 text-sm border rounded focus:outline-none focus:ring-1 ${
+            className={`w-full mb-1 px-2 py-1 border rounded focus:outline-none focus:ring-1 ${
               isChordNameValid
                 ? 'border-slate-300 focus:ring-[#85B0B7] bg-white'
                 : 'border-red-300 focus:ring-red-400 bg-red-50'
             }`}
+            style={{ fontSize: `${fontSize}px` }}
             placeholder="コード名"
           />
           <input
@@ -239,7 +242,8 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
             onFocus={handleMemoFocus}
             onBlur={handleMemoBlur}
             onKeyDown={handleMemoKeyDown}
-            className="w-full mb-1 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 border-slate-300 focus:ring-[#85B0B7] bg-slate-50"
+            className="w-full mb-1 px-2 py-1 border rounded focus:outline-none focus:ring-1 border-slate-300 focus:ring-[#85B0B7] bg-slate-50"
+            style={{ fontSize: `${fontSize}px` }}
             placeholder="メモ（歌詞・演奏記号等）"
           />
           <input

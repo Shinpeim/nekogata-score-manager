@@ -21,6 +21,7 @@ import SortableSectionItem from './SortableSectionItem';
 interface SectionCardProps {
   section: ChordSection;
   selectedChords: Set<string>;
+  fontSize?: number;
   onSectionChange: (sectionId: string, field: keyof ChordSection, value: string | number) => void;
   onDeleteSection: (sectionId: string) => void;
   onDuplicateSection: (sectionId: string) => void;
@@ -38,6 +39,7 @@ interface SectionCardProps {
 const SectionCard: React.FC<SectionCardProps> = ({
   section,
   selectedChords,
+  fontSize = 14,
   onSectionChange,
   onDeleteSection,
   onDuplicateSection,
@@ -171,6 +173,7 @@ const SectionCard: React.FC<SectionCardProps> = ({
                     sectionId={section.id}
                     itemId={itemId}
                     isSelected={selectedChords.has(`${section.id}-${chordIndex}`)}
+                    fontSize={fontSize}
                     onUpdateChord={onUpdateChordInSection}
                     onFinalizeChordName={onFinalizeChordName}
                     onDeleteChord={onDeleteChordFromSection}

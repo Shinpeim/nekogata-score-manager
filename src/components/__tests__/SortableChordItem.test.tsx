@@ -176,7 +176,7 @@ describe('SortableChordItem', () => {
       renderWithDndContext();
       
       const memoInput = screen.getByPlaceholderText('メモ（歌詞・演奏記号等）');
-      expect(memoInput).toHaveClass('text-xs', 'bg-slate-50');
+      expect(memoInput).toHaveClass('bg-slate-50');
     });
   });
 });

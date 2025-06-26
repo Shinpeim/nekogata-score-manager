@@ -1,5 +1,6 @@
 import React from 'react';
 import type { ChordChart } from '../types';
+import { DEFAULT_FONT_SIZE } from '../utils/musicConstants';
 import {
   DndContext,
   closestCenter,
@@ -136,6 +137,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
               key={section.id}
               section={section}
               selectedChords={selectedChords}
+              fontSize={chart.fontSize ?? DEFAULT_FONT_SIZE}
               onSectionChange={sectionOperations.handleSectionChange}
               onDeleteSection={sectionOperations.deleteSection}
               onDuplicateSection={sectionOperations.duplicateSection}

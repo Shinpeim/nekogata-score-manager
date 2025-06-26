@@ -3,6 +3,7 @@ import {
   analyzeBarContent, 
   calculateDynamicBarWidth, 
   calculateBarWidth,
+  calculateChordWidthWithFontSize,
   DYNAMIC_BAR_WIDTH_CONFIG 
 } from '../dynamicBarWidth';
 import type { Chord } from '../../types';
@@ -195,6 +196,168 @@ describe('dynamicBarWidth', () => {
       
       // 各コード47px + パディング8px = 196px
       expect(width).toBeGreaterThanOrEqual(196);
+    });
+
+    test('フォントサイズを指定した場合、それに応じた幅が計算される', () => {
+      const chords: Chord[] = createTestChords([
+        { name: 'C', root: 'C' },
+        { name: 'Am', root: 'A' },
+        { name: 'F', root: 'F' },
+        { name: 'G', root: 'G' },
+      ]);
+      
+      // フォントサイズ10px（最小）
+      const widthSmall = calculateBarWidth(chords, 4, 10);
+      
+      // フォントサイズ14px（デフォルト）
+      const widthDefault = calculateBarWidth(chords, 4, 14);
+      
+      // フォントサイズ20px
+      const widthLarge = calculateBarWidth(chords, 4, 20);
+      
+      // フォントサイズが大きいほど幅も大きくなる
+      expect(widthSmall).toBeLessThanOrEqual(widthDefault);
+      expect(widthDefault).toBeLessThan(widthLarge);
+      
+      // 具体的な値も確認（10px時は各コード約33px、20px時は約67px）
+      const expectedSmall = Math.round((10 / 14) * 47) * 4 + 8; // 約142px
+      const expectedLarge = Math.round((20 / 14) * 47) * 4 + 8; // 約276px
+      
+      expect(widthSmall).toBeGreaterThanOrEqual(expectedSmall);
+      expect(widthLarge).toBeGreaterThanOrEqual(expectedLarge);
+    });
+  });
+
+  describe('calculateChordWidthWithFontSize', () => {
+    test('基本的なコードの幅計算', () => {
+      const chord: Chord = createTestChords([{ name: 'C', root: 'C' }])[0];
+      
+      // デフォルトフォントサイズ（14px）
+      const width = calculateChordWidthWithFontSize(chord);
+      expect(width).toBe(47); // ベース幅のみ
+      
+      // フォントサイズ10px
+      const widthSmall = calculateChordWidthWithFontSize(chord, 10);
+      expect(widthSmall).toBe(Math.round((10 / 14) * 47)); // 約34px
+      
+      // フォントサイズ20px
+      const widthLarge = calculateChordWidthWithFontSize(chord, 20);
+      expect(widthLarge).toBe(Math.round((20 / 14) * 47)); // 約67px
+    });
+
+    test('長いコード名の幅計算', () => {
+      const chord: Chord = createTestChords([{ name: 'Cmaj7', root: 'C' }])[0];
+      
+      // デフォルトフォントサイズ（14px）
+      const width = calculateChordWidthWithFontSize(chord);
+      // ベース幅47 + (5文字 - 3) * 5 = 47 + 10 = 57
+      expect(width).toBe(57);
+      
+      // フォントサイズ20px
+      const widthLarge = calculateChordWidthWithFontSize(chord, 20);
+      // 20/14 * 57 = 81.42... → 81
+      expect(widthLarge).toBe(81);
+    });
+
+    test('ベース音付きコードの幅計算', () => {
+      const chord: Chord = createTestChords([{ name: 'C', root: 'C', base: 'E' }])[0];
+      
+      // デフォルトフォントサイズ（14px）
+      const width = calculateChordWidthWithFontSize(chord);
+      // ベース幅47 + (3文字 - 3) * 5 = 47 + 0 = 47
+      expect(width).toBe(47);
+      
+      // 長いベース音付き
+      const longChord: Chord = createTestChords([{ name: 'Am7', root: 'A', base: 'C' }])[0];
+      const widthLong = calculateChordWidthWithFontSize(longChord);
+      // ベース幅47 + (5文字 - 3) * 5 = 47 + 10 = 57
+      expect(widthLong).toBe(57);
+    });
+
+    test('メモ付きコードの幅計算', () => {
+      const chord: Chord = createTestChords([{ name: 'C', root: 'C', memo: '短いメモ' }])[0];
+      
+      // デフォルトフォントサイズ（14px）
+      const width = calculateChordWidthWithFontSize(chord);
+      // ベース幅47 + メモボーナス max(20, 4文字 * 12) = 47 + 48 = 95 (日本語なので12倍)
+      expect(width).toBe(95);
+      
+      // 長いメモ
+      const longMemoChord: Chord = createTestChords([{ name: 'C', root: 'C', memo: 'これは非常に長いメモです' }])[0];
+      const widthLongMemo = calculateChordWidthWithFontSize(longMemoChord);
+      // ベース幅47 + メモボーナス max(20, 12文字 * 12) = 47 + 144 = 191
+      expect(widthLongMemo).toBe(191);
+      
+      // フォントサイズ20pxでの長いメモ
+      const widthLargeFontLongMemo = calculateChordWidthWithFontSize(longMemoChord, 20);
+      // ベース幅67 + メモボーナス max(20, 12 * (20/14) * 12) = 67 + 206 = 273
+      expect(widthLargeFontLongMemo).toBe(273);
+    });
+
+    test('複雑なコード（長い名前、ベース音、メモ）の幅計算', () => {
+      const chord: Chord = createTestChords([{ 
+        name: 'Cmaj7', 
+        root: 'C', 
+        base: 'E', 
+        memo: 'アルペジオで' 
+      }])[0];
+      
+      // デフォルトフォントサイズ（14px）
+      const width = calculateChordWidthWithFontSize(chord);
+      // ベース幅47 + 名前ボーナス(7文字 - 3) * 5 = 47 + 20 = 67
+      // + メモボーナス max(20, 6文字 * 12) = 72 (マルチバイト文字)
+      // = 139
+      expect(width).toBe(139);
+      
+      // フォントサイズでスケーリング
+      const widthSmall = calculateChordWidthWithFontSize(chord, 10);
+      const widthLarge = calculateChordWidthWithFontSize(chord, 20);
+      
+      // フォントサイズに比例して幅が変化
+      expect(widthSmall).toBeLessThan(width);
+      expect(widthLarge).toBeGreaterThan(width);
+    });
+
+    test('マルチバイト文字（日本語）vs ASCII文字のメモ幅計算', () => {
+      // 日本語メモ
+      const chordJapanese: Chord = createTestChords([{ 
+        name: 'C', 
+        root: 'C', 
+        memo: 'ストローク' // 5文字
+      }])[0];
+      
+      // ASCII文字メモ（同じ文字数）
+      const chordAscii: Chord = createTestChords([{ 
+        name: 'C', 
+        root: 'C', 
+        memo: 'strum' // 5文字
+      }])[0];
+      
+      const widthJapanese = calculateChordWidthWithFontSize(chordJapanese);
+      const widthAscii = calculateChordWidthWithFontSize(chordAscii);
+      
+      // 日本語の方が幅が大きい
+      expect(widthJapanese).toBeGreaterThan(widthAscii);
+      
+      // 日本語: 47 + max(20, 5 * 12) = 47 + 60 = 107
+      expect(widthJapanese).toBe(107);
+      
+      // ASCII: 47 + max(20, 5 * 5) = 47 + 25 = 72
+      expect(widthAscii).toBe(72);
+    });
+
+    test('混在メモ（日本語+ASCII）の幅計算', () => {
+      const chord: Chord = createTestChords([{ 
+        name: 'C', 
+        root: 'C', 
+        memo: 'down ダウン' // 混在
+      }])[0];
+      
+      const width = calculateChordWidthWithFontSize(chord);
+      
+      // マルチバイト文字が1つでも含まれていれば12倍
+      // 47 + max(20, 8文字 * 12) = 47 + 96 = 143
+      expect(width).toBe(143);
     });
   });
 });

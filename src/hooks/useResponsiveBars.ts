@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Chord } from '../types';
-import { calculateBarWidth, DYNAMIC_BAR_WIDTH_CONFIG } from '../utils/dynamicBarWidth';
+import { calculateBarWidth, calculateChordWidthWithFontSize, DYNAMIC_BAR_WIDTH_CONFIG } from '../utils/dynamicBarWidth';
 
 // レガシー互換性のための設定（既存コードとの互換性を保つ）
 const BAR_WIDTH_CONFIG = {
@@ -33,7 +33,7 @@ export const useResponsiveBars = () => {
    * 動的幅計算モード: 小節ごとの実際のコンテンツに基づいて行分割を計算
    * 改行マーカー（空の小節）を考慮
    */
-  const calculateDynamicLayout = useCallback((bars: Chord[][]): Chord[][][] => {
+  const calculateDynamicLayout = useCallback((bars: Chord[][], fontSize: number = 14): Chord[][][] => {
     const containerWidth = window.innerWidth - BAR_WIDTH_CONFIG.PADDING;
     const rows: Chord[][][] = [];
     let currentRow: Chord[][] = [];
@@ -51,7 +51,7 @@ export const useResponsiveBars = () => {
         continue;
       }
 
-      const barWidth = calculateBarWidth(bar, 4); // 拍数パラメータを追加
+      const barWidth = calculateBarWidth(bar, 4, fontSize); // fontSizeパラメータを追加
       
       // 現在の行に追加できるかチェック
       if (currentRow.length === 0 || currentRowWidth + barWidth <= containerWidth) {
@@ -78,8 +78,15 @@ export const useResponsiveBars = () => {
   /**
    * 小節の動的幅を計算
    */
-  const getBarWidth = useCallback((chords: Chord[], beatsPerBar: number = 4): number => {
-    return calculateBarWidth(chords, beatsPerBar);
+  const getBarWidth = useCallback((chords: Chord[], beatsPerBar: number = 4, fontSize: number = 14): number => {
+    return calculateBarWidth(chords, beatsPerBar, fontSize);
+  }, []);
+
+  /**
+   * コードごとの動的幅を計算
+   */
+  const getChordWidth = useCallback((chord: Chord, fontSize: number = 14): number => {
+    return calculateChordWidthWithFontSize(chord, fontSize);
   }, []);
 
   useEffect(() => {
@@ -108,6 +115,7 @@ export const useResponsiveBars = () => {
     // 新しい動的幅計算機能
     dynamicConfig: DYNAMIC_BAR_WIDTH_CONFIG,
     calculateDynamicLayout,
-    getBarWidth
+    getBarWidth,
+    getChordWidth
   };
 };

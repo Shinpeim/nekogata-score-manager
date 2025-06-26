@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import type { ChordChart as ChordChartType } from '../types';
 import BpmIndicator from './BpmIndicator';
 import ChordGridRenderer from './ChordGridRenderer';
-import { KEY_DISPLAY_NAMES } from '../utils/musicConstants';
+import { KEY_DISPLAY_NAMES, DEFAULT_FONT_SIZE, MIN_FONT_SIZE, MAX_FONT_SIZE, FONT_SIZE_STEP } from '../utils/musicConstants';
+import { useChartManagement } from '../hooks/useChartManagement';
 
 interface ChordChartViewerProps {
   chart: ChordChartType;
@@ -10,8 +11,32 @@ interface ChordChartViewerProps {
   onEdit?: () => void;
 }
 
-const ChordChartViewer: React.FC<ChordChartViewerProps> = ({ chart }) => {
+const ChordChartViewer: React.FC<ChordChartViewerProps> = ({ chart, currentChartId }) => {
   const [showDegreeNames, setShowDegreeNames] = useState(false);
+  const [fontSize, setFontSize] = useState(chart.fontSize ?? DEFAULT_FONT_SIZE);
+  const { updateChart } = useChartManagement();
+
+  // chartが変更されたときにfontSizeを更新
+  React.useEffect(() => {
+    setFontSize(chart.fontSize ?? DEFAULT_FONT_SIZE);
+  }, [chart.fontSize]);
+
+  const handleFontSizeChange = async (newSize: number) => {
+    setFontSize(newSize);
+    if (currentChartId) {
+      await updateChart(currentChartId, { fontSize: newSize });
+    }
+  };
+
+  const handleFontSizeIncrease = () => {
+    const newSize = Math.min(fontSize + FONT_SIZE_STEP, MAX_FONT_SIZE);
+    handleFontSizeChange(newSize);
+  };
+
+  const handleFontSizeDecrease = () => {
+    const newSize = Math.max(fontSize - FONT_SIZE_STEP, MIN_FONT_SIZE);
+    handleFontSizeChange(newSize);
+  };
 
   return (
     <div className="h-full bg-white overflow-y-auto" data-testid="chart-viewer">
@@ -41,6 +66,32 @@ const ChordChartViewer: React.FC<ChordChartViewerProps> = ({ chart }) => {
                   }`}></div>
                 </div>
               </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm text-slate-700">文字サイズ</span>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={handleFontSizeDecrease}
+                    disabled={fontSize <= MIN_FONT_SIZE}
+                    className="w-7 h-7 flex items-center justify-center bg-slate-200 text-slate-700 rounded hover:bg-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    aria-label="文字サイズを小さくする"
+                  >
+                    <span className="text-sm">−</span>
+                  </button>
+                  <span className="min-w-[40px] text-center text-xs text-slate-700">
+                    {fontSize}px
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleFontSizeIncrease}
+                    disabled={fontSize >= MAX_FONT_SIZE}
+                    className="w-7 h-7 flex items-center justify-center bg-slate-200 text-slate-700 rounded hover:bg-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    aria-label="文字サイズを大きくする"
+                  >
+                    <span className="text-sm">+</span>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -58,7 +109,8 @@ const ChordChartViewer: React.FC<ChordChartViewerProps> = ({ chart }) => {
                   section={section} 
                   timeSignature={chart.timeSignature} 
                   chartKey={chart.key} 
-                  showDegreeNames={showDegreeNames} 
+                  showDegreeNames={showDegreeNames}
+                  fontSize={fontSize}
                 />
               </div>
             ))

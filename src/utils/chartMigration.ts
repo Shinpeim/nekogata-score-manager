@@ -1,5 +1,6 @@
 import type { ChordChart } from '../types';
 import { extractChordRoot, parseOnChord } from './chordParsing';
+import { DEFAULT_FONT_SIZE } from './musicConstants';
 
 
 /**
@@ -83,6 +84,20 @@ const migrateChartDataV4 = (chart: ChordChart): ChordChart => {
 };
 
 /**
+ * v5.0.0のマイグレーション: fontSizeフィールド追加
+ * 楽譜ごとに文字サイズを設定できるようにする
+ */
+const migrateChartDataV5 = (chart: ChordChart): ChordChart => {
+  return {
+    ...chart,
+    // fontSizeが未設定の場合はデフォルト値を設定
+    fontSize: chart.fontSize ?? DEFAULT_FONT_SIZE,
+    // version情報を5.0.0に設定
+    version: '5.0.0'
+  };
+};
+
+/**
  * セマンティックバージョンを解析
  */
 const parseVersion = (version: string): { major: number; minor: number; patch: number } => {
@@ -108,14 +123,15 @@ interface Migration {
  * 新しいバージョンのマイグレーションはここに追加するだけ
  * 
  * 使用例:
- * 新しいv4.0.0マイグレーションを追加する場合:
- * { version: '4.0.0', migrate: migrateChartDataV4 },
+ * 新しいv5.0.0マイグレーションを追加する場合:
+ * { version: '5.0.0', migrate: migrateChartDataV5 },
  */
 const migrations: Migration[] = [
   { version: '1.0.0', migrate: migrateChartDataV1 },
   { version: '2.0.0', migrate: migrateChartDataV2 },
   { version: '3.0.0', migrate: migrateChartDataV3 },
   { version: '4.0.0', migrate: migrateChartDataV4 },
+  { version: '5.0.0', migrate: migrateChartDataV5 },
 ];
 
 /**
