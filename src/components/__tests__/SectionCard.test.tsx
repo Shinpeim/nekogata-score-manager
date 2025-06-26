@@ -23,8 +23,6 @@ describe('SectionCard', () => {
     onSectionChange: vi.fn(),
     onDeleteSection: vi.fn(),
     onDuplicateSection: vi.fn(),
-    onCopyChordProgression: vi.fn(),
-    onPasteChordProgression: vi.fn(),
     onReplaceChordProgression: vi.fn(),
     onToggleSelectAllInSection: vi.fn(),
     onChordDragEnd: vi.fn(),
@@ -58,8 +56,6 @@ describe('SectionCard', () => {
     render(<SectionCard {...defaultProps} />);
     
     expect(screen.getByTitle('このセクションの全選択')).toBeInTheDocument();
-    expect(screen.getByTitle('コード進行をコピー')).toBeInTheDocument();
-    expect(screen.getByTitle('クリップボードから追加')).toBeInTheDocument();
     expect(screen.getByTitle('このセクションを複製')).toBeInTheDocument();
     expect(screen.getByTitle('このセクションを削除')).toBeInTheDocument();
   });
@@ -86,18 +82,6 @@ describe('SectionCard', () => {
     await user.click(duplicateButton);
     
     expect(onDuplicateSection).toHaveBeenCalledWith('section-1');
-  });
-
-  it('コピーボタンクリックでコピー処理が呼ばれる', async () => {
-    const user = userEvent.setup();
-    const onCopyChordProgression = vi.fn();
-    
-    render(<SectionCard {...defaultProps} onCopyChordProgression={onCopyChordProgression} />);
-    
-    const copyButton = screen.getByTitle('コード進行をコピー');
-    await user.click(copyButton);
-    
-    expect(onCopyChordProgression).toHaveBeenCalledWith('section-1');
   });
 
   it('全選択ボタンクリックで全選択処理が呼ばれる', async () => {

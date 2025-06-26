@@ -24,8 +24,6 @@ interface SectionCardProps {
   onSectionChange: (sectionId: string, field: keyof ChordSection, value: string | number) => void;
   onDeleteSection: (sectionId: string) => void;
   onDuplicateSection: (sectionId: string) => void;
-  onCopyChordProgression: (sectionId: string) => void;
-  onPasteChordProgression: (sectionId: string) => void;
   onReplaceChordProgression: (sectionId: string, text: string) => void;
   onToggleSelectAllInSection: (sectionId: string) => void;
   onChordDragEnd: (event: DragEndEvent) => void;
@@ -43,8 +41,6 @@ const SectionCard: React.FC<SectionCardProps> = ({
   onSectionChange,
   onDeleteSection,
   onDuplicateSection,
-  onCopyChordProgression,
-  onPasteChordProgression,
   onReplaceChordProgression,
   onToggleSelectAllInSection,
   onChordDragEnd,
@@ -108,20 +104,6 @@ const SectionCard: React.FC<SectionCardProps> = ({
               title={getSelectAllTooltip()}
             >
               ☑
-            </button>
-            <button
-              onClick={() => onCopyChordProgression(section.id)}
-              className="bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-md text-sm w-8 h-8 flex items-center justify-center"
-              title="コード進行をコピー"
-            >
-              ⎘
-            </button>
-            <button
-              onClick={() => onPasteChordProgression(section.id)}
-              className="bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-md text-sm w-8 h-8 flex items-center justify-center"
-              title="クリップボードから追加"
-            >
-              ⎙
             </button>
             <button
               onClick={() => onDuplicateSection(section.id)}

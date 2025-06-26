@@ -142,43 +142,6 @@ describe('useSectionOperations', () => {
     );
   });
 
-  it('copyChordProgressionがクリップボードにコピーする', async () => {
-    const mockCopy = vi.mocked(chordCopyPaste.copyChordProgressionToClipboard);
-    mockCopy.mockResolvedValue(true);
-
-    const { result } = renderUseSectionOperations();
-
-    await act(async () => {
-      await result.current.copyChordProgression('section-1');
-    });
-
-    expect(mockCopy).toHaveBeenCalledWith(mockChart.sections![0].chords);
-    expect(result.current.copiedMessage).toContain('「Intro」のコード進行をコピーしました');
-  });
-
-  it('pasteChordProgressionがクリップボードからコードを追加する', async () => {
-    const mockPaste = vi.mocked(chordCopyPaste.pasteChordProgressionFromClipboard);
-    const pastedChords = [{ id: 'chord-5', name: 'D', root: 'D', duration: 4, memo: '' }];
-    mockPaste.mockResolvedValue(pastedChords);
-
-    const { result } = renderUseSectionOperations();
-
-    await act(async () => {
-      await result.current.pasteChordProgression('section-1');
-    });
-
-    expect(mockOnUpdateChart).toHaveBeenCalledWith({
-      ...mockChart,
-      sections: [
-        {
-          ...mockChart.sections![0],
-          chords: [...mockChart.sections![0].chords, ...pastedChords]
-        },
-        mockChart.sections![1]
-      ]
-    });
-  });
-
   it('replaceChordProgressionがテキストからコード進行を置換する', () => {
     const mockTextToChords = vi.mocked(chordCopyPaste.textToChords);
     const newChords = [

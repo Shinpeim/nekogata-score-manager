@@ -1,71 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { Chord } from '../../types';
+import { describe, it, expect } from 'vitest';
 import {
-  chordsToText,
   textToChords,
-  isValidChordProgression,
-  copyChordProgressionToClipboard,
-  pasteChordProgressionFromClipboard
+  isValidChordProgression
 } from '../chordCopyPaste';
-import { createTestChords } from '../../test-utils/chord-test-helpers';
 
 describe('chordCopyPaste', () => {
-  describe('chordsToText', () => {
-    it('should convert simple chords to text', () => {
-      const chords: Chord[] = createTestChords([
-        { name: 'C', root: 'C', duration: 4 },
-        { name: 'F', root: 'F', duration: 4 },
-        { name: 'G', root: 'G', duration: 4 },
-        { name: 'Am', root: 'A', duration: 4 }
-      ]);
-
-      const result = chordsToText(chords);
-      expect(result).toBe('C[4] F[4] G[4] Am[4]');
-    });
-
-    it('should convert chords with different durations', () => {
-      const chords: Chord[] = createTestChords([
-        { name: 'C', root: 'C', duration: 2 },
-        { name: 'F', root: 'F', duration: 2 },
-        { name: 'G', root: 'G', duration: 4 }
-      ]);
-
-      const result = chordsToText(chords);
-      expect(result).toBe('C[2] F[2] G[4]');
-    });
-
-    it('should convert chords with decimal durations', () => {
-      const chords: Chord[] = createTestChords([
-        { name: 'C', root: 'C', duration: 1.5 },
-        { name: 'F', root: 'F', duration: 2.5 }
-      ]);
-
-      const result = chordsToText(chords);
-      expect(result).toBe('C[1.5] F[2.5]');
-    });
-
-    it('should include line breaks as |', () => {
-      const chords: Chord[] = [
-        createTestChords([{ name: 'C', root: 'C', duration: 4 }])[0],
-        { id: 'line-break', name: '__LINE_BREAK__', root: '', isLineBreak: true, memo: '' },
-        createTestChords([{ name: 'F', root: 'F', duration: 4 }])[0]
-      ];
-
-      const result = chordsToText(chords);
-      expect(result).toBe('C[4] | F[4]');
-    });
-
-    it('should handle default duration', () => {
-      const chords: Chord[] = createTestChords([
-        { name: 'C', root: 'C' },
-        { name: 'F', root: 'F', duration: undefined }
-      ]);
-
-      const result = chordsToText(chords);
-      expect(result).toBe('C[4] F[4]');
-    });
-  });
-
   describe('textToChords', () => {
     it('should parse simple chord names', () => {
       const result = textToChords('C F G Am');
@@ -224,94 +163,6 @@ describe('chordCopyPaste', () => {
 
     it('should return true for mixed valid/invalid input', () => {
       expect(isValidChordProgression('C invalid F')).toBe(true);
-    });
-  });
-
-  describe('clipboard functions', () => {
-    const mockWriteText = vi.fn();
-    const mockReadText = vi.fn();
-
-    beforeEach(() => {
-      // Clipboard API をモック
-      Object.defineProperty(globalThis.navigator, 'clipboard', {
-        value: {
-          writeText: mockWriteText,
-          readText: mockReadText,
-        },
-        writable: true,
-      });
-      
-      mockWriteText.mockClear();
-      mockReadText.mockClear();
-    });
-
-    describe('copyChordProgressionToClipboard', () => {
-      it('should copy chord progression to clipboard', async () => {
-        mockWriteText.mockResolvedValue(undefined);
-        
-        const chords: Chord[] = createTestChords([
-          { name: 'C', root: 'C', duration: 4 },
-          { name: 'F', root: 'F', duration: 4 }
-        ]);
-
-        const result = await copyChordProgressionToClipboard(chords);
-
-        expect(result).toBe(true);
-        expect(mockWriteText).toHaveBeenCalledWith('C[4] F[4]');
-      });
-
-      it('should return false on error', async () => {
-        mockWriteText.mockRejectedValue(new Error('Clipboard error'));
-        
-        const chords: Chord[] = createTestChords([
-          { name: 'C', root: 'C', duration: 4 }
-        ]);
-
-        const result = await copyChordProgressionToClipboard(chords);
-
-        expect(result).toBe(false);
-      });
-    });
-
-    describe('pasteChordProgressionFromClipboard', () => {
-      it('should paste and parse chord progression from clipboard', async () => {
-        mockReadText.mockResolvedValue('C F G Am');
-
-        const result = await pasteChordProgressionFromClipboard();
-
-        expect(result).toHaveLength(4);
-        expect(result![0]).toMatchObject({ name: 'C', root: 'C', duration: 4, memo: '' });
-        expect(result![0].id).toBeDefined();
-        expect(mockReadText).toHaveBeenCalled();
-      });
-
-      it('should return null for empty clipboard', async () => {
-        mockReadText.mockResolvedValue('');
-
-        const result = await pasteChordProgressionFromClipboard();
-
-        expect(result).toBeNull();
-      });
-
-      it('should accept any content as valid (tolerant input)', async () => {
-        mockReadText.mockResolvedValue('invalid content');
-
-        const result = await pasteChordProgressionFromClipboard();
-
-        // 寛容な入力により、どんなテキストでも有効なコード進行として扱われる
-        expect(result).toHaveLength(2);
-        expect(result![0]).toMatchObject({ name: 'invalid', root: 'C', base: undefined, duration: 4, memo: '' });
-        expect(result![1]).toMatchObject({ name: 'content', root: 'C', base: undefined, duration: 4, memo: '' });
-        result!.forEach(chord => expect(chord.id).toBeDefined());
-      });
-
-      it('should return null on error', async () => {
-        mockReadText.mockRejectedValue(new Error('Clipboard error'));
-
-        const result = await pasteChordProgressionFromClipboard();
-
-        expect(result).toBeNull();
-      });
     });
   });
 });

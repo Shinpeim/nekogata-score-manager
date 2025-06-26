@@ -17,3 +17,13 @@
   - **背景**: 楽譜一覧の並び順が不定だったため、曲名の昇順で表示したい
   - **実装内容**: MainLayout.tsxで曲名による昇順ソート（日本語対応）を実装
   - **技術詳細**: `localeCompare('ja')`を使用して日本語も正しくソート
+
+### 2025-06-26: コードのコピペ機能削除
+- [x] **コードのコピペ機能削除** (実施工数: 1時間) ✅ 2025-06-26完了
+  - **背景**: 実際にコード譜を編集しているとほとんど使わない割に実装が複雑だったため削除
+  - **削除内容**: 
+    - UIコンポーネント: コピー・ペーストボタンの削除（SectionCard.tsx）
+    - ロジック: copyChordProgressionToClipboard、pasteChordProgressionFromClipboard関数の削除
+    - フック: useSectionOperationsからコピペ関連メソッドとcopiedMessage状態の削除
+  - **保持機能**: テキスト一括入力機能（textToChords、isValidChordProgression）は便利なため残存
+  - **影響範囲**: 4つのテストファイル修正、全テストパス確認済み

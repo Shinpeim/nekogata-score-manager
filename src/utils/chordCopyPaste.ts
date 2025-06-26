@@ -2,34 +2,6 @@ import type { Chord } from '../types';
 import { parseChordInput } from './chordParsing';
 import { v4 as uuidv4 } from 'uuid';
 
-/**
- * コード進行を文字列形式に変換する
- * 
- * @param chords - コードの配列
- * @returns テキスト形式のコード進行
- * 
- * 例: "C[4] F[2] G[2] | Am[4]"
- * - コード名[拍数]の形式
- * - 改行は "|" で表現
- */
-export const chordsToText = (chords: Chord[]): string => {
-  const parts: string[] = [];
-  
-  for (const chord of chords) {
-    if (chord.isLineBreak === true) {
-      parts.push('|');
-    } else {
-      const duration = chord.duration || 4;
-      // 整数拍数は拍数のみ、小数拍数は小数点付きで表示
-      const durationStr = duration % 1 === 0 ? duration.toString() : duration.toString();
-      // オンコードの場合は元の形式（コード名/ベース音）で出力
-      const fullChordName = chord.base ? `${chord.name}/${chord.base}` : chord.name;
-      parts.push(`${fullChordName}[${durationStr}]`);
-    }
-  }
-  
-  return parts.join(' ');
-};
 
 /**
  * 文字列からコード進行をパースする
@@ -104,39 +76,3 @@ export const isValidChordProgression = (text: string): boolean => {
   }
 };
 
-/**
- * クリップボードにコード進行をコピーする
- * 
- * @param chords - コピーするコードの配列
- * @returns コピーが成功したかどうか
- */
-export const copyChordProgressionToClipboard = async (chords: Chord[]): Promise<boolean> => {
-  try {
-    const text = chordsToText(chords);
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch (error) {
-    console.error('クリップボードへのコピーに失敗しました:', error);
-    return false;
-  }
-};
-
-/**
- * クリップボードからコード進行を読み取る
- * 
- * @returns パースされたコードの配列、またはnull
- */
-export const pasteChordProgressionFromClipboard = async (): Promise<Chord[] | null> => {
-  try {
-    const text = await navigator.clipboard.readText();
-    if (!text.trim()) {
-      return null;
-    }
-    
-    const chords = textToChords(text);
-    return chords.length > 0 ? chords : null;
-  } catch (error) {
-    console.error('クリップボードからの読み取りに失敗しました:', error);
-    return null;
-  }
-};
