@@ -51,6 +51,7 @@ const mockChordChartStore = {
   syncCallbacks: new Set<(charts: ChordChart[]) => void>(),
   subscribeSyncNotification: vi.fn(),
   applySyncedCharts: vi.fn(),
+  hasDataChanges: vi.fn(),
   // 追加で必要なプロパティ
   setCurrentChart: vi.fn(),
   getCurrentChart: vi.fn(),
@@ -93,6 +94,7 @@ describe('useChartSync', () => {
     
     // Reset mock implementations
     mockChordChartStore.subscribeSyncNotification.mockReturnValue(() => {});
+    mockChordChartStore.hasDataChanges.mockResolvedValue(true);
     mockSyncStore.isAuthenticated = false;
     mockSyncStore.sync.mockResolvedValue({
       success: true,
@@ -110,7 +112,8 @@ describe('useChartSync', () => {
       error: null,
       syncCallbacks: new Set<(charts: ChordChart[]) => void>(),
       subscribeSyncNotification: vi.fn().mockReturnValue(() => {}),
-      applySyncedCharts: vi.fn()
+      applySyncedCharts: vi.fn(),
+      hasDataChanges: vi.fn().mockResolvedValue(true)
     });
     
     Object.assign(mockSyncStore, {
@@ -140,7 +143,9 @@ describe('useChartSync', () => {
     
     vi.mocked(useChartManagement).mockReturnValue(mockChordChartStore);
     vi.mocked(useSyncStore).mockReturnValue(mockSyncStore as ReturnType<typeof useSyncStore>);
-    vi.mocked(useSetListManagement).mockReturnValue(createMockSetListManagement());
+    vi.mocked(useSetListManagement).mockReturnValue(createMockSetListManagement({
+      hasDataChanges: vi.fn().mockResolvedValue(true)
+    }));
     
     // Mock useSyncStore.getState() to return the mock state
     vi.mocked(useSyncStore).getState = vi.fn().mockReturnValue(mockSyncStore);

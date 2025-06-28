@@ -24,6 +24,7 @@ interface MockSetListManagement {
   loadFromStorage: ReturnType<typeof vi.fn>;
   clearError: ReturnType<typeof vi.fn>;
   applySyncedSetLists: ReturnType<typeof vi.fn>;
+  hasDataChanges: ReturnType<typeof vi.fn>;
   subscribeSyncNotification: ReturnType<typeof vi.fn>;
   notifySync: ReturnType<typeof vi.fn>;
 }
@@ -52,6 +53,7 @@ export const createMockSetListManagement = (overrides: Partial<MockSetListManage
   loadFromStorage: vi.fn(),
   clearError: vi.fn(),
   applySyncedSetLists: vi.fn(),
+  hasDataChanges: vi.fn(),
   subscribeSyncNotification: vi.fn(),
   notifySync: vi.fn(),
   ...overrides

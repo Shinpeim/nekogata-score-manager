@@ -48,6 +48,7 @@ export const useChartManagement = () => {
         throw error;
       }
     },
+    hasDataChanges: crudStore.hasDataChanges,
     subscribeSyncNotification: crudStore.subscribeSyncNotification,
     notifySyncCallbacks: crudStore.notifySyncCallbacks,
     // syncCallbacks は内部実装のため削除
