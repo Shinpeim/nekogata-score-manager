@@ -49,7 +49,7 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
     }
   };
 
-  const handleChange = (field: string, value: string | number) => {
+  const handleChange = (field: string, value: string | number | undefined) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors.length > 0) {
       setErrors([]);
@@ -130,7 +130,17 @@ const ChordChartForm: React.FC<ChordChartFormProps> = ({
                 id="tempo"
                 type="number"
                 value={formData.tempo}
-                onChange={(e) => handleChange('tempo', parseInt(e.target.value) || 120)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '') {
+                    handleChange('tempo', undefined);
+                  } else {
+                    const parsed = parseInt(value);
+                    if (!isNaN(parsed)) {
+                      handleChange('tempo', parsed);
+                    }
+                  }
+                }}
                 min="40"
                 max="200"
                 className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#85B0B7]"
