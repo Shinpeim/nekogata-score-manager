@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { ChordChart } from '../types';
 import TransposeConfirmDialog from './TransposeConfirmDialog';
 import { transposeChart } from '../utils/transpose';
+import { COMMON_TIME_SIGNATURES } from '../utils/musicConstants';
 
 interface BasicInfoEditorProps {
   chart: ChordChart;
@@ -159,10 +160,9 @@ const BasicInfoEditor: React.FC<BasicInfoEditorProps> = ({ chart, onUpdate, onTr
             onChange={(e) => handleFormChange('timeSignature', e.target.value)}
             className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#85B0B7]"
           >
-            <option value="4/4">4/4</option>
-            <option value="3/4">3/4</option>
-            <option value="2/4">2/4</option>
-            <option value="6/8">6/8</option>
+            {COMMON_TIME_SIGNATURES.map(sig => (
+              <option key={sig} value={sig}>{sig}</option>
+            ))}
           </select>
         </div>
       </div>

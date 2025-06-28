@@ -156,7 +156,7 @@ describe('useSectionOperations', () => {
       result.current.replaceChordProgression('section-1', 'C G');
     });
 
-    expect(mockTextToChords).toHaveBeenCalledWith('C G');
+    expect(mockTextToChords).toHaveBeenCalledWith('C G', 4); // セクションのbeatsPerBar（4）が渡される
     expect(mockOnUpdateChart).toHaveBeenCalledWith({
       ...mockChart,
       sections: [

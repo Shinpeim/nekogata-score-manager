@@ -22,10 +22,14 @@ export const useChordOperations = ({
 }: UseChordOperationsProps) => {
 
   const addChordToSection = (sectionId: string) => {
+    // 拍子に応じてデフォルトの拍数を決定
+    const section = chart.sections?.find(s => s.id === sectionId);
+    const defaultDuration = section?.beatsPerBar || 4;
+    
     const newChord: Chord = toDisplayChord({
       name: '',
       root: '',
-      duration: undefined,
+      duration: defaultDuration,
       memo: ''
     });
     
@@ -65,9 +69,10 @@ export const useChordOperations = ({
       return;
     }
     
-    // 既存のコードの拍数をデフォルトとして使用
-    const currentChord = chart.sections?.find(s => s.id === sectionId)?.chords[chordIndex];
-    const defaultDuration = currentChord?.duration || 4;
+    // 既存のコードの拍数をデフォルトとして使用、なければセクションの拍子から
+    const section = chart.sections?.find(s => s.id === sectionId);
+    const currentChord = section?.chords[chordIndex];
+    const defaultDuration = currentChord?.duration || section?.beatsPerBar || 4;
     
     const parsed = parseChordInput(value, defaultDuration);
     if (!parsed) {

@@ -7,16 +7,17 @@ import { v4 as uuidv4 } from 'uuid';
  * 文字列からコード進行をパースする
  * 
  * @param text - テキスト形式のコード進行
+ * @param defaultDuration - 拍数指定がない場合のデフォルト拍数
  * @returns コードの配列
  * 
  * サポートする形式:
- * - "C F G Am" (デフォルト4拍)
+ * - "C F G Am" (デフォルト拍数使用)
  * - "C[4] F[2] G[2] Am[4]" (拍数指定)
  * - "C F | G Am" (改行あり)
  * - "C[1.5] F[2.5]" (小数拍数)
  * - "E7(#9)[2] C7(b5)[4]" (テンションコード)
  */
-export const textToChords = (text: string): Chord[] => {
+export const textToChords = (text: string, defaultDuration: number = 4): Chord[] => {
   const chords: Chord[] = [];
   
   // 文字列を空白で分割
@@ -34,7 +35,7 @@ export const textToChords = (text: string): Chord[] => {
       });
     } else if (part.trim()) {
       // コード解析
-      const chord = parseChordText(part);
+      const chord = parseChordText(part, defaultDuration);
       if (chord) {
         chords.push(chord);
       }
@@ -48,10 +49,11 @@ export const textToChords = (text: string): Chord[] => {
  * 個別のコードテキストをパースする
  * 
  * @param text - コードテキスト (例: "Am[2]", "C7", "F#m", "E7(#9)[4]", "C/E[2]")
+ * @param defaultDuration - 拍数指定がない場合のデフォルト拍数
  * @returns パースされたコード、またはnull
  */
-const parseChordText = (text: string): Chord | null => {
-  const parsedChord = parseChordInput(text, 4);
+const parseChordText = (text: string, defaultDuration: number = 4): Chord | null => {
+  const parsedChord = parseChordInput(text, defaultDuration);
   if (parsedChord) {
     return {
       ...parsedChord,
