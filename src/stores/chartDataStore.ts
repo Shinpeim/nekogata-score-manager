@@ -55,15 +55,13 @@ export const useChartDataStore = create<ChartDataState>()(
           const currentChart = currentCharts[id];
           const newChart = charts[id];
           
-          // 基本プロパティの比較
+          // 基本プロパティの比較（updatedAtは除外）
           if (
             currentChart.title !== newChart.title ||
             currentChart.artist !== newChart.artist ||
             currentChart.key !== newChart.key ||
             currentChart.tempo !== newChart.tempo ||
             currentChart.timeSignature !== newChart.timeSignature ||
-            currentChart.createdAt !== newChart.createdAt ||
-            currentChart.updatedAt !== newChart.updatedAt ||
             currentChart.notes !== newChart.notes ||
             currentChart.version !== newChart.version ||
             currentChart.fontSize !== newChart.fontSize
