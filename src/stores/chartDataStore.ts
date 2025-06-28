@@ -10,6 +10,7 @@ interface ChartDataState {
   
   // アクション
   setCharts: (charts: ChordLibrary) => void;
+  updateChartsIfChanged: (charts: ChordLibrary) => void;
   setCurrentChart: (id: string | null) => void;
   addChartToData: (chart: ChordChart) => void;
   updateChartInData: (id: string, chart: ChordChart) => void;
@@ -34,6 +35,97 @@ export const useChartDataStore = create<ChartDataState>()(
       // アクション
       setCharts: (charts) => {
         set({ charts }, false, 'setCharts');
+      },
+      
+      updateChartsIfChanged: (charts) => {
+        const currentCharts = get().charts;
+        
+        // チャートの数が異なる場合は更新
+        const currentIds = Object.keys(currentCharts).sort();
+        const newIds = Object.keys(charts).sort();
+        
+        if (currentIds.length !== newIds.length || !currentIds.every((id, index) => id === newIds[index])) {
+          set({ charts }, false, 'updateChartsIfChanged');
+          return;
+        }
+        
+        // 各チャートの内容を比較
+        let hasChanges = false;
+        for (const id of currentIds) {
+          const currentChart = currentCharts[id];
+          const newChart = charts[id];
+          
+          // 基本プロパティの比較
+          if (
+            currentChart.title !== newChart.title ||
+            currentChart.artist !== newChart.artist ||
+            currentChart.key !== newChart.key ||
+            currentChart.tempo !== newChart.tempo ||
+            currentChart.timeSignature !== newChart.timeSignature ||
+            currentChart.createdAt !== newChart.createdAt ||
+            currentChart.updatedAt !== newChart.updatedAt ||
+            currentChart.notes !== newChart.notes ||
+            currentChart.version !== newChart.version ||
+            currentChart.fontSize !== newChart.fontSize
+          ) {
+            hasChanges = true;
+            break;
+          }
+          
+          // セクションの比較
+          if (currentChart.sections.length !== newChart.sections.length) {
+            hasChanges = true;
+            break;
+          }
+          
+          // 各セクションの詳細比較
+          for (let i = 0; i < currentChart.sections.length; i++) {
+            const currentSection = currentChart.sections[i];
+            const newSection = newChart.sections[i];
+            
+            if (
+              currentSection.id !== newSection.id ||
+              currentSection.name !== newSection.name ||
+              currentSection.beatsPerBar !== newSection.beatsPerBar ||
+              currentSection.barsCount !== newSection.barsCount
+            ) {
+              hasChanges = true;
+              break;
+            }
+            
+            // コードの比較
+            if (currentSection.chords.length !== newSection.chords.length) {
+              hasChanges = true;
+              break;
+            }
+            
+            for (let j = 0; j < currentSection.chords.length; j++) {
+              const currentChord = currentSection.chords[j];
+              const newChord = newSection.chords[j];
+              
+              if (
+                currentChord.name !== newChord.name ||
+                currentChord.root !== newChord.root ||
+                currentChord.base !== newChord.base ||
+                currentChord.duration !== newChord.duration ||
+                currentChord.isLineBreak !== newChord.isLineBreak ||
+                currentChord.memo !== newChord.memo
+              ) {
+                hasChanges = true;
+                break;
+              }
+            }
+            
+            if (hasChanges) break;
+          }
+          
+          if (hasChanges) break;
+        }
+        
+        // 変更がある場合のみ更新
+        if (hasChanges) {
+          set({ charts }, false, 'updateChartsIfChanged');
+        }
       },
       
       setCurrentChart: (id) => {

@@ -264,9 +264,9 @@ export const useChartCrudStore = create<ChartCrudState>()(
           
           logger.debug(`Chart ID selection: current=${currentChartId}, lastOpened=${lastOpenedChartId}, new=${newCurrentChartId}`);
           
-          // データストアを更新
+          // データストアを更新（変更がある場合のみ）
           logger.debug(`Updating dataStore with new charts...`);
-          dataStore.setCharts(chartsLibrary);
+          dataStore.updateChartsIfChanged(chartsLibrary);
           logger.debug(`Updated dataStore charts`);
           
           dataStore.setCurrentChart(newCurrentChartId);
