@@ -86,7 +86,11 @@ export const useSectionOperations = ({
   const replaceChordProgression = (sectionId: string, text: string) => {
     if (!text.trim()) return;
     
-    const chords = textToChords(text);
+    // セクションの拍子からデフォルト拍数を取得
+    const section = chart.sections?.find(s => s.id === sectionId);
+    const defaultDuration = section?.beatsPerBar || 4;
+    
+    const chords = textToChords(text, defaultDuration);
     if (chords.length === 0) return;
 
     const updatedChart = {

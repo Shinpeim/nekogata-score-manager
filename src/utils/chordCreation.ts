@@ -31,14 +31,18 @@ export const createNewChordChart = (
   const now = new Date();
   const empty = createEmptyChordChart();
   
+  // ユーザーが選択した拍子を使用してセクションを作成
+  const timeSignature = data.timeSignature || empty.timeSignature;
+  const sections = data.sections || [createEmptySection('イントロ', timeSignature)];
+  
   return {
     id: uuidv4(),
     ...empty,
     ...data,
     // tempoが未定義の場合はデフォルト値を使用
     tempo: data.tempo !== undefined ? data.tempo : empty.tempo,
-    // sectionsが未定義の場合はデフォルトセクションを使用
-    sections: data.sections || empty.sections,
+    // 正しい拍子で作成されたセクションを使用
+    sections,
     createdAt: now,
     updatedAt: now
   };

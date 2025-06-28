@@ -83,7 +83,7 @@ describe('useChordOperations', () => {
     // 新しいコードの基本プロパティを確認（idは動的生成されるため除外）
     expect(newChord.name).toBe('');
     expect(newChord.root).toBe('');
-    expect(newChord.duration).toBeUndefined();
+    expect(newChord.duration).toBe(4); // セクションのbeatsPerBar（4）がデフォルトとして設定される
     expect(newChord.memo).toBe('');
     expect(newChord.id).toBeDefined(); // idが存在することを確認
   });
