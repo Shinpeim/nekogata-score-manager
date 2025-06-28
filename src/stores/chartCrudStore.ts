@@ -14,7 +14,7 @@ interface ChartCrudState {
   
   // CRUD操作
   addChart: (chart: ChordChart) => Promise<void>;
-  updateChart: (id: string, chartUpdate: Partial<ChordChart>) => Promise<void>;
+  updateChart: (id: string, chartUpdate: Partial<ChordChart>, skipSync?: boolean) => Promise<void>;
   deleteChart: (id: string) => Promise<void>;
   deleteMultipleCharts: (ids: string[]) => Promise<void>;
   createNewChart: (chartData: Partial<ChordChart>) => Promise<ChordChart>;
@@ -63,7 +63,7 @@ export const useChartCrudStore = create<ChartCrudState>()(
         }
       },
       
-      updateChart: async (id: string, chartUpdate: Partial<ChordChart>) => {
+      updateChart: async (id: string, chartUpdate: Partial<ChordChart>, skipSync = false) => {
         try {
           set({ isLoading: true, error: null });
           
@@ -80,8 +80,10 @@ export const useChartCrudStore = create<ChartCrudState>()(
           // データストアを更新
           dataStore.updateChartInData(id, updatedChart);
           
-          // 同期通知
-          get().notifySyncCallbacks();
+          // 同期通知（skipSyncがfalseの場合のみ）
+          if (!skipSync) {
+            get().notifySyncCallbacks();
+          }
           
           set({ isLoading: false });
         } catch (error) {
