@@ -1,0 +1,53 @@
+1) [firefox] › e2e/tests/chart-creation.spec.ts:8:3 › Nekogata Score Manager - チャート作成機能 › 新規チャートの作成フローが動作する 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.waitFor: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('aside') to be visible
+        58 × locator resolved to hidden <aside class="↵            -translate-x-full md:translate-x-0 w-0↵            fixed md:relative↵            inset-y-0 left-0↵            bg-white shadow-lg md:shadow-sm↵            ↵            overflow-hidden↵            transition-all duration-300 ease-in-out↵            z-40 md:z-auto↵          ">…</aside>
+
+
+       at ../pages/HomePage.ts:61
+
+      59 |     // Score Explorerが開くのを待つ（幅が0より大きくなるのを待つ）
+      60 |     const sidebar = this.page.locator('aside');
+    > 61 |     await sidebar.waitFor({ state: 'visible' });
+         |                   ^
+      62 |     await sidebar.evaluate((el) => {
+      63 |       return new Promise((resolve) => {
+      64 |         const observer = new MutationObserver(() => {
+        at HomePage.clickOpenExplorer (/Users/shinpei/dev/github.com/Shinpeim/nekogata-score-manager/e2e/pages/HomePage.ts:61:19)
+        at /Users/shinpei/dev/github.com/Shinpeim/nekogata-score-manager/e2e/tests/chart-creation.spec.ts:21:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/chart-creation-Nekogata-Sc-c6de3--チャート作成機能-新規チャートの作成フローが動作する-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/chart-creation-Nekogata-Sc-c6de3--チャート作成機能-新規チャートの作成フローが動作する-firefox/error-context.md
+
+  2) [firefox] › e2e/tests/transpose.spec.ts:130:3 › Nekogata Score Manager - 移調機能テスト (音楽アプリの核心機能) › 複数キー移調テスト: C→G→D→A→E の連続移調検証 
+
+    Error: locator.evaluate: Execution context was destroyed, most likely because of a navigation.
+
+       at ../pages/HomePage.ts:62
+
+      60 |     const sidebar = this.page.locator('aside');
+      61 |     await sidebar.waitFor({ state: 'visible' });
+    > 62 |     await sidebar.evaluate((el) => {
+         |                   ^
+      63 |       return new Promise((resolve) => {
+      64 |         const observer = new MutationObserver(() => {
+      65 |           const width = parseInt(window.getComputedStyle(el).width, 10);
+        at HomePage.clickOpenExplorer (/Users/shinpei/dev/github.com/Shinpeim/nekogata-score-manager/e2e/pages/HomePage.ts:62:19)
+        at /Users/shinpei/dev/github.com/Shinpeim/nekogata-score-manager/e2e/tests/transpose.spec.ts:141:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/transpose-Nekogata-Score-M-40194-複数キー移調テスト-C→G→D→A→E-の連続移調検証-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/transpose-Nekogata-Score-M-40194-複数キー移調テスト-C→G→D→A→E-の連続移調検証-firefox/error-context.md
+
+  2 failed
+    [firefox] › e2e/tests/chart-creation.spec.ts:8:3 › Nekogata Score Manager - チャート作成機能 › 新規チャートの作成フローが動作する 
+    [firefox] › e2e/tests/transpose.spec.ts:130:3 › Nekogata Score Manager - 移調機能テスト (音楽アプリの核心機能) › 複数キー移調テスト: C→G→D→A→E の連続移調検証 
