@@ -24,7 +24,7 @@ const ChordChartViewer: React.FC<ChordChartViewerProps> = ({ chart, currentChart
   const handleFontSizeChange = async (newSize: number) => {
     setFontSize(newSize);
     if (currentChartId) {
-      await updateChart(currentChartId, { fontSize: newSize });
+      await updateChart(currentChartId, { fontSize: newSize }, true);
     }
   };
 
