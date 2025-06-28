@@ -127,6 +127,11 @@ export const useChartDataStore = create<ChartDataState>()(
       },
       
       setCurrentChart: (id) => {
+        // 現在のIDと同じ場合は更新をスキップ
+        if (get().currentChartId === id) {
+          return;
+        }
+        
         set({ currentChartId: id }, false, 'setCurrentChart');
         // 最後に開いたチャートIDを保存
         storageService.saveLastOpenedChartId(id).catch(console.error);
