@@ -12,8 +12,15 @@ export const extractChordRoot = (chordName: string): string => {
     return 'C'; // デフォルト値
   }
 
+  const trimmed = chordName.trim();
+  
+  // N.C. (No Chord) の場合はnullを返す
+  if (trimmed.toUpperCase() === 'N.C.' || trimmed.toUpperCase() === 'NC') {
+    return 'N.C.';
+  }
+
   // ルート音のパターンにマッチ: A-Gで始まり、#、b、♭のいずれかが続く可能性
-  const rootMatch = chordName.match(/^([A-G][#b♭]?)/i);
+  const rootMatch = trimmed.match(/^([A-G][#b♭]?)/i);
   
   if (rootMatch) {
     const root = rootMatch[1];

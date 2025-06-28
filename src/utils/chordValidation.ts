@@ -41,6 +41,11 @@ export const isValidChordName = (chordName: string): boolean => {
     return false;
   }
 
+  // N.C. (No Chord) は有効なコードとして扱う
+  if (trimmed.toUpperCase() === 'N.C.' || trimmed.toUpperCase() === 'NC') {
+    return true;
+  }
+
   // ルート音（A-G）で始まることのみチェック、あとはユーザーの入力をそのまま受け入れる
   const rootPattern = /^[A-G][#b♭]?/i;
   return rootPattern.test(trimmed);

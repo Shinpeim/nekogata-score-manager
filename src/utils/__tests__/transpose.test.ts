@@ -46,6 +46,13 @@ describe('移調機能のテスト', () => {
       expect(transposeChordName('', 2, 'D')).toBe('C');
       expect(transposeChordName('Invalid', 2, 'D')).toBe('Invalid');
     });
+
+    test('N.C. (No Chord) の処理', () => {
+      expect(transposeChordName('N.C.', 2, 'D')).toBe('N.C.');
+      expect(transposeChordName('NC', 5, 'F')).toBe('NC');
+      expect(transposeChordName('n.c.', -3, 'A')).toBe('n.c.');
+      expect(transposeChordName('nc', 7, 'G')).toBe('nc');
+    });
   });
 
   describe('calculateSemitonesDifference', () => {
@@ -140,6 +147,27 @@ describe('移調機能のテスト', () => {
       expect(lineBreakChord.isLineBreak).toBe(true);
       expect(lineBreakChord.name).toBe('');
       expect(lineBreakChord.root).toBe('');
+    });
+
+    test('N.C. (No Chord) を含むコード譜の移調', () => {
+      const chart = createTestChart();
+      chart.sections[0].chords = [
+        { id: 'chord-1', name: 'C', root: 'C', duration: 2, memo: '' },
+        { id: 'chord-2', name: 'N.C.', root: 'N.C.', duration: 2, memo: '' },
+        { id: 'chord-3', name: 'G', root: 'G', duration: 2, memo: '' },
+        { id: 'chord-4', name: 'NC', root: 'N.C.', duration: 2, memo: '' }
+      ];
+
+      const transposed = transposeChart(chart, 'D');
+      
+      expect(transposed.sections[0].chords[0].name).toBe('D');
+      expect(transposed.sections[0].chords[0].root).toBe('D');
+      expect(transposed.sections[0].chords[1].name).toBe('N.C.');
+      expect(transposed.sections[0].chords[1].root).toBe('N.C.');
+      expect(transposed.sections[0].chords[2].name).toBe('A');
+      expect(transposed.sections[0].chords[2].root).toBe('A');
+      expect(transposed.sections[0].chords[3].name).toBe('NC');
+      expect(transposed.sections[0].chords[3].root).toBe('N.C.');
     });
 
     test('拍数の保持', () => {
