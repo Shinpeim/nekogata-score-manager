@@ -48,6 +48,7 @@ export const useSetListManagement = () => {
         throw error;
       }
     },
+    hasDataChanges: crudStore.hasDataChanges,
     subscribeSyncNotification: crudStore.subscribeSyncNotification,
     notifySync: crudStore.notifySync,
   };

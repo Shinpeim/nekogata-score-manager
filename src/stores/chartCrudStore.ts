@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import type { ChordChart } from '../types';
+import type { ChordChart, ChordLibrary } from '../types';
 import { chartCrudService } from '../services/chartCrudService';
 import { syncNotificationService } from '../services/syncNotificationService';
 import { useChartDataStore } from './chartDataStore';
@@ -23,6 +23,7 @@ interface ChartCrudState {
   loadInitialData: () => Promise<void>;
   loadFromStorage: () => Promise<void>;
   applySyncedCharts: (mergedCharts: ChordChart[]) => Promise<void>;
+  hasDataChanges: (mergedCharts: ChordChart[]) => Promise<boolean>;
   
   // 同期メソッド（簡素化）
   subscribeSyncNotification: (callback: (charts: ChordChart[]) => void) => () => void;
@@ -284,6 +285,95 @@ export const useChartCrudStore = create<ChartCrudState>()(
             error: error instanceof Error ? error.message : '同期データの適用に失敗しました' 
           });
           throw error;
+        }
+      },
+      
+      hasDataChanges: async (mergedCharts: ChordChart[]) => {
+        try {
+          const dataStore = useChartDataStore.getState();
+          const currentCharts = dataStore.charts;
+          
+          // チャートライブラリを生成
+          const mergedChartsLibrary: ChordLibrary = {};
+          mergedCharts.forEach(chart => {
+            mergedChartsLibrary[chart.id] = chart;
+          });
+          
+          // チャートの数が異なる場合は変更あり
+          const currentIds = Object.keys(currentCharts).sort();
+          const newIds = Object.keys(mergedChartsLibrary).sort();
+          
+          if (currentIds.length !== newIds.length || !currentIds.every((id, index) => id === newIds[index])) {
+            return true;
+          }
+          
+          // 各チャートの内容を比較
+          for (const id of currentIds) {
+            const currentChart = currentCharts[id];
+            const newChart = mergedChartsLibrary[id];
+            
+            // 基本プロパティの比較（updatedAtは除外）
+            if (
+              currentChart.title !== newChart.title ||
+              currentChart.artist !== newChart.artist ||
+              currentChart.key !== newChart.key ||
+              currentChart.tempo !== newChart.tempo ||
+              currentChart.timeSignature !== newChart.timeSignature ||
+              currentChart.notes !== newChart.notes ||
+              currentChart.version !== newChart.version ||
+              currentChart.fontSize !== newChart.fontSize
+            ) {
+              return true;
+            }
+            
+            // セクションの比較
+            if (currentChart.sections.length !== newChart.sections.length) {
+              return true;
+            }
+            
+            // 各セクションの詳細比較
+            for (let i = 0; i < currentChart.sections.length; i++) {
+              const currentSection = currentChart.sections[i];
+              const newSection = newChart.sections[i];
+              
+              if (
+                currentSection.id !== newSection.id ||
+                currentSection.name !== newSection.name ||
+                currentSection.beatsPerBar !== newSection.beatsPerBar ||
+                currentSection.barsCount !== newSection.barsCount
+              ) {
+                return true;
+              }
+              
+              // コードの比較
+              if (currentSection.chords.length !== newSection.chords.length) {
+                return true;
+              }
+              
+              for (let j = 0; j < currentSection.chords.length; j++) {
+                const currentChord = currentSection.chords[j];
+                const newChord = newSection.chords[j];
+                
+                if (
+                  currentChord.name !== newChord.name ||
+                  currentChord.root !== newChord.root ||
+                  currentChord.base !== newChord.base ||
+                  currentChord.duration !== newChord.duration ||
+                  currentChord.isLineBreak !== newChord.isLineBreak ||
+                  currentChord.memo !== newChord.memo
+                ) {
+                  return true;
+                }
+              }
+            }
+          }
+          
+          // 変更なし
+          return false;
+        } catch (error) {
+          logger.error('hasDataChanges error:', error);
+          // エラーの場合は安全側に倒して変更ありとする
+          return true;
         }
       },
       

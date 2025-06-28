@@ -23,6 +23,7 @@ interface SetListCrudState {
   loadInitialData: () => Promise<void>;
   loadFromStorage: () => Promise<void>;
   applySyncedSetLists: (mergedSetLists: SetList[]) => Promise<void>;
+  hasDataChanges: (mergedSetLists: SetList[]) => Promise<boolean>;
   
   // 同期通知
   subscribeSyncNotification: (callback: (setLists: SetList[]) => void) => () => void;
@@ -332,6 +333,45 @@ export const useSetListCrudStore = create<SetListCrudState>()(
             error: error instanceof Error ? error.message : '同期セットリストデータの適用に失敗しました' 
           });
           throw error;
+        }
+      },
+      
+      hasDataChanges: async (mergedSetLists: SetList[]) => {
+        try {
+          const dataStore = useSetListStore.getState();
+          const currentSetLists = dataStore.setLists;
+          
+          // セットリストの数が異なる場合は変更あり
+          const currentIds = Object.keys(currentSetLists).sort();
+          const mergedIds = mergedSetLists.map(s => s.id).sort();
+          
+          if (currentIds.length !== mergedIds.length || !currentIds.every((id, index) => id === mergedIds[index])) {
+            return true;
+          }
+          
+          // 各セットリストの内容を比較
+          for (const mergedSetList of mergedSetLists) {
+            const currentSetList = currentSetLists[mergedSetList.id];
+            if (!currentSetList) {
+              return true;
+            }
+            
+            // 基本プロパティの比較（updatedAtは除外）
+            if (
+              currentSetList.name !== mergedSetList.name ||
+              currentSetList.chartIds.length !== mergedSetList.chartIds.length ||
+              !currentSetList.chartIds.every((id, index) => id === mergedSetList.chartIds[index])
+            ) {
+              return true;
+            }
+          }
+          
+          // 変更なし
+          return false;
+        } catch (error) {
+          logger.error('hasDataChanges error:', error);
+          // エラーの場合は安全側に倒して変更ありとする
+          return true;
         }
       },
       

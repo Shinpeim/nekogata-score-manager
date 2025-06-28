@@ -61,15 +61,27 @@ export const useChartSync = () => {
       
       if (result.success) {
         if (result.mergedCharts) {
-          logger.debug(`[SYNC] useChartSync calling applySyncedCharts with ${result.mergedCharts.length} charts`);
-          await chordChartStore.applySyncedCharts(result.mergedCharts);
-          logger.debug(`[SYNC] useChartSync applySyncedCharts completed`);
+          // 実際に変更があるかチェック
+          const hasChartChanges = await chordChartStore.hasDataChanges(result.mergedCharts);
+          if (hasChartChanges) {
+            logger.debug(`[SYNC] useChartSync calling applySyncedCharts with ${result.mergedCharts.length} charts`);
+            await chordChartStore.applySyncedCharts(result.mergedCharts);
+            logger.debug(`[SYNC] useChartSync applySyncedCharts completed`);
+          } else {
+            logger.debug(`[SYNC] useChartSync skipping applySyncedCharts - no data changes detected`);
+          }
         }
         
         if (result.mergedSetLists) {
-          logger.debug(`[SYNC] useChartSync calling applySyncedSetLists with ${result.mergedSetLists.length} setlists`);
-          await setListStore.applySyncedSetLists(result.mergedSetLists);
-          logger.debug(`[SYNC] useChartSync applySyncedSetLists completed`);
+          // 実際に変更があるかチェック
+          const hasSetListChanges = await setListStore.hasDataChanges(result.mergedSetLists);
+          if (hasSetListChanges) {
+            logger.debug(`[SYNC] useChartSync calling applySyncedSetLists with ${result.mergedSetLists.length} setlists`);
+            await setListStore.applySyncedSetLists(result.mergedSetLists);
+            logger.debug(`[SYNC] useChartSync applySyncedSetLists completed`);
+          } else {
+            logger.debug(`[SYNC] useChartSync skipping applySyncedSetLists - no data changes detected`);
+          }
         }
       } else {
         logger.warn(`[SYNC] Manual sync - not applying data:`, { 
@@ -109,15 +121,27 @@ export const useChartSync = () => {
           // 成功時にマージ済みデータを適用
           if (result.success) {
             if (result.mergedCharts) {
-              logger.debug(`Auto sync applying ${result.mergedCharts.length} charts`);
-              await chordChartStore.applySyncedCharts(result.mergedCharts);
-              logger.debug('Auto sync applySyncedCharts completed');
+              // 実際に変更があるかチェック
+              const hasChartChanges = await chordChartStore.hasDataChanges(result.mergedCharts);
+              if (hasChartChanges) {
+                logger.debug(`Auto sync applying ${result.mergedCharts.length} charts`);
+                await chordChartStore.applySyncedCharts(result.mergedCharts);
+                logger.debug('Auto sync applySyncedCharts completed');
+              } else {
+                logger.debug('Auto sync skipping applySyncedCharts - no data changes detected');
+              }
             }
             
             if (result.mergedSetLists) {
-              logger.debug(`Auto sync applying ${result.mergedSetLists.length} setlists`);
-              await setListStore.applySyncedSetLists(result.mergedSetLists);
-              logger.debug('Auto sync applySyncedSetLists completed');
+              // 実際に変更があるかチェック
+              const hasSetListChanges = await setListStore.hasDataChanges(result.mergedSetLists);
+              if (hasSetListChanges) {
+                logger.debug(`Auto sync applying ${result.mergedSetLists.length} setlists`);
+                await setListStore.applySyncedSetLists(result.mergedSetLists);
+                logger.debug('Auto sync applySyncedSetLists completed');
+              } else {
+                logger.debug('Auto sync skipping applySyncedSetLists - no data changes detected');
+              }
             }
           } else {
             logger.debug('Auto sync - not applying data:', { 
@@ -143,13 +167,21 @@ export const useChartSync = () => {
           
           if (result.success) {
             if (result.mergedCharts) {
-              logger.debug(`Auto sync applying ${result.mergedCharts.length} charts`);
-              await chordChartStore.applySyncedCharts(result.mergedCharts);
+              // 実際に変更があるかチェック
+              const hasChartChanges = await chordChartStore.hasDataChanges(result.mergedCharts);
+              if (hasChartChanges) {
+                logger.debug(`Auto sync applying ${result.mergedCharts.length} charts`);
+                await chordChartStore.applySyncedCharts(result.mergedCharts);
+              }
             }
             
             if (result.mergedSetLists) {
-              logger.debug(`Auto sync applying ${result.mergedSetLists.length} setlists`);
-              await setListStore.applySyncedSetLists(result.mergedSetLists);
+              // 実際に変更があるかチェック
+              const hasSetListChanges = await setListStore.hasDataChanges(result.mergedSetLists);
+              if (hasSetListChanges) {
+                logger.debug(`Auto sync applying ${result.mergedSetLists.length} setlists`);
+                await setListStore.applySyncedSetLists(result.mergedSetLists);
+              }
             }
           }
         }
