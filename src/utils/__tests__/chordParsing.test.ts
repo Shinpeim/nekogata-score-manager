@@ -23,6 +23,13 @@ describe('chordParsing', () => {
       expect(extractChordRoot('Bbm7(b5)')).toBe('B♭');
     });
 
+    it('should handle N.C. (No Chord)', () => {
+      expect(extractChordRoot('N.C.')).toBe('N.C.');
+      expect(extractChordRoot('NC')).toBe('N.C.');
+      expect(extractChordRoot('n.c.')).toBe('N.C.');
+      expect(extractChordRoot('nc')).toBe('N.C.');
+    });
+
     it('should return default for invalid input', () => {
       expect(extractChordRoot('')).toBe('C');
       expect(extractChordRoot('invalid')).toBe('C');
@@ -176,7 +183,9 @@ describe('chordParsing', () => {
           { input: 'Gaug', expected: { name: 'Gaug', root: 'G' } },
           { input: 'Csus4', expected: { name: 'Csus4', root: 'C' } },
           { input: 'Asus2', expected: { name: 'Asus2', root: 'A' } },
-          { input: 'Cadd9', expected: { name: 'Cadd9', root: 'C' } }
+          { input: 'Cadd9', expected: { name: 'Cadd9', root: 'C' } },
+          { input: 'N.C.', expected: { name: 'N.C.', root: 'N.C.' } },
+          { input: 'NC', expected: { name: 'NC', root: 'N.C.' } }
         ];
 
         for (const { input, expected } of testCases) {

@@ -18,6 +18,11 @@ describe('chordValidation', () => {
       expect(isValidChordName('G7')).toBe(true);
       expect(isValidChordName('Am7')).toBe(true);
       expect(isValidChordName('Cmaj7')).toBe(true);
+      // N.C. (No Chord) のテスト
+      expect(isValidChordName('N.C.')).toBe(true);
+      expect(isValidChordName('NC')).toBe(true);
+      expect(isValidChordName('n.c.')).toBe(true);
+      expect(isValidChordName('nc')).toBe(true);
     });
 
     it('無効なコード名を正しく判定する', () => {

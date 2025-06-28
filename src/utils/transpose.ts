@@ -69,6 +69,11 @@ export const transposeChordName = (chordName: string, semitones: number, targetK
     return 'C';
   }
 
+  // N.C. (No Chord) の場合は移調せずそのまま返す
+  if (trimmed.toUpperCase() === 'N.C.' || trimmed.toUpperCase() === 'NC') {
+    return trimmed;
+  }
+
   // オンコードの場合は分離して処理
   if (isOnChord(trimmed)) {
     const parsed = parseOnChord(trimmed);
