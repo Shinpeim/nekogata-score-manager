@@ -35,6 +35,8 @@ export const createNewChordChart = (
     id: uuidv4(),
     ...empty,
     ...data,
+    // tempoが未定義の場合はデフォルト値を使用
+    tempo: data.tempo !== undefined ? data.tempo : empty.tempo,
     // sectionsが未定義の場合はデフォルトセクションを使用
     sections: data.sections || empty.sections,
     createdAt: now,
