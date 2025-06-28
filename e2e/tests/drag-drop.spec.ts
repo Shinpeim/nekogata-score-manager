@@ -66,8 +66,8 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
     // 移動後の期待順序: C - F - Am - G
     await chartEditorPage.dragChordToPosition(sectionIndex, 1, sectionIndex, 2);
     
-    // ドラッグ操作の完了を待つ
-    await page.waitForTimeout(1000);
+    // ドラッグ操作の完了を待つ（少し待機してから順序を確認）
+    await page.waitForTimeout(500);  // アニメーション完了を待つ
 
     // 5. 順序変更後の確認
     const afterDragOrder = await chartEditorPage.getChordOrderInSection(sectionIndex);

@@ -56,8 +56,35 @@ export class HomePage {
       await this.explorerToggle.click();
     }
     
-    // Score Explorerが開くのを待つ
-    await this.page.waitForTimeout(300); // CSS遷移を待つ
+    // Score Explorerが開くのを待つ（幅が0より大きくなるのを待つ）
+    const sidebar = this.page.locator('aside');
+    await sidebar.waitFor({ state: 'attached' }); // DOMに存在することを確認
+    await sidebar.evaluate((el) => {
+      return new Promise((resolve) => {
+        // 既に開いている場合のチェック
+        const currentWidth = parseInt(window.getComputedStyle(el).width, 10);
+        if (currentWidth > 0) {
+          resolve(true);
+          return;
+        }
+        
+        // MutationObserverで変更を監視
+        const observer = new MutationObserver(() => {
+          const width = parseInt(window.getComputedStyle(el).width, 10);
+          if (width > 0) {
+            observer.disconnect();
+            resolve(true);
+          }
+        });
+        observer.observe(el, { attributes: true, attributeFilter: ['style', 'class'] });
+        
+        // タイムアウト設定（フォールバック）
+        setTimeout(() => {
+          observer.disconnect();
+          resolve(true);
+        }, 3000);
+      });
+    });
   }
 
   async toggleExplorer() {
@@ -81,27 +108,42 @@ export class HomePage {
       // Wait for Score Explorer to open (幅が0より大きくなるのを待つ)
       await sidebar.evaluate((el) => {
         return new Promise((resolve) => {
-          const checkWidth = () => {
-            const width = parseInt(window.getComputedStyle(el).width, 10);
-            if (width > 0) {
-              resolve(true);
-            } else {
-              setTimeout(checkWidth, 100);
-            }
+          // CSS transition の完了を待つ
+          const handleTransitionEnd = () => {
+            el.removeEventListener('transitionend', handleTransitionEnd);
+            resolve(true);
           };
-          checkWidth();
+          
+          el.addEventListener('transitionend', handleTransitionEnd);
+          
+          // タイムアウト設定（フォールバック）
+          const timeout = setTimeout(() => {
+            el.removeEventListener('transitionend', handleTransitionEnd);
+            resolve(true);
+          }, 1000);
+          
+          // 既に開いている場合のチェック
+          const width = parseInt(window.getComputedStyle(el).width, 10);
+          if (width > 0) {
+            clearTimeout(timeout);
+            el.removeEventListener('transitionend', handleTransitionEnd);
+            resolve(true);
+          }
         });
       });
-      
-      // CSS遷移が完了するのを待つ
-      await this.page.waitForTimeout(300);
     }
   }
 
   async setDesktopViewport() {
     await this.page.setViewportSize({ width: 1280, height: 720 });
-    // Wait for viewport change to take effect
-    await this.page.waitForTimeout(100);
+    // Wait for viewport change to take effect by checking actual viewport size
+    await this.page.waitForFunction(
+      ({ expectedWidth, expectedHeight }) => {
+        return window.innerWidth >= expectedWidth && window.innerHeight >= expectedHeight;
+      },
+      { expectedWidth: 1280, expectedHeight: 720 },
+      { timeout: 5000 }
+    );
   }
 
   getEmptyStateMessage() {

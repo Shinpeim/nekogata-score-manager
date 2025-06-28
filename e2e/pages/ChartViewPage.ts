@@ -38,8 +38,18 @@ export class ChartViewPage {
         // Score Explorerが閉じているので開く
         await explorerToggle.click();
         
-        // 少し待機してScore Explorerが開くのを待つ
-        await this.page.waitForTimeout(1000);
+        // Score Explorerが開くのを待つ（サイドバーの幅が0より大きくなるのを待つ）
+        const sidebar = this.page.locator('aside');
+        await sidebar.waitFor({ state: 'visible' });
+        await this.page.waitForFunction(
+          () => {
+            const aside = document.querySelector('aside');
+            if (!aside) return false;
+            const width = parseInt(window.getComputedStyle(aside).width, 10);
+            return width > 0;
+          },
+          { timeout: 5000 }
+        );
       }
     }
     
@@ -75,8 +85,8 @@ export class ChartViewPage {
       throw new Error(`Edit button not found in DOM (index: ${chartIndex ?? 0})`);
     }
     
-    // 編集画面に遷移するまで少し待機
-    await this.page.waitForTimeout(500);
+    // 編集画面に遷移するまで待機（編集エディタの表示を待つ）
+    await this.page.waitForSelector('[data-testid="chart-editor"]', { state: 'visible', timeout: 5000 });
   }
 
   getChartTitleWithText(title: string) {
