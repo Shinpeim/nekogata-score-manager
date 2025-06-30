@@ -182,8 +182,18 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-hidden">
-          {children}
+        <main className="flex-1 overflow-hidden relative">
+          {/* Overlay for desktop when sidebar is open */}
+          {explorerOpen && (
+            <div 
+              className="hidden md:block absolute inset-0 z-10" 
+              onClick={() => setExplorerOpen(false)}
+              data-testid="desktop-overlay"
+            />
+          )}
+          <div className="relative z-20">
+            {children}
+          </div>
         </main>
       </div>
 
