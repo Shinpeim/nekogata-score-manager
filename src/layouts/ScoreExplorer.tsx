@@ -234,6 +234,7 @@ const ScoreExplorer: React.FC<ScoreExplorerProps> = ({
           onClick={onClose}
           className="p-2 text-slate-500 hover:text-slate-700"
           aria-label="サイドバーを閉じる"
+          data-testid="explorer-close-button"
         >
           <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

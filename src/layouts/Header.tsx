@@ -17,7 +17,7 @@ const Header: React.FC<HeaderProps> = ({ explorerOpen, setExplorerOpen }) => {
   const [syncDropdownOpen, setSyncDropdownOpen] = useState(false);
 
   return (
-    <header className="bg-white shadow-sm border-b border-slate-200" data-testid="header">
+    <header className="bg-white shadow-sm border-b border-slate-200 relative" data-testid="header">
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex items-center h-12">
           <button

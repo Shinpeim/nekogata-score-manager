@@ -70,10 +70,10 @@ const SetListSelector: React.FC = () => {
       {showDropdown && (
         <>
           <div 
-            className="fixed inset-0 z-10" 
+            className="fixed inset-0" 
             onClick={() => setShowDropdown(false)}
           />
-          <div className="absolute z-20 w-full mt-1 bg-white border border-slate-200 rounded-md shadow-lg max-h-64 overflow-y-auto">
+          <div className="absolute w-full mt-1 bg-white border border-slate-200 rounded-md shadow-lg max-h-64 overflow-y-auto">
             <div 
               className="p-3 hover:bg-slate-50 cursor-pointer border-b border-slate-100"
               onClick={() => handleSetListSelect(null)}
@@ -132,7 +132,7 @@ const SetListSelector: React.FC = () => {
 
       {/* 削除確認ダイアログ */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-6 max-w-sm mx-4">
             <h3 className="text-lg font-medium text-slate-900 mb-2">
               セットリストを削除

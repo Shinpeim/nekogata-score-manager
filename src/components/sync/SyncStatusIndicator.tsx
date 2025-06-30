@@ -75,7 +75,7 @@ export const SyncStatusIndicator: React.FC<SyncStatusIndicatorProps> = ({ classN
           {showErrorDetail && (
             <div 
               ref={errorDetailRef}
-              className="absolute top-full right-0 mt-1 p-2 bg-white border border-slate-200 rounded-md shadow-lg z-10 max-w-xs"
+              className="absolute top-full right-0 mt-1 p-2 bg-white border border-slate-200 rounded-md shadow-lg max-w-xs"
             >
               <p className="text-xs text-[#EE5840] whitespace-pre-wrap break-words">
                 {syncError}
