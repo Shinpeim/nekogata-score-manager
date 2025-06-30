@@ -151,19 +151,29 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
           />
         )}
 
+        {/* Desktop backdrop - 画面全体を覆う */}
+        {explorerOpen && (
+          <div 
+            className="hidden md:block fixed inset-0 z-30" 
+            onClick={() => setExplorerOpen(false)}
+            data-testid="desktop-overlay"
+          />
+        )}
+
         {/* Responsive Score Explorer - 単一のインスタンス */}
-        <aside 
-          className={`
-            ${explorerOpen ? 'translate-x-0 w-80' : '-translate-x-full md:translate-x-0 w-0'}
-            fixed md:relative
-            inset-y-0 left-0
-            bg-white shadow-lg md:shadow-sm
-            ${explorerOpen ? 'border-r border-slate-200' : ''}
-            ${explorerOpen ? 'overflow-y-auto' : 'overflow-hidden'}
-            transition-all duration-300 ease-in-out
-            z-40 md:z-auto
-          `}
-        >
+        {explorerOpen && (
+          <aside 
+            className={`
+              w-80
+              fixed md:relative
+              inset-y-0 left-0
+              bg-white shadow-lg md:shadow-sm
+              border-r border-slate-200
+              overflow-y-auto
+              transition-all duration-300 ease-in-out
+              z-40
+            `}
+          >
           <ScoreExplorer
             charts={charts}
             currentChartId={currentChartId}
@@ -179,21 +189,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
             onEditChart={handleEditChart}
             onClose={() => setExplorerOpen(false)}
           />
-        </aside>
+          </aside>
+        )}
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-hidden relative">
-          {/* Overlay for desktop when sidebar is open */}
-          {explorerOpen && (
-            <div 
-              className="hidden md:block absolute inset-0 z-10" 
-              onClick={() => setExplorerOpen(false)}
-              data-testid="desktop-overlay"
-            />
-          )}
-          <div className="relative z-20">
-            {children}
-          </div>
+        <main className="flex-1 overflow-hidden">
+          {children}
         </main>
       </div>
 
