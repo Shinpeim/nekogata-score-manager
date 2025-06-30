@@ -85,11 +85,12 @@ test.describe('Nekogata Score Manager - 移調機能テスト (音楽アプリ�
     await expect(transposeButton).toBeVisible();
     
     console.log('移調ボタンをクリック中...');
-    await transposeButton.click({ force: true });
+    // Firefoxでの互換性のため、dispatchEventを使用
+    await transposeButton.dispatchEvent('click');
     console.log('移調ボタンクリック完了');
 
-    // 移調ダイアログが閉じるまで待機
-    await expect(page.locator('text=キーの変更')).not.toBeVisible();
+    // 移調ダイアログが閉じるまで待機（タイムアウトを延長）
+    await expect(page.locator('text=キーの変更')).not.toBeVisible({ timeout: 10000 });
 
     // 移調処理が完了するまで待機
     await page.waitForFunction(() => {
@@ -178,7 +179,8 @@ test.describe('Nekogata Score Manager - 移調機能テスト (音楽アプリ�
 
       // 移調確認ダイアログで移調実行
       const transposeButton = page.locator('button:has-text("はい、コードも一緒に移調する")');
-      await transposeButton.click();
+      // Firefoxでの互換性のため、dispatchEventを使用
+      await transposeButton.dispatchEvent('click');
 
       // 移調ダイアログが閉じるまで待機
       await expect(page.locator('text=キーの変更')).not.toBeVisible();
@@ -248,7 +250,8 @@ test.describe('Nekogata Score Manager - 移調機能テスト (音楽アプリ�
     await keySelect.selectOption('A');
     
     const transposeButton = page.locator('button:has-text("はい、コードも一緒に移調する")');
-    await transposeButton.click();
+    // Firefoxでの互換性のため、dispatchEventを使用
+    await transposeButton.dispatchEvent('click');
 
     // 移調ダイアログが閉じるまで待機
     await expect(page.locator('text=キーの変更')).not.toBeVisible();

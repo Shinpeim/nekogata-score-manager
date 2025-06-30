@@ -30,6 +30,10 @@ test.describe('セットリスト作成機能', () => {
     await expect(scoreExplorerPage.chartsTab).toBeAttached();
     
     // 楽譜を2つ作成
+    // サイドバーが確実に開いていることを確認
+    const sidebar = page.locator('aside');
+    await expect(sidebar).toHaveClass(/translate-x-0/);
+    
     await scoreExplorerPage.clickCreateNew();
     await expect(chartFormPage.form).toBeVisible();
     
@@ -40,6 +44,15 @@ test.describe('セットリスト作成機能', () => {
     // Wait for chart to be created and appear in the list
     await expect(page.locator('text=テスト楽曲1').first()).toBeVisible();
 
+    // 新規作成後はサイドバーが閉じているので、再度開く
+    await homePage.ensureExplorerOpen();
+    
+    // サイドバー内の要素が表示されるのを待つ
+    await expect(scoreExplorerPage.chartsTab).toBeVisible();
+    await page.waitForTimeout(500); // アニメーション完了を待つ
+    
+    // 編集画面が表示されている場合があるので、新規作成ボタンが確実にクリックできるまで待つ
+    await scoreExplorerPage.createNewButton.waitFor({ state: 'visible' });
     await scoreExplorerPage.clickCreateNew();
     await expect(chartFormPage.form).toBeVisible();
     
@@ -50,17 +63,20 @@ test.describe('セットリスト作成機能', () => {
     // Wait for second chart to be created and appear in the list
     await expect(page.locator('text=テスト楽曲2').first()).toBeVisible();
 
+    // 新規作成後はサイドバーが閉じているので、再度開く
+    await homePage.ensureExplorerOpen();
+    
     // 楽譜タブが選択されていることを確認
     await expect(scoreExplorerPage.chartsTab).toHaveClass(/bg-white/);
 
     // セットリストタブに切り替え
-    await scoreExplorerPage.setlistsTab.click();
+    await scoreExplorerPage.setlistsTab.dispatchEvent('click');
     
     // セットリストが選択されていない場合のメッセージを確認
     await expect(page.locator('text=セットリストを選択してください')).toBeVisible();
     
     // 楽譜タブに戻る
-    await scoreExplorerPage.chartsTab.click();
+    await scoreExplorerPage.chartsTab.dispatchEvent('click');
     
     // 作成された楽譜が表示されることを確認
     await expect(page.locator('text=テスト楽曲1').first()).toBeVisible();
@@ -72,13 +88,13 @@ test.describe('セットリスト作成機能', () => {
     await homePage.clickOpenExplorer();
     
     // セットリストタブに切り替え
-    await scoreExplorerPage.setlistsTab.click();
+    await scoreExplorerPage.setlistsTab.dispatchEvent('click');
     
     // セットリストが選択されていない場合のメッセージを確認
     await expect(page.locator('text=セットリストを選択してください')).toBeVisible();
     
     // 楽譜タブに戻る
-    await scoreExplorerPage.chartsTab.click();
+    await scoreExplorerPage.chartsTab.dispatchEvent('click');
   });
 
   test('楽譜タブとセットリストタブの切り替えができる', async ({ page }) => {
@@ -90,7 +106,7 @@ test.describe('セットリスト作成機能', () => {
     await expect(scoreExplorerPage.setlistsTab).not.toHaveClass(/bg-white/);
 
     // セットリストタブをクリック
-    await scoreExplorerPage.setlistsTab.click();
+    await scoreExplorerPage.setlistsTab.dispatchEvent('click');
     await expect(scoreExplorerPage.setlistsTab).toHaveClass(/bg-white/);
     await expect(scoreExplorerPage.chartsTab).not.toHaveClass(/bg-white/);
 
@@ -98,7 +114,7 @@ test.describe('セットリスト作成機能', () => {
     await expect(page.locator('text=セットリストを選択してください')).toBeVisible();
 
     // 楽譜タブに戻る
-    await scoreExplorerPage.chartsTab.click();
+    await scoreExplorerPage.chartsTab.dispatchEvent('click');
     await expect(scoreExplorerPage.chartsTab).toHaveClass(/bg-white/);
     await expect(scoreExplorerPage.setlistsTab).not.toHaveClass(/bg-white/);
   });

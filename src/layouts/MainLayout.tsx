@@ -55,6 +55,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
       await createNewChart(chartData);
       setShowCreateForm(false);
       
+      // 新規作成後はサイドバーを閉じる
+      setExplorerOpen(false);
+      
       // 新規作成後は編集モードに遷移
       if (onStartEdit) {
         onStartEdit();
@@ -130,6 +133,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
 
   const handleEditChart = (chartId: string) => {
     setCurrentChart(chartId);
+    // 編集開始時はサイドバーを閉じる
+    setExplorerOpen(false);
     if (onEditChart) {
       onEditChart(chartId);
     }
@@ -142,49 +147,44 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, explorerOpen: propExp
         setExplorerOpen={setExplorerOpen}
       />
 
-      <div className="flex flex-1 relative">
-        {/* Mobile backdrop */}
-        {explorerOpen && (
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
-            onClick={() => setExplorerOpen(false)}
-          />
-        )}
-
-        {/* Responsive Score Explorer - 単一のインスタンス */}
-        <aside 
-          className={`
-            ${explorerOpen ? 'translate-x-0 w-80' : '-translate-x-full md:translate-x-0 w-0'}
-            fixed md:relative
-            inset-y-0 left-0
-            bg-white shadow-lg md:shadow-sm
-            ${explorerOpen ? 'border-r border-slate-200' : ''}
-            ${explorerOpen ? 'overflow-y-auto' : 'overflow-hidden'}
-            transition-all duration-300 ease-in-out
-            z-40 md:z-auto
-          `}
-        >
-          <ScoreExplorer
-            charts={charts}
-            currentChartId={currentChartId}
-            selectedChartIds={selectedChartIds}
-            onChartSelect={handleChartSelect}
-            onSelectAll={handleSelectAll}
-            onSetCurrentChart={setCurrentChart}
-            onCreateNew={() => setShowCreateForm(true)}
-            onImport={() => setShowImportDialog(true)}
-            onExportSelected={handleExportSelected}
-            onDeleteSelected={handleDeleteSelected}
-            onDuplicateSelected={handleDuplicateSelected}
-            onEditChart={handleEditChart}
-            onClose={() => setExplorerOpen(false)}
-          />
-        </aside>
-
-        {/* Main Content Area */}
-        <main className="flex-1 overflow-hidden">
+      <div className="flex-1 relative">
+        {/* Main Content Area - 常に表示 */}
+        <main className="h-full overflow-hidden">
           {children}
         </main>
+
+        {/* Sidebar Layer - 常に存在、開閉はCSSで制御 */}
+        <div className={`fixed inset-0 ${explorerOpen ? '' : 'pointer-events-none'}`}>
+          {/* Backdrop - explorerOpenの時のみ表示 */}
+          <div 
+            className={`absolute inset-0 bg-black bg-opacity-50 md:bg-transparent transition-opacity duration-300 ${
+              explorerOpen ? 'opacity-100' : 'opacity-0'
+            }`}
+            onClick={() => setExplorerOpen(false)}
+            data-testid="desktop-overlay"
+          />
+          
+          {/* Sidebar - 常に存在、開閉はtransformで制御 */}
+          <aside className={`absolute inset-y-0 left-0 w-80 bg-white shadow-lg border-r border-slate-200 overflow-y-auto transition-transform duration-300 ${
+            explorerOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}>
+            <ScoreExplorer
+              charts={charts}
+              currentChartId={currentChartId}
+              selectedChartIds={selectedChartIds}
+              onChartSelect={handleChartSelect}
+              onSelectAll={handleSelectAll}
+              onSetCurrentChart={setCurrentChart}
+              onCreateNew={() => setShowCreateForm(true)}
+              onImport={() => setShowImportDialog(true)}
+              onExportSelected={handleExportSelected}
+              onDeleteSelected={handleDeleteSelected}
+              onDuplicateSelected={handleDuplicateSelected}
+              onEditChart={handleEditChart}
+              onClose={() => setExplorerOpen(false)}
+            />
+          </aside>
+        </div>
       </div>
 
       {/* 新規作成フォーム */}

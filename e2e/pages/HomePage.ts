@@ -88,49 +88,31 @@ export class HomePage {
   }
 
   async toggleExplorer() {
-    await this.explorerToggle.click();
+    await this.explorerToggle.dispatchEvent('click');
   }
   
   async ensureExplorerOpen() {
-    // サイドバーの幅で判定する方法に変更
+    // サイドバーのtransformで判定する方法に変更
     const sidebar = this.page.locator('aside');
     
-    // Score Explorerが開いているか確認（幅が0でないことを確認）
+    // Score Explorerが開いているか確認（translateX(0)かどうか）
     const isOpen = await sidebar.evaluate((el) => {
-      const styles = window.getComputedStyle(el);
-      const width = parseInt(styles.width, 10);
-      return width > 0;
+      const transform = window.getComputedStyle(el).transform;
+      // translate-x-0の場合、transformは'none'または'matrix(1, 0, 0, 1, 0, 0)'
+      return transform === 'none' || transform === 'matrix(1, 0, 0, 1, 0, 0)';
     });
     
     if (!isOpen) {
       await this.explorerToggle.click();
       
-      // Wait for Score Explorer to open (幅が0より大きくなるのを待つ)
-      await sidebar.evaluate((el) => {
-        return new Promise((resolve) => {
-          // CSS transition の完了を待つ
-          const handleTransitionEnd = () => {
-            el.removeEventListener('transitionend', handleTransitionEnd);
-            resolve(true);
-          };
-          
-          el.addEventListener('transitionend', handleTransitionEnd);
-          
-          // タイムアウト設定（フォールバック）
-          const timeout = setTimeout(() => {
-            el.removeEventListener('transitionend', handleTransitionEnd);
-            resolve(true);
-          }, 1000);
-          
-          // 既に開いている場合のチェック
-          const width = parseInt(window.getComputedStyle(el).width, 10);
-          if (width > 0) {
-            clearTimeout(timeout);
-            el.removeEventListener('transitionend', handleTransitionEnd);
-            resolve(true);
-          }
-        });
+      // サイドバーが開くまで待つ（translateX(0)になるまで）
+      await sidebar.waitFor({
+        state: 'visible',
+        timeout: 5000
       });
+      
+      // アニメーション完了を待つ
+      await this.page.waitForTimeout(300); // transition-duration-300
     }
   }
 

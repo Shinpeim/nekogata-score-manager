@@ -59,7 +59,7 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
         </svg>
       </button>
       {showActionsDropdown && selectedChartIds.length > 0 && (
-        <div className="absolute top-full left-0 mt-1 bg-white border border-slate-200 rounded-md shadow-lg z-10 min-w-32">
+        <div className="absolute top-full left-0 mt-1 bg-white border border-slate-200 rounded-md shadow-lg z-[70] min-w-32">
           <button
             onClick={(e) => {
               e.preventDefault();

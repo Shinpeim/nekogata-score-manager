@@ -50,20 +50,14 @@ test.describe('Nekogata Score Manager - 基本動作テスト', () => {
     // ヘッダーのトグルボタンをクリックして閉じる
     await homePage.toggleExplorer();
     
-    // Score Explorerが閉じるのを待つ（幅が0になるのを待つ）
+    // Score Explorerが閉じるのを待つ
     const sidebar = page.locator('aside');
-    await page.waitForFunction(
-      () => {
-        const aside = document.querySelector('aside');
-        if (!aside) return false;
-        const width = parseInt(window.getComputedStyle(aside).width, 10);
-        return width === 0;
-      },
-      { timeout: 5000 }
-    );
+    
+    // アニメーション完了を待つ
+    await page.waitForTimeout(300);
     
     // Score Explorerが非表示になることを確認
-    // サイドバーの幅が0になり、overflow-hiddenが適用されることを確認
-    await expect(sidebar).toHaveClass(/overflow-hidden/);
+    // サイドバーが左に移動して見えなくなることを確認
+    await expect(sidebar).toHaveClass(/-translate-x-full/);
   });
 });

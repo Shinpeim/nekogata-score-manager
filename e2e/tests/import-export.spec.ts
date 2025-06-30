@@ -47,11 +47,10 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       await page.waitForLoadState('networkidle');
       await expect(chartViewPage.getChartTitleWithText(testChartTitle)).toBeVisible();
       
-      // 2. Score Explorerはopen済みなので確認のみ
+      // 2. 新規作成後はサイドバーが閉じているので、再度開く
+      await homePage.ensureExplorerOpen();
       
-      // 3. Score Explorerが開いていることを確認（インポートボタンの存在で確認）
-      
-      // 4. インポートボタンが表示されることを確認
+      // 3. インポートボタンが表示されることを確認
       await expect(scoreExplorerPage.importButton).toBeVisible();
       
       // このテストの範囲：基本的なUI表示確認
@@ -75,7 +74,7 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       // Wait for chart to be created
       await page.waitForLoadState('networkidle');
       
-      // 2. Score Explorerが確実に開いていることを確認
+      // 2. 新規作成後はサイドバーが閉じているので、開く
       await homePage.ensureExplorerOpen();
       
       // 3. 最初のチャートのチェックボックスを選択（インデックス0）
@@ -150,6 +149,7 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       
       // 2. インポート実行
       await homePage.ensureExplorerOpen();
+      await page.waitForTimeout(500); // アニメーション完了を待つ
       await scoreExplorerPage.clickImport();
       
       const fileInput = scoreExplorerPage.getFileInput();
@@ -192,6 +192,7 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       
       // 2. インポート実行
       await homePage.ensureExplorerOpen();
+      await page.waitForTimeout(500); // アニメーション完了を待つ
       await scoreExplorerPage.clickImport();
       
       const fileInput = scoreExplorerPage.getFileInput();
@@ -229,6 +230,7 @@ test.describe('Nekogata Score Manager - インポート・エクスポート機�
       
       // 2. インポート実行
       await homePage.ensureExplorerOpen();
+      await page.waitForTimeout(500); // アニメーション完了を待つ
       await scoreExplorerPage.clickImport();
       
       const fileInput = scoreExplorerPage.getFileInput();

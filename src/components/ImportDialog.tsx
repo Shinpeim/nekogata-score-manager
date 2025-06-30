@@ -50,7 +50,7 @@ const ImportDialog: React.FC<ImportDialogProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-200">
           <div className="flex justify-between items-center">
@@ -90,6 +90,7 @@ const ImportDialog: React.FC<ImportDialogProps> = ({
                 <button
                   onClick={handleImport}
                   disabled={!importFile || isImporting}
+                  data-testid="import-dialog-import-button"
                   className={`flex-1 px-4 py-2 rounded-md font-medium ${
                     importFile && !isImporting
                       ? 'bg-[#BDD0CA] hover:bg-[#A4C2B5] text-slate-800'
