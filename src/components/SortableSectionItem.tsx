@@ -28,11 +28,11 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({ id, children 
       <div className="relative">
         <div
           {...listeners}
-          className="absolute -left-8 top-0 w-6 h-full flex items-center justify-center cursor-move hover:bg-slate-100 rounded"
+          className="absolute -left-12 top-0 w-10 h-full flex items-center justify-center cursor-move hover:bg-slate-100 rounded"
           title="ドラッグして並び替え"
         >
           <svg
-            className="w-4 h-4 text-slate-400"
+            className="w-6 h-6 text-slate-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
