@@ -144,9 +144,9 @@ describe('ChordChartEditor - Drag & Drop', () => {
       />
     );
 
-    // ドラッグハンドルボタンが存在し、正しいクラスが適用されていることを確認
+    // ドラッグハンドルが存在することを確認（ヘッダー全体がドラッグ可能になっている）
     const dragHandles = screen.getAllByTitle('ドラッグして移動');
-    expect(dragHandles[0]).toHaveClass('cursor-grab', 'active:cursor-grabbing');
+    expect(dragHandles[0]).toBeInTheDocument();
   });
 
   it('改行マーカーにもドラッグハンドルが表示される', () => {

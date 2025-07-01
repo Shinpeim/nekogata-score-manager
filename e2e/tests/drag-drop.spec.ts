@@ -189,10 +189,10 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
     const chordCount = await chordItems.count();
     expect(chordCount).toBeGreaterThanOrEqual(2);
 
-    // 各コードアイテムにドラッグハンドルが存在することを確認
+    // 各コードアイテムにドラッグハンドル（ヘッダー部分）が存在することを確認
     for (let i = 0; i < Math.min(chordCount, 2); i++) {
       const chordItem = chordItems.nth(i);
-      const dragHandle = chordItem.locator('button[title="ドラッグして移動"]');
+      const dragHandle = chordItem.locator('div.cursor-grab').first();
       const dragHandleExists = await dragHandle.count() > 0;
       expect(dragHandleExists).toBe(true);
     }
