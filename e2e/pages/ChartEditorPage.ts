@@ -258,8 +258,8 @@ export class ChartEditorPage {
     const sourceChord = await this.getActualChordElement(fromSectionIndex, fromChordIndex);
     const targetChord = await this.getActualChordElement(toSectionIndex, toChordIndex);
     
-    // ドラッグハンドルを取得（⋮⋮ボタン）
-    const dragHandle = sourceChord.locator('button[title="ドラッグして移動"]');
+    // ドラッグハンドルを取得（ヘッダー全体がドラッグ可能）
+    const dragHandle = sourceChord.locator('div.cursor-grab').first();
     
     console.log(`Dragging chord from section ${fromSectionIndex}, index ${fromChordIndex} to section ${toSectionIndex}, index ${toChordIndex}`);
     

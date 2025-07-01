@@ -178,17 +178,19 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
         }
       }}
     >
-      <div className="flex justify-between items-center mb-1">
+      <div 
+        className="flex justify-between items-center mb-1 cursor-grab active:cursor-grabbing"
+        {...attributes}
+        {...listeners}
+      >
         <span className="text-xs text-slate-500">#{chordIndex + 1}</span>
         <div className="flex gap-1">
-          <button
-            {...attributes}
-            {...listeners}
-            className="text-slate-400 hover:text-slate-600 text-xs cursor-grab active:cursor-grabbing"
+          <span
+            className="text-slate-400 hover:text-slate-600 text-xs"
             title="ドラッグして移動"
           >
             ⋮⋮
-          </button>
+          </span>
           {isSelected && (
             <span className="text-[#85B0B7] text-xs">
               ✓
