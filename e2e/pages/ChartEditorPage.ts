@@ -263,36 +263,43 @@ export class ChartEditorPage {
     
     console.log(`Dragging chord from section ${fromSectionIndex}, index ${fromChordIndex} to section ${toSectionIndex}, index ${toChordIndex}`);
     
-    // Playwright組み込みのdragToメソッドを使用（改良）
-    try {
-      await dragHandle.dragTo(targetChord, {
-        force: true,
-        timeout: 10000
-      });
-      console.log('dragTo completed successfully');
-    } catch (error) {
-      console.log('dragTo failed, trying manual mouse events:', error);
+    // TouchSensorの250ms遅延に対応するため、手動でマウスイベントを制御
+    const sourceBoundingBox = await dragHandle.boundingBox();
+    const targetBoundingBox = await targetChord.boundingBox();
+    
+    if (sourceBoundingBox && targetBoundingBox) {
+      // ドラッグハンドルの中央にマウスを移動
+      await this.page.mouse.move(
+        sourceBoundingBox.x + sourceBoundingBox.width / 2, 
+        sourceBoundingBox.y + sourceBoundingBox.height / 2
+      );
       
-      // フォールバック: マニュアルマウス操作
-      const sourceBoundingBox = await dragHandle.boundingBox();
-      const targetBoundingBox = await targetChord.boundingBox();
+      // マウスボタンを押下
+      await this.page.mouse.down();
       
-      if (sourceBoundingBox && targetBoundingBox) {
-        console.log('Using manual mouse events');
-        await this.page.mouse.move(sourceBoundingBox.x + sourceBoundingBox.width / 2, sourceBoundingBox.y + sourceBoundingBox.height / 2);
-        await this.page.mouse.down();
-        await this.page.waitForFunction(() => document.querySelector('[data-chord-item]:hover') !== null, { timeout: 1000 });
-        await this.page.mouse.move(targetBoundingBox.x + targetBoundingBox.width / 2, targetBoundingBox.y + targetBoundingBox.height / 2, { steps: 10 });
-        await this.page.waitForFunction(() => document.querySelector('[data-chord-item]:hover') !== null, { timeout: 1000 });
-        await this.page.mouse.up();
-      }
+      // TouchSensorの250ms遅延 + PointerSensorの8px移動を考慮
+      await this.page.waitForTimeout(300); // 250ms + 余裕
+      
+      // 少し移動してドラッグを開始（8px以上移動）
+      await this.page.mouse.move(
+        sourceBoundingBox.x + sourceBoundingBox.width / 2 + 10, 
+        sourceBoundingBox.y + sourceBoundingBox.height / 2,
+        { steps: 5 }
+      );
+      
+      // ターゲット位置まで移動
+      await this.page.mouse.move(
+        targetBoundingBox.x + targetBoundingBox.width / 2, 
+        targetBoundingBox.y + targetBoundingBox.height / 2,
+        { steps: 10 }
+      );
+      
+      // ドロップ
+      await this.page.mouse.up();
     }
     
-    // ドロップ完了を待機（コードの順序が変更されるまで待つ）
-    await this.page.waitForFunction(() => {
-      const sections = document.querySelectorAll('[data-section-card]');
-      return sections.length > 0;
-    }, { timeout: 3000 });
+    // ドロップ完了を待機（アニメーション待機）
+    await this.page.waitForTimeout(100);
     console.log('Drag operation completed');
   }
 
