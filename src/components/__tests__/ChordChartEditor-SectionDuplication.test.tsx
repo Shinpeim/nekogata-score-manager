@@ -124,7 +124,7 @@ describe('ChordChartEditor - Section Duplication', () => {
     const savedChart = saveMock.mock.calls[0][0];
     const sectionNames = savedChart.sections.map((s: { name: string }) => s.name);
     
-    // 順序が Verse, Chorus, Chorus (コピー) になっていることを確認
+    // 順序が Verse, Chorus, Chorus (コピー) になっていることを確認（最後に追加される）
     expect(sectionNames).toEqual(['Verse', 'Chorus', 'Chorus (コピー)']);
   });
 
@@ -147,7 +147,7 @@ describe('ChordChartEditor - Section Duplication', () => {
     
     const savedChart = saveMock.mock.calls[0][0];
     const originalSection = savedChart.sections[0];
-    const duplicatedSection = savedChart.sections[1];
+    const duplicatedSection = savedChart.sections[savedChart.sections.length - 1]; // 最後のセクション
     
     // 基本プロパティが正しくコピーされていることを確認
     expect(duplicatedSection.beatsPerBar).toBe(originalSection.beatsPerBar);

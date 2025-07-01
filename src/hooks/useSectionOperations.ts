@@ -66,14 +66,9 @@ export const useSectionOperations = ({
     };
 
     const sections = chart.sections || [];
-    const originalIndex = sections.findIndex(section => section.id === sectionId);
-    if (originalIndex === -1) return;
-
-    const newSections = [
-      ...sections.slice(0, originalIndex + 1),
-      newSection,
-      ...sections.slice(originalIndex + 1)
-    ];
+    
+    // 新しいセクションを最後に追加
+    const newSections = [...sections, newSection];
 
     const updatedChart = {
       ...chart,
