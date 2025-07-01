@@ -74,7 +74,7 @@ const SyncDropdown: React.FC<SyncDropdownProps> = ({
       </button>
       
       {showDropdown && (
-        <div className="absolute top-full right-0 mt-1 bg-white border border-slate-200 rounded-md shadow-lg min-w-48">
+        <div className="absolute top-full right-0 mt-1 bg-white border border-slate-200 rounded-md shadow-lg min-w-48 z-50">
           <button
             onClick={handleSyncClick}
             disabled={!isAuthenticated || syncInProgress || isSyncing}
