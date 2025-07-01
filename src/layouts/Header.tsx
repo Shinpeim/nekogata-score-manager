@@ -18,8 +18,8 @@ const Header: React.FC<HeaderProps> = ({ explorerOpen, setExplorerOpen }) => {
 
   return (
     <header className="bg-white shadow-sm border-b border-slate-200 relative" data-testid="header">
-      <div className="px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center h-12">
+      <div className="px-4 sm:px-6 lg:px-8 overflow-visible">
+        <div className="flex items-center h-12 relative overflow-visible">
           <button
             onClick={() => setExplorerOpen(!explorerOpen)}
             className="px-2 py-1 rounded-md bg-slate-100 border border-slate-300 text-slate-600 hover:bg-slate-200 hover:text-slate-700 hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mr-3 shadow-sm transition-all duration-150 text-sm font-medium"
