@@ -34,7 +34,7 @@ describe('SetListChartItem', () => {
   };
 
   it('楽譜が存在する場合、正しく表示される', () => {
-    renderWithDndContext(
+    const { container } = renderWithDndContext(
       <SetListChartItem
         index={0}
         chart={mockChart}
@@ -47,7 +47,10 @@ describe('SetListChartItem', () => {
     expect(screen.getByText('Test Song')).toBeInTheDocument();
     expect(screen.getByText('(Key: C)')).toBeInTheDocument();
     expect(screen.getByText('Artist: Test Artist')).toBeInTheDocument();
-    expect(screen.getByText('⋮⋮')).toBeInTheDocument();
+    // SVGアイコンが存在することを確認
+    const dragHandle = container.querySelector('[role="button"][aria-roledescription="sortable"]');
+    expect(dragHandle).toBeInTheDocument();
+    expect(dragHandle).toHaveClass('cursor-grab');
   });
 
   it('楽譜をクリックするとonChartClickが呼ばれる', () => {
@@ -67,7 +70,7 @@ describe('SetListChartItem', () => {
   });
 
   it('ドラッグハンドルをクリックしてもonChartClickが呼ばれない', () => {
-    renderWithDndContext(
+    const { container } = renderWithDndContext(
       <SetListChartItem
         index={0}
         chart={mockChart}
@@ -76,14 +79,14 @@ describe('SetListChartItem', () => {
       />
     );
 
-    const dragHandle = screen.getByText('⋮⋮');
-    fireEvent.click(dragHandle);
+    const dragHandle = container.querySelector('[role="button"][aria-roledescription="sortable"]');
+    fireEvent.click(dragHandle!);
 
     expect(mockOnChartClick).not.toHaveBeenCalled();
   });
 
   it('削除された楽譜の場合、適切なメッセージが表示される', () => {
-    renderWithDndContext(
+    const { container } = renderWithDndContext(
       <SetListChartItem
         index={1}
         chart={null}
@@ -94,7 +97,10 @@ describe('SetListChartItem', () => {
 
     expect(screen.getByText('2.')).toBeInTheDocument();
     expect(screen.getByText('(削除された楽譜)')).toBeInTheDocument();
-    expect(screen.getByText('⋮⋮')).toBeInTheDocument();
+    // SVGアイコンが存在することを確認
+    const dragHandle = container.querySelector('[role="button"][aria-roledescription="sortable"]');
+    expect(dragHandle).toBeInTheDocument();
+    expect(dragHandle).toHaveClass('cursor-grab');
   });
 
   it('削除された楽譜をクリックしてもonChartClickが呼ばれない', () => {
@@ -143,7 +149,7 @@ describe('SetListChartItem', () => {
   });
 
   it('ドラッグ可能な要素として設定されている', () => {
-    renderWithDndContext(
+    const { container } = renderWithDndContext(
       <SetListChartItem
         index={0}
         chart={mockChart}
@@ -156,7 +162,8 @@ describe('SetListChartItem', () => {
     expect(chartItem).toBeInTheDocument();
     
     // ドラッグハンドルが存在することを確認
-    const dragHandle = screen.getByText('⋮⋮');
+    const dragHandle = container.querySelector('[role="button"][aria-roledescription="sortable"]');
+    expect(dragHandle).toBeInTheDocument();
     expect(dragHandle).toHaveClass('cursor-grab');
   });
 });
