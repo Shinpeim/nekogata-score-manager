@@ -22,7 +22,9 @@ test.describe('Nekogata Score Manager - ドラッグ&ドロップ機能テスト
 
   test('コード順序変更のドラッグ&ドロップが正確に動作する', async ({ page, browserName }) => {
     // WebKit系ブラウザでは@dnd-kitの互換性問題により一時的にスキップ
-    test.skip(browserName === 'webkit', 'WebKit系ブラウザでは@dnd-kitドラッグ操作に互換性問題があります');
+    if (browserName === 'webkit') {
+      test.skip(true, 'WebKit系ブラウザでは@dnd-kitドラッグ操作に互換性問題があります');
+    }
     
     const homePage = new HomePage(page);
     const chartFormPage = new ChordChartFormPage(page);

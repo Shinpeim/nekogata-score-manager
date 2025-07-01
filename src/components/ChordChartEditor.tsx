@@ -125,7 +125,7 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
 
   return (
     <div className="h-full bg-white overflow-y-auto" data-testid="chart-editor">
-      <div className="p-6">
+      <div className="p-6 pl-16">
         {/* Header */}
         <div className="mb-6 flex justify-between items-center">
           <h2 className="text-2xl font-bold text-slate-900" data-testid="editor-title">{chart.title || '無題のコード譜'} - 編集</h2>
