@@ -6,19 +6,11 @@ import { toDisplayChord } from '../utils/chordConversion';
 interface UseChordOperationsProps {
   chart: ChordChart;
   onUpdateChart: (chart: ChordChart) => void;
-  selectedChords: Set<string>;
-  setSelectedChords: (chords: Set<string>) => void;
-  lastSelectedChord: string | null;
-  setLastSelectedChord: (chord: string | null) => void;
 }
 
 export const useChordOperations = ({
   chart,
   onUpdateChart,
-  selectedChords,
-  setSelectedChords,
-  lastSelectedChord,
-  setLastSelectedChord,
 }: UseChordOperationsProps) => {
 
   const addChordToSection = (sectionId: string) => {
@@ -140,48 +132,11 @@ export const useChordOperations = ({
     onUpdateChart(updatedChart);
   };
 
-  const toggleChordSelection = (sectionId: string, chordIndex: number, event?: React.MouseEvent) => {
-    const chordId = `${sectionId}-${chordIndex}`;
-    
-    if (event?.shiftKey && lastSelectedChord) {
-      const lastParts = lastSelectedChord.split('-');
-      const lastSectionId = lastParts.slice(0, -1).join('-');
-      const lastChordIndex = parseInt(lastParts[lastParts.length - 1]);
-      
-      if (lastSectionId === sectionId) {
-        const start = Math.min(chordIndex, lastChordIndex);
-        const end = Math.max(chordIndex, lastChordIndex);
-        
-        const newSelected = new Set(selectedChords);
-        
-        for (let i = start; i <= end; i++) {
-          const section = chart.sections?.find(s => s.id === sectionId);
-          if (section && i < section.chords.length && section.chords[i].isLineBreak !== true) {
-            newSelected.add(`${sectionId}-${i}`);
-          }
-        }
-        
-        setSelectedChords(newSelected);
-        setLastSelectedChord(chordId);
-      }
-    } else {
-      const newSelected = new Set(selectedChords);
-      if (newSelected.has(chordId)) {
-        newSelected.delete(chordId);
-      } else {
-        newSelected.add(chordId);
-      }
-      setSelectedChords(newSelected);
-      setLastSelectedChord(chordId);
-    }
-  };
-
   return {
     addChordToSection,
     updateChordInSection,
     finalizeChordName,
     deleteChordFromSection,
     insertLineBreakAfterChord,
-    toggleChordSelection,
   };
 };

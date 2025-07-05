@@ -4,17 +4,11 @@ import { textToChords } from '../utils/chordCopyPaste';
 interface UseSectionOperationsProps {
   chart: ChordChart;
   onUpdateChart: (chart: ChordChart) => void;
-  selectedChords: Set<string>;
-  setSelectedChords: (chords: Set<string>) => void;
-  setLastSelectedChord: (chord: string | null) => void;
 }
 
 export const useSectionOperations = ({
   chart,
   onUpdateChart,
-  selectedChords,
-  setSelectedChords,
-  setLastSelectedChord,
 }: UseSectionOperationsProps) => {
 
   const handleSectionChange = (sectionId: string, field: keyof ChordSection, value: string | number) => {
@@ -102,31 +96,6 @@ export const useSectionOperations = ({
     onUpdateChart(updatedChart);
   };
 
-  const toggleSelectAllInSection = (sectionId: string) => {
-    const section = chart.sections?.find(s => s.id === sectionId);
-    if (!section) return;
-
-    const sectionChordIds = [];
-    for (let i = 0; i < section.chords.length; i++) {
-      if (section.chords[i].isLineBreak !== true) {
-        sectionChordIds.push(`${sectionId}-${i}`);
-      }
-    }
-
-    const selectedInSection = sectionChordIds.filter(id => selectedChords.has(id)).length;
-    const newSelected = new Set(selectedChords);
-
-    if (selectedInSection === sectionChordIds.length) {
-      sectionChordIds.forEach(id => newSelected.delete(id));
-      if (newSelected.size === 0) {
-        setLastSelectedChord(null);
-      }
-    } else {
-      sectionChordIds.forEach(id => newSelected.add(id));
-    }
-
-    setSelectedChords(newSelected);
-  };
 
   return {
     handleSectionChange,
@@ -134,6 +103,5 @@ export const useSectionOperations = ({
     deleteSection,
     duplicateSection,
     replaceChordProgression,
-    toggleSelectAllInSection,
   };
 };

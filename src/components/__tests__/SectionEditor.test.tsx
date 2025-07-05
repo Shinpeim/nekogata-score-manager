@@ -49,18 +49,12 @@ describe('SectionEditor - セクション入れ替え機能', () => {
   };
 
   const mockOnUpdateChart = vi.fn();
-  const mockSetSelectedChords = vi.fn();
-  const mockSetLastSelectedChord = vi.fn();
 
   it('セクションのドラッグハンドルが表示される', () => {
     render(
       <SectionEditor
         chart={mockChart}
         onUpdateChart={mockOnUpdateChart}
-        selectedChords={new Set()}
-        setSelectedChords={mockSetSelectedChords}
-        lastSelectedChord={null}
-        setLastSelectedChord={mockSetLastSelectedChord}
       />
     );
 
@@ -74,10 +68,6 @@ describe('SectionEditor - セクション入れ替え機能', () => {
       <SectionEditor
         chart={mockChart}
         onUpdateChart={mockOnUpdateChart}
-        selectedChords={new Set()}
-        setSelectedChords={mockSetSelectedChords}
-        lastSelectedChord={null}
-        setLastSelectedChord={mockSetLastSelectedChord}
       />
     );
 
@@ -93,10 +83,6 @@ describe('SectionEditor - セクション入れ替え機能', () => {
       <SectionEditor
         chart={mockChart}
         onUpdateChart={mockOnUpdateChart}
-        selectedChords={new Set()}
-        setSelectedChords={mockSetSelectedChords}
-        lastSelectedChord={null}
-        setLastSelectedChord={mockSetLastSelectedChord}
       />
     );
 
@@ -125,10 +111,6 @@ describe('SectionEditor - セクション入れ替え機能', () => {
       <SectionEditor
         chart={mockChart}
         onUpdateChart={mockOnUpdateChart}
-        selectedChords={new Set()}
-        setSelectedChords={mockSetSelectedChords}
-        lastSelectedChord={null}
-        setLastSelectedChord={mockSetLastSelectedChord}
       />
     );
 
@@ -152,10 +134,6 @@ describe('SectionEditor - セクション入れ替え機能', () => {
       <SectionEditor
         chart={mockChart}
         onUpdateChart={mockOnUpdateChart}
-        selectedChords={new Set()}
-        setSelectedChords={mockSetSelectedChords}
-        lastSelectedChord={null}
-        setLastSelectedChord={mockSetLastSelectedChord}
       />
     );
 

@@ -19,8 +19,6 @@ vi.mock('../../utils/lineBreakHelpers', () => ({
 describe('useChordOperations', () => {
   let mockChart: ChordChart;
   let mockOnUpdateChart: ReturnType<typeof vi.fn>;
-  let mockSetSelectedChords: ReturnType<typeof vi.fn>;
-  let mockSetLastSelectedChord: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     mockChart = {
@@ -48,20 +46,14 @@ describe('useChordOperations', () => {
     };
 
     mockOnUpdateChart = vi.fn();
-    mockSetSelectedChords = vi.fn();
-    mockSetLastSelectedChord = vi.fn();
 
     vi.clearAllMocks();
   });
 
-  const renderUseChordOperations = (selectedChords = new Set<string>(), lastSelectedChord: string | null = null) => {
+  const renderUseChordOperations = () => {
     return renderHook(() => useChordOperations({
       chart: mockChart,
       onUpdateChart: mockOnUpdateChart,
-      selectedChords,
-      setSelectedChords: mockSetSelectedChords,
-      lastSelectedChord,
-      setLastSelectedChord: mockSetLastSelectedChord,
     }));
   };
 
@@ -189,43 +181,4 @@ describe('useChordOperations', () => {
     });
   });
 
-  it('toggleChordSelectionが単一コードの選択状態を切り替える', () => {
-    const selectedChords = new Set<string>();
-    const { result } = renderUseChordOperations(selectedChords);
-
-    act(() => {
-      result.current.toggleChordSelection('section-1', 0);
-    });
-
-    expect(mockSetSelectedChords).toHaveBeenCalledWith(new Set(['section-1-0']));
-    expect(mockSetLastSelectedChord).toHaveBeenCalledWith('section-1-0');
-  });
-
-  it('toggleChordSelectionでShiftキーを押しながらクリックすると範囲選択する', () => {
-    const selectedChords = new Set<string>();
-    const { result } = renderUseChordOperations(selectedChords, 'section-1-0');
-
-    const mockEvent = { shiftKey: true } as React.MouseEvent;
-
-    act(() => {
-      result.current.toggleChordSelection('section-1', 2, mockEvent);
-    });
-
-    expect(mockSetSelectedChords).toHaveBeenCalledWith(
-      new Set(['section-1-0', 'section-1-1', 'section-1-2'])
-    );
-    expect(mockSetLastSelectedChord).toHaveBeenCalledWith('section-1-2');
-  });
-
-  it('既に選択されているコードをクリックすると選択解除する', () => {
-    const selectedChords = new Set(['section-1-0']);
-    const { result } = renderUseChordOperations(selectedChords);
-
-    act(() => {
-      result.current.toggleChordSelection('section-1', 0);
-    });
-
-    expect(mockSetSelectedChords).toHaveBeenCalledWith(new Set());
-    expect(mockSetLastSelectedChord).toHaveBeenCalledWith('section-1-0');
-  });
 });

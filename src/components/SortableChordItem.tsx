@@ -12,8 +12,6 @@ interface SortableChordItemProps {
   onFinalizeChordName: (sectionId: string, chordIndex: number, value: string) => void;
   onDeleteChord: (sectionId: string, chordIndex: number) => void;
   onInsertLineBreak: (sectionId: string, chordIndex: number) => void;
-  isSelected?: boolean;
-  onToggleSelection?: (sectionId: string, chordIndex: number, event?: React.MouseEvent) => void;
   fontSize?: number;
 }
 
@@ -22,12 +20,10 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
   chordIndex,
   sectionId,
   itemId,
-  isSelected = false,
   onUpdateChord,
   onFinalizeChordName,
   onDeleteChord,
   onInsertLineBreak,
-  onToggleSelection,
   fontSize = 14,
 }) => {
   // 入力表示用の状態
@@ -161,22 +157,9 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
       className={`p-2 border rounded-md ${
         chord.isLineBreak === true 
           ? 'border-orange-300 bg-orange-50' 
-          : isSelected 
-            ? 'border-[#85B0B7] bg-[#85B0B7]/10'
-            : 'border-slate-200'
-      } ${isDragging ? 'shadow-lg' : ''} ${
-        chord.isLineBreak !== true ? 'cursor-pointer hover:border-[#85B0B7]/50' : ''
-      }`}
+          : 'border-slate-200'
+      } ${isDragging ? 'shadow-lg' : ''}`}
       data-chord-item={`${sectionId}-${chordIndex}`}
-      onClick={(e) => {
-        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLButtonElement) {
-          return;
-        }
-        
-        if (chord.isLineBreak !== true && onToggleSelection) {
-          onToggleSelection(sectionId, chordIndex, e);
-        }
-      }}
     >
       <div 
         className="flex justify-between items-center mb-1 cursor-grab active:cursor-grabbing"
@@ -191,11 +174,6 @@ const SortableChordItem: React.FC<SortableChordItemProps> = ({
           >
             ⋮⋮
           </span>
-          {isSelected && (
-            <span className="text-[#85B0B7] text-xs">
-              ✓
-            </span>
-          )}
           {chord.isLineBreak !== true && (
             <button
               onClick={() => onInsertLineBreak(sectionId, chordIndex)}
