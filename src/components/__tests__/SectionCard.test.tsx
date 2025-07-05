@@ -19,19 +19,16 @@ describe('SectionCard', () => {
 
   const defaultProps = {
     section: mockSection,
-    selectedChords: new Set<string>(),
     onSectionChange: vi.fn(),
     onDeleteSection: vi.fn(),
     onDuplicateSection: vi.fn(),
     onReplaceChordProgression: vi.fn(),
-    onToggleSelectAllInSection: vi.fn(),
     onChordDragEnd: vi.fn(),
     onAddChordToSection: vi.fn(),
     onUpdateChordInSection: vi.fn(),
     onFinalizeChordName: vi.fn(),
     onDeleteChordFromSection: vi.fn(),
     onInsertLineBreakAfterChord: vi.fn(),
-    onToggleChordSelection: vi.fn(),
   };
 
   it('セクション名が正しく表示される', () => {
@@ -55,7 +52,6 @@ describe('SectionCard', () => {
   it('セクション操作ボタンが表示される', () => {
     render(<SectionCard {...defaultProps} />);
     
-    expect(screen.getByTitle('このセクションの全選択')).toBeInTheDocument();
     expect(screen.getByTitle('このセクションを複製')).toBeInTheDocument();
     expect(screen.getByTitle('このセクションを削除')).toBeInTheDocument();
   });
@@ -82,18 +78,6 @@ describe('SectionCard', () => {
     await user.click(duplicateButton);
     
     expect(onDuplicateSection).toHaveBeenCalledWith('section-1');
-  });
-
-  it('全選択ボタンクリックで全選択処理が呼ばれる', async () => {
-    const user = userEvent.setup();
-    const onToggleSelectAllInSection = vi.fn();
-    
-    render(<SectionCard {...defaultProps} onToggleSelectAllInSection={onToggleSelectAllInSection} />);
-    
-    const selectAllButton = screen.getByTitle('このセクションの全選択');
-    await user.click(selectAllButton);
-    
-    expect(onToggleSelectAllInSection).toHaveBeenCalledWith('section-1');
   });
 
   it('コード追加ボタンが表示される', () => {
@@ -139,11 +123,4 @@ describe('SectionCard', () => {
     expect(onReplaceChordProgression).toHaveBeenCalledWith('section-1', 'C F G Am');
   });
 
-  it('選択状態によってツールチップが変わる', () => {
-    const selectedChords = new Set(['section-1-0', 'section-1-1', 'section-1-2']);
-    
-    render(<SectionCard {...defaultProps} selectedChords={selectedChords} />);
-    
-    expect(screen.getByTitle('このセクションの選択をすべて解除')).toBeInTheDocument();
-  });
 });

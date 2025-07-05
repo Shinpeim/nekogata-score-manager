@@ -24,19 +24,11 @@ import { useChordOperations } from '../hooks/useChordOperations';
 interface SectionEditorProps {
   chart: ChordChart;
   onUpdateChart: (chart: ChordChart) => void;
-  selectedChords: Set<string>;
-  setSelectedChords: (chords: Set<string>) => void;
-  lastSelectedChord: string | null;
-  setLastSelectedChord: (chord: string | null) => void;
 }
 
 const SectionEditor: React.FC<SectionEditorProps> = ({
   chart,
   onUpdateChart,
-  selectedChords,
-  setSelectedChords,
-  lastSelectedChord,
-  setLastSelectedChord,
 }) => {
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -58,18 +50,11 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
   const sectionOperations = useSectionOperations({
     chart,
     onUpdateChart,
-    selectedChords,
-    setSelectedChords,
-    setLastSelectedChord,
   });
 
   const chordOperations = useChordOperations({
     chart,
     onUpdateChart,
-    selectedChords,
-    setSelectedChords,
-    lastSelectedChord,
-    setLastSelectedChord,
   });
 
   const handleSectionDragEnd = (event: DragEndEvent) => {
@@ -147,20 +132,17 @@ const SectionEditor: React.FC<SectionEditorProps> = ({
             <SectionCard
               key={section.id}
               section={section}
-              selectedChords={selectedChords}
               fontSize={chart.fontSize ?? DEFAULT_FONT_SIZE}
               onSectionChange={sectionOperations.handleSectionChange}
               onDeleteSection={sectionOperations.deleteSection}
               onDuplicateSection={sectionOperations.duplicateSection}
               onReplaceChordProgression={sectionOperations.replaceChordProgression}
-              onToggleSelectAllInSection={sectionOperations.toggleSelectAllInSection}
               onChordDragEnd={handleChordDragEnd}
               onAddChordToSection={chordOperations.addChordToSection}
               onUpdateChordInSection={chordOperations.updateChordInSection}
               onFinalizeChordName={chordOperations.finalizeChordName}
               onDeleteChordFromSection={chordOperations.deleteChordFromSection}
               onInsertLineBreakAfterChord={chordOperations.insertLineBreakAfterChord}
-              onToggleChordSelection={chordOperations.toggleChordSelection}
             />
           ))}
         </SortableContext>

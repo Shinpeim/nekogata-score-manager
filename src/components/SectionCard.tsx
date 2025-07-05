@@ -21,38 +21,32 @@ import SortableSectionItem from './SortableSectionItem';
 
 interface SectionCardProps {
   section: ChordSection;
-  selectedChords: Set<string>;
   fontSize?: number;
   onSectionChange: (sectionId: string, field: keyof ChordSection, value: string | number) => void;
   onDeleteSection: (sectionId: string) => void;
   onDuplicateSection: (sectionId: string) => void;
   onReplaceChordProgression: (sectionId: string, text: string) => void;
-  onToggleSelectAllInSection: (sectionId: string) => void;
   onChordDragEnd: (event: DragEndEvent) => void;
   onAddChordToSection: (sectionId: string) => void;
   onUpdateChordInSection: (sectionId: string, chordIndex: number, field: keyof Chord, value: string | number) => void;
   onFinalizeChordName: (sectionId: string, chordIndex: number, value: string) => void;
   onDeleteChordFromSection: (sectionId: string, chordIndex: number) => void;
   onInsertLineBreakAfterChord: (sectionId: string, chordIndex: number) => void;
-  onToggleChordSelection: (sectionId: string, chordIndex: number, event?: React.MouseEvent) => void;
 }
 
 const SectionCard: React.FC<SectionCardProps> = ({
   section,
-  selectedChords,
   fontSize = 14,
   onSectionChange,
   onDeleteSection,
   onDuplicateSection,
   onReplaceChordProgression,
-  onToggleSelectAllInSection,
   onChordDragEnd,
   onAddChordToSection,
   onUpdateChordInSection,
   onFinalizeChordName,
   onDeleteChordFromSection,
   onInsertLineBreakAfterChord,
-  onToggleChordSelection,
 }) => {
   const [pasteText, setPasteText] = useState<string>('');
 
@@ -79,26 +73,6 @@ const SectionCard: React.FC<SectionCardProps> = ({
     setPasteText('');
   };
 
-  const getSectionChordIds = () => {
-    const sectionChordIds = [];
-    for (let i = 0; i < section.chords.length; i++) {
-      if (section.chords[i].isLineBreak !== true) {
-        sectionChordIds.push(`${section.id}-${i}`);
-      }
-    }
-    return sectionChordIds;
-  };
-
-  const getSelectAllTooltip = () => {
-    const sectionChordIds = getSectionChordIds();
-    const selectedInSection = sectionChordIds.filter(id => selectedChords.has(id)).length;
-    
-    if (selectedInSection === sectionChordIds.length && sectionChordIds.length > 0) {
-      return "このセクションの選択をすべて解除";
-    } else {
-      return "このセクションの全選択";
-    }
-  };
 
   return (
     <SortableSectionItem id={section.id}>
@@ -111,13 +85,6 @@ const SectionCard: React.FC<SectionCardProps> = ({
             className="text-lg font-medium bg-transparent border-b border-slate-300 focus:outline-none focus:border-[#85B0B7] flex-1 min-w-0"
           />
           <div className="flex gap-2 flex-shrink-0">
-            <button
-              onClick={() => onToggleSelectAllInSection(section.id)}
-              className="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-md text-sm w-8 h-8 flex items-center justify-center"
-              title={getSelectAllTooltip()}
-            >
-              ☑
-            </button>
             <button
               onClick={() => onDuplicateSection(section.id)}
               className="bg-[#BDD0CA] hover:bg-[#A4C2B5] text-slate-800 p-2 rounded-md text-sm w-8 h-8 flex items-center justify-center"
@@ -183,13 +150,11 @@ const SectionCard: React.FC<SectionCardProps> = ({
                     chordIndex={chordIndex}
                     sectionId={section.id}
                     itemId={itemId}
-                    isSelected={selectedChords.has(`${section.id}-${chordIndex}`)}
                     fontSize={fontSize}
                     onUpdateChord={onUpdateChordInSection}
                     onFinalizeChordName={onFinalizeChordName}
                     onDeleteChord={onDeleteChordFromSection}
                     onInsertLineBreak={onInsertLineBreakAfterChord}
-                    onToggleSelection={onToggleChordSelection}
                   />
                 );
               })}

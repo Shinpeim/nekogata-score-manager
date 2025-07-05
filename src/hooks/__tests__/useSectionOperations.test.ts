@@ -14,8 +14,6 @@ vi.mock('../../utils/chordCopyPaste', () => ({
 describe('useSectionOperations', () => {
   let mockChart: ChordChart;
   let mockOnUpdateChart: ReturnType<typeof vi.fn>;
-  let mockSetSelectedChords: ReturnType<typeof vi.fn>;
-  let mockSetLastSelectedChord: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     mockChart = {
@@ -52,8 +50,6 @@ describe('useSectionOperations', () => {
     };
 
     mockOnUpdateChart = vi.fn();
-    mockSetSelectedChords = vi.fn();
-    mockSetLastSelectedChord = vi.fn();
 
     vi.clearAllMocks();
   });
@@ -62,9 +58,6 @@ describe('useSectionOperations', () => {
     return renderHook(() => useSectionOperations({
       chart: mockChart,
       onUpdateChart: mockOnUpdateChart,
-      selectedChords: new Set(),
-      setSelectedChords: mockSetSelectedChords,
-      setLastSelectedChord: mockSetLastSelectedChord,
     }));
   };
 
@@ -169,22 +162,4 @@ describe('useSectionOperations', () => {
     });
   });
 
-  it('toggleSelectAllInSectionがセクション内のコードを全選択/全解除する', () => {
-    const selectedChords = new Set<string>();
-    const { result } = renderHook(() => useSectionOperations({
-      chart: mockChart,
-      onUpdateChart: mockOnUpdateChart,
-      selectedChords,
-      setSelectedChords: mockSetSelectedChords,
-      setLastSelectedChord: mockSetLastSelectedChord,
-    }));
-
-    act(() => {
-      result.current.toggleSelectAllInSection('section-1');
-    });
-
-    expect(mockSetSelectedChords).toHaveBeenCalledWith(
-      new Set(['section-1-0', 'section-1-1'])
-    );
-  });
 });

@@ -31,8 +31,6 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
   }, [chart]);
 
   const [editedChart, setEditedChart] = useState<ChordChart>(chartWithIds);
-  const [selectedChords, setSelectedChords] = useState<Set<string>>(new Set());
-  const [lastSelectedChord, setLastSelectedChord] = useState<string | null>(null);
   const [validationResult, setValidationResult] = useState<{ isValid: boolean; errors: string[] }>({ 
     isValid: true, 
     errors: [] 
@@ -180,10 +178,6 @@ const ChordChartEditor: React.FC<ChordChartEditorProps> = ({ chart, onSave, onCa
         <SectionEditor
           chart={editedChart}
           onUpdateChart={setEditedChart}
-          selectedChords={selectedChords}
-          setSelectedChords={setSelectedChords}
-          lastSelectedChord={lastSelectedChord}
-          setLastSelectedChord={setLastSelectedChord}
         />
 
         <div className="mb-8">
